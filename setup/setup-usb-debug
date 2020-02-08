@@ -1,0 +1,5 @@
+sudo usermod -aG plugdev cody
+lsusb
+sudo 'SUBSYSTEM=="usb", ATTR{idVendor}=="2e04", ATTR{idProduct}=="c026", MODE="0666", GROUP="plugdev"' >> /etc/udev/rules.d/51-android.rules
+adb kill-server
+adb devices

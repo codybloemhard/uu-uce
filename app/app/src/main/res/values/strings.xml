@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Uce</string>
+    <string name="title_activity_map">map</string>
+    <string name="title_activity_geo_map">geo_map</string>
 </resources>
