@@ -1,18 +1,18 @@
 package com.uu_uce
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MotionEvent
+import androidx.appcompat.app.AppCompatActivity
 import com.uu_uce.ui.FlingDir
 import com.uu_uce.ui.Flinger
 
-class MainActivity : AppCompatActivity(){
+class GeoMap : AppCompatActivity(){
     private var flinger: Flinger? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_geo_map)
         flinger = Flinger(this, ::action)
     }
 
@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity(){
     }
 
     private fun action(dir: FlingDir, delta: Float){
-        val intent = Intent(this, GeoMap::class.java)
+        val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
         if(dir == FlingDir.VER) return
         if(delta > 0.0f)

@@ -1,11 +1,10 @@
 package com.uu_uce.ui
 
-import android.os.Bundle
-import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GestureDetectorCompat
+import kotlin.math.abs
 
 enum class FlingDir{
     HOR, VER
@@ -31,9 +30,9 @@ class Flinger(
         velocityX: Float,
         velocityY: Float
     ): Boolean {
-        var dy = (moveEv?.getY() ?: 0.0f) - (downEv?.getY() ?: 0.0f)
-        var dx = (moveEv?.getX() ?: 0.0f) - (downEv?.getX() ?: 0.0f)
-        if (Math.abs(dy) > Math.abs(dx))
+        val dy = (moveEv?.y ?: 0.0f) - (downEv?.y ?: 0.0f)
+        val dx = (moveEv?.x ?: 0.0f) - (downEv?.x ?: 0.0f)
+        if (abs(dy) > abs(dx))
             action(FlingDir.VER, dy)
         else
             action(FlingDir.HOR, dy)
