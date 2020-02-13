@@ -2,7 +2,6 @@ package com.uu_uce
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.MotionEvent
 import com.uu_uce.ui.FlingDir
 import com.uu_uce.ui.Flinger
 import com.uu_uce.ui.TouchParent
