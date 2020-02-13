@@ -1,7 +1,6 @@
 package com.uu_uce
 
 import org.junit.Test
-
 import org.junit.Assert.*
 
 /**
