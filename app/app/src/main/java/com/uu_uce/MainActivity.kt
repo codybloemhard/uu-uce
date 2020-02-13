@@ -1,24 +1,17 @@
 package com.uu_uce
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MotionEvent
 import com.uu_uce.ui.FlingDir
 import com.uu_uce.ui.Flinger
+import com.uu_uce.ui.TouchParent
 
-class MainActivity : AppCompatActivity(){
-    private var flinger: Flinger? = null
-
+class MainActivity : TouchParent() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        flinger = Flinger(this, ::action)
-    }
-
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        flinger!!.getOnTouchEvent(event)
-        return super.onTouchEvent(event)
+        addChild(Flinger(this, ::action))
     }
 
     private fun action(dir: FlingDir, delta: Float){

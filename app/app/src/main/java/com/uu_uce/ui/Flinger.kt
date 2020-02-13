@@ -13,14 +13,14 @@ enum class FlingDir{
 class Flinger(
         parent: AppCompatActivity,
         var action: (FlingDir, Float) -> Unit)
-        : GestureDetector.OnGestureListener{
+        : TouchChild, GestureDetector.OnGestureListener{
     private var gestureDetector: GestureDetectorCompat? = null
 
     init{
         gestureDetector = GestureDetectorCompat(parent, this)
     }
 
-    fun getOnTouchEvent(event: MotionEvent?) {
+    override fun getOnTouchEvent(event: MotionEvent?) {
         gestureDetector!!.onTouchEvent(event)
     }
 
