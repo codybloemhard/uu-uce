@@ -6,9 +6,8 @@ import java.util.*
 
 class CodeConventions {
     @Test
-    // this test fails to see if the CI fails if the tests fail!
     fun ccCheck() {
-        assertEquals(3, 1 + 1)
+        assertEquals(2, 1 + 1)
     }
 
     /*
