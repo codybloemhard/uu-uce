@@ -4,6 +4,9 @@ import org.junit.Test
 import org.junit.Assert.*
 import java.util.*
 
+@Suppress("ConstantConditionIf", "LiftReturnOrAssignment", "VARIABLE_WITH_REDUNDANT_INITIALIZER",
+    "CascadeIf"
+)
 class CodeConventions {
     @Test
     fun ccCheck() {
@@ -94,10 +97,11 @@ class CodeConventions {
     @Test
     fun ccFlowExpressionsOverSetting(){
         //YES
-        val x = if(3 > 4) 4
+        val x = if(false) 4
         else 5
+        //NO
         var y = 0
-        if(3 > 4)
+        if(false)
             y = 4
         else
             y = 5
