@@ -14,6 +14,7 @@
 - see if you see your code passes the CI, goto the github page -> actions and see if it passes
 ## Ending a task
 - make sure your branch passes the CI and your code is tidy
+- Try linting your code and writing good unit test
 - if you go to git -> branch: branch-name you can click ```New pull request```
 - write a comment in the pull request with a small summary of what it is
 - I will review, you can assign me as reviewer (ocdy1001)
