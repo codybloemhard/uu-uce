@@ -39,7 +39,7 @@ class LocationServices{
         val permissionsNeeded = listOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
-    var networkRunning = false
+    private var networkRunning = false
     /*
     Will start polling the location.
     context: the activity that uses this.
@@ -86,14 +86,14 @@ class LocationServices{
             override fun onLocationChanged(location: Location?) {
                 if (location != null) {
 
-                    action(Pair(location!!.latitude, location!!.longitude))
+                    action(Pair(location.latitude, location.longitude))
                     Log.d(
                         "LocationServices",
-                        " Network Latitude : " + location!!.latitude
+                        " Network Latitude : " + location.latitude
                     )
                     Log.d(
                         "LocationServices",
-                        " Network Longitude : " + location!!.longitude
+                        " Network Longitude : " + location.longitude
                     )
                 }
             }
