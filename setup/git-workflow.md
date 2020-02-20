@@ -17,6 +17,7 @@
 - Try linting your code and writing good unit tests
 - if you go to git -> branch: branch-name you can click ```New pull request```
 - write a comment in the pull request with a small summary of what it is
+- merge with branch ```mergelane```
 - I will review, you can assign me as reviewer (ocdy1001)
 - The code will be reviewed, refactored. It may be that you are asked to change to more things before it will be merged.
 - Your branch will be merged
