@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.Toast
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.getPermissions
 import com.uu_uce.ui.FlingDir
@@ -29,7 +30,8 @@ class MainActivity : TouchParent() {
         val button : Button = findViewById(R.id.gpsButton)
 
         button.setOnClickListener {
-            locationServices.startLocNet(this, 5000, 0F, ::updateLoc)
+            val result = locationServices.startPollThread(this, 5000, 0F, ::updateLoc)
+            Toast.makeText(this, result.toString(), Toast.LENGTH_SHORT).show()
         }
     }
 
