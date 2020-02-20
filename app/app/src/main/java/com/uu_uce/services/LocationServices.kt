@@ -1,4 +1,4 @@
-package com.uu_uce
+package com.uu_uce.services
 
 import android.Manifest
 import android.content.Context
@@ -11,25 +11,23 @@ import android.os.Bundle
 import android.util.Log
 import androidx.core.content.ContextCompat.checkSelfPermission
 
-class LocationServices (context: Context){
-    private val mContext = context
+class LocationServices{
+    companion object {
+        val permissionsNeeded = listOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
+    }
 
-    private var hasGps = false
-    private var hasNetwork = false
-
-    var locationNetwork: Location? = null
     var networkRunning = false
 
-    fun startLocNet(action: (Pair<Double, Double>) -> Unit) {
+    fun startLocNet(context: Context, pollTimeMs: Long, minDist: Float, action: (Pair<Double, Double>) -> Unit) {
         //Check if the network is running, might not be the best way to do this.
         if(networkRunning) {
             Log.d("LocationServices", "LocationNetwork already running")
             return
         }
 
-        val locationManager = mContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        hasGps = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-        hasNetwork = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val hasGps = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        val hasNetwork = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
         if (!hasGps && !hasNetwork) return
 
@@ -40,15 +38,15 @@ class LocationServices (context: Context){
 
         var result = PackageManager.PERMISSION_DENIED
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            result = checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION)
-            Log.d("LocationServices.getLoc", "permissions: $result")
+            result = checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+            Log.d("LocationServices", "permissions: $result")
         }
         if (result != PackageManager.PERMISSION_GRANTED) return
 
         val locationListener = object : LocationListener {
             override fun onLocationChanged(location: Location?) {
                 if (location != null) {
-                    locationNetwork = location
+                    val locationNetwork = location
 
                     action(Pair(locationNetwork!!.latitude, locationNetwork!!.longitude))
                     Log.d(
@@ -79,7 +77,7 @@ class LocationServices (context: Context){
             }
         }
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0F, locationListener)
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, pollTimeMs, minDist, locationListener)
 
         networkRunning = true
         Log.d("LocationServices", "Started network")

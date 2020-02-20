@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import com.uu_uce.services.LocationServices
+import com.uu_uce.services.getPermissions
 import com.uu_uce.ui.FlingDir
 import com.uu_uce.ui.Flinger
 import com.uu_uce.ui.TouchParent
@@ -15,21 +17,20 @@ class MainActivity : TouchParent() {
     private var loc : Pair<Double, Double>? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val locationServices = LocationServices(this)
-        val permissionServices = PermissionServices(this, this)
+        val locationServices = LocationServices()
         Log.d("MainActivity", "Successfully created services")
 
         // Request location permission
-        permissionServices.getPermissions(listOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE))
+        getPermissions(this, this, LocationServices.permissionsNeeded)
 
-        startApp()
+        setContentView(R.layout.activity_main)
+        addChild(Flinger(this, ::action))
 
         val button : Button = findViewById(R.id.gpsButton)
 
         button.setOnClickListener {
-            locationServices.startLocNet(::updateLoc)
+            locationServices.startLocNet(this, 5000, 0F, ::updateLoc)
         }
-
     }
 
     private fun action(dir: FlingDir, delta: Float) {
@@ -45,11 +46,6 @@ class MainActivity : TouchParent() {
     private fun updateLoc(newLoc : Pair<Double, Double>){
         loc = newLoc
         gpstext.text = "Latitude: ${loc?.first} \nlongitude: ${loc?.second}"
-    }
-
-    private fun startApp() {
-        setContentView(R.layout.activity_main)
-        addChild(Flinger(this, ::action))
     }
 
     // Respond to permission request
