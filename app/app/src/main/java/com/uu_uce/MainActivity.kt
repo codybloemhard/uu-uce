@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import com.uu_uce.services.LocationServices
+import com.uu_uce.services.degreeToUTM
 import com.uu_uce.services.getPermissions
 import com.uu_uce.ui.FlingDir
 import com.uu_uce.ui.Flinger
@@ -46,7 +47,8 @@ class MainActivity : TouchParent() {
 
     private fun updateLoc(newLoc : Pair<Double, Double>){
         loc = newLoc
-        gpstext.text = "Latitude: ${loc?.first} \nlongitude: ${loc?.second}"
+        val utmLoc = degreeToUTM(newLoc)
+        gpstext.text = "UTM: ${utmLoc.zone}${utmLoc.letter} ${utmLoc.east} ${utmLoc.north} \n GPS: ${loc?.first} , ${loc?.second}"
     }
 
     // Respond to permission request

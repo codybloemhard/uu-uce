@@ -6,10 +6,13 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.core.content.ContextCompat.checkSelfPermission
+import kotlin.math.*
 
 enum class LocationPollStartResult{
     ALREAD_LIVE,
@@ -29,6 +32,84 @@ enum class LocationPollStartResult{
             HYBRID -> "Location using GPS/network hybrid!"
         }
     }
+}
+
+data class UTMCoordinate(val zone : Int, val letter : Char, val east : Double, val north : Double)
+
+/*
+    Will convert latitude, longitude coordinate to UTM.
+    degPos: a pair of doubles of the form (latitude, longitude).
+      It will provide you with a triple of UTM coordinates of the form (letter, easting, northing).
+     */
+fun degreeToUTM(degPos : Pair<Double, Double>) : UTMCoordinate{
+    val letter : Char
+    var easting : Double
+    var northing : Double
+
+
+    val lat = degPos.first
+    val lon = degPos.second
+
+    val zone = floor(lon / 6 + 31).toInt()
+
+    when {
+        lat < -72 -> letter = 'C'
+        lat < -64 -> letter = 'D'
+        lat < -56 -> letter = 'E'
+        lat < -48 -> letter = 'F'
+        lat < -40 -> letter = 'G'
+        lat < -32 -> letter = 'H'
+        lat < -24 -> letter = 'J'
+        lat < -16 -> letter = 'K'
+        lat < -8 -> letter = 'L'
+        lat < 0 -> letter = 'M'
+        lat < 8 -> letter = 'N'
+        lat < 16 -> letter = 'P'
+        lat < 24 -> letter = 'Q'
+        lat < 32 -> letter = 'R'
+        lat < 40 -> letter = 'S'
+        lat < 48 -> letter = 'T'
+        lat < 56 -> letter = 'U'
+        lat < 64 -> letter = 'V'
+        lat < 72 -> letter = 'W'
+        else -> letter = 'X'
+    }
+
+    easting = 0.5 * ln(
+        (1 + cos(lat * Math.PI / 180) * sin(lon * Math.PI / 180 - (6 * zone - 183) * Math.PI / 180)) / (1 - cos(
+            lat * Math.PI / 180
+        ) * sin(lon * Math.PI / 180 - (6 * zone - 183) * Math.PI / 180))
+    ) * 0.9996 * 6399593.62 / (1 + 0.0820944379.pow(2.0) * cos(lat * Math.PI / 180).pow(2.0)).pow(0.5) * (1 + 0.0820944379.pow(
+        2.0
+    ) / 2 * (0.5 * ln(
+        (1 + cos(lat * Math.PI / 180) * sin(
+            lon * Math.PI / 180 - (6 * zone - 183) * Math.PI / 180
+        )) / (1 - cos(lat * Math.PI / 180) * sin(lon * Math.PI / 180 - (6 * zone - 183) * Math.PI / 180))
+    )).pow(2.0) * cos(lat * Math.PI / 180).pow(2.0) / 3) + 500000
+    easting = (easting * 100).roundToInt() * 0.01
+    northing = (atan(
+        tan(lat * Math.PI / 180) / cos(lon * Math.PI / 180 - (6 * zone - 183) * Math.PI / 180)
+    ) - lat * Math.PI / 180) * 0.9996 * 6399593.625 / sqrt(
+        1 + 0.006739496742 * cos(lat * Math.PI / 180).pow(2.0)
+    ) * (1 + 0.006739496742 / 2 * (0.5 * ln(
+        (1 + cos(
+            lat * Math.PI / 180
+        ) * sin(lon * Math.PI / 180 - (6 * zone - 183) * Math.PI / 180)) / (1 - cos(
+            lat * Math.PI / 180
+        ) * sin(lon * Math.PI / 180 - (6 * zone - 183) * Math.PI / 180))
+    )).pow(2.0) * cos(lat * Math.PI / 180).pow(2.0)) + 0.9996 * 6399593.625 * (lat * Math.PI / 180 - 0.005054622556 * (lat * Math.PI / 180 + sin(
+        2 * lat * Math.PI / 180
+    ) / 2) + 4.258201531e-05 * (3 * (lat * Math.PI / 180 + sin(2 * lat * Math.PI / 180) / 2) + sin(
+        2 * lat * Math.PI / 180
+    ) * cos(lat * Math.PI / 180).pow(2.0)) / 4 - 1.674057895e-07 * (5 * (3 * (lat * Math.PI / 180 + sin(2 * lat * Math.PI / 180) / 2) + sin(
+        2 * lat * Math.PI / 180
+    ) * cos(lat * Math.PI / 180).pow(2.0)) / 4 + sin(2 * lat * Math.PI / 180) * cos(
+        lat * Math.PI / 180
+    ).pow(2.0) * cos(lat * Math.PI / 180).pow(2.0)) / 3)
+    if (letter < 'M') northing += 10000000
+    northing = (northing * 100).roundToInt() * 0.01
+
+    return UTMCoordinate(zone, letter, easting, northing)
 }
 
 /*
