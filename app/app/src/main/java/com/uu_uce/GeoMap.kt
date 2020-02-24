@@ -18,6 +18,7 @@ class GeoMap : TouchParent() {
         addChild(Flinger(this, ::action))
 
         var dir = File(filesDir, "mydir")
+        dir.mkdir()
         var path = File(dir, "bt25mv10sh0f6422al1r020.shp")
         var test = SHP_File(null,  path)
         test.read()
