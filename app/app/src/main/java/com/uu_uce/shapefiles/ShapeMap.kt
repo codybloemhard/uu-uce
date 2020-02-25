@@ -7,33 +7,58 @@ import diewald_shapeFile.files.shp.shapeTypes.ShpPolyLine
 import diewald_shapeFile.files.shp.shapeTypes.ShpPolygon
 import diewald_shapeFile.files.shp.shapeTypes.ShpShape
 
+fun mergeBBs(
+        mins: List<MutableList<Double>>,
+        maxs: List<MutableList<Double>>)
+        : Pair<MutableList<Double>,MutableList<Double>>{
+    var bmin = mutableListOf(Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE)
+    var bmax = mutableListOf(0.0,0.0,0.0)
+
+    bmin = mins.fold(bmin, {bb, shapez ->
+        bb[0] = minOf(shapez[0], bb[0])
+        bb[1] = minOf(shapez[1], bb[1])
+        bb[2] = minOf(shapez[2], bb[2])
+        bb
+    })
+    bmax = maxs.fold(bmax, {bb, shapez ->
+        bb[0] = maxOf(shapez[0], bb[0])
+        bb[1] = maxOf(shapez[1], bb[1])
+        bb[2] = maxOf(shapez[2], bb[2])
+        bb
+    })
+    return Pair(bmin,bmax)
+}
+
 class ShapeMap{
     private var layers = mutableListOf<Pair<LayerType,ShapeLayer>>()
+    private var bmin = mutableListOf(Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE)
+    private var bmax = mutableListOf(0.0,0.0,0.0)
 
     fun addLayer(type: LayerType, shpFile: SHP_File){
         layers.add(Pair(type,ShapeLayer(shpFile)))
+        val bminmax = mergeBBs(
+            layers.map{l -> l.second.bmin},
+            layers.map{l -> l.second.bmax})
+        bmin = bminmax.first
+        bmax = bminmax.second
+        Log.d("ShapeMap", "($bmin),($bmax)")
     }
 }
 
 class ShapeLayer(shapeFile: SHP_File){
     private var shapes: List<ShapeZ>
-    private var bmin = mutableListOf(Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE)
-    private var bmax = mutableListOf(0.0,0.0,0.0)
+    var bmin = mutableListOf(Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE)
+        private set
+    var bmax = mutableListOf(0.0,0.0,0.0)
+        private set
 
     init{
         shapes = shapeFile.shpShapes.map{s -> ShapeZ(s)}
-        bmin = shapes.fold(bmin, {bb, shapez ->
-            bb[0] = minOf(shapez.bmin[0], bb[0])
-            bb[1] = minOf(shapez.bmin[1], bb[1])
-            bb[2] = minOf(shapez.bmin[2], bb[2])
-            bb
-        })
-        bmax = shapes.fold(bmax, {bb, shapez ->
-            bb[0] = maxOf(shapez.bmax[0], bb[0])
-            bb[1] = maxOf(shapez.bmax[1], bb[1])
-            bb[2] = maxOf(shapez.bmax[2], bb[2])
-            bb
-        })
+        val bminmax = mergeBBs(
+            shapes.map{s -> s.bmin},
+            shapes.map{s -> s.bmax})
+        bmin = bminmax.first
+        bmax = bminmax.second
         Log.d("ShapeLayer", "($bmin),($bmax)")
     }
 }
@@ -42,7 +67,9 @@ class ShapeZ(shape: ShpShape){
     private var type: ShapeType
     private var points: List<Triple<Double,Double,Double>>
     var bmin = mutableListOf(Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE)
+        private set
     var bmax = mutableListOf(0.0,0.0,0.0)
+        private set
 
     init{
         when(shape.shapeType){
