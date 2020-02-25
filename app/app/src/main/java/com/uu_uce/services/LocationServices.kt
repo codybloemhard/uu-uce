@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.core.content.ContextCompat.checkSelfPermission
+import kotlin.math.*
 
 enum class LocationPollStartResult{
     ALREAD_LIVE,
@@ -29,6 +30,74 @@ enum class LocationPollStartResult{
             HYBRID -> "Location using GPS/network hybrid!"
         }
     }
+}
+
+fun latToUTMLetter(lat: Double): Char{
+    val letters = listOf('C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M',
+        'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W')
+    var counter = -72
+    for(l in letters){
+        if(lat < counter)
+            return l
+        counter += 8
+    }
+    return 'X'
+}
+
+data class UTMCoordinate(val zone : Int, val letter : Char, val east : Double, val north : Double)
+
+/*
+Will convert latitude, longitude coordinate to UTM.
+degPos: a pair of doubles of the form (latitude, longitude).
+It will provide you with a triple of UTM coordinates of the form (letter, easting, northing).
+ */
+fun degreeToUTM(degPos : Pair<Double, Double>) : UTMCoordinate{
+    var easting : Double
+    var northing : Double
+
+    val lat = degPos.first
+    val lon = degPos.second
+
+    val zone = floor(lon / 6 + 31).toInt()
+    val letter = latToUTMLetter(lat)
+
+    val deg = Math.PI / 180
+
+    easting = 0.5 * ln(
+        (1 + cos(lat * deg) * sin(lon * deg - (6 * zone - 183) * deg)) / (1 - cos(
+            lat * deg
+        ) * sin(lon * deg - (6 * zone - 183) * deg))
+    ) * 0.9996 * 6399593.62 / (1 + 0.0820944379.pow(2.0) * cos(lat * deg).pow(2.0)).pow(0.5) * (1 + 0.0820944379.pow(
+        2.0
+    ) / 2 * (0.5 * ln(
+        (1 + cos(lat * deg) * sin(
+            lon * deg - (6 * zone - 183) * deg
+        )) / (1 - cos(lat * deg) * sin(lon * deg - (6 * zone - 183) * deg))
+    )).pow(2.0) * cos(lat * deg).pow(2.0) / 3) + 500000
+    easting = (easting * 100).roundToInt() * 0.01
+    northing = (atan(
+        tan(lat * deg) / cos(lon * deg - (6 * zone - 183) * deg)
+    ) - lat * deg) * 0.9996 * 6399593.625 / sqrt(
+        1 + 0.006739496742 * cos(lat * deg).pow(2.0)
+    ) * (1 + 0.006739496742 / 2 * (0.5 * ln(
+        (1 + cos(
+            lat * deg
+        ) * sin(lon * deg - (6 * zone - 183) * deg)) / (1 - cos(
+            lat * deg
+        ) * sin(lon * deg - (6 * zone - 183) * deg))
+    )).pow(2.0) * cos(lat * deg).pow(2.0)) + 0.9996 * 6399593.625 * (lat * deg - 0.005054622556 * (lat * deg + sin(
+        2 * lat * deg
+    ) / 2) + 4.258201531e-05 * (3 * (lat * deg + sin(2 * lat * deg) / 2) + sin(
+        2 * lat * deg
+    ) * cos(lat * deg).pow(2.0)) / 4 - 1.674057895e-07 * (5 * (3 * (lat * deg + sin(2 * lat * deg) / 2) + sin(
+        2 * lat * deg
+    ) * cos(lat * deg).pow(2.0)) / 4 + sin(2 * lat * deg) * cos(
+        lat * deg
+    ).pow(2.0) * cos(lat * deg).pow(2.0)) / 3)
+    if (letter < 'M') northing += 10000000
+    northing = (northing * 100).roundToInt() * 0.01
+
+    return UTMCoordinate(zone, letter, easting, northing)
 }
 
 /*
@@ -116,6 +185,7 @@ class LocationServices{
         }
 
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, pollTimeMs, minDist, locationListener)
+        action(Pair(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).latitude, locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).longitude))
 
         networkRunning = true
         Log.d("LocationServices", "Started network")
