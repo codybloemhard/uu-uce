@@ -46,8 +46,10 @@ class ShapeMap{
         Log.d("ShapeMap", "($bmin),($bmax)")
     }
 
-    fun draw(canvas: Canvas, topleft: Triple<Double,Double,Double>, botright: Triple<Double,Double,Double>, width: Int, height: Int){
-        for(layer in layers) layer.second.draw(canvas,layer.first, topleft, botright, width, height)
+    fun draw(canvas: Canvas, width: Int, height: Int){
+        val bmin = Triple(bmin[0],bmin[1],bmin[2])
+        val bmax = Triple(bmax[0],bmax[1],bmax[2])
+        for(layer in layers) layer.second.draw(canvas,layer.first, bmin, bmax, width, height)
     }
 }
 
@@ -123,7 +125,7 @@ class ShapeZ(shape: ShpShape) {
         width: Int,
         height: Int
     ) {
-        if (points.size < 1) return
+        if (points.size < 2) return
         var drawPoints = FloatArray(4 * (points.size - 1))
 
         var lineIndex = 0
@@ -131,11 +133,11 @@ class ShapeZ(shape: ShpShape) {
             drawPoints[lineIndex++] =
                 ((points[i].first - topleft.first) / (botright.first - topleft.first) * width).toFloat()
             drawPoints[lineIndex++] =
-                ((points[i].second - topleft.second) / (botright.second - topleft.second) * height).toFloat()
+                (height - (points[i].second - topleft.second) / (botright.second - topleft.second) * height).toFloat()
             drawPoints[lineIndex++] =
-                ((points[i + 1].first - topleft.first) / (botright.first - topleft.first) * height).toFloat()
+                ((points[i + 1].first - topleft.first) / (botright.first - topleft.first) * width).toFloat()
             drawPoints[lineIndex++] =
-                ((points[i + 1].first - topleft.second) / (botright.second - topleft.second) * width).toFloat()
+                (height - (points[i + 1].second - topleft.second) / (botright.second - topleft.second) * height).toFloat()
         }
 
         canvas.drawLines(drawPoints, paint)

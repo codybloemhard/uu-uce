@@ -22,7 +22,7 @@ class CustomMap : View {
 
     init{
         var dir = File(context.filesDir, "mydir")
-        var path = File(dir, "nl_10km.shp")
+        var path = File(dir, "bt25mv10sh0f6422al1r020.shp")
         var file = SHP_File(null,  path)
         file.read()
         smap = ShapeMap()
@@ -32,8 +32,6 @@ class CustomMap : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        smap.draw(canvas, Triple(0.0,0.0, 0.0), Triple(100000.0,100000.0,0.0), width, height)
-
-        canvas.drawLine(0f,0f,width.toFloat(),height.toFloat(),Paint(Paint.ANTI_ALIAS_FLAG) )
+        smap.draw(canvas, width, height)
     }
 }
