@@ -1,5 +1,7 @@
 package com.uu_uce.shapefiles
 
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.util.Log
 import diewald_shapeFile.files.shp.SHP_File
 import diewald_shapeFile.files.shp.shapeTypes.ShpPoint
@@ -13,6 +15,10 @@ class ShapeMap{
     fun addLayer(type: LayerType, shpFile: SHP_File){
         layers.add(Pair(type,ShapeLayer(shpFile)))
     }
+
+    fun draw(canvas: Canvas, topleft: Triple<Double,Double,Double>, botright: Triple<Double,Double,Double>, width: Int, height: Int){
+        for(layer in layers) layer.second.draw(canvas,layer.first, topleft, botright, width, height)
+    }
 }
 
 class ShapeLayer(shapeFile: SHP_File){
@@ -21,6 +27,10 @@ class ShapeLayer(shapeFile: SHP_File){
     init{
         shapes = shapeFile.shpShapes.map{s -> ShapeZ(s)}
     }
+
+    fun draw(canvas: Canvas, type: LayerType, topleft: Triple<Double,Double,Double>, botright: Triple<Double,Double,Double>, width: Int, height: Int){
+        for(shape in shapes) shape.draw(canvas, type, topleft, botright, width, height)
+    }
 }
 
 class ShapeZ(shape: ShpShape){
@@ -28,6 +38,7 @@ class ShapeZ(shape: ShpShape){
     private var points: List<Triple<Double,Double,Double>>
     private var bmin = mutableListOf(0.0,0.0,0.0)
     private var bmax = mutableListOf(0.0,0.0,0.0)
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     init{
         when(shape.shapeType){
@@ -53,6 +64,21 @@ class ShapeZ(shape: ShpShape){
                 points = listOf()
             }
         }
+    }
+
+    fun draw(canvas: Canvas, type: LayerType, topleft: Triple<Double,Double,Double>, botright: Triple<Double,Double,Double>, width: Int, height: Int){
+        if(points.size<1) return
+        var drawPoints = FloatArray(4*(points.size-1))
+
+        var lineIndex = 0
+        for(i in 0..points.size-2){
+            drawPoints[lineIndex++] = ((points[i].first - topleft.first)/(botright.first-topleft.first) * width).toFloat()
+            drawPoints[lineIndex++] = ((points[i].second - topleft.second)/(botright.second-topleft.second) * height).toFloat()
+            drawPoints[lineIndex++] = ((points[i+1].first - topleft.first)/(botright.first-topleft.first) * height).toFloat()
+            drawPoints[lineIndex++] = ((points[i+1].first - topleft.second)/(botright.second-topleft.second) * width).toFloat()
+        }
+
+        canvas.drawLines(drawPoints, paint)
     }
 }
 

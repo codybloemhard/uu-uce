@@ -6,16 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".GeoMap">
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="416dp"
-        android:layout_height="100dp"
-        android:textAlignment="center"
-        android:textSize="36sp"
-        android:textStyle="bold"
+    <com.uu_uce.views.CustomMap
+        android:id="@+id/customMap"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:text="This is a map!" />
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

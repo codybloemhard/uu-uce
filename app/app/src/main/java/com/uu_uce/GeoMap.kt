@@ -17,14 +17,7 @@ class GeoMap : TouchParent() {
         setContentView(R.layout.activity_geo_map)
         addChild(Flinger(this, ::action))
 
-        var dir = File(filesDir, "mydir")
-        dir.mkdir()
-        var path = File(dir, "bt25mv10sh0f6422al1r020.shp")
-        var test = SHP_File(null,  path)
-        test.read()
-        var smap = ShapeMap()
-        smap.addLayer(LayerType.Height, test)
-        var lol = 0
+
     }
 
     private fun action(dir: FlingDir, delta: Float){
