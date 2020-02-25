@@ -6,12 +6,9 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
-import android.net.ConnectivityManager
-import android.net.NetworkInfo
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat.checkSelfPermission
 import kotlin.math.*
 
@@ -35,46 +32,34 @@ enum class LocationPollStartResult{
     }
 }
 
+fun latToUTMLetter(lat: Double): Char{
+    val letters = listOf('C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M',
+        'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W')
+    var counter = -72
+    for(l in letters){
+        if(lat < counter)
+            return l
+        counter += 8
+    }
+    return 'X'
+}
+
 data class UTMCoordinate(val zone : Int, val letter : Char, val east : Double, val north : Double)
 
 /*
-    Will convert latitude, longitude coordinate to UTM.
-    degPos: a pair of doubles of the form (latitude, longitude).
-      It will provide you with a triple of UTM coordinates of the form (letter, easting, northing).
-     */
+Will convert latitude, longitude coordinate to UTM.
+degPos: a pair of doubles of the form (latitude, longitude).
+It will provide you with a triple of UTM coordinates of the form (letter, easting, northing).
+ */
 fun degreeToUTM(degPos : Pair<Double, Double>) : UTMCoordinate{
-    val letter : Char
     var easting : Double
     var northing : Double
-
 
     val lat = degPos.first
     val lon = degPos.second
 
     val zone = floor(lon / 6 + 31).toInt()
-
-    when {
-        lat < -72 ->    letter = 'C'
-        lat < -64 ->    letter = 'D'
-        lat < -56 ->    letter = 'E'
-        lat < -48 ->    letter = 'F'
-        lat < -40 ->    letter = 'G'
-        lat < -32 ->    letter = 'H'
-        lat < -24 ->    letter = 'J'
-        lat < -16 ->    letter = 'K'
-        lat < -8 ->     letter = 'L'
-        lat < 0 ->      letter = 'M'
-        lat < 8 ->      letter = 'N'
-        lat < 16 ->     letter = 'P'
-        lat < 24 ->     letter = 'Q'
-        lat < 32 ->     letter = 'R'
-        lat < 40 ->     letter = 'S'
-        lat < 48 ->     letter = 'T'
-        lat < 56 ->     letter = 'U'
-        lat < 64 ->     letter = 'V'
-        lat < 72 ->     letter = 'W'
-        else ->         letter = 'X'
-    }
+    val letter = latToUTMLetter(lat)
 
     val deg = Math.PI / 180
 
