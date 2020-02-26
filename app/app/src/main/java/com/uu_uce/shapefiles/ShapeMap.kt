@@ -8,6 +8,7 @@ import diewald_shapeFile.files.shp.shapeTypes.ShpPoint
 import diewald_shapeFile.files.shp.shapeTypes.ShpPolyLine
 import diewald_shapeFile.files.shp.shapeTypes.ShpPolygon
 import diewald_shapeFile.files.shp.shapeTypes.ShpShape
+import kotlin.math.absoluteValue
 import kotlin.system.measureTimeMillis
 
 typealias p3 = Triple<Double,Double,Double>
@@ -99,7 +100,7 @@ class ShapeMap{
         if(zoom == 999.0)
             zoom = 1.0 / waspect
         else
-            zoom *= 0.97
+            zoom *= 0.99
         val viewport = zoomXyMidAabb(bmin,bmax,zoom, waspect)
         for(layer in layers) layer.second.draw(canvas,layer.first, viewport.first, viewport.second, width, height)
     }
@@ -113,7 +114,8 @@ class ShapeLayer(shapeFile: SHP_File){
         private set
     @ExperimentalUnsignedTypes
     val zDens = hashMapOf<Int,UInt>()
-    val shapeMask = mutableListOf<Boolean>()
+    private val shapeMask = mutableListOf<Boolean>()
+    private val shapeSet = mutableSetOf<Int>()
 
     init{
         shapes = shapeFile.shpShapes.map{s -> ShapeZ(s)}
@@ -130,12 +132,15 @@ class ShapeLayer(shapeFile: SHP_File){
             var new = old + 1u
             zDens.put(mz, new)
         }
-        shapes.map{ _ -> shapeMask.add(false) }
+        shapes.map{ shapeMask.add(false) }
     }
 
     fun draw(canvas: Canvas, type: LayerType, topleft: p3, botright: p3, width: Int, height: Int){
+        if(shapes.isEmpty()) return
         var minz = Int.MAX_VALUE
         var maxz = Int.MIN_VALUE
+        val zs = 14
+        shapeSet.clear()
         shapes.forEachIndexed(){
             i, shape ->
             val ok = aabbIntersect(shape.bmin,shape.bmax,topleft,botright)
@@ -144,8 +149,34 @@ class ShapeLayer(shapeFile: SHP_File){
                 minz = minOf(minz, mz)
                 maxz = maxOf(maxz, mz)
                 shapeMask[i] = true
+                if(!shapeSet.contains(mz)){
+                    shapeSet.add(mz)
+                }
             }else shapeMask[i] = false
         }
+        val zdiff = maxz - minz
+        val zIndices = mutableListOf<Int>()
+        for(zi in 0..zs)
+            zIndices.add(minz + (zdiff.toDouble() * (1.0/zi.toDouble())).toInt())
+        val zLevels = zIndices.map{ Int.MAX_VALUE }.toMutableList()
+        val zDeltas = zLevels.map{ Int.MAX_VALUE }.toMutableList()
+        zIndices.forEachIndexed{
+            i, zi ->
+            for(shape in shapes){
+                val mz = shape.meanZ()
+                val delta = (mz - zi).absoluteValue
+                if(zDeltas[i] > delta){
+                    zDeltas[i] = delta
+                    zLevels[i] = mz
+                }
+            }
+        }
+        shapes.forEachIndexed{
+            i, shape ->
+            if(!zLevels.contains(shape.meanZ()))
+                shapeMask[i] = false
+        }
+
         var shapeCount = 0
         shapes.forEachIndexed(){
             i, shape ->
