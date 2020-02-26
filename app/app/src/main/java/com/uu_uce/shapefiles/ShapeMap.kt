@@ -8,6 +8,7 @@ import diewald_shapeFile.files.shp.shapeTypes.ShpPoint
 import diewald_shapeFile.files.shp.shapeTypes.ShpPolyLine
 import diewald_shapeFile.files.shp.shapeTypes.ShpPolygon
 import diewald_shapeFile.files.shp.shapeTypes.ShpShape
+import kotlin.system.measureTimeMillis
 
 fun mergeBBs(
         mins: List<MutableList<Double>>,
@@ -37,13 +38,19 @@ class ShapeMap{
     private var bmax = mutableListOf(0.0,0.0,0.0)
 
     fun addLayer(type: LayerType, shpFile: SHP_File){
-        layers.add(Pair(type,ShapeLayer(shpFile)))
-        val bminmax = mergeBBs(
-            layers.map{l -> l.second.bmin},
-            layers.map{l -> l.second.bmax})
-        bmin = bminmax.first
-        bmax = bminmax.second
-        Log.d("ShapeMap", "($bmin),($bmax)")
+        val timeSave = measureTimeMillis {
+            layers.add(Pair(type,ShapeLayer(shpFile)))
+        }
+        Log.i("ShapeMap", "Save: $timeSave")
+        val timeBB = measureTimeMillis {
+            val bminmax = mergeBBs(
+                layers.map{l -> l.second.bmin},
+                layers.map{l -> l.second.bmax})
+            bmin = bminmax.first
+            bmax = bminmax.second
+        }
+        Log.i("ShapeMap", "Calc: $timeBB")
+        Log.i("ShapeMap", "bb: ($bmin),($bmax)")
     }
 
     fun draw(canvas: Canvas, width: Int, height: Int){

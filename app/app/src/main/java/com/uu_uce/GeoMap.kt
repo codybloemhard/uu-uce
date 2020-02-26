@@ -16,8 +16,6 @@ class GeoMap : TouchParent() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_geo_map)
         addChild(Flinger(this, ::action))
-
-
     }
 
     private fun action(dir: FlingDir, delta: Float){
