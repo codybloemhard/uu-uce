@@ -41,15 +41,15 @@ fun aabbIntersect(amin: p3, amax: p3, bmin: p3, bmax: p3) : Boolean{
             )
 }
 
-fun zoomXyMidAabb(bmin: p3, bmax: p3, zoom: Double): Pair<p3,p3>{
+fun zoomXyMidAabb(bmin: p3, bmax: p3, zoom: Double, waspect: Double): Pair<p3,p3>{
     val w = bmax.first - bmin.first
     val h = bmax.second - bmin.second
-    val size = minOf(w,h)
     val xm = bmin.first + w / 2.0
     val ym = bmin.second + h / 2.0
-    val zoff = size / 2.0 * zoom;
-    val nmin = Triple(xm - zoff, ym - zoff, Double.MIN_VALUE)
-    val nmax = Triple(xm + zoff, ym + zoff, Double.MAX_VALUE)
+    val woff = w * waspect / 2.0 * zoom;
+    val hoff = h / 2.0 * zoom
+    val nmin = Triple(xm - woff, ym - hoff, Double.MIN_VALUE)
+    val nmax = Triple(xm + woff, ym + hoff, Double.MAX_VALUE)
     return Pair(nmin, nmax)
 }
 
@@ -59,6 +59,8 @@ class ShapeMap{
     private var bmax = p3Zero
     @ExperimentalUnsignedTypes
     val zDens = hashMapOf<Int,UInt>()
+
+    private var zoom = 999.0
 
     fun addLayer(type: LayerType, shpFile: SHP_File){
         val timeSave = measureTimeMillis {
@@ -93,9 +95,13 @@ class ShapeMap{
     }
 
     fun draw(canvas: Canvas, width: Int, height: Int){
-        val size = minOf(width,height)
-        val viewport = zoomXyMidAabb(bmin,bmax,0.1)
-        for(layer in layers) layer.second.draw(canvas,layer.first, viewport.first, viewport.second, size, size)
+        val waspect = width.toDouble() / height.toDouble()
+        if(zoom == 999.0)
+            zoom = 1.0 / waspect
+        else
+            zoom *= 0.97
+        val viewport = zoomXyMidAabb(bmin,bmax,zoom, waspect)
+        for(layer in layers) layer.second.draw(canvas,layer.first, viewport.first, viewport.second, width, height)
     }
 }
 

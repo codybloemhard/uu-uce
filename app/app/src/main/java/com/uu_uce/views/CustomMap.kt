@@ -48,5 +48,6 @@ class CustomMap : View {
             smap.draw(canvas, width, height)
         }
         Log.i("CustomMap", "Draw: $timeDraw")
+        invalidate()
     }
 }
