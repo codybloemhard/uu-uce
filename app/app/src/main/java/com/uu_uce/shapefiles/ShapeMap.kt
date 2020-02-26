@@ -10,35 +10,55 @@ import diewald_shapeFile.files.shp.shapeTypes.ShpPolygon
 import diewald_shapeFile.files.shp.shapeTypes.ShpShape
 import kotlin.system.measureTimeMillis
 
-fun mergeBBs(
-        mins: List<MutableList<Double>>,
-        maxs: List<MutableList<Double>>)
-        : Pair<MutableList<Double>,MutableList<Double>>{
+typealias p3 = Triple<Double,Double,Double>
+val p3Zero = Triple(0.0,0.0,0.0)
+
+fun mergeBBs(mins: List<p3>,maxs: List<p3>): Pair<p3,p3>{
     var bmin = mutableListOf(Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE)
-    var bmax = mutableListOf(0.0,0.0,0.0)
+    var bmax = mutableListOf(Double.MIN_VALUE,Double.MIN_VALUE,Double.MIN_VALUE)
 
     bmin = mins.fold(bmin, {bb, shapez ->
-        bb[0] = minOf(shapez[0], bb[0])
-        bb[1] = minOf(shapez[1], bb[1])
-        bb[2] = minOf(shapez[2], bb[2])
+        bb[0] = minOf(shapez.first, bb[0])
+        bb[1] = minOf(shapez.second, bb[1])
+        bb[2] = minOf(shapez.third, bb[2])
         bb
     })
     bmax = maxs.fold(bmax, {bb, shapez ->
-        bb[0] = maxOf(shapez[0], bb[0])
-        bb[1] = maxOf(shapez[1], bb[1])
-        bb[2] = maxOf(shapez[2], bb[2])
+        bb[0] = maxOf(shapez.first, bb[0])
+        bb[1] = maxOf(shapez.second, bb[1])
+        bb[2] = maxOf(shapez.third, bb[2])
         bb
     })
-    return Pair(bmin,bmax)
+    return Pair(Triple(bmin[0],bmin[1],bmin[2]),Triple(bmax[0],bmax[1],bmax[2]))
+}
+
+fun aabbIntersect(amin: p3, amax: p3, bmin: p3, bmax: p3) : Boolean{
+    return !(
+            amin.first > bmax.first ||
+            amax.first < bmin.first ||
+            amin.second > bmax.second ||
+            amax.second < bmin.second
+            )
+}
+
+fun zoomXyMidAabb(bmin: p3, bmax: p3, zoom: Double): Pair<p3,p3>{
+    val w = bmax.first - bmin.first
+    val h = bmax.second - bmin.second
+    val size = minOf(w,h)
+    val xm = bmin.first + w / 2.0
+    val ym = bmin.second + h / 2.0
+    val zoff = size / 2.0 * zoom;
+    val nmin = Triple(xm - zoff, ym - zoff, Double.MIN_VALUE)
+    val nmax = Triple(xm + zoff, ym + zoff, Double.MAX_VALUE)
+    return Pair(nmin, nmax)
 }
 
 class ShapeMap{
     private var layers = mutableListOf<Pair<LayerType,ShapeLayer>>()
-    private var bmin = mutableListOf(Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE)
-    private var bmax = mutableListOf(0.0,0.0,0.0)
+    private var bmin = p3Zero
+    private var bmax = p3Zero
     @ExperimentalUnsignedTypes
-    var zDens = hashMapOf<Int,UInt>()
-        private set
+    val zDens = hashMapOf<Int,UInt>()
 
     fun addLayer(type: LayerType, shpFile: SHP_File){
         val timeSave = measureTimeMillis {
@@ -73,22 +93,21 @@ class ShapeMap{
     }
 
     fun draw(canvas: Canvas, width: Int, height: Int){
-        val bmin = Triple(bmin[0],bmin[1],bmin[2])
-        val bmax = Triple(bmax[0],bmax[1],bmax[2])
         val size = minOf(width,height)
-        for(layer in layers) layer.second.draw(canvas,layer.first, bmin, bmax, size, size)
+        val viewport = zoomXyMidAabb(bmin,bmax,0.1)
+        for(layer in layers) layer.second.draw(canvas,layer.first, viewport.first, viewport.second, size, size)
     }
 }
 
 class ShapeLayer(shapeFile: SHP_File){
     private var shapes: List<ShapeZ>
-    var bmin = mutableListOf(Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE)
+    var bmin = p3Zero
         private set
-    var bmax = mutableListOf(0.0,0.0,0.0)
+    var bmax = p3Zero
         private set
     @ExperimentalUnsignedTypes
-    var zDens = hashMapOf<Int,UInt>()
-        private set
+    val zDens = hashMapOf<Int,UInt>()
+    val shapeMask = mutableListOf<Boolean>()
 
     init{
         shapes = shapeFile.shpShapes.map{s -> ShapeZ(s)}
@@ -105,10 +124,31 @@ class ShapeLayer(shapeFile: SHP_File){
             var new = old + 1u
             zDens.put(mz, new)
         }
+        shapes.map{ _ -> shapeMask.add(false) }
     }
 
-    fun draw(canvas: Canvas, type: LayerType, topleft: Triple<Double,Double,Double>, botright: Triple<Double,Double,Double>, width: Int, height: Int){
-        for(shape in shapes) shape.draw(canvas, type, topleft, botright, width, height)
+    fun draw(canvas: Canvas, type: LayerType, topleft: p3, botright: p3, width: Int, height: Int){
+        var minz = Int.MAX_VALUE
+        var maxz = Int.MIN_VALUE
+        shapes.forEachIndexed(){
+            i, shape ->
+            val ok = aabbIntersect(shape.bmin,shape.bmax,topleft,botright)
+            if(ok){
+                val mz = shape.meanZ()
+                minz = minOf(minz, mz)
+                maxz = maxOf(maxz, mz)
+                shapeMask[i] = true
+            }else shapeMask[i] = false
+        }
+        var shapeCount = 0
+        shapes.forEachIndexed(){
+            i, shape ->
+            if(shapeMask[i]){
+                shape.draw(canvas, type, topleft, botright, width, height)
+                shapeCount++
+            }
+        }
+        Log.d("ShapeMap", "Shapes drawn: $shapeCount / ${shapes.size}")
     }
 }
 
@@ -116,9 +156,9 @@ class ShapeZ(shape: ShpShape) {
     private var type: ShapeType
     private var points: List<Triple<Double, Double, Double>>
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    var bmin = mutableListOf(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE)
+    var bmin = p3Zero
         private set
-    var bmax = mutableListOf(0.0, 0.0, 0.0)
+    var bmax = p3Zero
         private set
 
     init {
@@ -139,12 +179,8 @@ class ShapeZ(shape: ShpShape) {
                 type = ShapeType.Point
                 val point = (shape as ShpPoint).point
                 points = listOf(Triple(point[0], point[1], point[2]))
-                bmin[0] = point[0]
-                bmin[1] = point[1]
-                bmin[2] = point[2]
-                bmax[0] = point[0]
-                bmax[1] = point[1]
-                bmax[2] = point[2]
+                bmin = Triple(point[0],point[1],point[2])
+                bmax = bmin.copy()
             }
             else -> {
                 Log.d("ShapeZ", "${shape.shapeType}")
@@ -181,16 +217,12 @@ class ShapeZ(shape: ShpShape) {
     }
 
     private fun updateBB(bb: Array<DoubleArray>) {
-        bmin[0] = bb[0][0]
-        bmin[1] = bb[1][0]
-        bmin[2] = bb[2][0]
-        bmax[0] = bb[0][1]
-        bmax[1] = bb[1][1]
-        bmax[2] = bb[2][1]
+        bmin = Triple(bb[0][0], bb[1][0], bb[2][0])
+        bmax = Triple(bb[0][1], bb[1][1], bb[2][1])
     }
 
     fun meanZ(): Int{
-        return ((bmin[2] + bmax[2]) / 2).toInt()
+        return ((bmin.third + bmax.third) / 2).toInt()
     }
 }
 
