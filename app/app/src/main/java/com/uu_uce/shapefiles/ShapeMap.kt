@@ -36,6 +36,9 @@ class ShapeMap{
     private var layers = mutableListOf<Pair<LayerType,ShapeLayer>>()
     private var bmin = mutableListOf(Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE)
     private var bmax = mutableListOf(0.0,0.0,0.0)
+    @ExperimentalUnsignedTypes
+    var zDens = hashMapOf<Int,UInt>()
+        private set
 
     fun addLayer(type: LayerType, shpFile: SHP_File){
         val timeSave = measureTimeMillis {
@@ -49,14 +52,31 @@ class ShapeMap{
             bmin = bminmax.first
             bmax = bminmax.second
         }
-        Log.i("ShapeMap", "Calc: $timeBB")
+        val timeDens = measureTimeMillis {
+            layers.map{
+                l ->
+                val lDens = l.second.zDens
+                lDens.keys.map {
+                    key ->
+                    val old = zDens[key] ?: 0u
+                    val local = lDens[key] ?: 0u
+                    zDens.put(key, old + local)
+                }
+            }
+        }
+        Log.i("ShapeMap", "Calc boundingbox: $timeBB")
+        Log.i("ShapeMap", "Calc z density: $timeDens")
         Log.i("ShapeMap", "bb: ($bmin),($bmax)")
+        zDens.keys.sorted().map{
+            key -> Log.i("ShapeMap", "($key,${zDens[key]})")
+        }
     }
 
     fun draw(canvas: Canvas, width: Int, height: Int){
         val bmin = Triple(bmin[0],bmin[1],bmin[2])
         val bmax = Triple(bmax[0],bmax[1],bmax[2])
-        for(layer in layers) layer.second.draw(canvas,layer.first, bmin, bmax, width, height)
+        val size = minOf(width,height)
+        for(layer in layers) layer.second.draw(canvas,layer.first, bmin, bmax, size, size)
     }
 }
 
@@ -66,6 +86,9 @@ class ShapeLayer(shapeFile: SHP_File){
         private set
     var bmax = mutableListOf(0.0,0.0,0.0)
         private set
+    @ExperimentalUnsignedTypes
+    var zDens = hashMapOf<Int,UInt>()
+        private set
 
     init{
         shapes = shapeFile.shpShapes.map{s -> ShapeZ(s)}
@@ -74,7 +97,14 @@ class ShapeLayer(shapeFile: SHP_File){
             shapes.map{s -> s.bmax})
         bmin = bminmax.first
         bmax = bminmax.second
-        Log.d("ShapeLayer", "($bmin),($bmax)")
+        Log.i("ShapeLayer", "($bmin),($bmax)")
+        shapes.map{
+            s ->
+            val mz = s.meanZ()
+            val old = zDens[mz] ?: 0u
+            var new = old + 1u
+            zDens.put(mz, new)
+        }
     }
 
     fun draw(canvas: Canvas, type: LayerType, topleft: Triple<Double,Double,Double>, botright: Triple<Double,Double,Double>, width: Int, height: Int){
@@ -157,6 +187,10 @@ class ShapeZ(shape: ShpShape) {
         bmax[0] = bb[0][1]
         bmax[1] = bb[1][1]
         bmax[2] = bb[2][1]
+    }
+
+    fun meanZ(): Int{
+        return ((bmin[2] + bmax[2]) / 2).toInt()
     }
 }
 
