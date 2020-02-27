@@ -198,8 +198,6 @@ class LocationServices{
         locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, locationListener, Looper.myLooper())
         val locationGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
 
-
-
         locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, locationListener, Looper.myLooper())
         val locationNetwork = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
 
