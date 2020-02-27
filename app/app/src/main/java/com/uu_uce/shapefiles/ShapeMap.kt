@@ -150,14 +150,9 @@ class ShapeLayer(shapeFile: SHP_File, private val zs: UInt){
         }
         zDensSorted = zDens.keys.sorted()
         shapes = shapes.sortedBy{ it.meanZ() }
-        var lastZ = Int.MIN_VALUE
-        for(i in shapes.indices){
-            val shape = shapes[i]
-            val z = shape.meanZ()
-            if(z != lastZ){
-                lastZ = z
-                zIndices[z] = i
-            }
+        zDensSorted.forEachIndexed {
+            i, z ->
+            zIndices[z] = i
         }
         zmask = shapes.map{ false }.toMutableList()
         selectInitLines()
@@ -173,15 +168,23 @@ class ShapeLayer(shapeFile: SHP_File, private val zs: UInt){
         //maskShapesZ(true)
         val (minz,maxz) = minMaxZ()
         if(minz < oldMinZ || maxz > oldMaxZ){ // translate or zoom out, add relevant lines
-            val first = targets.first().first
-            val last = targets.last().first
-            val whole = maxz - minz
-            val emptyLower = first - minz
-            val emptyUpper = maxz - last
-            /*val indexLow = zIndices.get()
-            if(emptyLower > step){
-
-            }*/
+            val indexFirst = targets.first().second
+            val indexLast = targets.last().second
+            val indexLow = zIndices[minz] ?: 1
+            val indexUpper = zIndices[maxz] ?: (zDensSorted.size - 1)
+            val step = zDensSorted.size / zs.toInt()
+            var index = if(indexLow < indexFirst) indexLow
+            else Int.MAX_VALUE
+            while(index < indexFirst){
+                targets.add(Pair(zDensSorted[index], index))
+                index += step
+            }
+            index = if(indexUpper > indexLast) indexUpper
+            else Int.MIN_VALUE
+            while(index > indexLast){
+                targets.add(Pair(zDensSorted[index], index))
+                index -= step
+            }
         }else{ // stay the same or zoom in, remove lines that are out of scope
             targets = targets.filter { (z,_) -> z in minz..maxz }.toMutableList()
         }
@@ -221,6 +224,8 @@ class ShapeLayer(shapeFile: SHP_File, private val zs: UInt){
             shape.draw(canvas, type, topleft, botright, width, height)
             shapeCount++
         }
+        oldMinZ = minz
+        oldMaxZ = maxz
         Log.d("ShapeMap", "Shapes drawn: $shapeCount / ${shapes.size}")
     }
 
