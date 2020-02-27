@@ -164,6 +164,10 @@ class ShapeLayer(shapeFile: SHP_File, private val zs: UInt){
 
     fun draw(canvas: Canvas, type: LayerType, topleft: p3, botright: p3, width: Int, height: Int){
         if(shapes.isEmpty()) return
+        if(targets.isEmpty()){
+            selectInitLines()
+            return
+        }
         maskShapesBB(topleft, botright, false)
         //maskShapesZ(true)
         val (minz,maxz) = minMaxZ()
@@ -185,9 +189,10 @@ class ShapeLayer(shapeFile: SHP_File, private val zs: UInt){
                 targets.add(Pair(zDensSorted[index], index))
                 index -= step
             }
-        }else{ // stay the same or zoom in, remove lines that are out of scope
-            targets = targets.filter { (z,_) -> z in minz..maxz }.toMutableList()
+            targets.distinctBy { (z,_) -> z }
+            targets.sortBy{ (z,i) -> z}
         }
+        targets = targets.filter { (z,_) -> z in minz..maxz }.toMutableList()
         //Log.d("ShapeMap", "mmz: $minz - $maxz")
         var toAdd = zs.toInt() - targets.size
         if(toAdd > 0){ // add more lines
@@ -210,9 +215,26 @@ class ShapeLayer(shapeFile: SHP_File, private val zs: UInt){
                 toAdd--
                 sortedIndex++
             }
+            targets.distinctBy { (z,_) -> z }
             targets.sortBy{ (z,i) -> z}
         }else if(toAdd < 0){ // remove lines
-
+            //remove least important lines, doesnt work?
+            var deltas = mutableListOf<Pair<Int,Int>>()
+            for(i in 1 until targets.size - 1){
+                val (az, _) = targets[i]
+                val (bz, _) = targets[i + 1]
+                val delta = bz - az
+                deltas.add(Pair(delta, i))
+            }
+            deltas.sortBy { (d,_) -> d }
+            val tresh = minOf(deltas.size,-toAdd)
+            var newTargets = mutableListOf<Pair<Int,Int>>()
+            deltas.forEachIndexed(){
+                j, (_,i) ->
+                if(j >= tresh)
+                    newTargets.add(targets[i])
+            }
+            targets = newTargets
         }
 
         maskShapesZ(true)
