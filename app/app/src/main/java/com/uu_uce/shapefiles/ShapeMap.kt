@@ -62,6 +62,8 @@ class ShapeMap{
     val zDens = hashMapOf<Int,UInt>()
 
     private var zoom = 999.0
+    private var zoomVel = 0.01
+    private var zoomDir = 1.0
 
     fun addLayer(type: LayerType, shpFile: SHP_File){
         val timeSave = measureTimeMillis {
@@ -97,12 +99,22 @@ class ShapeMap{
 
     fun draw(canvas: Canvas, width: Int, height: Int){
         val waspect = width.toDouble() / height.toDouble()
-        if(zoom == 999.0)
-            zoom = 1.0 / waspect
-        else
-            zoom *= 0.99
+        setZoom(waspect)
         val viewport = zoomXyMidAabb(bmin,bmax,zoom, waspect)
         for(layer in layers) layer.second.draw(canvas,layer.first, viewport.first, viewport.second, width, height)
+    }
+
+    private fun setZoom(waspect: Double){
+        if(zoom == 999.0) {
+            zoom = 1.0 / waspect
+            return
+        }
+        if(zoom < 0.01 && zoomDir > 0.0)
+            zoomDir = -1.0
+        if(zoom > (1.0 / waspect) && zoomDir < 0.0)
+            zoomDir = 1.0
+
+        zoom *= (1.0 - (zoomVel * zoomDir))
     }
 }
 
@@ -117,6 +129,9 @@ class ShapeLayer(shapeFile: SHP_File, private val zs: UInt){
     private val zDensSorted: List<Int>
     private val zmask: MutableList<Boolean>
     private var targets = mutableListOf<Pair<Int,Int>>()
+    private var oldMinZ = Int.MIN_VALUE
+    private var oldMaxZ = Int.MAX_VALUE
+    private val zIndices = hashMapOf<Int,Int>()
 
     init{
         shapes = shapeFile.shpShapes.map{s -> ShapeZ(s)}
@@ -135,19 +150,44 @@ class ShapeLayer(shapeFile: SHP_File, private val zs: UInt){
         }
         zDensSorted = zDens.keys.sorted()
         shapes = shapes.sortedBy{ it.meanZ() }
+        var lastZ = Int.MIN_VALUE
+        for(i in shapes.indices){
+            val shape = shapes[i]
+            val z = shape.meanZ()
+            if(z != lastZ){
+                lastZ = z
+                zIndices[z] = i
+            }
+        }
         zmask = shapes.map{ false }.toMutableList()
         selectInitLines()
+        maskShapesBB(bmin, bmax, false)
+        val (minz,maxz) = minMaxZ()
+        oldMinZ = minz
+        oldMaxZ = maxz
     }
 
     fun draw(canvas: Canvas, type: LayerType, topleft: p3, botright: p3, width: Int, height: Int){
         if(shapes.isEmpty()) return
         maskShapesBB(topleft, botright, false)
-        maskShapesZ(true)
+        //maskShapesZ(true)
         val (minz,maxz) = minMaxZ()
-        Log.d("ShapeMap", "mmz: $minz - $maxz")
-        targets = targets.filter { (z,_) -> z in minz..maxz }.toMutableList()
+        if(minz < oldMinZ || maxz > oldMaxZ){ // translate or zoom out, add relevant lines
+            val first = targets.first().first
+            val last = targets.last().first
+            val whole = maxz - minz
+            val emptyLower = first - minz
+            val emptyUpper = maxz - last
+            /*val indexLow = zIndices.get()
+            if(emptyLower > step){
+
+            }*/
+        }else{ // stay the same or zoom in, remove lines that are out of scope
+            targets = targets.filter { (z,_) -> z in minz..maxz }.toMutableList()
+        }
+        //Log.d("ShapeMap", "mmz: $minz - $maxz")
         var toAdd = zs.toInt() - targets.size
-        if(toAdd > 0){
+        if(toAdd > 0){ // add more lines
             Log.d("ShapeMap", "to add: $toAdd")
             val deltas = mutableListOf<Triple<Int,Int,Int>>()
             for(i in 0 until targets.size - 1){
@@ -168,7 +208,10 @@ class ShapeLayer(shapeFile: SHP_File, private val zs: UInt){
                 sortedIndex++
             }
             targets.sortBy{ (z,i) -> z}
+        }else if(toAdd < 0){ // remove lines
+
         }
+
         maskShapesZ(true)
         maskShapesBB(topleft, botright, true)
         var shapeCount = 0
