@@ -65,7 +65,7 @@ class ShapeMap{
 
     fun addLayer(type: LayerType, shpFile: SHP_File){
         val timeSave = measureTimeMillis {
-            layers.add(Pair(type,ShapeLayer(shpFile)))
+            layers.add(Pair(type,ShapeLayer(shpFile, 20u)))
         }
         Log.i("ShapeMap", "Save: $timeSave")
         val timeBB = measureTimeMillis {
@@ -106,7 +106,7 @@ class ShapeMap{
     }
 }
 
-class ShapeLayer(shapeFile: SHP_File){
+class ShapeLayer(shapeFile: SHP_File, private val zs: UInt){
     private var shapes: List<ShapeZ>
     var bmin = p3Zero
         private set
@@ -114,8 +114,9 @@ class ShapeLayer(shapeFile: SHP_File){
         private set
     @ExperimentalUnsignedTypes
     val zDens = hashMapOf<Int,UInt>()
-    private val shapeMask = mutableListOf<Boolean>()
-    private val shapeSet = mutableSetOf<Int>()
+    private val zDensSorted: List<Int>
+    private val zmask: MutableList<Boolean>
+    private var targets = mutableListOf<Pair<Int,Int>>()
 
     init{
         shapes = shapeFile.shpShapes.map{s -> ShapeZ(s)}
@@ -132,60 +133,103 @@ class ShapeLayer(shapeFile: SHP_File){
             var new = old + 1u
             zDens.put(mz, new)
         }
-        shapes.map{ shapeMask.add(false) }
+        zDensSorted = zDens.keys.sorted()
+        shapes = shapes.sortedBy{ it.meanZ() }
+        zmask = shapes.map{ false }.toMutableList()
+        selectInitLines()
     }
 
     fun draw(canvas: Canvas, type: LayerType, topleft: p3, botright: p3, width: Int, height: Int){
         if(shapes.isEmpty()) return
-        var minz = Int.MAX_VALUE
-        var maxz = Int.MIN_VALUE
-        val zs = 14
-        shapeSet.clear()
-        shapes.forEachIndexed(){
-            i, shape ->
-            val ok = aabbIntersect(shape.bmin,shape.bmax,topleft,botright)
-            if(ok){
-                val mz = shape.meanZ()
-                minz = minOf(minz, mz)
-                maxz = maxOf(maxz, mz)
-                shapeMask[i] = true
-                if(!shapeSet.contains(mz)){
-                    shapeSet.add(mz)
-                }
-            }else shapeMask[i] = false
-        }
-        val zdiff = maxz - minz
-        val zIndices = mutableListOf<Int>()
-        for(zi in 0..zs)
-            zIndices.add(minz + (zdiff.toDouble() * (1.0/zi.toDouble())).toInt())
-        val zLevels = zIndices.map{ Int.MAX_VALUE }.toMutableList()
-        val zDeltas = zLevels.map{ Int.MAX_VALUE }.toMutableList()
-        zIndices.forEachIndexed{
-            i, zi ->
-            for(shape in shapes){
-                val mz = shape.meanZ()
-                val delta = (mz - zi).absoluteValue
-                if(zDeltas[i] > delta){
-                    zDeltas[i] = delta
-                    zLevels[i] = mz
-                }
+        maskShapesBB(topleft, botright, false)
+        maskShapesZ(true)
+        val (minz,maxz) = minMaxZ()
+        Log.d("ShapeMap", "mmz: $minz - $maxz")
+        targets = targets.filter { (z,_) -> z in minz..maxz }.toMutableList()
+        var toAdd = zs.toInt() - targets.size
+        if(toAdd > 0){
+            Log.d("ShapeMap", "to add: $toAdd")
+            val deltas = mutableListOf<Triple<Int,Int,Int>>()
+            for(i in 0 until targets.size - 1){
+                val (az, ai) = targets[i]
+                val (bz, bi) = targets[i + 1]
+                val delta = bz - az
+                deltas.add(Triple(delta, ai, bi))
             }
+            val deltasSorted = deltas.sortedBy{ (t,_,_) -> t }.reversed()
+            var sortedIndex = 0
+            while(toAdd > 0 && sortedIndex < deltasSorted.size){
+                val a = deltasSorted[sortedIndex].second
+                val b = deltasSorted[sortedIndex].third
+                val i = (a + b) / 2
+                val z = zDensSorted[i]
+                targets.add(Pair(z, i))
+                toAdd--
+                sortedIndex++
+            }
+            targets.sortBy{ (z,i) -> z}
         }
-        shapes.forEachIndexed{
-            i, shape ->
-            if(!zLevels.contains(shape.meanZ()))
-                shapeMask[i] = false
-        }
-
+        maskShapesZ(true)
+        maskShapesBB(topleft, botright, true)
         var shapeCount = 0
-        shapes.forEachIndexed(){
-            i, shape ->
-            if(shapeMask[i]){
-                shape.draw(canvas, type, topleft, botright, width, height)
-                shapeCount++
-            }
+        for(i in shapes.indices){
+            if(!zmask[i]) continue
+            val shape = shapes[i]
+            shape.draw(canvas, type, topleft, botright, width, height)
+            shapeCount++
         }
         Log.d("ShapeMap", "Shapes drawn: $shapeCount / ${shapes.size}")
+    }
+
+    fun minMaxZ(): Pair<Int,Int>{
+        val minz = shapes.foldIndexed(Int.MAX_VALUE, {
+            i, z, s ->
+            if(zmask[i]) minOf(z, s.meanZ())
+            else z
+        })
+        val maxz = shapes.foldIndexed(Int.MIN_VALUE, {
+            i, z, s ->
+            if(zmask[i]) maxOf(z, s.meanZ())
+            else z
+        })
+        return Pair(minz,maxz)
+    }
+
+    private fun selectInitLines(){
+        val step = zDensSorted.size / zs.toInt()
+        for(i in 0..zs.toInt()){
+            val stepi = step * i
+            targets.add(Pair(zDensSorted[stepi], stepi))
+        }
+    }
+
+    private fun maskShapesZ(secondMask: Boolean){
+        val zSet = targets.map{ (z,_) -> z}.toSet()
+        for(i in shapes.indices){
+            if(secondMask)
+                if(!zmask[i])
+                    continue
+            val shape = shapes[i]
+            if(!zSet.contains(shape.meanZ())){
+                zmask[i] = false
+                continue
+            }
+            zmask[i] = true
+        }
+    }
+
+    private fun maskShapesBB(tl: p3, br: p3, secondMask: Boolean){
+        for(i in shapes.indices){
+            if(secondMask)
+                if(!zmask[i])
+                    continue
+            val shape = shapes[i]
+            if(!aabbIntersect(shape.bmin,shape.bmax,tl,br)) {
+                zmask[i] = false
+                continue
+            }
+            zmask[i] = true
+        }
     }
 }
 
