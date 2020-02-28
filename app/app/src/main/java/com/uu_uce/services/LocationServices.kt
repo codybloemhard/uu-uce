@@ -8,12 +8,13 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import androidx.core.content.ContextCompat.checkSelfPermission
 import kotlin.math.*
 
 enum class LocationPollStartResult{
-    ALREAD_LIVE,
+    ALREADY_LIVE,
     LOCATION_UNAVAILABLE,
     PERMISSIONS_DENIED,
     GPS_ONLY,
@@ -22,7 +23,7 @@ enum class LocationPollStartResult{
 
     override fun toString(): String {
         return when(this){
-            ALREAD_LIVE -> "Location already started!"
+            ALREADY_LIVE -> "Location already started!"
             LOCATION_UNAVAILABLE -> "Location not available!"
             PERMISSIONS_DENIED -> "Permissions denied!"
             GPS_ONLY -> "Location started using GPS!"
@@ -109,6 +110,7 @@ class LocationServices{
     }
 
     private var networkRunning = false
+    private var networkKilled = false
     /*
     Will start polling the location.
     context: the activity that uses this.
@@ -127,12 +129,13 @@ class LocationServices{
         //Check if the network is running, might not be the best way to do this.
         if(networkRunning) {
             Log.d("LocationServices", "LocationNetwork already running")
-            return LocationPollStartResult.ALREAD_LIVE
+            return LocationPollStartResult.ALREADY_LIVE
         }
 
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val hasGps = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
         val hasNetwork = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+        var networkProvider : String? = null
 
         if (!hasGps && !hasNetwork)
             return LocationPollStartResult.LOCATION_UNAVAILABLE
@@ -154,15 +157,14 @@ class LocationServices{
         val locationListener = object : LocationListener {
             override fun onLocationChanged(location: Location?) {
                 if (location != null) {
-
                     action(Pair(location.latitude, location.longitude))
                     Log.d(
                         "LocationServices",
-                        " Network Latitude : " + location.latitude
+                        "Latitude : " + location.latitude
                     )
                     Log.d(
                         "LocationServices",
-                        " Network Longitude : " + location.longitude
+                        "Longitude : " + location.longitude
                     )
                 }
             }
@@ -172,27 +174,68 @@ class LocationServices{
                 status: Int,
                 extras: Bundle?
             ) {
-                Log.d("LocationService", "locationListener: onStatusChanged: No handling logic!")
+                Log.d("LocationServices", "$provider new status : $status")
             }
 
             override fun onProviderEnabled(provider: String?) {
-                Log.d("LocationService", "locationListener: onProviderEnabled: No handling logic!")
+                Log.d("LocationServices", "$provider now enabled")
+                if(!networkRunning && !networkKilled){
+                    Log.d("LocationServices", "Restarting network")
+                    startPollThread(context, pollTimeMs, minDist, action)
+                }
             }
 
             override fun onProviderDisabled(provider: String?) {
-                Log.d("LocationService", "locationListener: onProviderDisabled: No handling logic!")
+                Log.d("LocationServices", "$provider now disabled")
+                if(networkProvider == provider){
+                    Log.d("LocationServices", "Active provider disabled, restarting network")
+                    networkRunning = false
+                    startPollThread(context, pollTimeMs, minDist, action)
+                }
             }
         }
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, pollTimeMs, minDist, locationListener)
-        action(Pair(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).latitude, locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).longitude))
+        locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, locationListener, Looper.myLooper())
+        val locationGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
 
-        networkRunning = true
-        Log.d("LocationServices", "Started network")
-        if(hasGps && hasNetwork)
+        locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, locationListener, Looper.myLooper())
+        val locationNetwork = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+
+        /*
+        Will call requestLocationUpdates with specified provider and start by entering the result of
+        lastKnownLocation into action.
+        provider: the type of location you want to use.
+         */
+        fun startLocUpdates(provider : String){
+            locationManager.requestLocationUpdates(provider, pollTimeMs, minDist, locationListener)
+            if(locationManager.getLastKnownLocation(provider) != null)
+                action(Pair(locationManager.getLastKnownLocation(provider).latitude, locationManager.getLastKnownLocation(provider).longitude))
+            networkRunning = true
+            networkProvider = provider
+        }
+
+        if(locationGps != null && locationNetwork != null && hasGps && hasNetwork){
+            if(locationGps.accuracy > locationNetwork.accuracy){
+                Log.d("LocationServices", "Using network location")
+                startLocUpdates(LocationManager.NETWORK_PROVIDER)
+            }else{
+                Log.d("LocationServices", "Using gps location")
+                startLocUpdates(LocationManager.GPS_PROVIDER)
+            }
             return LocationPollStartResult.HYBRID
-        if(hasGps)
+        }
+        else if(hasGps){
+            Log.d("LocationServices", "Defaulting to gps location")
+            startLocUpdates(LocationManager.GPS_PROVIDER)
             return LocationPollStartResult.GPS_ONLY
-        return LocationPollStartResult.NETWORK_ONLY
+        }
+        else if(hasNetwork){
+            Log.d("LocationServices", "Gps unavailable, using network location")
+            startLocUpdates(LocationManager.GPS_PROVIDER)
+            return LocationPollStartResult.NETWORK_ONLY
+        }
+        else{
+            return LocationPollStartResult.LOCATION_UNAVAILABLE
+        }
     }
 }

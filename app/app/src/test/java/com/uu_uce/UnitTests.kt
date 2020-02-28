@@ -4,7 +4,6 @@ import com.uu_uce.services.degreeToUTM
 import com.uu_uce.services.latToUTMLetter
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import kotlin.math.absoluteValue
 
 class UnitTests {
     private fun uglyLatToLetter(lat: Double): Char{
