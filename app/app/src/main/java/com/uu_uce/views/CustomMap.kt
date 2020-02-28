@@ -3,6 +3,7 @@ package com.uu_uce.views
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.util.Log
@@ -45,7 +46,9 @@ class CustomMap : View {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val timeDraw = measureTimeMillis {
+            canvas.drawColor(Color.rgb(234, 243, 245))
             smap.draw(canvas, width, height)
+
         }
         Log.i("CustomMap", "Draw: $timeDraw")
         invalidate()
