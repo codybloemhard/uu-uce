@@ -4,7 +4,6 @@ import android.os.Bundle
 import com.uu_uce.ui.TouchParent
 
 class MainActivity : TouchParent() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
