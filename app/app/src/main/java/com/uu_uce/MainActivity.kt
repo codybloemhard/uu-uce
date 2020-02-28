@@ -6,8 +6,6 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
-import com.uu_uce.GeoMap
-import com.uu_uce.R
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.getPermissions
 import com.uu_uce.ui.FlingDir
