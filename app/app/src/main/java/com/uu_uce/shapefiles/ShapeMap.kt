@@ -9,10 +9,12 @@ import diewald_shapeFile.files.shp.shapeTypes.ShpPoint
 import diewald_shapeFile.files.shp.shapeTypes.ShpPolyLine
 import diewald_shapeFile.files.shp.shapeTypes.ShpPolygon
 import diewald_shapeFile.files.shp.shapeTypes.ShpShape
+import kotlin.math.log
 import kotlin.system.measureTimeMillis
 
 typealias p3 = Triple<Double,Double,Double>
 val p3Zero = Triple(0.0,0.0,0.0)
+val p3Max = Triple(Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE)
 
 fun mergeBBs(mins: List<p3>,maxs: List<p3>): Pair<p3,p3>{
     var bmin = mutableListOf(Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE)
@@ -58,8 +60,9 @@ class ShapeMap{
     private var layers = mutableListOf<Pair<LayerType,ShapeLayer>>()
     private var bmin = p3Zero
     private var bmax = p3Zero
-    @ExperimentalUnsignedTypes
-    val zDens = hashMapOf<Int,UInt>()
+    val zDens = hashMapOf<Int,Int>()
+    val zs = 10
+    var zoomLevel = 5
 
     private var zoom = 999.0
     private var zoomVel = 0.01
@@ -75,7 +78,7 @@ class ShapeMap{
 
     fun addLayer(type: LayerType, shpFile: SHP_File){
         val timeSave = measureTimeMillis {
-            layers.add(Pair(type,ShapeLayer(shpFile, 20u)))
+            layers.add(Pair(type,ShapeLayer(shpFile, zs)))
         }
         Log.i("ShapeMap", "Save: $timeSave")
         val timeBB = measureTimeMillis {
@@ -91,8 +94,8 @@ class ShapeMap{
                 val lDens = l.second.zDens
                 lDens.keys.map {
                     key ->
-                    val old = zDens[key] ?: 0u
-                    val local = lDens[key] ?: 0u
+                    val old = zDens[key] ?: 0
+                    val local = lDens[key] ?: 0
                     zDens.put(key, old + local)
                 }
             }
@@ -109,14 +112,13 @@ class ShapeMap{
         val waspect = width.toDouble() / height.toDouble()
         setZoom(waspect)
         val viewport = zoomXyMidAabb(bmin,bmax,zoom, waspect)
-        for(layer in layers) layer.second.draw(canvas, layer.first, viewport.first, viewport.second, width, height)
+        for(layer in layers) layer.second.draw(canvas, layer.first, viewport.first, viewport.second, width, height, zoomLevel)
         drawDeviceLocation(coordToScreen(Pair(314000.0, 4675000.0), viewport.first, viewport.second, width, height), canvas, deviceLocPaint, deviceLocEdgePaint, 15F, 4F)
     }
 
     private fun setZoom(waspect: Double){
         if(zoom == 999.0) {
             zoom = 1.0 / waspect
-            return
         }
         if(zoom < 0.01 && zoomDir > 0.0)
             zoomDir = -1.0
@@ -124,195 +126,104 @@ class ShapeMap{
             zoomDir = 1.0
 
         zoom *= (1.0 - (zoomVel * zoomDir))
+        zoomLevel = maxOf(0,minOf(zs-1, zs - ((zoom-0.1)/(1.0/waspect-0.1) * zs).toInt()))
     }
 }
 
-class ShapeLayer(shapeFile: SHP_File, private val zs: UInt){
-    private var shapes: List<ShapeZ>
+class ShapeLayer(shapeFile: SHP_File, private val zs: Int){
+    private var allShapes: List<ShapeZ>
+    private var zoomShapes: List<List<ShapeZ>>
     var bmin = p3Zero
         private set
     var bmax = p3Zero
         private set
-    @ExperimentalUnsignedTypes
-    val zDens = hashMapOf<Int,UInt>()
+    val zDens = hashMapOf<Int,Int>()
     private val zDensSorted: List<Int>
-    private val zmask: MutableList<Boolean>
-    private var targets = mutableListOf<Pair<Int,Int>>()
-    private var oldMinZ = Int.MIN_VALUE
-    private var oldMaxZ = Int.MAX_VALUE
-    private val zIndices = hashMapOf<Int,Int>()
 
     init{
-        shapes = shapeFile.shpShapes.map{s -> ShapeZ(s)}
+        allShapes = shapeFile.shpShapes.map{ s -> ShapeZ(s)}
         val bminmax = mergeBBs(
-            shapes.map{s -> s.bmin},
-            shapes.map{s -> s.bmax})
+            allShapes.map{ s -> s.bmin},
+            allShapes.map{ s -> s.bmax})
         bmin = bminmax.first
         bmax = bminmax.second
         Log.i("ShapeLayer", "($bmin),($bmax)")
-        shapes.map{
+        allShapes.map{
             s ->
             val mz = s.meanZ()
-            val old = zDens[mz] ?: 0u
-            var new = old + 1u
+            val old = zDens[mz] ?: 0
+            var new = old + 1
             zDens.put(mz, new)
         }
         zDensSorted = zDens.keys.sorted()
-        shapes = shapes.sortedBy{ it.meanZ() }
-        zDensSorted.forEachIndexed {
-            i, z ->
-            zIndices[z] = i
+        allShapes = allShapes.sortedBy{ it.meanZ() }
+
+        //create zoom levels for shapes
+        var indices: MutableList<Int> = mutableListOf()
+        var nrHeights = 0
+        var curPow = log(zDensSorted.size.toDouble(), 2.0).toInt() + 1
+        var curStep = 0
+        var stepSize: Int = 1 shl curPow
+        zoomShapes = List(zs){i->
+            var totalHeights =
+                if(i == zs-1) zDensSorted.size
+                else ((i+1) * zDensSorted.size.toFloat() / zs).toInt()
+
+            while(nrHeights < totalHeights){
+                var index: Int = curStep * stepSize
+                if (index >= zDensSorted.size) {
+                    curPow--
+                    stepSize = 1 shl curPow
+                    curStep = 1
+                    continue
+                }
+                if(indices.contains(index))
+                    throw Exception("uh oh")
+
+                indices.add(index)
+                nrHeights++
+                curStep+=2
+            }
+
+            var shapes: MutableList<ShapeZ> = mutableListOf()
+            indices.sort()
+            if(indices.isNotEmpty()){
+                var a = 0
+                var b = 0
+                while(a < indices.size && b < allShapes.size){
+                    var shape = allShapes[b]
+                    var z = zDensSorted[indices[a]]
+                    when {
+                        shape.meanZ() == z -> {
+                            //shapes.add(ShapeZ((i+1).toDouble()/zs, allShapes[b]))
+                            shapes.add(ShapeZ((i+1).toDouble()/zs, allShapes[b]))
+                            b++
+                        }
+                        shape.meanZ() < z -> b++
+                        else -> a++
+                    }
+                }
+            }
+            shapes
         }
-        zmask = shapes.map{ false }.toMutableList()
-        selectInitLines()
-        maskShapesBB(bmin, bmax, false)
-        val (minz,maxz) = minMaxZ()
-        oldMinZ = minz
-        oldMaxZ = maxz
     }
 
-    fun draw(canvas: Canvas, type: LayerType, topleft: p3, botright: p3, width: Int, height: Int){
-        if(shapes.isEmpty()) return
-        if(targets.isEmpty()){
-            selectInitLines()
-            return
-        }
-        maskShapesBB(topleft, botright, false)
-        //maskShapesZ(true)
-        val (minz,maxz) = minMaxZ()
-        if(minz < oldMinZ || maxz > oldMaxZ){ // translate or zoom out, add relevant lines
-            val indexFirst = targets.first().second
-            val indexLast = targets.last().second
-            val indexLow = zIndices[minz] ?: 1
-            val indexUpper = zIndices[maxz] ?: (zDensSorted.size - 1)
-            val step = zDensSorted.size / zs.toInt()
-            var index = if(indexLow < indexFirst) indexLow
-            else Int.MAX_VALUE
-            while(index < indexFirst){
-                targets.add(Pair(zDensSorted[index], index))
-                index += step
-            }
-            index = if(indexUpper > indexLast) indexUpper
-            else Int.MIN_VALUE
-            while(index > indexLast){
-                targets.add(Pair(zDensSorted[index], index))
-                index -= step
-            }
-            targets.distinctBy { (z,_) -> z }
-            targets.sortBy{ (z,i) -> z}
-        }
-        targets = targets.filter { (z,_) -> z in minz..maxz }.toMutableList()
-        //Log.d("ShapeMap", "mmz: $minz - $maxz")
-        var toAdd = zs.toInt() - targets.size
-        if(toAdd > 0){ // add more lines
-            Log.d("ShapeMap", "to add: $toAdd")
-            val deltas = mutableListOf<Triple<Int,Int,Int>>()
-            for(i in 0 until targets.size - 1){
-                val (az, ai) = targets[i]
-                val (bz, bi) = targets[i + 1]
-                val delta = bz - az
-                deltas.add(Triple(delta, ai, bi))
-            }
-            val deltasSorted = deltas.sortedBy{ (t,_,_) -> t }.reversed()
-            var sortedIndex = 0
-            while(toAdd > 0 && sortedIndex < deltasSorted.size){
-                val a = deltasSorted[sortedIndex].second
-                val b = deltasSorted[sortedIndex].third
-                val i = (a + b) / 2
-                val z = zDensSorted[i]
-                targets.add(Pair(z, i))
-                toAdd--
-                sortedIndex++
-            }
-            targets.distinctBy { (z,_) -> z }
-            targets.sortBy{ (z,i) -> z}
-        }else if(toAdd < 0){ // remove lines
-            //remove least important lines, doesnt work?
-            var deltas = mutableListOf<Pair<Int,Int>>()
-            for(i in 1 until targets.size - 1){
-                val (az, _) = targets[i]
-                val (bz, _) = targets[i + 1]
-                val delta = bz - az
-                deltas.add(Pair(delta, i))
-            }
-            deltas.sortBy { (d,_) -> d }
-            val tresh = minOf(deltas.size,-toAdd)
-            var newTargets = mutableListOf<Pair<Int,Int>>()
-            deltas.forEachIndexed(){
-                j, (_,i) ->
-                if(j >= tresh)
-                    newTargets.add(targets[i])
-            }
-            targets = newTargets
-        }
+    fun draw(canvas: Canvas, type: LayerType, topleft: p3, botright: p3, width: Int, height: Int, zoomLevel: Int){
+        if(allShapes.isEmpty()) return
 
-        maskShapesZ(true)
-        maskShapesBB(topleft, botright, true)
         var shapeCount = 0
-        for(i in shapes.indices){
-            if(!zmask[i]) continue
-            val shape = shapes[i]
-            shape.draw(canvas, type, topleft, botright, width, height)
-            shapeCount++
-        }
-        oldMinZ = minz
-        oldMaxZ = maxz
-        Log.d("ShapeMap", "Shapes drawn: $shapeCount / ${shapes.size}")
-    }
-
-    fun minMaxZ(): Pair<Int,Int>{
-        val minz = shapes.foldIndexed(Int.MAX_VALUE, {
-            i, z, s ->
-            if(zmask[i]) minOf(z, s.meanZ())
-            else z
-        })
-        val maxz = shapes.foldIndexed(Int.MIN_VALUE, {
-            i, z, s ->
-            if(zmask[i]) maxOf(z, s.meanZ())
-            else z
-        })
-        return Pair(minz,maxz)
-    }
-
-    private fun selectInitLines(){
-        val step = zDensSorted.size / zs.toInt()
-        for(i in 0..zs.toInt()){
-            val stepi = step * i
-            targets.add(Pair(zDensSorted[stepi], stepi))
-        }
-    }
-
-    private fun maskShapesZ(secondMask: Boolean){
-        val zSet = targets.map{ (z,_) -> z}.toSet()
-        for(i in shapes.indices){
-            if(secondMask)
-                if(!zmask[i])
-                    continue
-            val shape = shapes[i]
-            if(!zSet.contains(shape.meanZ())){
-                zmask[i] = false
-                continue
+        for(i in zoomShapes[zoomLevel].indices){
+            val shape = zoomShapes[zoomLevel][i]
+            if(aabbIntersect(shape.bmin,shape.bmax,topleft,botright)) {
+                shape.draw(canvas, type, topleft, botright, width, height)
+                shapeCount++
             }
-            zmask[i] = true
         }
-    }
-
-    private fun maskShapesBB(tl: p3, br: p3, secondMask: Boolean){
-        for(i in shapes.indices){
-            if(secondMask)
-                if(!zmask[i])
-                    continue
-            val shape = shapes[i]
-            if(!aabbIntersect(shape.bmin,shape.bmax,tl,br)) {
-                zmask[i] = false
-                continue
-            }
-            zmask[i] = true
-        }
+        Log.d("ShapeMap", "Shapes drawn: $shapeCount / ${allShapes.size}")
     }
 }
 
-class ShapeZ(shape: ShpShape) {
+class ShapeZ {
     private var type: ShapeType
     private var points: List<Triple<Double, Double, Double>>
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -321,7 +232,7 @@ class ShapeZ(shape: ShpShape) {
     var bmax = p3Zero
         private set
 
-    init {
+    constructor(shape: ShpShape) {
         when (shape.shapeType) {
             ShpShape.Type.PolygonZ -> {
                 type = ShapeType.Polygon
@@ -348,6 +259,27 @@ class ShapeZ(shape: ShpShape) {
                 points = listOf()
             }
         }
+    }
+
+    constructor(zoomPercentage: Double, baseShape: ShapeZ){
+        type = baseShape.type
+        var mutablePoints = mutableListOf(baseShape.points.first())
+        for(i in 1 until (baseShape.points.size * zoomPercentage).toInt()){
+            mutablePoints.add(baseShape.points[(i/zoomPercentage).toInt()])
+        }
+        mutablePoints.add(baseShape.points.last())
+        points = mutablePoints
+        if(points.size > 2)
+            Log.d("","")
+
+        var minx = points.minBy{it.first}!!.first
+        var miny = points.minBy{it.second}!!.second
+        var minz = points.minBy{it.third}!!.third
+        var maxx = points.maxBy{it.first}!!.first
+        var maxy = points.maxBy{it.second}!!.second
+        var maxz = points.maxBy{it.third}!!.third
+        bmin = p3(minx,miny,minz)
+        bmax = p3(maxx,maxy,maxz)
     }
 
     fun draw(
