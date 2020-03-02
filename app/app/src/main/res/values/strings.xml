@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Uce</string>
+    <string name="app_name">UCE</string>
     <string name="title_activity_geo_map">geo_map</string>
     <string name="show_infographic">Pin</string>
     <string name="close">Close</string>
