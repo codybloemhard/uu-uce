@@ -1,5 +1,6 @@
 package com.uu_uce
 
+import com.uu_uce.shapefiles.aabbIntersect
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -12,5 +13,21 @@ class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
         assertEquals(4, 2 + 2)
+    }
+
+    @Test
+    fun test_aabb_inter(){
+        assertEquals(aabbIntersect(
+            Triple(1.0, 1.0, 0.0),
+            Triple(2.0, 2.0, 0.0),
+            Triple(2.1, 0.0, 0.0),
+            Triple(3.0, 9.0, 0.0)
+        ), false)
+        assertEquals(aabbIntersect(
+            Triple(1.0, 1.0, 0.0),
+            Triple(2.0, 2.0, 0.0),
+            Triple(2.0, 0.0, 0.0),
+            Triple(3.0, 9.0, 0.0)
+        ), true)
     }
 }
