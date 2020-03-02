@@ -1,5 +1,7 @@
 sudo usermod -aG plugdev cody
 lsusb
+# or write with vim the line between '', matching the codes in lsusb.
 sudo 'SUBSYSTEM=="usb", ATTR{idVendor}=="2e04", ATTR{idProduct}=="c026", MODE="0666", GROUP="plugdev"' >> /etc/udev/rules.d/51-android.rules
+# reboot
 adb kill-server
 adb devices
