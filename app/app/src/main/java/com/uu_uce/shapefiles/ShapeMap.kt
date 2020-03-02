@@ -44,18 +44,6 @@ fun aabbIntersect(amin: p3, amax: p3, bmin: p3, bmax: p3) : Boolean{
             )
 }
 
-fun zoomXyMidAabb(bmin: p3, bmax: p3, zoom: Double, waspect: Double): Pair<p3,p3>{
-    val w = bmax.first - bmin.first
-    val h = bmax.second - bmin.second
-    val xm = bmin.first + w / 2.0
-    val ym = bmin.second + h / 2.0
-    val woff = w * waspect / 2.0 * zoom
-    val hoff = h / 2.0 * zoom
-    val nmin = Triple(xm - woff, ym - hoff, Double.MIN_VALUE)
-    val nmax = Triple(xm + woff, ym + hoff, Double.MAX_VALUE)
-    return Pair(nmin, nmax)
-}
-
 class ShapeMap(private val nrOfLODs: Int){
     private var layers = mutableListOf<Pair<LayerType,ShapeLayer>>()
     private var bmin = p3Zero
@@ -70,6 +58,8 @@ class ShapeMap(private val nrOfLODs: Int){
     private val deviceLocPaint : Paint = Paint()
     private val deviceLocEdgePaint : Paint = Paint()
 
+    private lateinit var camera: Camera
+
     init{
         deviceLocPaint.color = Color.BLUE
         deviceLocEdgePaint.color = Color.WHITE
@@ -80,13 +70,6 @@ class ShapeMap(private val nrOfLODs: Int){
             layers.add(Pair(type,ShapeLayer(shpFile, nrOfLODs)))
         }
         Log.i("ShapeMap", "Save: $timeSave")
-        val timeBB = measureTimeMillis {
-            val bminmax = mergeBBs(
-                layers.map{l -> l.second.bmin},
-                layers.map{l -> l.second.bmax})
-            bmin = bminmax.first
-            bmax = bminmax.second
-        }
         val timeDens = measureTimeMillis {
             layers.map{
                 l ->
@@ -99,7 +82,6 @@ class ShapeMap(private val nrOfLODs: Int){
                 }
             }
         }
-        Log.i("ShapeMap", "Calc boundingbox: $timeBB")
         Log.i("ShapeMap", "Calc z density: $timeDens")
         Log.i("ShapeMap", "bb: ($bmin),($bmax)")
         zDens.keys.sorted().map{
@@ -107,25 +89,23 @@ class ShapeMap(private val nrOfLODs: Int){
         }
     }
 
-    fun draw(canvas: Canvas, width: Int, height: Int){
-        val waspect = width.toDouble() / height.toDouble()
-        setZoom(waspect)
-        val viewport = zoomXyMidAabb(bmin,bmax,zoom, waspect)
-        for(layer in layers) layer.second.draw(canvas, layer.first, viewport.first, viewport.second, width, height, zoomLevel)
-        drawDeviceLocation(coordToScreen(Pair(314000.0, 4675000.0), viewport.first, viewport.second, width, height), canvas, deviceLocPaint, deviceLocEdgePaint, 15F, 4F)
+    fun initialize(){
+        val bminmax = mergeBBs(
+            layers.map{l -> l.second.bmin},
+            layers.map{l -> l.second.bmax})
+        bmin = bminmax.first
+        bmax = bminmax.second
+        val mx = (bmin.first + bmax.first) / 2.0
+        val my = (bmin.second + bmax.second) / 2.0
+        camera = Camera(mx, my, 1.0, bmin, bmax)
     }
 
-    private fun setZoom(waspect: Double){
-        if(zoom == 999.0) {
-            zoom = 1.0 / waspect
-        }
-        if(zoom < 0.01 && zoomDir > 0.0)
-            zoomDir = -1.0
-        if(zoom > (1.0 / waspect) && zoomDir < 0.0)
-            zoomDir = 1.0
-
-        zoom *= (1.0 - (zoomVel * zoomDir))
-        zoomLevel = maxOf(0,minOf(nrOfLODs-1, nrOfLODs - 1 - ((zoom-0.01)/(1.0/waspect-0.01) * nrOfLODs).toInt()))
+    fun draw(canvas: Canvas, width: Int, height: Int){
+        val waspect = width.toDouble() / height
+        camera.setZoom(1.0 / waspect)
+        val viewport = camera.getViewport(waspect)
+        for(layer in layers) layer.second.draw(canvas, layer.first, viewport.first, viewport.second, width, height, zoomLevel)
+        drawDeviceLocation(coordToScreen(Pair(314000.0, 4675000.0), viewport.first, viewport.second, width, height), canvas, deviceLocPaint, deviceLocEdgePaint, 15F, 4F)
     }
 }
 

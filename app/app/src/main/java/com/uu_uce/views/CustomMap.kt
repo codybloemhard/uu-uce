@@ -34,6 +34,7 @@ class CustomMap : View {
         smap = ShapeMap(10)
         val timeParse = measureTimeMillis {
             smap.addLayer(LayerType.Height, file)
+            smap.initialize()
         }
         Log.i("CustomMap", "Parse file: $timeParse")
     }
