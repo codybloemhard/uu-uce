@@ -60,8 +60,8 @@ class ShapeMap{
     private var layers = mutableListOf<Pair<LayerType,ShapeLayer>>()
     private var bmin = p3Zero
     private var bmax = p3Zero
-    val zDens = hashMapOf<Int,Int>()
-    val zs = 10
+    private val zDens = hashMapOf<Int,Int>()
+    private val zs = 6
     var zoomLevel = 5
 
     private var zoom = 999.0
@@ -206,6 +206,17 @@ class ShapeLayer(shapeFile: SHP_File, private val zs: Int){
             }
             shapes
         }
+        zoomShapes.map{
+            ss -> ss.map{
+            s -> s.points.size
+        }
+        }
+        val npoints = zoomShapes.fold(0){
+            r0, ss -> r0 + ss.fold(0){
+            r1, s -> r1 + s.points.size
+        }
+        }
+        Log.d("Bruh","Bruh")
     }
 
     fun draw(canvas: Canvas, type: LayerType, topleft: p3, botright: p3, width: Int, height: Int, zoomLevel: Int){
@@ -225,7 +236,7 @@ class ShapeLayer(shapeFile: SHP_File, private val zs: Int){
 
 class ShapeZ {
     private var type: ShapeType
-    private var points: List<Triple<Double, Double, Double>>
+    var points: List<Triple<Double, Double, Double>>
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     var bmin = p3Zero
         private set
