@@ -98,29 +98,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/popup_window_title" />
 
-            <ImageView
-                android:id="@+id/popup_window_infographic"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="10dp"
-                android:gravity="center"
-                app:layout_constraintBottom_toTopOf="@+id/popup_window_close_button"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/popup_window_title"
-                android:contentDescription="TODO" />
 
-            <VideoView
-                android:id="@+id/popup_window_video"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginStart="10dp"
-                android:gravity="center"
-                app:layout_constraintBottom_toTopOf="@+id/popup_window_close_button"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/popup_window_title"
-                android:contentDescription="TODO"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
