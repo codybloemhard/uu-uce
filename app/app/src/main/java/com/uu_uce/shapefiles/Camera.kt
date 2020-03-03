@@ -15,7 +15,7 @@ fun lerp(a: Double, b: Double, t: Double): Double{
 }
 
 enum class AnimType{
-    NONE, TRANS
+    NONE, TRANS, OUT
 }
 
 class Camera(
@@ -100,7 +100,12 @@ class Camera(
 
     fun zoomOutMax(){
         if(isBusy()) return
-        startAnimation(Triple(mx,my,maxZoom), 500.0)
+        animBegin = Triple(x, y, zoom)
+        animTarget = Triple(mx,my,maxZoom)
+        animStartT = System.currentTimeMillis().toDouble()
+        animDuration = 500.0
+        animType = AnimType.OUT
+        animT = 0.0
     }
 
     fun startAnimation(target: p3, durationMs: Double){
@@ -119,6 +124,26 @@ class Camera(
 
     fun update(){
         if(!isBusy()) return
+        when(animType){
+            AnimType.NONE -> {}
+            AnimType.TRANS -> updateTrans()
+            AnimType.OUT -> updateOut()
+        }
+    }
+
+    private fun updateOut(){
+        val ct = System.currentTimeMillis().toDouble()
+        val t = ((ct - animStartT) / animDuration).coerceIn(0.0, 1.0)
+        x = animBegin.first + (animTarget.first - animBegin.first) * t
+        y = animBegin.second + (animTarget.second - animBegin.second) * t
+        zoom = animBegin.third + (animTarget.third - animBegin.third) * t
+        if(ct > animStartT + animDuration){
+            animType = AnimType.NONE
+            return
+        }
+    }
+
+    private fun updateTrans(){
         val ct = System.currentTimeMillis().toDouble()
         val t = ((ct - animStartT) / animDuration).coerceIn(0.0, 1.0)
         val distFraction = distXy(animBegin, animTarget) / maxDistXy
