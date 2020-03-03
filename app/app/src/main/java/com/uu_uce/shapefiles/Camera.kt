@@ -98,9 +98,9 @@ class Camera(
         zoom = zoom.coerceIn(minZoom, maxZoom)
     }
 
-    fun zoomOutMax(){
+    fun zoomOutMax(duration: Double){
         if(isBusy()) return
-        startAnimation(Triple(mx,my,maxZoom), 500.0)
+        startAnimation(Triple(mx,my,maxZoom), duration)
     }
 
     fun startAnimation(target: p3, durationMs: Double){
