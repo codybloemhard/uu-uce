@@ -21,7 +21,7 @@ class Flinger(
     }
 
     override fun getOnTouchEvent(event: MotionEvent?) {
-        gestureDetector!!.onTouchEvent(event)
+        gestureDetector?.onTouchEvent(event)
     }
 
     override fun onFling(

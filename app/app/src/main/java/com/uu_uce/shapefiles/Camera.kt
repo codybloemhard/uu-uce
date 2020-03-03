@@ -10,19 +10,37 @@ class Camera(
     var maxZoom = 1.0
     var minZoom = 0.0000000001
 
+    private var lastWoff = 0.0
+    private var lastHoff = 0.0
+
     fun getViewport(waspect: Double): Pair<p3,p3>{
         val w = viewMax.first - viewMin.first
         val h = viewMax.second - viewMin.second
         val woff = w * waspect / 2.0 * zoom
         val hoff = h / 2.0 * zoom
+        lastWoff = woff
+        lastHoff = hoff
         val nmin = Triple(x - woff, y - hoff, Double.MIN_VALUE)
         val nmax = Triple(x + woff, y + hoff, Double.MAX_VALUE)
         return Pair(nmin, nmax)
     }
 
     fun setPos(newX: Double, newY: Double){
-        x = newX.coerceIn(viewMin.first, viewMax.first)
-        y = newY.coerceIn(viewMin.second, viewMax.second)
+        val minx = viewMin.first + lastWoff
+        val maxx = viewMax.first - lastWoff
+        val miny = viewMin.second + lastHoff
+        val maxy = viewMax.second - lastHoff
+        if(minx >= maxx || miny >= maxy){
+            x = (viewMin.first + viewMax.first) / 2.0
+            y = (viewMin.second + viewMax.second) / 2.0
+        }else{
+            x = newX.coerceIn(minx, maxx)
+            y = newY.coerceIn(miny, maxy)
+        }
+    }
+
+    fun moveView(dx: Double, dy: Double){
+        setPos(x + (dx * lastWoff), y + (dy * lastHoff))
     }
 
     fun getZoom(): Double{

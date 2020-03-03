@@ -1,10 +1,8 @@
 package com.uu_uce.ui
 
-import android.util.Log
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.GestureDetectorCompat
 
 
 class Zoomer(
@@ -24,10 +22,6 @@ class Zoomer(
     override fun onScaleBegin(detector: ScaleGestureDetector?): Boolean {
         super.onScaleBegin(detector)
         return true
-    }
-
-    override fun onScaleEnd(detector: ScaleGestureDetector?) {
-        super.onScaleEnd(detector)
     }
 
     override fun onScale(detector: ScaleGestureDetector?): Boolean {

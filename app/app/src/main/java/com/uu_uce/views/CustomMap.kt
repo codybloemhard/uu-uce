@@ -55,6 +55,11 @@ class CustomMap : View {
     fun zoomMap(zoom: Double){
         val deltaOne = 1.0 - zoom.coerceIn(0.5, 1.5)
         camera?.zoomIn(1.0 + deltaOne)
-        Log.d("CustomMap", "zoom: $zoom")
+    }
+
+    fun moveMap(dxpx: Double, dypx: Double){
+        val dx = dxpx / width
+        val dy = dypx / height
+        camera?.moveView(dx * 2, dy * -2)
     }
 }
