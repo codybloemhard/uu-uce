@@ -10,7 +10,6 @@ class MainActivity : TouchParent() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val intent = Intent(this, GeoMap::class.java)
-        getPermissions(this, this, LocationServices.permissionsNeeded)
         startActivity(intent)
     }
 }

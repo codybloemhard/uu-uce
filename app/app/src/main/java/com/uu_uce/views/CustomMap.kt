@@ -7,6 +7,8 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import androidx.core.content.res.ResourcesCompat
+import com.uu_uce.R
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.services.degreeToUTM
@@ -44,7 +46,9 @@ class CustomMap : View {
             1,
             PinType.TEXT,
             "Test",
-            PinTextContent()
+            PinTextContent(),
+            60,
+            ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
         )
 
     init{
@@ -83,7 +87,8 @@ class CustomMap : View {
                 deviceLocEdgePaint,
                 15F,
                 4F)
-            pin.draw(viewport, this, canvas, context, 75)
+            pin.draw(viewport, this, canvas)
+            
         }
         Log.i("CustomMap", "Draw: $timeDraw")
         invalidate()
