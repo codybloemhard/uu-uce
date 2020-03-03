@@ -7,6 +7,9 @@ class Camera(
     private val viewMin: p3,
     private val viewMax: p3){
 
+    var maxZoom = 1.0
+    var minZoom = 0.0000000001
+
     fun getViewport(waspect: Double): Pair<p3,p3>{
         val w = viewMax.first - viewMin.first
         val h = viewMax.second - viewMin.second
@@ -22,11 +25,16 @@ class Camera(
         y = newY.coerceIn(viewMin.second, viewMax.second)
     }
 
+    fun getZoom(): Double{
+        return zoom
+    }
+
     fun setZoom(newZoom: Double){
-        zoom = maxOf(0.0, newZoom)
+        zoom = newZoom.coerceIn(minZoom, maxZoom)
     }
 
     fun zoomIn(factor: Double){
         zoom *= factor
+        zoom = zoom.coerceIn(minZoom, maxZoom)
     }
 }

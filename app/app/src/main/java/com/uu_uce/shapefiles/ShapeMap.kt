@@ -51,10 +51,6 @@ class ShapeMap(private val nrOfLODs: Int){
     private val zDens = hashMapOf<Int,Int>()
     private var zoomLevel = 5
 
-    private var zoom = 999.0
-    private var zoomVel = 0.01
-    private var zoomDir = 1.0
-
     private val deviceLocPaint : Paint = Paint()
     private val deviceLocEdgePaint : Paint = Paint()
 
@@ -105,9 +101,12 @@ class ShapeMap(private val nrOfLODs: Int){
     fun draw(canvas: Canvas, width: Int, height: Int){
         val waspect = width.toDouble() / height
         if(first){
-            camera.setZoom(1.0 / waspect)
+            val z = 1.0 / waspect
+            camera.maxZoom = z
+            camera.setZoom(z)
             first = false
         }
+        zoomLevel = maxOf(0,minOf(nrOfLODs-1, nrOfLODs - 1 - ((camera.getZoom()-0.01)/(1.0/waspect-0.01) * nrOfLODs).toInt()))
         val viewport = camera.getViewport(waspect)
         for(layer in layers) layer.second.draw(canvas, layer.first, viewport.first, viewport.second, width, height, zoomLevel)
         drawDeviceLocation(coordToScreen(Pair(314000.0, 4675000.0), viewport.first, viewport.second, width, height), canvas, deviceLocPaint, deviceLocEdgePaint, 15F, 4F)
