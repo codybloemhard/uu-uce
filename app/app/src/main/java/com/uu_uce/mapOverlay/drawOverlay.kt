@@ -1,4 +1,4 @@
-package mapOverlay
+package com.uu_uce.mapOverlay
 
 import android.view.View
 import com.uu_uce.services.UTMCoordinate

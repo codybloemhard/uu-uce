@@ -10,16 +10,15 @@ import android.view.View
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.services.degreeToUTM
-import com.uu_uce.services.getPermissions
 import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.ShapeMap
 import com.uu_uce.shapefiles.p3
 import diewald_shapeFile.files.shp.SHP_File
-import kotlinx.android.synthetic.main.activity_main.*
-import mapOverlay.coordToScreen
-import mapOverlay.drawDeviceLocation
-import pins.Pin
-import pins.PinTextContent
+import com.uu_uce.mapOverlay.coordToScreen
+import com.uu_uce.mapOverlay.drawDeviceLocation
+import com.uu_uce.pins.Pin
+import com.uu_uce.pins.PinTextContent
+import com.uu_uce.pins.PinType
 import java.io.File
 import kotlin.system.measureTimeMillis
 
@@ -30,14 +29,23 @@ class CustomMap : View {
 
     private var smap : ShapeMap
     private var loc : UTMCoordinate = UTMCoordinate(31, 'N', 0.0, 0.0)
-    private var viewport = Pair(p3(308968.83, 4667733.3, 540.0), p3(319547.5, 4682999.6, 1370.0))
+    private var viewport = Pair(
+        p3(308968.83, 4667733.3, 540.0),
+        p3(319547.5, 4682999.6, 1370.0))
 
     private val locationServices = LocationServices()
 
     private val deviceLocPaint : Paint = Paint()
     private val deviceLocEdgePaint : Paint = Paint()
 
-    private val pin : Pin = Pin(UTMCoordinate(31, 'N', 0.0, 0.0), 1, 1, "Test", PinTextContent())
+    private val pin : Pin =
+        Pin(
+            UTMCoordinate(31, 'N', 314968.0, 4677733.6),
+            1,
+            PinType.TEXT,
+            "Test",
+            PinTextContent()
+        )
 
     init{
         Log.d("CustomMap", "Init")
@@ -68,10 +76,16 @@ class CustomMap : View {
         val timeDraw = measureTimeMillis {
             canvas.drawColor(Color.rgb(234, 243, 245))
             smap.draw(canvas, width, height, context)
-            drawDeviceLocation(coordToScreen(loc, viewport, this), canvas, deviceLocPaint, deviceLocEdgePaint, 15F, 4F)
-            pin.draw(viewport, this, canvas, context, 15)
+            drawDeviceLocation(
+                coordToScreen(loc, viewport, this),
+                canvas,
+                deviceLocPaint,
+                deviceLocEdgePaint,
+                15F,
+                4F)
+            pin.draw(viewport, this, canvas, context, 75)
         }
-        //Log.i("CustomMap", "Draw: $timeDraw")
+        Log.i("CustomMap", "Draw: $timeDraw")
         invalidate()
     }
 

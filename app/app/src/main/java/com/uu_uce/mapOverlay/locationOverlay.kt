@@ -1,4 +1,4 @@
-package mapOverlay
+package com.uu_uce.mapOverlay
 
 import android.graphics.Canvas
 import android.graphics.Paint

@@ -11,8 +11,8 @@ import diewald_shapeFile.files.shp.shapeTypes.ShpPoint
 import diewald_shapeFile.files.shp.shapeTypes.ShpPolyLine
 import diewald_shapeFile.files.shp.shapeTypes.ShpPolygon
 import diewald_shapeFile.files.shp.shapeTypes.ShpShape
-import pins.Pin
-import pins.PinTextContent
+import com.uu_uce.pins.Pin
+import com.uu_uce.pins.PinTextContent
 import kotlin.math.log
 import kotlin.math.pow
 import kotlin.system.measureTimeMillis

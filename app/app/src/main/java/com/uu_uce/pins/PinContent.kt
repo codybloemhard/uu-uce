@@ -1,4 +1,4 @@
-package pins
+package com.uu_uce.pins
 
 abstract class PinContent {
 
