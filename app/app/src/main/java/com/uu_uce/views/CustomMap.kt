@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import com.uu_uce.shapefiles.Camera
 import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.ShapeMap
 import diewald_shapeFile.files.shp.SHP_File
@@ -18,6 +19,7 @@ class CustomMap : View {
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private var smap : ShapeMap
+    private var camera: Camera? = null
 
     init{
         Log.d("CustomMap", "Init")
@@ -34,7 +36,7 @@ class CustomMap : View {
         smap = ShapeMap(10)
         val timeParse = measureTimeMillis {
             smap.addLayer(LayerType.Height, file)
-            smap.initialize()
+            camera = smap.initialize()
         }
         Log.i("CustomMap", "Parse file: $timeParse")
     }
@@ -48,5 +50,11 @@ class CustomMap : View {
         }
         Log.i("CustomMap", "Draw: $timeDraw")
         invalidate()
+    }
+
+    fun zoomMap(zoom: Double){
+        val deltaOne = 1.0 - zoom.coerceIn(0.5, 1.5)
+        camera?.zoomIn(1.0 + deltaOne)
+        Log.d("CustomMap", "zoom: $zoom")
     }
 }

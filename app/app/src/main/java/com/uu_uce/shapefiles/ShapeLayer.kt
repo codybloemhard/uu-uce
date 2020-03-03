@@ -102,7 +102,6 @@ class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
                 r1, s -> r1 + s.points.size
         }
         }
-        Log.d("Bruh","Bruh")
     }
 
     fun draw(canvas: Canvas, type: LayerType, topleft: p3, botright: p3, width: Int, height: Int, zoomLevel: Int){
