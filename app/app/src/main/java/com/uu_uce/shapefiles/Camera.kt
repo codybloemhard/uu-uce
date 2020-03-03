@@ -25,14 +25,18 @@ class Camera(
         return Pair(nmin, nmax)
     }
 
+    fun setPosCenter(){
+        x = (viewMin.first + viewMax.first) / 2.0
+        y = (viewMin.second + viewMax.second) / 2.0
+    }
+
     fun setPos(newX: Double, newY: Double){
         val minx = viewMin.first + lastWoff
         val maxx = viewMax.first - lastWoff
         val miny = viewMin.second + lastHoff
         val maxy = viewMax.second - lastHoff
         if(minx >= maxx || miny >= maxy){
-            x = (viewMin.first + viewMax.first) / 2.0
-            y = (viewMin.second + viewMax.second) / 2.0
+            setPosCenter()
         }else{
             x = newX.coerceIn(minx, maxx)
             y = newY.coerceIn(miny, maxy)
@@ -54,5 +58,10 @@ class Camera(
     fun zoomIn(factor: Double){
         zoom *= factor
         zoom = zoom.coerceIn(minZoom, maxZoom)
+    }
+
+    fun zoomOutMax(){
+        zoom = maxZoom
+        setPosCenter()
     }
 }

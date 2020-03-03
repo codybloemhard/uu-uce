@@ -62,4 +62,8 @@ class CustomMap : View {
         val dy = dypx / height
         camera?.moveView(dx * 2, dy * -2)
     }
+
+    fun zoomOutMax(){
+        camera?.zoomOutMax()
+    }
 }
