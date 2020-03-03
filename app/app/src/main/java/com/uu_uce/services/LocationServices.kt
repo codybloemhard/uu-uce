@@ -158,14 +158,14 @@ class LocationServices{
             override fun onLocationChanged(location: Location?) {
                 if (location != null) {
                     action(Pair(location.latitude, location.longitude))
-                    Log.d(
+                    /*Log.d(
                         "LocationServices",
                         "Latitude : " + location.latitude
-                    )
-                    Log.d(
+                    )*/
+                    /*Log.d(
                         "LocationServices",
                         "Longitude : " + location.longitude
-                    )
+                    )*/
                 }
             }
 
