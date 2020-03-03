@@ -1,5 +1,19 @@
 package com.uu_uce.shapefiles
 
+import android.util.Log
+import kotlin.math.absoluteValue
+import kotlin.math.pow
+import kotlin.math.sqrt
+
+fun distXy(p: p3, q: p3): Double{
+    return sqrt((p.first - q.first).pow(2) +
+            (p.second - q.second).pow(2))
+}
+
+fun lerp(a: Double, b: Double, t: Double): Double{
+    return a + (b - a) * t
+}
+
 enum class AnimType{
     NONE, TRANS
 }
@@ -13,6 +27,7 @@ class Camera(
 
     private val mx = (viewMin.first + viewMax.first) / 2.0
     private val my = (viewMin.second + viewMax.second) / 2.0
+    private val maxDistXy = distXy(viewMin, viewMax)
 
     var maxZoom = 1.0
     var minZoom = 0.0000000001
@@ -25,6 +40,7 @@ class Camera(
     private var animTarget = p3Zero
     private var animDuration = 0.0
     private var animStartT = 0.0
+    private var animT = 0.0
 
     fun getViewport(waspect: Double): Pair<p3,p3>{
         val w = viewMax.first - viewMin.first
@@ -94,15 +110,37 @@ class Camera(
         animStartT = System.currentTimeMillis().toDouble()
         animDuration = durationMs
         animType = AnimType.TRANS
+        animT = 0.0
+    }
+
+    private fun smooth(t: Double): Double{
+        return -(t - 1.0).pow(4.0) + 1.0
     }
 
     fun update(){
         if(!isBusy()) return
         val ct = System.currentTimeMillis().toDouble()
         val t = ((ct - animStartT) / animDuration).coerceIn(0.0, 1.0)
-        x = animBegin.first + (animTarget.first - animBegin.first) * t
-        y = animBegin.second + (animTarget.second - animBegin.second) * t
-        zoom = animBegin.third + (animTarget.third - animBegin.third) * t
+        val distFraction = distXy(animBegin, animTarget) / maxDistXy
+        val zoomAvg = (animBegin.third + animTarget.third) / 2.0
+        val midZoom = (maxZoom - zoomAvg)*distFraction + zoomAvg
+        val zt = 1.0/3.0
+        when {
+            t < zt -> {
+                zoom = lerp(animBegin.third, midZoom, smooth(t / zt))
+            }
+            t < 1-zt -> {
+                val tt = (t - zt) / (1 - 2*zt)
+                x = animBegin.first + (animTarget.first - animBegin.first) * tt
+                y = animBegin.second + (animTarget.second - animBegin.second) * tt
+            }
+            else -> {
+                x = animTarget.first
+                y = animTarget.second
+                zoom = lerp(animTarget.third, midZoom, 1 - smooth((t - (1 - zt)) / zt))
+            }
+        }
+
         if(ct > animStartT + animDuration){
             animType = AnimType.NONE
             return

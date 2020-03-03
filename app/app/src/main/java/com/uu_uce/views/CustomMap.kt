@@ -66,6 +66,6 @@ class CustomMap : View {
 
     fun zoomOutMax(){
         //camera.zoomOutMax()
-        camera.startAnimation(Triple(314000.0, 4675000.0, 0.01), 500.0)
+        camera.startAnimation(Triple(314000.0, 4675000.0, 0.02), 1500.0)
     }
 }
