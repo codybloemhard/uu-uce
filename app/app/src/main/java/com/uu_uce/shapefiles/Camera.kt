@@ -114,7 +114,7 @@ class Camera(
     }
 
     private fun smooth(t: Double): Double{
-        return -(t - 1.0).pow(4.0) + 1.0
+        return -(t - 1.0).pow(2.0) + 1.0
     }
 
     fun update(){
@@ -137,7 +137,7 @@ class Camera(
             else -> {
                 x = animTarget.first
                 y = animTarget.second
-                zoom = lerp(animTarget.third, midZoom, 1 - smooth((t - (1 - zt)) / zt))
+                zoom = lerp(animTarget.third,midZoom, 1 - smooth((t - (1 - zt)) / zt))
             }
         }
 
