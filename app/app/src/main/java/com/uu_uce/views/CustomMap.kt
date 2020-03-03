@@ -19,7 +19,7 @@ class CustomMap : View {
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private var smap : ShapeMap
-    private var camera: Camera? = null
+    private var camera: Camera
 
     init{
         Log.d("CustomMap", "Init")
@@ -36,13 +36,14 @@ class CustomMap : View {
         smap = ShapeMap(10)
         val timeParse = measureTimeMillis {
             smap.addLayer(LayerType.Height, file)
-            camera = smap.initialize()
         }
+        camera = smap.initialize()
         Log.i("CustomMap", "Parse file: $timeParse")
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        camera.update()
         val timeDraw = measureTimeMillis {
             canvas.drawColor(Color.rgb(234, 243, 245))
             smap.draw(canvas, width, height)
@@ -54,16 +55,17 @@ class CustomMap : View {
 
     fun zoomMap(zoom: Double){
         val deltaOne = 1.0 - zoom.coerceIn(0.5, 1.5)
-        camera?.zoomIn(1.0 + deltaOne)
+        camera.zoomIn(1.0 + deltaOne)
     }
 
     fun moveMap(dxpx: Double, dypx: Double){
         val dx = dxpx / width
         val dy = dypx / height
-        camera?.moveView(dx * 2, dy * -2)
+        camera.moveView(dx * 2, dy * -2)
     }
 
     fun zoomOutMax(){
-        camera?.zoomOutMax()
+        //camera.zoomOutMax()
+        camera.startAnimation(Triple(314000.0, 4675000.0, 0.01), 500.0)
     }
 }
