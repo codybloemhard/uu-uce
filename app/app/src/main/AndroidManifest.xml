@@ -23,7 +23,7 @@
             android:name=".GeoMap"
             android:label="@string/title_activity_geo_map"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".TestPins">
+        <activity android:name=".PinActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

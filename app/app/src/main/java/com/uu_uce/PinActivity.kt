@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 
 import androidx.constraintlayout.widget.ConstraintLayout
 
-class TestPins : AppCompatActivity() {
+class PinActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,11 +24,11 @@ class TestPins : AppCompatActivity() {
         var title = "Dit is de titel"
 
         btnShowContent.setOnClickListener {
-            openPopupWindow(parentLayout, title, getString(R.string.sample_text))
+            openPopupWindow(parentLayout, title)
         }
     }
 
-    private fun openPopupWindow(parentLayout: ConstraintLayout, title: String, content: String) {
+    private fun openPopupWindow(parentLayout: ConstraintLayout, title: String) {
 
         val layoutInflater = layoutInflater
 
@@ -36,13 +36,11 @@ class TestPins : AppCompatActivity() {
         val customView = layoutInflater.inflate(R.layout.popup_window, null)
         val popupWindow = PopupWindow(customView,ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
+        popupWindow.isOutsideTouchable = true
+
         // add the title for the popup window
         val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
         windowTitle.text = title
-
-        // add the text for the Textview in the popup window
-        val windowContent = customView.findViewById<TextView>(R.id.popup_window_text)
-        windowContent.text = content
 
         popupWindow.showAtLocation(parentLayout, Gravity.CENTER, 0, 0)
 
