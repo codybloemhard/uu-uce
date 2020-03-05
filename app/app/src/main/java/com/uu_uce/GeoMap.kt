@@ -1,25 +1,32 @@
 package com.uu_uce
 
-import android.content.Intent
 import android.os.Bundle
-import com.uu_uce.ui.FlingDir
-import com.uu_uce.ui.Flinger
+import com.uu_uce.ui.DoubleTapper
+import com.uu_uce.ui.Scroller
 import com.uu_uce.ui.TouchParent
+import com.uu_uce.ui.Zoomer
+import kotlinx.android.synthetic.main.activity_geo_map.*
 
 class GeoMap : TouchParent() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_geo_map)
-        addChild(Flinger(this, ::action))
+        addChild(Zoomer(this, ::onZoom))
+        addChild(Scroller(this, ::onScroll))
+        addChild(DoubleTapper(this, ::onDoubleTap))
+
+        button2.setOnClickListener{customMap.zoomToDevice()}
     }
 
-    private fun action(dir: FlingDir, delta: Float){
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-        if(dir == FlingDir.VER) return
-        if(delta > 0.0f)
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-        else
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+    private fun onZoom(delta: Float){
+        this.customMap.zoomMap(delta.toDouble())
+    }
+
+    private fun onScroll(dx: Float, dy: Float){
+        this.customMap.moveMap(dx.toDouble(), dy.toDouble())
+    }
+
+    private fun onDoubleTap(){
+        this.customMap.zoomOutMax()
     }
 }

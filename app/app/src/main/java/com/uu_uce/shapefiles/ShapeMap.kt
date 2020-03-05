@@ -48,18 +48,6 @@ fun aabbIntersect(amin: p3, amax: p3, bmin: p3, bmax: p3) : Boolean{
             )
 }
 
-fun zoomXyMidAabb(bmin: p3, bmax: p3, zoom: Double, waspect: Double): Pair<p3,p3>{
-    val w = bmax.first - bmin.first
-    val h = bmax.second - bmin.second
-    val xm = bmin.first + w / 2.0
-    val ym = bmin.second + h / 2.0
-    val woff = w * waspect / 2.0 * zoom
-    val hoff = h / 2.0 * zoom
-    val nmin = Triple(xm - woff, ym - hoff, Double.MIN_VALUE)
-    val nmax = Triple(xm + woff, ym + hoff, Double.MAX_VALUE)
-    return Pair(nmin, nmax)
-}
-
 class ShapeMap(private val nrOfLODs: Int){
     private var layers = mutableListOf<Pair<LayerType,ShapeLayer>>()
     private var bmin = p3Zero
@@ -67,22 +55,22 @@ class ShapeMap(private val nrOfLODs: Int){
     private val zDens = hashMapOf<Int,Int>()
     private var zoomLevel = 5
 
-    private var zoom = 999.0
-    private var zoomVel = 0.01
-    private var zoomDir = 1.0
+    private val deviceLocPaint : Paint = Paint()
+    private val deviceLocEdgePaint : Paint = Paint()
+
+    private lateinit var camera: Camera
+    private var first = true
+
+    init{
+        deviceLocPaint.color = Color.BLUE
+        deviceLocEdgePaint.color = Color.WHITE
+    }
 
     fun addLayer(type: LayerType, shpFile: SHP_File){
         val timeSave = measureTimeMillis {
             layers.add(Pair(type,ShapeLayer(shpFile, nrOfLODs)))
         }
         Log.i("ShapeMap", "Save: $timeSave")
-        val timeBB = measureTimeMillis {
-            val bminmax = mergeBBs(
-                layers.map{l -> l.second.bmin},
-                layers.map{l -> l.second.bmax})
-            bmin = bminmax.first
-            bmax = bminmax.second
-        }
         val timeDens = measureTimeMillis {
             layers.map{
                 l ->
@@ -95,7 +83,6 @@ class ShapeMap(private val nrOfLODs: Int){
                 }
             }
         }
-        Log.i("ShapeMap", "Calc boundingbox: $timeBB")
         Log.i("ShapeMap", "Calc z density: $timeDens")
         Log.i("ShapeMap", "bb: ($bmin),($bmax)")
         zDens.keys.sorted().map{
@@ -103,231 +90,29 @@ class ShapeMap(private val nrOfLODs: Int){
         }
     }
 
-    fun draw(canvas: Canvas, width: Int, height: Int, context : Context){
-        val waspect = width.toDouble() / height.toDouble()
-        setZoom(waspect)
-        val viewport = zoomXyMidAabb(bmin,bmax,zoom, waspect)
-        for(layer in layers) layer.second.draw(canvas, layer.first, viewport.first, viewport.second, width, height, zoomLevel)
-    }
-
-    private fun setZoom(waspect: Double){
-        if(zoom == 999.0) {
-            zoom = 1.0 / waspect
-        }
-        if(zoom < 0.01 && zoomDir > 0.0)
-            zoomDir = -1.0
-        if(zoom > (1.0 / waspect) && zoomDir < 0.0)
-            zoomDir = 1.0
-
-        //zoom *= (1.0 - (zoomVel * zoomDir))
-        zoomLevel = maxOf(0,minOf(nrOfLODs-1, nrOfLODs - 1 - ((zoom-0.01)/(1.0/waspect-0.01) * nrOfLODs).toInt()))
-    }
-}
-
-class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
-    private var allShapes: List<ShapeZ>
-    private lateinit var zoomShapes: List<List<ShapeZ>>
-    var bmin = p3Zero
-        private set
-    var bmax = p3Zero
-        private set
-    val zDens = hashMapOf<Int,Int>()
-    private val zDensSorted: List<Int>
-
-    init{
-        allShapes = shapeFile.shpShapes.map{ s -> ShapeZ(s)}
-
+    fun initialize(): Camera{
         val bminmax = mergeBBs(
-            allShapes.map{ s -> s.bmin},
-            allShapes.map{ s -> s.bmax})
+            layers.map{l -> l.second.bmin},
+            layers.map{l -> l.second.bmax})
         bmin = bminmax.first
         bmax = bminmax.second
-        Log.i("ShapeLayer", "($bmin),($bmax)")
-
-        allShapes.map{
-            s ->
-            val mz = s.meanZ()
-            val old = zDens[mz] ?: 0
-            val new = old + 1
-            zDens.put(mz, new)
-        }
-        zDensSorted = zDens.keys.sorted()
-        allShapes = allShapes.sortedBy{ it.meanZ() }
-
-        createZoomLevels()
+        val mx = (bmin.first + bmax.first) / 2.0
+        val my = (bmin.second + bmax.second) / 2.0
+        camera = Camera(mx, my, 1.0, bmin, bmax)
+        return camera
     }
 
-    private fun createZoomLevels(){
-        val indices: MutableList<Int> = mutableListOf()
-        var nrHeights = 0
-        var curPow = log(zDensSorted.size.toDouble(), 2.0).toInt() + 1
-        var curStep = 0
-        var stepSize: Int = 1 shl curPow
-        zoomShapes = List(nrOfLODs){ i->
-            val level = (i+1).toDouble()/nrOfLODs
-            val factor = maxOf(level.pow(3), 0.1)
-            val totalHeights =
-                if(i == nrOfLODs-1) zDensSorted.size
-                else (factor*zDensSorted.size).toInt()
-
-            while(nrHeights < totalHeights){
-                val index: Int = curStep * stepSize
-                if (index >= zDensSorted.size) {
-                    curPow--
-                    stepSize = 1 shl curPow
-                    curStep = 1
-                    continue
-                }
-                if(indices.contains(index))
-                    throw Exception("uh oh")
-
-                indices.add(index)
-                nrHeights++
-                curStep+=2
-            }
-
-            val shapes: MutableList<ShapeZ> = mutableListOf()
-            indices.sort()
-            if(indices.isNotEmpty()){
-                var a = 0
-                var b = 0
-                while(a < indices.size && b < allShapes.size){
-                    val shape = allShapes[b]
-                    val z = zDensSorted[indices[a]]
-                    when {
-                        shape.meanZ() == z -> {
-                            //shapes.add(ShapeZ((i+1).toDouble()/zs, allShapes[b]))
-                            val level = (i+1).toDouble() / (nrOfLODs)
-                            val factor =(level + level.pow(3))/2
-                            shapes.add(ShapeZ((factor), allShapes[b]))
-                            b++
-                        }
-                        shape.meanZ() < z -> b++
-                        else -> a++
-                    }
-                }
-            }
-            shapes
+    fun draw(canvas: Canvas, width: Int, height: Int){
+        val waspect = width.toDouble() / height
+        if(first){
+            val z = 1.0 / waspect
+            camera.maxZoom = z
+            camera.setZoom(z)
+            first = false
         }
-        zoomShapes.map{
-            ss -> ss.map{
-            s -> s.points.size
-        }
-        }
-        val npoints = zoomShapes.fold(0){
-            r0, ss -> r0 + ss.fold(0){
-            r1, s -> r1 + s.points.size
-        }
-        }
-    }
-
-    fun draw(canvas: Canvas, type: LayerType, topleft: p3, botright: p3, width: Int, height: Int, zoomLevel: Int){
-        if(allShapes.isEmpty()) return
-
-        var shapeCount = 0
-        for(i in zoomShapes[zoomLevel].indices){
-            val shape = zoomShapes[zoomLevel][i]
-            if(aabbIntersect(shape.bmin,shape.bmax,topleft,botright)) {
-                shape.draw(canvas, type, topleft, botright, width, height)
-                shapeCount++
-            }
-        }
-        //Log.d("ShapeMap", "Shapes drawn: $shapeCount / ${allShapes.size}")
-    }
-}
-
-class ShapeZ {
-    private var type: ShapeType
-    var points: List<Triple<Double, Double, Double>>
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    var bmin = p3Zero
-        private set
-    var bmax = p3Zero
-        private set
-
-    constructor(shape: ShpShape) {
-        when (shape.shapeType) {
-            ShpShape.Type.PolygonZ -> {
-                type = ShapeType.Polygon
-                val poly = (shape as ShpPolygon)
-                points = poly.points.map { point -> Triple(point[0], point[1], point[2]) }
-                updateBB(poly.boundingBox)
-            }
-            ShpShape.Type.PolyLineZ -> {
-                type = ShapeType.Polygon
-                val poly = (shape as ShpPolyLine)
-                points = poly.points.map { point -> Triple(point[0], point[1], point[2]) }
-                updateBB(poly.boundingBox)
-            }
-            ShpShape.Type.PointZ -> {
-                type = ShapeType.Point
-                val point = (shape as ShpPoint).point
-                points = listOf(Triple(point[0], point[1], point[2]))
-                bmin = Triple(point[0],point[1],point[2])
-                bmax = bmin.copy()
-            }
-            else -> {
-                Log.d("ShapeZ", "${shape.shapeType}")
-                type = ShapeType.Point
-                points = listOf()
-            }
-        }
-    }
-
-    constructor(zoomPercentage: Double, baseShape: ShapeZ){
-        type = baseShape.type
-        val mutablePoints = mutableListOf(baseShape.points.first())
-        for(i in 1 until (baseShape.points.size * zoomPercentage).toInt()){
-            mutablePoints.add(baseShape.points[(i/zoomPercentage).toInt()])
-        }
-        mutablePoints.add(baseShape.points.last())
-        points = mutablePoints
-        if(points.size > 2)
-            Log.d("","")
-
-        val minx = points.minBy{it.first}!!.first
-        val miny = points.minBy{it.second}!!.second
-        val minz = points.minBy{it.third}!!.third
-        val maxx = points.maxBy{it.first}!!.first
-        val maxy = points.maxBy{it.second}!!.second
-        val maxz = points.maxBy{it.third}!!.third
-        bmin = p3(minx,miny,minz)
-        bmax = p3(maxx,maxy,maxz)
-    }
-
-    fun draw(
-        canvas: Canvas,
-        type: LayerType,
-        topleft: Triple<Double, Double, Double>,
-        botright: Triple<Double, Double, Double>,
-        width: Int,
-        height: Int
-    ) {
-        if (points.size < 2) return
-        val drawPoints = FloatArray(4 * (points.size - 1))
-
-        var lineIndex = 0
-        for (i in 0..points.size - 2) {
-            drawPoints[lineIndex++] =
-                ((points[i].first - topleft.first) / (botright.first - topleft.first) * width).toFloat()
-            drawPoints[lineIndex++] =
-                (height - (points[i].second - topleft.second) / (botright.second - topleft.second) * height).toFloat()
-            drawPoints[lineIndex++] =
-                ((points[i + 1].first - topleft.first) / (botright.first - topleft.first) * width).toFloat()
-            drawPoints[lineIndex++] =
-                (height - (points[i + 1].second - topleft.second) / (botright.second - topleft.second) * height).toFloat()
-        }
-
-        canvas.drawLines(drawPoints, paint)
-    }
-
-    private fun updateBB(bb: Array<DoubleArray>) {
-        bmin = Triple(bb[0][0], bb[1][0], bb[2][0])
-        bmax = Triple(bb[0][1], bb[1][1], bb[2][1])
-    }
-
-    fun meanZ(): Int{
-        return ((bmin.third + bmax.third) / 2).toInt()
+        zoomLevel = maxOf(0,minOf(nrOfLODs-1, nrOfLODs - 1 - ((camera.getZoom()-0.01)/(1.0/waspect-0.01) * nrOfLODs).toInt()))
+        val viewport = camera.getViewport(waspect)
+        for(layer in layers) layer.second.draw(canvas, layer.first, viewport.first, viewport.second, width, height, zoomLevel)
     }
 }
 

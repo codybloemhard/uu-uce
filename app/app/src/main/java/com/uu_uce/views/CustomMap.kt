@@ -12,6 +12,7 @@ import com.uu_uce.R
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.services.degreeToUTM
+import com.uu_uce.shapefiles.Camera
 import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.ShapeMap
 import com.uu_uce.shapefiles.p3
@@ -30,10 +31,8 @@ class CustomMap : View {
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private var smap : ShapeMap
+
     private var loc : UTMCoordinate = UTMCoordinate(31, 'N', 0.0, 0.0)
-    private var viewport = Pair(
-        p3(308968.83, 4667733.3, 540.0),
-        p3(319547.5, 4682999.6, 1370.0))
 
     private val locationServices = LocationServices()
 
@@ -51,6 +50,8 @@ class CustomMap : View {
             ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
         )
 
+    private var camera: Camera
+
     init{
         Log.d("CustomMap", "Init")
         val dir = File(context.filesDir, "mydir")
@@ -67,6 +68,7 @@ class CustomMap : View {
         val timeParse = measureTimeMillis {
             smap.addLayer(LayerType.Height, file)
         }
+        camera = smap.initialize()
         Log.i("CustomMap", "Parse file: $timeParse")
 
         deviceLocPaint.color = Color.BLUE
@@ -77,9 +79,11 @@ class CustomMap : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        camera.update()
+        val viewport = camera.getViewport(width.toDouble() / height)
         val timeDraw = measureTimeMillis {
             canvas.drawColor(Color.rgb(234, 243, 245))
-            smap.draw(canvas, width, height, context)
+            smap.draw(canvas, width, height)
             drawDeviceLocation(
                 coordToScreen(loc, viewport, this),
                 canvas,
@@ -94,8 +98,27 @@ class CustomMap : View {
         invalidate()
     }
 
-    private fun updateLoc(newLoc : Pair<Double, Double>){
+    private fun updateLoc(newLoc : Pair<Double, Double>) {
         loc = degreeToUTM(newLoc)
         Log.d("CustomMap", "${loc.east}, ${loc.north}")
+    }
+
+    fun zoomMap(zoom: Double){
+        val deltaOne = 1.0 - zoom.coerceIn(0.5, 1.5)
+        camera.zoomIn(1.0 + deltaOne)
+    }
+
+    fun moveMap(dxpx: Double, dypx: Double){
+        val dx = dxpx / width
+        val dy = dypx / height
+        camera.moveView(dx * 2, dy * -2)
+    }
+
+    fun zoomOutMax(){
+        camera.zoomOutMax(1500.0)
+    }
+
+    fun zoomToDevice(){
+        camera.startAnimation(Triple(loc.east, loc.north, 0.02), 1500.0)
     }
 }

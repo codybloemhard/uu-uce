@@ -4,44 +4,35 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GestureDetectorCompat
-import kotlin.math.abs
 
-enum class FlingDir{
-    HOR, VER
-}
-
-class Flinger(
-        parent: AppCompatActivity,
-        var action: (FlingDir, Float) -> Unit)
-        : TouchChild, GestureDetector.OnGestureListener{
+class DoubleTapper(
+    parent: AppCompatActivity,
+    var action: () -> Unit)
+    : TouchChild,
+    GestureDetector.OnGestureListener,
+    GestureDetector.OnDoubleTapListener{
     private var gestureDetector: GestureDetectorCompat? = null
 
     init{
         gestureDetector = GestureDetectorCompat(parent, this)
+        gestureDetector?.setOnDoubleTapListener(this)
     }
 
     override fun getOnTouchEvent(event: MotionEvent?) {
         gestureDetector?.onTouchEvent(event)
     }
 
-    override fun onFling(
-        downEv: MotionEvent?,
-        moveEv: MotionEvent?,
-        velocityX: Float,
-        velocityY: Float
-    ): Boolean {
-        val dy = (moveEv?.y ?: 0.0f) - (downEv?.y ?: 0.0f)
-        val dx = (moveEv?.x ?: 0.0f) - (downEv?.x ?: 0.0f)
-        if (abs(dy) > abs(dx))
-            action(FlingDir.VER, dy)
-        else
-            action(FlingDir.HOR, dy)
+    override fun onDoubleTap(e: MotionEvent?): Boolean {
+        action()
         return true
     }
 
+    override fun onDoubleTapEvent(e: MotionEvent?): Boolean { return true }
+    override fun onSingleTapConfirmed(e: MotionEvent?): Boolean { return true }
     override fun onShowPress(e: MotionEvent?) {}
-    override fun onSingleTapUp(e: MotionEvent?): Boolean { return false }
+    override fun onSingleTapUp(e: MotionEvent?): Boolean { return true }
     override fun onDown(e: MotionEvent?): Boolean { return false }
+    override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean { return false }
     override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean { return false }
     override fun onLongPress(e: MotionEvent?) {}
 }
