@@ -10,9 +10,6 @@
         android:layout_height="wrap_content"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
-        android:fontFamily="sans-serif"
-        android:gravity="start|top"
-        android:textColor="#99000000"
-        android:textSize="12sp" />
+        android:src="@drawable/earth"/>
 
 </LinearLayout>

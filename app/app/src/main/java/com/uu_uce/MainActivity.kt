@@ -7,7 +7,7 @@ import com.uu_uce.ui.TouchParent
 class MainActivity : TouchParent() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val intent = Intent(this, GeoMap::class.java)
+        val intent = Intent(this, PinActivity::class.java)
         startActivity(intent)
     }
 }

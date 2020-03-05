@@ -12,6 +12,11 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.res.ResourcesCompat
+import com.uu_uce.pins.Pin
+import com.uu_uce.pins.PinTextContent
+import com.uu_uce.pins.PinType
+import com.uu_uce.services.UTMCoordinate
 
 class PinActivity : AppCompatActivity() {
 
@@ -22,14 +27,23 @@ class PinActivity : AppCompatActivity() {
         val btnShowContent = findViewById<Button>(R.id.btnShowContent)
         val parentLayout = findViewById<ConstraintLayout>(R.id.testPins)
         val title = "Dit is de titel"
+        val ptc = PinTextContent()
+        ptc.text = getString(R.string.sample_text)
+        val pin =
+            getDrawable(R.drawable.ic_show_infographic)?.let {
+                Pin(UTMCoordinate(31, 'N', 0.0, 0.0),0, PinType.TEXT, title, ptc, 60,
+                    it
+                )
+            }
 
         btnShowContent.setOnClickListener {
-            openPopupWindow(parentLayout, title)
+            openPopupWindow(parentLayout, pin)
         }
     }
 
-    private fun openPopupWindow(parentLayout: ConstraintLayout, title: String) {
+    private fun openPopupWindow(parentLayout: ConstraintLayout, pin: Pin?) {
 
+        ContentFragment.pin = pin
         val layoutInflater = layoutInflater
 
         // build an custom view (to be inflated on top of our current view & build it's popup window
@@ -38,7 +52,7 @@ class PinActivity : AppCompatActivity() {
 
         // add the title for the popup window
         val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
-        windowTitle.text = title
+        windowTitle.text = pin?.title
 
         popupWindow.showAtLocation(parentLayout, Gravity.CENTER, 0, 0)
 
