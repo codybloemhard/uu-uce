@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 
 import androidx.constraintlayout.widget.ConstraintLayout
 
-class TestPins : AppCompatActivity() {
+class PinActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,11 +24,11 @@ class TestPins : AppCompatActivity() {
         val title = "Dit is de titel"
 
         btnShowContent.setOnClickListener {
-            openPopupWindow(parentLayout, title, getString(R.string.sample_text))
+            openPopupWindow(parentLayout, title)
         }
     }
 
-    private fun openPopupWindow(parentLayout: ConstraintLayout, title: String, content: String) {
+    private fun openPopupWindow(parentLayout: ConstraintLayout, title: String) {
 
         val layoutInflater = layoutInflater
 
@@ -40,16 +40,19 @@ class TestPins : AppCompatActivity() {
         val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
         windowTitle.text = title
 
-        // add the text for the Textview in the popup window
-        val windowContent = customView.findViewById<TextView>(R.id.popup_window_text)
-        windowContent.text = content
-
         popupWindow.showAtLocation(parentLayout, Gravity.CENTER, 0, 0)
+
+        val fm = supportFragmentManager
+        val ft = fm.beginTransaction()
+        val cf = fm.findFragmentById(R.id.ContentFragment)
 
         val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
 
         btnClosePopupWindow.setOnClickListener {
             popupWindow.dismiss()
+            if (cf != null) {
+                ft.remove(cf).commit()
+            }
         }
     }
 }

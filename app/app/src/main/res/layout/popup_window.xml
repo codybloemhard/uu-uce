@@ -2,21 +2,11 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:bind="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#33000000"
     android:gravity="center"
     android:padding="10dp" >
-
-    <!--
-    <data>
-        <variable
-            name="TextContent"
-            type="string"
-            />
-    </data>
-    -->
 
     <androidx.cardview.widget.CardView
         android:id="@+id/popup_window_view"
@@ -41,24 +31,6 @@
             android:layout_marginEnd="12dp"
             android:minHeight="300dp" >
 
-            <Button
-                android:id="@+id/popup_window_close_button"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:layout_marginBottom="8dp"
-                android:fontFamily="sans-serif"
-                android:minWidth="64dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                android:text="@string/close_popup"
-                android:textAllCaps="true"
-                android:textColor="#6200ee"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
-
             <TextView
                 android:id="@+id/popup_window_title"
                 android:layout_width="match_parent"
@@ -76,28 +48,34 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!--
-            <include
-                layout="@layout/popup_window_text"
-                bind:TextContent2="@{TextContent}" />
-            -->
-
-            <TextView
-                android:id="@+id/popup_window_text"
+            <fragment
+                android:id="@+id/ContentFragment"
+                android:name="com.uu_uce.PinContent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:fontFamily="sans-serif"
-                android:gravity="start|top"
-                android:textColor="#99000000"
-                android:textSize="16sp"
                 app:layout_constraintBottom_toTopOf="@+id/popup_window_close_button"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/popup_window_title" />
 
+            <Button
+                android:id="@+id/popup_window_close_button"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="sans-serif"
+                android:minWidth="64dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:text="@string/close_popup"
+                android:textAllCaps="true"
+                android:textColor="#6200ee"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

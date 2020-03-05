@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">UCE</string>
     <string name="title_activity_geo_map">geo_map</string>
-    <string name="show_infographic">Pin</string>
+    <string name="show_pin">Pin</string>
     <string name="close">Close</string>
     <string name="this_is_a_popup_window">This is a popup window..</string>
     <string name="close_popup">OK</string>
