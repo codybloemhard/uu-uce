@@ -54,7 +54,7 @@ class CustomMap : View {
     private var camera: Camera
 
     init{
-        Logger.log("CustomMap", "Init")
+        Logger.log(LogType.Info,"CustomMap", "Init")
         val dir = File(context.filesDir, "mydir")
         val path = File(dir, "bt25mv10sh0f6422al1r020.shp")
         SHP_File.LOG_INFO = false
@@ -94,13 +94,13 @@ class CustomMap : View {
                 4F)
             pin.draw(viewport, this, canvas)
         }
-        Logger.logTyped(LogType.Continues, "CustomMap", "Draw: $timeDraw")
+        Logger.log(LogType.Continues, "CustomMap", "Draw: $timeDraw")
         invalidate()
     }
 
     private fun updateLoc(newLoc : Pair<Double, Double>) {
         loc = degreeToUTM(newLoc)
-        Logger.log("CustomMap", "${loc.east}, ${loc.north}")
+        Logger.log(LogType.Event,"CustomMap", "${loc.east}, ${loc.north}")
     }
 
     fun zoomMap(zoom: Double){
@@ -115,7 +115,7 @@ class CustomMap : View {
     }
 
     fun zoomOutMax(){
-        camera.zoomOutMax(1000.0)
+        camera.zoomOutMax(500.0)
     }
 
     fun zoomToDevice(){

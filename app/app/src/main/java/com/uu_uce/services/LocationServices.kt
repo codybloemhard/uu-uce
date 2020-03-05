@@ -130,7 +130,7 @@ class LocationServices{
     {
         //Check if the network is running, might not be the best way to do this.
         if(networkRunning) {
-            Logger.log("LocationServices", "LocationNetwork already running")
+            Logger.log(LogType.Info,"LocationServices", "LocationNetwork already running")
             return LocationPollStartResult.ALREADY_LIVE
         }
 
@@ -142,7 +142,7 @@ class LocationServices{
         if (!hasGps && !hasNetwork)
             return LocationPollStartResult.LOCATION_UNAVAILABLE
 
-        Logger.log(
+        Logger.log( LogType.Info,
             "LocationServices",
             "gpsEnabled: $hasGps, networkEnabled: $hasNetwork"
         )
@@ -150,7 +150,7 @@ class LocationServices{
         var result = PackageManager.PERMISSION_DENIED
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             result = checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-            Logger.log("LocationServices", "permissions: $result")
+            Logger.log(LogType.Info,"LocationServices", "permissions: $result")
         }
 
         if (result != PackageManager.PERMISSION_GRANTED)
@@ -160,11 +160,11 @@ class LocationServices{
             override fun onLocationChanged(location: Location?) {
                 if (location != null) {
                     action(Pair(location.latitude, location.longitude))
-                    Logger.logTyped( LogType.Continues,
+                    Logger.log( LogType.Event,
                         "LocationServices",
                         "Latitude : " + location.latitude
                     )
-                    Logger.logTyped( LogType.Continues,
+                    Logger.log( LogType.Event,
                         "LocationServices",
                         "Longitude : " + location.longitude
                     )
@@ -176,21 +176,21 @@ class LocationServices{
                 status: Int,
                 extras: Bundle?
             ) {
-                Logger.log("LocationServices", "$provider new status : $status")
+                Logger.log(LogType.Event,"LocationServices", "$provider new status : $status")
             }
 
             override fun onProviderEnabled(provider: String?) {
-                Logger.log("LocationServices", "$provider now enabled")
+                Logger.log(LogType.Event,"LocationServices", "$provider now enabled")
                 if(!networkRunning && !networkKilled){
-                    Logger.log("LocationServices", "Restarting network")
+                    Logger.log(LogType.Info,"LocationServices", "Restarting network")
                     startPollThread(context, pollTimeMs, minDist, action)
                 }
             }
 
             override fun onProviderDisabled(provider: String?) {
-                Logger.log("LocationServices", "$provider now disabled")
+                Logger.log(LogType.Event,"LocationServices", "$provider now disabled")
                 if(networkProvider == provider){
-                    Logger.log("LocationServices", "Active provider disabled, restarting network")
+                    Logger.log(LogType.Info,"LocationServices", "Active provider disabled, restarting network")
                     networkRunning = false
                     startPollThread(context, pollTimeMs, minDist, action)
                 }
@@ -218,21 +218,21 @@ class LocationServices{
 
         if(locationGps != null && locationNetwork != null && hasGps && hasNetwork){
             if(locationGps.accuracy > locationNetwork.accuracy){
-                Logger.log("LocationServices", "Using network location")
+                Logger.log(LogType.Info,"LocationServices", "Using network location")
                 startLocUpdates(LocationManager.NETWORK_PROVIDER)
             }else{
-                Logger.log("LocationServices", "Using gps location")
+                Logger.log(LogType.Info,"LocationServices", "Using gps location")
                 startLocUpdates(LocationManager.GPS_PROVIDER)
             }
             return LocationPollStartResult.HYBRID
         }
         else if(hasGps){
-            Logger.log("LocationServices", "Defaulting to gps location")
+            Logger.log(LogType.Info,"LocationServices", "Defaulting to gps location")
             startLocUpdates(LocationManager.GPS_PROVIDER)
             return LocationPollStartResult.GPS_ONLY
         }
         else if(hasNetwork){
-            Logger.log("LocationServices", "Gps unavailable, using network location")
+            Logger.log(LogType.Info,"LocationServices", "Gps unavailable, using network location")
             startLocUpdates(LocationManager.GPS_PROVIDER)
             return LocationPollStartResult.NETWORK_ONLY
         }

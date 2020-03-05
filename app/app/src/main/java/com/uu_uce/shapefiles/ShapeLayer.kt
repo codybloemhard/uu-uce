@@ -109,7 +109,7 @@ class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
     fun draw(canvas: Canvas, type: LayerType, topleft: p3, botright: p3, width: Int, height: Int, zoomLevel: Int){
         if(allShapes.isEmpty()) return
 
-        Logger.logTyped(LogType.Continues, "zoom", zoomLevel.toString())
+        Logger.log(LogType.Continues, "zoom", zoomLevel.toString())
 
         var shapeCount = 0
         for(i in zoomShapes[zoomLevel].indices){
@@ -119,6 +119,6 @@ class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
                 shapeCount++
             }
         }
-        Logger.logTyped(LogType.Continues, "ShapeMap", "Shapes drawn: $shapeCount / ${allShapes.size}")
+        Logger.log(LogType.Continues, "ShapeMap", "Shapes drawn: $shapeCount / ${allShapes.size}")
     }
 }

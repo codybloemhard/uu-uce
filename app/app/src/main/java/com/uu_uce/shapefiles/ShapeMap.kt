@@ -4,6 +4,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.Log
+import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import diewald_shapeFile.files.shp.SHP_File
 import kotlin.system.measureTimeMillis
@@ -61,7 +62,7 @@ class ShapeMap(private val nrOfLODs: Int){
         val timeSave = measureTimeMillis {
             layers.add(Pair(type,ShapeLayer(shpFile, nrOfLODs)))
         }
-        Logger.log("ShapeMap", "Save: $timeSave")
+        Logger.log(LogType.Info,"ShapeMap", "Save: $timeSave")
         val timeDens = measureTimeMillis {
             layers.map{
                 l ->
@@ -74,8 +75,8 @@ class ShapeMap(private val nrOfLODs: Int){
                 }
             }
         }
-        Logger.log("ShapeMap", "Calc z density: $timeDens")
-        Logger.log("ShapeMap", "bb: ($bmin),($bmax)")
+        Logger.log(LogType.Info,"ShapeMap", "Calc z density: $timeDens")
+        Logger.log(LogType.Info, "ShapeMap", "bb: ($bmin),($bmax)")
         zDens.keys.sorted().map{
             key -> Log.i("ShapeMap", "($key,${zDens[key]})")
         }

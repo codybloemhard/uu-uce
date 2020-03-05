@@ -11,6 +11,6 @@ class MainActivity : TouchParent() {
         super.onCreate(savedInstanceState)
         val intent = Intent(this, GeoMap::class.java)
         startActivity(intent)
-        Logger.setTypeEnabled(LogType.Continues, false)
+        Logger.setTypeEnabled(LogType.Continues, true)
     }
 }

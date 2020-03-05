@@ -3,6 +3,7 @@ package com.uu_uce.shapefiles
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.util.Log
+import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import diewald_shapeFile.files.shp.shapeTypes.ShpPoint
 import diewald_shapeFile.files.shp.shapeTypes.ShpPolyLine
@@ -40,7 +41,7 @@ class ShapeZ {
                 bmax = bmin.copy()
             }
             else -> {
-                Logger.log("ShapeZ", "Non supported type: ${shape.shapeType}")
+                Logger.log(LogType.NotImplemented,"ShapeZ", "Non supported type: ${shape.shapeType}")
                 type = ShapeType.Point
                 points = listOf()
             }
