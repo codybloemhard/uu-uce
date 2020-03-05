@@ -51,7 +51,6 @@ class ShapeMap(private val nrOfLODs: Int){
     private val deviceLocEdgePaint : Paint = Paint()
 
     private lateinit var camera: Camera
-    private var first = true
 
     init{
         deviceLocPaint.color = Color.BLUE
@@ -96,12 +95,6 @@ class ShapeMap(private val nrOfLODs: Int){
 
     fun draw(canvas: Canvas, width: Int, height: Int){
         val waspect = width.toDouble() / height
-        if(first){
-            val z = 1.0 / waspect
-            camera.maxZoom = z
-            camera.setZoom(z)
-            first = false
-        }
         zoomLevel = maxOf(0,minOf(nrOfLODs-1, nrOfLODs - 1 - ((camera.getZoom()-0.01)/(1.0/waspect-0.01) * nrOfLODs).toInt()))
         val viewport = camera.getViewport(waspect)
         for(layer in layers) layer.second.draw(canvas, layer.first, viewport.first, viewport.second, width, height, zoomLevel)

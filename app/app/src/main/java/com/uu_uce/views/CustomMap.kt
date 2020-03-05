@@ -33,6 +33,7 @@ class CustomMap : View {
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private var smap : ShapeMap
+    private var first = true
 
     private var loc : UTMCoordinate = UTMCoordinate(31, 'N', 0.0, 0.0)
 
@@ -80,12 +81,19 @@ class CustomMap : View {
     }
 
     override fun onDraw(canvas: Canvas) {
-        //super.onDraw(canvas)
+        super.onDraw(canvas)
+        val waspect = width.toDouble() / height
+        if(first){
+            val z = 1.0 / (waspect)
+            camera.maxZoom = z
+            camera.setZoom(z)
+            first = false
+        }
         val res = camera.update()
         if(res == UpdateResult.NOOP){
             return
         }
-        val viewport = camera.getViewport(width.toDouble() / height)
+        val viewport = camera.getViewport(waspect)
         val timeDraw = measureTimeMillis {
             canvas.drawColor(Color.rgb(234, 243, 245))
             smap.draw(canvas, width, height)
