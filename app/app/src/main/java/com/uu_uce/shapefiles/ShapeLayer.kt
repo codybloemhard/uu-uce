@@ -2,6 +2,7 @@ package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
 import android.util.Log
+import com.uu_uce.mapOverlay.boundingBoxIntersect
 import diewald_shapeFile.files.shp.SHP_File
 import kotlin.math.log
 import kotlin.math.pow
@@ -112,7 +113,7 @@ class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
         var shapeCount = 0
         for(i in zoomShapes[zoomLevel].indices){
             val shape = zoomShapes[zoomLevel][i]
-            if(aabbIntersect(shape.bmin,shape.bmax,topleft,botright)) {
+            if(boundingBoxIntersect(shape.bmin,shape.bmax,topleft,botright)) {
                 shape.draw(canvas, type, topleft, botright, width, height)
                 shapeCount++
             }

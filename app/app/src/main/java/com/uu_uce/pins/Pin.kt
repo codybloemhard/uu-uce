@@ -2,8 +2,11 @@ package com.uu_uce.pins
 
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.view.View
+import com.uu_uce.mapOverlay.boundingBoxIntersect
 import com.uu_uce.mapOverlay.coordToScreen
+import com.uu_uce.mapOverlay.pointInBoundingBox
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.shapefiles.p3
 import kotlin.math.roundToInt
@@ -27,7 +30,18 @@ class Pin(
 
     fun draw(viewport : Pair<p3,p3>, view : View, canvas : Canvas){
         val location : Pair<Float, Float> = coordToScreen(coordinate, viewport, view)
-        image.setBounds((location.first - pinSize/2).roundToInt(), (location.second - imageHeight).roundToInt(), (location.first + pinSize/2).roundToInt(), (location.second).roundToInt())
+
+        val minX = (location.first - pinSize/2).roundToInt()
+        val minY = (location.second - imageHeight).roundToInt()
+        val maxX = (location.first + pinSize/2).roundToInt()
+        val maxY = (location.second).roundToInt()
+
+        if(!pointInBoundingBox(viewport.first, viewport.second, p3(coordinate.east, coordinate.north, 0.0))){
+            Log.d("Pin.draw", "pin outside of viewport")
+            return
+        }
+
+        image.setBounds(minX, minY, maxX, maxY)
         image.draw(canvas)
     }
 }

@@ -29,15 +29,6 @@ fun mergeBBs(mins: List<p3>,maxs: List<p3>): Pair<p3,p3>{
     return Pair(Triple(bmin[0],bmin[1],bmin[2]),Triple(bmax[0],bmax[1],bmax[2]))
 }
 
-fun aabbIntersect(amin: p3, amax: p3, bmin: p3, bmax: p3) : Boolean{
-    return !(
-            amin.first > bmax.first ||
-            amax.first < bmin.first ||
-            amin.second > bmax.second ||
-            amax.second < bmin.second
-            )
-}
-
 class ShapeMap(private val nrOfLODs: Int){
     private var layers = mutableListOf<Pair<LayerType,ShapeLayer>>()
     private var bmin = p3Zero
