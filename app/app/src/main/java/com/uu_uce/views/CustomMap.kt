@@ -9,19 +9,18 @@ import android.util.Log
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
+import com.uu_uce.mapOverlay.coordToScreen
+import com.uu_uce.mapOverlay.drawDeviceLocation
+import com.uu_uce.pins.Pin
+import com.uu_uce.pins.PinTextContent
+import com.uu_uce.pins.PinType
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.services.degreeToUTM
 import com.uu_uce.shapefiles.Camera
 import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.ShapeMap
-import com.uu_uce.shapefiles.p3
 import diewald_shapeFile.files.shp.SHP_File
-import com.uu_uce.mapOverlay.coordToScreen
-import com.uu_uce.mapOverlay.drawDeviceLocation
-import com.uu_uce.pins.Pin
-import com.uu_uce.pins.PinTextContent
-import com.uu_uce.pins.PinType
 import java.io.File
 import kotlin.system.measureTimeMillis
 

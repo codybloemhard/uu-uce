@@ -1,7 +1,5 @@
 package com.uu_uce.shapefiles
 
-import android.util.Log
-import kotlin.math.absoluteValue
 import kotlin.math.pow
 import kotlin.math.sqrt
 

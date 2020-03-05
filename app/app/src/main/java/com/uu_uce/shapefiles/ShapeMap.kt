@@ -1,20 +1,10 @@
 package com.uu_uce.shapefiles
 
-import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.Log
-import com.uu_uce.services.UTMCoordinate
 import diewald_shapeFile.files.shp.SHP_File
-import diewald_shapeFile.files.shp.shapeTypes.ShpPoint
-import diewald_shapeFile.files.shp.shapeTypes.ShpPolyLine
-import diewald_shapeFile.files.shp.shapeTypes.ShpPolygon
-import diewald_shapeFile.files.shp.shapeTypes.ShpShape
-import com.uu_uce.pins.Pin
-import com.uu_uce.pins.PinTextContent
-import kotlin.math.log
-import kotlin.math.pow
 import kotlin.system.measureTimeMillis
 
 typealias p3 = Triple<Double,Double,Double>

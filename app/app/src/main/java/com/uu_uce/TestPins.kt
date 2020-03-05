@@ -21,7 +21,7 @@ class TestPins : AppCompatActivity() {
 
         val btnShowContent = findViewById<Button>(R.id.btnShowContent)
         val parentLayout = findViewById<ConstraintLayout>(R.id.testPins)
-        var title = "Dit is de titel"
+        val title = "Dit is de titel"
 
         btnShowContent.setOnClickListener {
             openPopupWindow(parentLayout, title, getString(R.string.sample_text))
