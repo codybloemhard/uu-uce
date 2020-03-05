@@ -36,18 +36,23 @@ class PinActivity : AppCompatActivity() {
         val customView = layoutInflater.inflate(R.layout.popup_window, null)
         val popupWindow = PopupWindow(customView,ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
-        popupWindow.isOutsideTouchable = true
-
         // add the title for the popup window
         val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
         windowTitle.text = title
 
         popupWindow.showAtLocation(parentLayout, Gravity.CENTER, 0, 0)
 
+        val fm = supportFragmentManager
+        val ft = fm.beginTransaction()
+        val cf = fm.findFragmentById(R.id.ContentFragment)
+
         val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
 
         btnClosePopupWindow.setOnClickListener {
             popupWindow.dismiss()
+            if (cf != null) {
+                ft.remove(cf).commit()
+            }
         }
     }
 }

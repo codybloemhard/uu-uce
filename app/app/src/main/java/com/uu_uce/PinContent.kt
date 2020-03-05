@@ -18,18 +18,16 @@ class PinContent : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        if (textContentView != null) {
-            var parent = textContentView?.parent as ViewGroup
-            if (parent != null) {
-                parent?.removeView(view)
-            }
+        if (textContentView == null) {
+            println("textContentView == null")
+        } else {
+            println("textContentView != null")
         }
-        else {
-            textContentView = inflater.inflate(R.layout.popup_window_text_content, container)
 
-            val windowContent = textContentView?.findViewById<TextView>(R.id.text_content)
-            windowContent?.text = getString(R.string.sample_text)
-        }
+        textContentView = inflater.inflate(R.layout.popup_window_text_content, container)
+
+        val windowContent = textContentView?.findViewById<TextView>(R.id.text_content)
+        windowContent?.text = getString(R.string.sample_text)
 
         return textContentView
     }
