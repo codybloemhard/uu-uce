@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.Toast
 import com.uu_uce.GeoMap
 import com.uu_uce.R
+import com.uu_uce.misc.Logger
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.getPermissions
 import com.uu_uce.ui.FlingDir
@@ -20,8 +21,7 @@ class GpsExample : TouchParent() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val locationServices = LocationServices()
-        Log.d("MainActivity", "Successfully created services")
-
+        Logger.log("GPS", "Successfully created services")
         // Request location permission
         getPermissions(this, this, LocationServices.permissionsNeeded)
 
@@ -58,11 +58,10 @@ class GpsExample : TouchParent() {
         grantResults: IntArray
     ) {
         if (requestCode == 1) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d("MainActivity", "Permissions granted")
-            } else {
-                Log.d("MainActivity", "Permissions were not granted")
-            }
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                Logger.log("GPS", "Permissions granted")
+            else
+                Logger.log("GPS", "Permissions were not granted")
         }
     }
 }

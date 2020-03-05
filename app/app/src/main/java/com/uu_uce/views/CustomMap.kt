@@ -11,6 +11,8 @@ import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation
+import com.uu_uce.misc.LogType
+import com.uu_uce.misc.Logger
 import com.uu_uce.pins.Pin
 import com.uu_uce.pins.PinTextContent
 import com.uu_uce.pins.PinType
@@ -52,7 +54,7 @@ class CustomMap : View {
     private var camera: Camera
 
     init{
-        Log.d("CustomMap", "Init")
+        Logger.log("CustomMap", "Init")
         val dir = File(context.filesDir, "mydir")
         val path = File(dir, "bt25mv10sh0f6422al1r020.shp")
         SHP_File.LOG_INFO = false
@@ -91,15 +93,14 @@ class CustomMap : View {
                 15F,
                 4F)
             pin.draw(viewport, this, canvas)
-            
         }
-        Log.i("CustomMap", "Draw: $timeDraw")
+        Logger.logTyped(LogType.Continues, "CustomMap", "Draw: $timeDraw")
         invalidate()
     }
 
     private fun updateLoc(newLoc : Pair<Double, Double>) {
         loc = degreeToUTM(newLoc)
-        Log.d("CustomMap", "${loc.east}, ${loc.north}")
+        Logger.log("CustomMap", "${loc.east}, ${loc.north}")
     }
 
     fun zoomMap(zoom: Double){
@@ -114,7 +115,7 @@ class CustomMap : View {
     }
 
     fun zoomOutMax(){
-        camera.zoomOutMax(1500.0)
+        camera.zoomOutMax(1000.0)
     }
 
     fun zoomToDevice(){
