@@ -31,7 +31,7 @@ class ContentFragment : Fragment() {
                 windowContent?.text = pin?.content?.getTextContent()
             }
             PinType.IMAGE -> {
-
+                contentView = inflater.inflate(R.layout.popup_window_image_content, container)
             }
             PinType.VIDEO -> {
 

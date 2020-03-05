@@ -31,7 +31,7 @@ class PinActivity : AppCompatActivity() {
         ptc.text = getString(R.string.sample_text)
         val pin =
             getDrawable(R.drawable.ic_show_infographic)?.let {
-                Pin(UTMCoordinate(31, 'N', 0.0, 0.0),0, PinType.TEXT, title, ptc, 60,
+                Pin(UTMCoordinate(31, 'N', 0.0, 0.0),0, PinType.IMAGE, title, ptc, 60,
                     it
                 )
             }
@@ -42,8 +42,9 @@ class PinActivity : AppCompatActivity() {
     }
 
     private fun openPopupWindow(parentLayout: ConstraintLayout, pin: Pin?) {
-
+        // make sure we can access the Pin in the fragment
         ContentFragment.pin = pin
+
         val layoutInflater = layoutInflater
 
         // build an custom view (to be inflated on top of our current view & build it's popup window
