@@ -22,6 +22,7 @@ import com.uu_uce.services.degreeToUTM
 import com.uu_uce.shapefiles.Camera
 import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.ShapeMap
+import com.uu_uce.shapefiles.UpdateResult
 import diewald_shapeFile.files.shp.SHP_File
 import java.io.File
 import kotlin.system.measureTimeMillis
@@ -79,8 +80,11 @@ class CustomMap : View {
     }
 
     override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-        camera.update()
+        //super.onDraw(canvas)
+        val res = camera.update()
+        if(res == UpdateResult.NOOP){
+            return
+        }
         val viewport = camera.getViewport(width.toDouble() / height)
         val timeDraw = measureTimeMillis {
             canvas.drawColor(Color.rgb(234, 243, 245))
@@ -94,8 +98,9 @@ class CustomMap : View {
                 4F)
             pin.draw(viewport, this, canvas)
         }
-        Logger.log(LogType.Continues, "CustomMap", "Draw: $timeDraw")
-        invalidate()
+        Logger.log(LogType.Continues, "CustomMap", "Draw MS: $timeDraw")
+        if(res == UpdateResult.ANIM)
+            invalidate()
     }
 
     private fun updateLoc(newLoc : Pair<Double, Double>) {
@@ -106,19 +111,27 @@ class CustomMap : View {
     fun zoomMap(zoom: Double){
         val deltaOne = 1.0 - zoom.coerceIn(0.5, 1.5)
         camera.zoomIn(1.0 + deltaOne)
+        if(camera.needsInvalidate())
+            invalidate()
     }
 
     fun moveMap(dxpx: Double, dypx: Double){
         val dx = dxpx / width
         val dy = dypx / height
         camera.moveView(dx * 2, dy * -2)
+        if(camera.needsInvalidate())
+            invalidate()
     }
 
     fun zoomOutMax(){
         camera.zoomOutMax(500.0)
+        if(camera.needsInvalidate())
+            invalidate()
     }
 
     fun zoomToDevice(){
         camera.startAnimation(Triple(loc.east, loc.north, 0.02), 1500.0)
+        if(camera.needsInvalidate())
+            invalidate()
     }
 }

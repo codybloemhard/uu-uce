@@ -1,5 +1,7 @@
 package com.uu_uce.shapefiles
 
+import com.uu_uce.misc.LogType
+import com.uu_uce.misc.Logger
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -14,6 +16,10 @@ fun lerp(a: Double, b: Double, t: Double): Double{
 
 enum class AnimType{
     NONE, TRANS, OUT
+}
+
+enum class UpdateResult{
+    NOOP, REDRAW, ANIM
 }
 
 class Camera(
@@ -32,6 +38,7 @@ class Camera(
 
     private var lastWoff = 0.0
     private var lastHoff = 0.0
+    private var changed = true
 
     private var animType: AnimType = AnimType.NONE
     private var animBegin = p3Zero
@@ -56,24 +63,32 @@ class Camera(
         return animType != AnimType.NONE
     }
 
-    fun setPosCenter(){
-        if(isBusy()) return
-        x = mx
-        y = my
+    fun needsInvalidate(): Boolean{
+        return changed || isBusy()
     }
 
-    fun setPos(newX: Double, newY: Double){
+    private fun setXy(xx: Double, yy: Double){
+        changed = changed || xx != x || yy != y
+        x = xx
+        y = yy
+    }
+
+    private fun setPosCenter(){
+        if(isBusy()) return
+        setXy(mx, my)
+    }
+
+    private fun setPos(newX: Double, newY: Double){
         if(isBusy()) return
         val minx = viewMin.first + lastWoff
         val maxx = viewMax.first - lastWoff
         val miny = viewMin.second + lastHoff
         val maxy = viewMax.second - lastHoff
-        if(minx >= maxx || miny >= maxy){
+        if(minx >= maxx || miny >= maxy)
             setPosCenter()
-        }else{
-            x = newX.coerceIn(minx, maxx)
-            y = newY.coerceIn(miny, maxy)
-        }
+        else
+            setXy(newX.coerceIn(minx, maxx),newY.coerceIn(miny, maxy))
+
     }
 
     fun moveView(dx: Double, dy: Double){
@@ -85,15 +100,20 @@ class Camera(
         return zoom
     }
 
+    private fun setZ(zz: Double){
+        changed = changed || zoom != zz
+        zoom = zz
+    }
+
     fun setZoom(newZoom: Double){
         if(isBusy()) return
-        zoom = newZoom.coerceIn(minZoom, maxZoom)
+        setZ(newZoom.coerceIn(minZoom, maxZoom))
     }
 
     fun zoomIn(factor: Double){
         if(isBusy()) return
-        zoom *= factor
-        zoom = zoom.coerceIn(minZoom, maxZoom)
+        val z = zoom * factor
+        setZ(z.coerceIn(minZoom, maxZoom))
     }
 
     fun zoomOutMax(duration: Double){
@@ -120,13 +140,21 @@ class Camera(
         return -(t - 1.0).pow(2.0) + 1.0
     }
 
-    fun update(){
-        if(!isBusy()) return
+    //Updates and returns true if viewport has changed
+    fun update(): UpdateResult{
+        if(!changed && !isBusy()){
+            return UpdateResult.NOOP
+        }
+        changed = false
         when(animType){
             AnimType.NONE -> {}
             AnimType.TRANS -> updateTrans()
             AnimType.OUT -> updateOut()
         }
+        return if(isBusy())
+            UpdateResult.ANIM
+        else
+            UpdateResult.REDRAW
     }
 
     private fun updateOut(){
