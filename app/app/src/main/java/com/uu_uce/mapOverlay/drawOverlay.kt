@@ -8,11 +8,40 @@ import com.uu_uce.shapefiles.p3
 Calculates where on the screen a coordinate is.
 coordinate: the coordinate to be mapped onto the screen.
 viewport: the current viewport.
+view: the current map that the function is called in.
 It will provide you with the screen location of a certain coordinate.
  */
-fun coordToScreen(coordinate  : UTMCoordinate, viewport : Pair<p3, p3>, view : View) : Pair<Float, Float>{
-    return Pair(((coordinate.east - viewport.first.first) / (viewport.second.first - viewport.first.first) * view.width).toFloat(),
-        (view.height - (coordinate.north - viewport.first.second) / (viewport.second.second - viewport.first.second) * view.height).toFloat())
+fun coordToScreen(coordinate  : UTMCoordinate, viewport : Pair<p3, p3>, viewWidth : Int, viewHeight : Int) : Pair<Float, Float>{
+    val mapX = (coordinate.east - viewport.first.first)
+    val mapY = (coordinate.north - viewport.first.second)
+
+    val coordRangeX = (viewport.second.first - viewport.first.first)
+    val coordRangeY = (viewport.second.second - viewport.first.second)
+
+    val screenX = mapX / coordRangeX * viewWidth
+    val screenY = viewHeight - mapY / coordRangeY * viewHeight
+
+    return Pair(screenX.toFloat(), screenY.toFloat())
+}
+
+/*
+Calculates where on the map a screen coordinate is.
+screenLoc: the location on the screen you would like the map coordinate of.
+viewport: the current viewport.
+view: the current map that the function is called in.
+It will provide you with the screen location of a certain coordinate.
+ */
+fun screenToCoord(screenLoc : Pair<Float, Float>, viewport : Pair<p3, p3>, viewWidth : Int, viewHeight : Int) : UTMCoordinate{
+    val screenX = screenLoc.first / viewWidth
+    val screenY = (viewHeight - screenLoc.second) / viewHeight
+
+    val coordRangeX = (viewport.second.first - viewport.first.first)
+    val coordRangeY = (viewport.second.second - viewport.first.second)
+
+    val easting = screenX * coordRangeX + viewport.first.first
+    val northing = screenY * coordRangeY + viewport.first.second
+
+    return UTMCoordinate(31, 'N', easting, northing)
 }
 
 /*
@@ -33,17 +62,18 @@ fun boundingBoxIntersect(bb1Min: p3, bb1Max: p3, bb2Min: p3, bb2Max: p3) : Boole
 }
 
 /*
-Calculates if two boundingboxes intersect.
+Calculates if a point is inside of a boundingbox.
 bb1Min: The top-left coordinate of the first bounding box.
 bb1Max: The bottom-right coordinate of the first bounding box.
 point : A point that you wish to know of if it is in the screen.
+bufferSize: How far outside the boundingbox can the point be to still be considered inside.
 It will provide you with a boolean value that says if the bounding boxes intersect or not.
  */
-fun pointInBoundingBox(bbMin: p3, bbMax: p3, point : p3) : Boolean{
+fun pointInBoundingBox(bbMin: p3, bbMax: p3, point : p3, bufferSize : Int) : Boolean{
     return(
-                point.first     < bbMax.first   &&
-                point.first     > bbMin.first   &&
-                point.second    < bbMax.second  &&
-                point.second    > bbMin.second
+                point.first     < bbMax.first   + bufferSize    &&
+                point.first     > bbMin.first   - bufferSize    &&
+                point.second    < bbMax.second  + bufferSize    &&
+                point.second    > bbMin.second  - bufferSize
             )
 }

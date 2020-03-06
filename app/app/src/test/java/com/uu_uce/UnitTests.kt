@@ -1,7 +1,13 @@
 package com.uu_uce
 
+import android.view.View
+import com.uu_uce.mapOverlay.coordToScreen
+import com.uu_uce.mapOverlay.screenToCoord
+import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.services.degreeToUTM
 import com.uu_uce.services.latToUTMLetter
+import com.uu_uce.shapefiles.p3
+import com.uu_uce.views.CustomMap
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -44,5 +50,21 @@ class UnitTests {
         assertEquals(utm.zone, 49)
         assertEquals(utm.east, 436032.58, 0.1)
         assertEquals(utm.north, 6095248.71, 0.1)
+    }
+
+    @Test
+    fun testScreenMapConversion(){
+        val coordinate = UTMCoordinate(31, 'N', 313368.0, 4671833.6)
+        val viewport = Pair(
+                p3(308968.83, 4667733.3, 540.0),
+                p3(319547.5, 4682999.6, 1370.0))
+
+        val screenWidth = 1920
+        val screenHeight = 1080
+
+        val screenCoordinate = coordToScreen(coordinate, viewport, screenWidth, screenHeight)
+        val mapCoordinate = screenToCoord(screenCoordinate, viewport, screenWidth, screenHeight)
+        assertEquals(mapCoordinate.east, coordinate.east, 0.1)
+        assertEquals(mapCoordinate.north, coordinate.north, 0.1)
     }
 }

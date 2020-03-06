@@ -12,7 +12,7 @@ import com.uu_uce.R
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation
 import com.uu_uce.pins.Pin
-import com.uu_uce.pins.PinTextContent
+import com.uu_uce.pins.PinContent
 import com.uu_uce.pins.PinType
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.UTMCoordinate
@@ -38,16 +38,21 @@ class CustomMap : View {
     private val deviceLocPaint : Paint = Paint()
     private val deviceLocEdgePaint : Paint = Paint()
 
-    private val pin : Pin =
-        Pin(
-            UTMCoordinate(31, 'N', 314968.0, 4677733.6),
-            1,
-            PinType.TEXT,
-            "Test",
-            PinTextContent(),
-            60,
-            ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
-        )
+    val pinList : MutableList<Pin> = mutableListOf(Pin(
+        UTMCoordinate(31, 'N', 314968.0, 4677733.6),
+        1,
+        PinType.TEXT,
+        "Test1",
+        PinContent(),
+        ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
+    ), Pin(
+        UTMCoordinate(31, 'N', 313368.0, 4671833.6),
+        1,
+        PinType.TEXT,
+        "Test2",
+        PinContent(),
+        ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
+    ))
 
     private var camera: Camera
 
@@ -84,14 +89,13 @@ class CustomMap : View {
             canvas.drawColor(Color.rgb(234, 243, 245))
             smap.draw(canvas, width, height)
             drawDeviceLocation(
-                coordToScreen(loc, viewport, this),
+                coordToScreen(loc, viewport, width, height),
                 canvas,
                 deviceLocPaint,
                 deviceLocEdgePaint,
                 15F,
                 4F)
-            pin.draw(viewport, this, canvas)
-            
+            pinList.map { pin -> pin.draw(viewport, this, canvas) }
         }
         Log.i("CustomMap", "Draw: $timeDraw")
         invalidate()

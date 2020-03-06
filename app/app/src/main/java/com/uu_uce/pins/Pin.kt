@@ -18,31 +18,41 @@ enum class PinType {
 }
 
 class Pin(
-    var coordinate  : UTMCoordinate,
-    var difficulty  : Int,
-    var type        : PinType,
-    var title       : String,
-    var content     : PinContent,
-    var pinSize     : Int,
-    var image       : Drawable
+    private var coordinate  : UTMCoordinate,
+    private var difficulty  : Int,
+    private var type        : PinType,
+    private var title       : String,
+    private var content     : PinContent,
+    private var image       : Drawable
 ) {
-    val imageHeight = pinSize * (image.intrinsicHeight.toFloat() / image.intrinsicWidth.toFloat())
+    private val pinSize = 60
+    private val imageHeight = pinSize * (image.intrinsicHeight.toFloat() / image.intrinsicWidth.toFloat())
+
+    var inScreen : Boolean = true
+
+    var minX : Int = 0
+    var minY : Int = 0
+    var maxX : Int = 0
+    var maxY : Int = 0
 
     fun draw(viewport : Pair<p3,p3>, view : View, canvas : Canvas){
-        val location : Pair<Float, Float> = coordToScreen(coordinate, viewport, view)
+        val location : Pair<Float, Float> = coordToScreen(coordinate, viewport, view.width, view.height)
 
-        val minX = (location.first - pinSize/2).roundToInt()
-        val minY = (location.second - imageHeight).roundToInt()
-        val maxX = (location.first + pinSize/2).roundToInt()
-        val maxY = (location.second).roundToInt()
+        minX = (location.first - pinSize/2).roundToInt()
+        minY = (location.second - imageHeight).roundToInt()
+        maxX = (location.first + pinSize/2).roundToInt()
+        maxY = (location.second).roundToInt()
 
-        if(!pointInBoundingBox(viewport.first, viewport.second, p3(coordinate.east, coordinate.north, 0.0))){
-            Log.d("Pin.draw", "pin outside of viewport")
+        if(!pointInBoundingBox(viewport.first, viewport.second, p3(coordinate.east, coordinate.north, 0.0), pinSize)){
+            //Log.d("Pin.draw", "pin outside of viewport")
+            inScreen = false
             return
         }
 
+        inScreen = true
         image.setBounds(minX, minY, maxX, maxY)
         image.draw(canvas)
+
     }
 }
 
