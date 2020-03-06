@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Looper
 import android.util.Log
 import androidx.core.content.ContextCompat.checkSelfPermission
+import com.uu_uce.shapefiles.p2
 import kotlin.math.*
 
 enum class LocationPollStartResult{
@@ -52,7 +53,7 @@ Will convert latitude, longitude coordinate to UTM.
 degPos: a pair of doubles of the form (latitude, longitude).
 It will provide you with a triple of UTM coordinates of the form (letter, easting, northing).
  */
-fun degreeToUTM(degPos : Pair<Double, Double>) : UTMCoordinate{
+fun degreeToUTM(degPos : p2) : UTMCoordinate{
     var easting : Double
     var northing : Double
 
@@ -123,7 +124,7 @@ class LocationServices{
         context: Context,
         pollTimeMs: Long,
         minDist: Float,
-        action: (Pair<Double, Double>) -> Unit)
+        action: (p2) -> Unit)
         : LocationPollStartResult
     {
         //Check if the network is running, might not be the best way to do this.

@@ -36,8 +36,8 @@ class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
 
     private fun createBB(){
         val bminmax = mergeBBs(
-            allShapes.map{ s -> s.bmin},
-            allShapes.map{ s -> s.bmax})
+            allShapes.map{ s -> s.bMin},
+            allShapes.map{ s -> s.bMax})
         bmin = bminmax.first
         bmax = bminmax.second
     }
@@ -105,7 +105,7 @@ class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
         }
     }
 
-    fun draw(canvas: Canvas, type: LayerType, topleft: p3, botright: p3, width: Int, height: Int, zoomLevel: Int){
+    fun draw(canvas: Canvas, type: LayerType, viewport : Pair<p2,p2>, width: Int, height: Int, zoomLevel: Int){
         if(allShapes.isEmpty()) return
 
         Log.d("zoom", zoomLevel.toString())
@@ -113,8 +113,8 @@ class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
         var shapeCount = 0
         for(i in zoomShapes[zoomLevel].indices){
             val shape = zoomShapes[zoomLevel][i]
-            if(boundingBoxIntersect(shape.bmin,shape.bmax,topleft,botright)) {
-                shape.draw(canvas, type, topleft, botright, width, height)
+            if(boundingBoxIntersect(shape.bMin, shape.bMax, viewport.first, viewport.second)) {
+                shape.draw(canvas, type, viewport, width, height)
                 shapeCount++
             }
         }

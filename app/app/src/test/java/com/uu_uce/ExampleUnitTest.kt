@@ -1,6 +1,6 @@
 package com.uu_uce
 
-import com.uu_uce.mapOverlay.boundingBoxIntersect
+import com.uu_uce.mapOverlay.boundingBoxContains
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -17,17 +17,17 @@ class ExampleUnitTest {
 
     @Test
     fun test_aabb_inter(){
-        assertEquals(boundingBoxIntersect(
-            Triple(1.0, 1.0, 0.0),
-            Triple(2.0, 2.0, 0.0),
-            Triple(2.1, 0.0, 0.0),
-            Triple(3.0, 9.0, 0.0)
+        assertEquals(boundingBoxContains(
+            Pair(1.0, 1.0),
+            Pair(2.0, 2.0),
+            Pair(2.1, 0.0),
+            Pair(3.0, 9.0)
         ), false)
-        assertEquals(boundingBoxIntersect(
-            Triple(1.0, 1.0, 0.0),
-            Triple(2.0, 2.0, 0.0),
-            Triple(2.0, 0.0, 0.0),
-            Triple(3.0, 9.0, 0.0)
+        assertEquals(boundingBoxContains(
+            Pair(1.0, 1.0),
+            Pair(2.0, 2.0),
+            Pair(2.0, 0.0),
+            Pair(3.0, 9.0)
         ), true)
     }
 }

@@ -28,7 +28,7 @@ class Camera(
     private val maxDistXy = distXy(viewMin, viewMax)
 
     var maxZoom = 1.0
-    var minZoom = 0.0000000001
+    private var minZoom = 0.0000000001
 
     private var lastWoff = 0.0
     private var lastHoff = 0.0
@@ -40,15 +40,15 @@ class Camera(
     private var animStartT = 0.0
     private var animT = 0.0
 
-    fun getViewport(waspect: Double): Pair<p3,p3>{
+    fun getViewport(wAspect: Double): Pair<p2,p2>{
         val w = viewMax.first - viewMin.first
         val h = viewMax.second - viewMin.second
-        val woff = w * waspect / 2.0 * zoom
+        val woff = w * wAspect / 2.0 * zoom
         val hoff = h / 2.0 * zoom
         lastWoff = woff
         lastHoff = hoff
-        val nmin = Triple(x - woff, y - hoff, Double.MIN_VALUE)
-        val nmax = Triple(x + woff, y + hoff, Double.MAX_VALUE)
+        val nmin = p2(x - woff, y - hoff)
+        val nmax = p2(x + woff, y + hoff)
         return Pair(nmin, nmax)
     }
 
@@ -56,13 +56,13 @@ class Camera(
         return animType != AnimType.NONE
     }
 
-    fun setPosCenter(){
+    private fun setPosCenter(){
         if(isBusy()) return
         x = mx
         y = my
     }
 
-    fun setPos(newX: Double, newY: Double){
+    private fun setPos(newX: Double, newY: Double){
         if(isBusy()) return
         val minx = viewMin.first + lastWoff
         val maxx = viewMax.first - lastWoff

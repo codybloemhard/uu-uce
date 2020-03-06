@@ -20,6 +20,7 @@ import com.uu_uce.services.degreeToUTM
 import com.uu_uce.shapefiles.Camera
 import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.ShapeMap
+import com.uu_uce.shapefiles.p2
 import diewald_shapeFile.files.shp.SHP_File
 import java.io.File
 import kotlin.system.measureTimeMillis
@@ -38,7 +39,7 @@ class CustomMap : View {
     private val deviceLocPaint : Paint = Paint()
     private val deviceLocEdgePaint : Paint = Paint()
 
-    val pinList : MutableList<Pin> = mutableListOf(Pin(
+    private val pinList : MutableList<Pin> = mutableListOf(Pin(
         UTMCoordinate(31, 'N', 314968.0, 4677733.6),
         1,
         PinType.TEXT,
@@ -101,7 +102,7 @@ class CustomMap : View {
         invalidate()
     }
 
-    private fun updateLoc(newLoc : Pair<Double, Double>) {
+    private fun updateLoc(newLoc : p2) {
         loc = degreeToUTM(newLoc)
         Log.d("CustomMap", "${loc.east}, ${loc.north}")
     }

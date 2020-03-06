@@ -6,8 +6,7 @@ import com.uu_uce.mapOverlay.screenToCoord
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.services.degreeToUTM
 import com.uu_uce.services.latToUTMLetter
-import com.uu_uce.shapefiles.p3
-import com.uu_uce.views.CustomMap
+import com.uu_uce.shapefiles.p2
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -56,8 +55,8 @@ class UnitTests {
     fun testScreenMapConversion(){
         val coordinate = UTMCoordinate(31, 'N', 313368.0, 4671833.6)
         val viewport = Pair(
-                p3(308968.83, 4667733.3, 540.0),
-                p3(319547.5, 4682999.6, 1370.0))
+                p2(308968.83, 4667733.3),
+                p2(319547.5, 4682999.6))
 
         val screenWidth = 1920
         val screenHeight = 1080
