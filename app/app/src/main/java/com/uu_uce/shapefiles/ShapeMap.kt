@@ -68,7 +68,6 @@ class ShapeMap(private val nrOfLODs: Int){
                 }
             }
         }
-
         Logger.log(LogType.Info,"ShapeMap", "Calc z density: $timeDens")
         Logger.log(LogType.Info, "ShapeMap", "bb: ($bMin),($bMax)")
         zDens.keys.sorted().map{

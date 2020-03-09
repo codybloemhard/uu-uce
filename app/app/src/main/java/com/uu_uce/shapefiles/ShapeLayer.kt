@@ -4,6 +4,8 @@ import android.graphics.Canvas
 import com.uu_uce.mapOverlay.aaBoundingBoxIntersect
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
+import android.util.Log
+import com.uu_uce.mapOverlay.aaBoundingBoxIntersect
 import diewald_shapeFile.files.shp.SHP_File
 import kotlin.math.log
 import kotlin.math.pow

@@ -1,5 +1,6 @@
 package com.uu_uce
 
+import android.view.View
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.screenToCoord
 import com.uu_uce.services.UTMCoordinate
