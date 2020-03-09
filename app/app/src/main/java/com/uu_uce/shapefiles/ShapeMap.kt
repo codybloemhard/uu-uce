@@ -54,7 +54,7 @@ class ShapeMap(private val nrOfLODs: Int){
         val timeSave = measureTimeMillis {
             layers.add(Pair(type,ShapeLayer(shpFile, nrOfLODs)))
         }
-        Log.i("ShapeMap", "Save: $timeSave")
+        //Log.i("ShapeMap", "Save: $timeSave")
         val timeDens = measureTimeMillis {
             layers.map{
                 l ->
@@ -67,8 +67,8 @@ class ShapeMap(private val nrOfLODs: Int){
                 }
             }
         }
-        Log.i("ShapeMap", "Calc z density: $timeDens")
-        Log.i("ShapeMap", "bb: ($bMin),($bMax)")
+        //Log.i("ShapeMap", "Calc z density: $timeDens")
+        //Log.i("ShapeMap", "bb: ($bMin),($bMax)")
         zDens.keys.sorted().map{
             key -> Log.i("ShapeMap", "($key,${zDens[key]})")
         }

@@ -11,6 +11,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation
+import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.pins.Pin
 import com.uu_uce.pins.PinContent
 import com.uu_uce.pins.PinType
@@ -36,6 +37,8 @@ class CustomMap : View {
 
     private val locationServices = LocationServices()
 
+    private val pinTapBufferSize : Int = 10
+
     private val deviceLocPaint : Paint = Paint()
     private val deviceLocEdgePaint : Paint = Paint()
 
@@ -54,6 +57,9 @@ class CustomMap : View {
         PinContent(),
         ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
     ))
+
+    var statusBarHeight = 0
+    val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
 
     private var camera: Camera
 
@@ -74,12 +80,16 @@ class CustomMap : View {
             smap.addLayer(LayerType.Height, file)
         }
         camera = smap.initialize()
-        Log.i("CustomMap", "Parse file: $timeParse")
+        //Log.i("CustomMap", "Parse file: $timeParse")
 
         deviceLocPaint.color = Color.BLUE
         deviceLocEdgePaint.color = Color.WHITE
 
         locationServices.startPollThread(context, 5000, 0F, ::updateLoc)
+
+        if (resourceId > 0) {
+            statusBarHeight = resources.getDimensionPixelSize(resourceId)
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -98,7 +108,7 @@ class CustomMap : View {
                 4F)
             pinList.map { pin -> pin.draw(viewport, this, canvas) }
         }
-        Log.i("CustomMap", "Draw: $timeDraw")
+        //Log.i("CustomMap", "Draw: $timeDraw")
         invalidate()
     }
 
@@ -124,5 +134,16 @@ class CustomMap : View {
 
     fun zoomToDevice(){
         camera.startAnimation(Triple(loc.east, loc.north, 0.02), 1500.0)
+    }
+
+    fun tapPin(tapLocation : p2){
+        val canvasTapLocation : p2 = Pair(tapLocation.first, tapLocation.second - statusBarHeight)
+        pinList.forEach{ p ->
+            if(!p.inScreen) return@forEach
+            if(pointInAABoundingBox(p.boundingBox.first, p.boundingBox.second, canvasTapLocation, pinTapBufferSize)){
+                //TODO: implement popup function here
+                return
+            }
+        }
     }
 }

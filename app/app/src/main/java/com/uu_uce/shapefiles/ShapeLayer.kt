@@ -2,7 +2,7 @@ package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
 import android.util.Log
-import com.uu_uce.mapOverlay.boundingBoxIntersect
+import com.uu_uce.mapOverlay.aaBoundingBoxIntersect
 import diewald_shapeFile.files.shp.SHP_File
 import kotlin.math.log
 import kotlin.math.pow
@@ -108,16 +108,16 @@ class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
     fun draw(canvas: Canvas, type: LayerType, viewport : Pair<p2,p2>, width: Int, height: Int, zoomLevel: Int){
         if(allShapes.isEmpty()) return
 
-        Log.d("zoom", zoomLevel.toString())
+        //Log.d("ShapeLayer", "Zoom: ${zoomLevel.toString()}")
 
         var shapeCount = 0
         for(i in zoomShapes[zoomLevel].indices){
             val shape = zoomShapes[zoomLevel][i]
-            if(boundingBoxIntersect(shape.bMin, shape.bMax, viewport.first, viewport.second)) {
+            if(aaBoundingBoxIntersect(shape.bMin, shape.bMax, viewport.first, viewport.second)) {
                 shape.draw(canvas, type, viewport, width, height)
                 shapeCount++
             }
         }
-        Log.d("ShapeMap", "Shapes drawn: $shapeCount / ${allShapes.size}")
+        //Log.d("ShapeLayer", "Shapes drawn: $shapeCount / ${allShapes.size}")
     }
 }

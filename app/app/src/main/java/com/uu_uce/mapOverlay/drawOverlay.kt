@@ -52,7 +52,7 @@ bb2Min: The top-left coordinate of the second bounding box.
 bb2Max: The bottom-right coordinate of the second bounding box.
 It will provide you with a boolean value that says if the bounding boxes intersect or not.
  */
-fun boundingBoxContains(bb1Min: p2, bb1Max: p2, bb2Min: p2, bb2Max: p2) : Boolean{
+fun aaBoundingBoxContains(bb1Min: p2, bb1Max: p2, bb2Min: p2, bb2Max: p2) : Boolean{
     return !(
                 bb1Min.first    >   bb2Max.first  ||
                 bb1Max.first    <   bb2Min.first  ||
@@ -61,8 +61,8 @@ fun boundingBoxContains(bb1Min: p2, bb1Max: p2, bb2Min: p2, bb2Max: p2) : Boolea
             )
 }
 
-fun boundingBoxIntersect(bb1Min: p3, bb1Max: p3, bb2Min: p2, bb2Max: p2) : Boolean{
-    return boundingBoxContains(p2(bb1Min.first, bb1Min.second), p2(bb1Max.first, bb1Max.second), bb2Min, bb2Max)
+fun aaBoundingBoxIntersect(bb1Min: p3, bb1Max: p3, bb2Min: p2, bb2Max: p2) : Boolean{
+    return aaBoundingBoxContains(p2(bb1Min.first, bb1Min.second), p2(bb1Max.first, bb1Max.second), bb2Min, bb2Max)
 }
 
 /*
@@ -73,7 +73,7 @@ point : A point that you wish to know of if it is in the screen.
 bufferSize: How far outside the boundingbox can the point be to still be considered inside.
 It will provide you with a boolean value that says if the bounding boxes intersect or not.
  */
-fun pointInBoundingBox(bbMin: p3, bbMax: p3, point : p3, bufferSize : Int) : Boolean{
+fun pointInAABoundingBox(bbMin: p2, bbMax: p2, point : p2, bufferSize : Int) : Boolean{
     return(
                 point.first     < bbMax.first   + bufferSize    &&
                 point.first     > bbMin.first   - bufferSize    &&
