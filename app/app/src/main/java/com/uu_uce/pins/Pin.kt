@@ -2,7 +2,6 @@ package com.uu_uce.pins
 
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
-import android.util.Log
 import android.view.View
 import com.uu_uce.mapOverlay.aaBoundingBoxContains
 import com.uu_uce.mapOverlay.coordToScreen
