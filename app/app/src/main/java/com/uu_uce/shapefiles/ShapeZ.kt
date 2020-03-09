@@ -1,6 +1,7 @@
 package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.util.Log
 import diewald_shapeFile.files.shp.shapeTypes.ShpPoint
@@ -11,7 +12,6 @@ import diewald_shapeFile.files.shp.shapeTypes.ShpShape
 class ShapeZ {
     private var type: ShapeType
     var points: List<Triple<Double, Double, Double>>
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     var bmin = p3Zero
         private set
     var bmax = p3Zero
@@ -69,7 +69,7 @@ class ShapeZ {
 
     fun draw(
         canvas: Canvas,
-        type: LayerType,
+        paint: Paint,
         topleft: Triple<Double, Double, Double>,
         botright: Triple<Double, Double, Double>,
         width: Int,

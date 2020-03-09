@@ -1,9 +1,12 @@
 package com.uu_uce.shapefiles
 
+import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.Log
+import android.widget.Button
+import androidx.constraintlayout.widget.ConstraintSet
 import diewald_shapeFile.files.shp.SHP_File
 import kotlin.system.measureTimeMillis
 
@@ -39,24 +42,40 @@ fun aabbIntersect(amin: p3, amax: p3, bmin: p3, bmax: p3) : Boolean{
 }
 
 class ShapeMap(private val nrOfLODs: Int){
+    var layerMask = mutableListOf<Boolean>()
+
     private var layers = mutableListOf<Pair<LayerType,ShapeLayer>>()
     private var bmin = p3Zero
     private var bmax = p3Zero
     private val zDens = hashMapOf<Int,Int>()
     private var zoomLevel = 5
 
-    private val deviceLocPaint : Paint = Paint()
-    private val deviceLocEdgePaint : Paint = Paint()
+    private val layerPaints : List<Paint>
 
     private lateinit var camera: Camera
     private var first = true
 
     init{
-        deviceLocPaint.color = Color.BLUE
-        deviceLocEdgePaint.color = Color.WHITE
+        layerPaints = List<Paint>(LayerType.values().size){i ->
+            val p = Paint()
+            when(i){
+                LayerType.Water.value -> {
+                    p.color = Color.rgb(33,11,203)
+                    p.color = Color.BLACK
+                }
+                LayerType.Height.value -> {
+                    p.color = Color.rgb(0,0,0)
+                }
+                LayerType.Vegetation.value -> {
+                    p.color = Color.rgb(0,133,31)
+                    p.color = Color.BLACK
+                }
+            }
+            p
+        }
     }
 
-    fun addLayer(type: LayerType, shpFile: SHP_File){
+    fun addLayer(type: LayerType, shpFile: SHP_File, context: Context){
         val timeSave = measureTimeMillis {
             layers.add(Pair(type,ShapeLayer(shpFile, nrOfLODs)))
         }
@@ -78,6 +97,8 @@ class ShapeMap(private val nrOfLODs: Int){
         zDens.keys.sorted().map{
             key -> Log.i("ShapeMap", "($key,${zDens[key]})")
         }
+
+        layerMask.add(true)
     }
 
     fun initialize(): Camera{
@@ -102,7 +123,20 @@ class ShapeMap(private val nrOfLODs: Int){
         }
         zoomLevel = maxOf(0,minOf(nrOfLODs-1, nrOfLODs - 1 - ((camera.getZoom()-0.01)/(1.0/waspect-0.01) * nrOfLODs).toInt()))
         val viewport = camera.getViewport(waspect)
-        for(layer in layers) layer.second.draw(canvas, layer.first, viewport.first, viewport.second, width, height, zoomLevel)
+        for(i in layers.indices) {
+            if(layerMask[i]) {
+                var (t,l) = layers[i]
+                l.draw(
+                    canvas,
+                    layerPaints[t.value],
+                    viewport.first,
+                    viewport.second,
+                    width,
+                    height,
+                    zoomLevel
+                )
+            }
+        }
     }
 }
 
@@ -110,6 +144,6 @@ enum class ShapeType{
     Polygon, Line, Point
 }
 
-enum class LayerType{
-    Vegetation, Height, Water
+enum class LayerType(val value: Int){
+    Vegetation(0), Height(1), Water(2)
 }

@@ -21,6 +21,8 @@ import com.uu_uce.shapefiles.Camera
 import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.ShapeMap
 import diewald_shapeFile.files.shp.SHP_File
+import diewald_shapeFile.files.shp.shapeTypes.ShpShape
+import kotlinx.android.synthetic.main.activity_geo_map.view.*
 import java.io.File
 import kotlin.system.measureTimeMillis
 
@@ -54,19 +56,24 @@ class CustomMap : View {
     init{
         Log.d("CustomMap", "Init")
         val dir = File(context.filesDir, "mydir")
-        val path = File(dir, "bt25mv10sh0f6422al1r020.shp")
+        val path1 = File(dir, "bt25mv10sh0f6422al1r020.shp")
+        val path2 = File(dir, "bt25mv10sh0f6422hp1r020.shp")
         SHP_File.LOG_INFO = false
         SHP_File.LOG_ONLOAD_HEADER = false
         SHP_File.LOG_ONLOAD_CONTENT = false
-        val file = SHP_File(null, path)
+        val file1 = SHP_File(null, path1)
+        val file2 = SHP_File(null, path2)
         val timeRead = measureTimeMillis {
-            file.read()
+            file1.read()
+            file2.read()
         }
         Log.i("CustomMap", "Read file: $timeRead")
         smap = ShapeMap(10)
         val timeParse = measureTimeMillis {
-            smap.addLayer(LayerType.Height, file)
+            smap.addLayer(LayerType.Height, file1, context)
+            smap.addLayer(LayerType.Water, file2, context)
         }
+
         camera = smap.initialize()
         Log.i("CustomMap", "Parse file: $timeParse")
 
@@ -119,5 +126,9 @@ class CustomMap : View {
 
     fun zoomToDevice(){
         camera.startAnimation(Triple(loc.east, loc.north, 0.02), 1500.0)
+    }
+
+    fun toggleLayer(l: Int){
+        smap.layerMask[l] = !smap.layerMask[l]
     }
 }

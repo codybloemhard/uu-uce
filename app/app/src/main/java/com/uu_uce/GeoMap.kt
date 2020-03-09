@@ -15,7 +15,8 @@ class GeoMap : TouchParent() {
         addChild(Scroller(this, ::onScroll))
         addChild(DoubleTapper(this, ::onDoubleTap))
 
-        button2.setOnClickListener{customMap.zoomToDevice()}
+        button.setOnClickListener{customMap.zoomToDevice()}
+        button2.setOnClickListener{customMap.toggleLayer(1)}
     }
 
     private fun onZoom(delta: Float){
