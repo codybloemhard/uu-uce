@@ -45,15 +45,15 @@ class Camera(
     private var animStartT = 0.0
     private var animT = 0.0
 
-    fun getViewport(waspect: Double): Pair<p3,p3>{
+    fun getViewport(wAspect: Double): Pair<p2,p2>{
         val w = viewMax.first - viewMin.first
         val h = viewMax.second - viewMin.second
-        val woff = w * waspect / 2.0 * zoom
+        val woff = w * wAspect / 2.0 * zoom
         val hoff = h / 2.0 * zoom
         lastWoff = woff
         lastHoff = hoff
-        val nmin = Triple(x - woff, y - hoff, Double.MIN_VALUE)
-        val nmax = Triple(x + woff, y + hoff, Double.MAX_VALUE)
+        val nmin = p2(x - woff, y - hoff)
+        val nmax = p2(x + woff, y + hoff)
         return Pair(nmin, nmax)
     }
 

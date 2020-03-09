@@ -1,10 +1,8 @@
 package com.uu_uce
 
 import android.os.Bundle
-import com.uu_uce.ui.DoubleTapper
-import com.uu_uce.ui.Scroller
-import com.uu_uce.ui.TouchParent
-import com.uu_uce.ui.Zoomer
+import com.uu_uce.shapefiles.p2
+import com.uu_uce.ui.*
 import kotlinx.android.synthetic.main.activity_geo_map.*
 
 class GeoMap : TouchParent() {
@@ -14,6 +12,7 @@ class GeoMap : TouchParent() {
         addChild(Zoomer(this, ::onZoom))
         addChild(Scroller(this, ::onScroll))
         addChild(DoubleTapper(this, ::onDoubleTap))
+        addChild(SingleTapper(this, ::onSingleTap))
 
         button2.setOnClickListener{customMap.zoomToDevice()}
     }
@@ -28,5 +27,9 @@ class GeoMap : TouchParent() {
 
     private fun onDoubleTap(){
         this.customMap.zoomOutMax()
+    }
+
+    private fun onSingleTap(tapLocation : p2){
+        customMap.tapPin(tapLocation)
     }
 }
