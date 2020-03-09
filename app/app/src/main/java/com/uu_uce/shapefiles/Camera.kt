@@ -1,7 +1,5 @@
 package com.uu_uce.shapefiles
 
-import com.uu_uce.misc.LogType
-import com.uu_uce.misc.Logger
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -34,7 +32,7 @@ class Camera(
     private val maxDistXy = distXy(viewMin, viewMax)
 
     var maxZoom = 1.0
-    var minZoom = 0.0000000001
+    private var minZoom = 0.0000000001
 
     private var lastWoff = 0.0
     private var lastHoff = 0.0

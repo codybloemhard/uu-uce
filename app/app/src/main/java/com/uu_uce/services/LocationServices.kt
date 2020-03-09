@@ -9,7 +9,6 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Looper
-import android.util.Log
 import androidx.core.content.ContextCompat.checkSelfPermission
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger

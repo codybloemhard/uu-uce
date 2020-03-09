@@ -2,7 +2,6 @@ package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.util.Log
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import diewald_shapeFile.files.shp.shapeTypes.ShpPoint
