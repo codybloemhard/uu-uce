@@ -1,7 +1,6 @@
 package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
-import android.util.Log
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import diewald_shapeFile.files.shp.SHP_File
@@ -109,7 +108,7 @@ class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
     fun draw(canvas: Canvas, type: LayerType, topleft: p3, botright: p3, width: Int, height: Int, zoomLevel: Int){
         if(allShapes.isEmpty()) return
 
-        Logger.log(LogType.Continues, "zoom", zoomLevel.toString())
+        Logger.log(LogType.Continuous, "zoom", zoomLevel.toString())
 
         var shapeCount = 0
         for(i in zoomShapes[zoomLevel].indices){
@@ -119,6 +118,6 @@ class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
                 shapeCount++
             }
         }
-        Logger.log(LogType.Continues, "ShapeMap", "Shapes drawn: $shapeCount / ${allShapes.size}")
+        Logger.log(LogType.Continuous, "ShapeMap", "Shapes drawn: $shapeCount / ${allShapes.size}")
     }
 }

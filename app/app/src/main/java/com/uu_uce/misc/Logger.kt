@@ -2,7 +2,7 @@ package com.uu_uce.misc
 
 import android.util.Log
 
-enum class LogType{ Event, Continues, Info, NotImplemented }
+enum class LogType{ Event, Continuous, Info, NotImplemented }
 
 class Logger{
     companion object {
@@ -10,7 +10,7 @@ class Logger{
         private val tagMask = hashMapOf<String, Boolean>()
 
         init{
-            typeMask[LogType.Continues] = true
+            typeMask[LogType.Continuous] = true
             typeMask[LogType.Event] = true
             typeMask[LogType.Info] = true
             typeMask[LogType.NotImplemented] = true

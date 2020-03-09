@@ -106,7 +106,7 @@ class CustomMap : View {
                 4F)
             pin.draw(viewport, this, canvas)
         }
-        Logger.log(LogType.Continues, "CustomMap", "Draw MS: $timeDraw")
+        Logger.log(LogType.Continuous, "CustomMap", "Draw MS: $timeDraw")
         if(res == UpdateResult.ANIM)
             invalidate()
     }
