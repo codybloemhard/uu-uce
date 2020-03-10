@@ -10,8 +10,8 @@
         android:layout_height="wrap_content"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
-        android:src="@drawable/earth"
+        android:src="@drawable/logo"
         android:scaleType="fitCenter"
-        android:contentDescription="@string/imageContentDescription"/>
+        android:contentDescription="plaatje"/>
 
 </LinearLayout>
