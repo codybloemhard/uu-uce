@@ -12,8 +12,12 @@ import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation
+
+import com.uu_uce.misc.LogType
+import com.uu_uce.misc.Logger
+import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.pins.Pin
-import com.uu_uce.pins.PinTextContent
+import com.uu_uce.pins.PinContent
 import com.uu_uce.pins.PinType
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.UTMCoordinate
@@ -28,6 +32,8 @@ import com.uu_uce.ui.Zoomer
 import diewald_shapeFile.files.shp.SHP_File
 import diewald_shapeFile.files.shp.shapeTypes.ShpShape
 import kotlinx.android.synthetic.main.activity_geo_map.view.*
+import com.uu_uce.shapefiles.UpdateResult
+import com.uu_uce.shapefiles.p2
 import java.io.File
 import kotlin.system.measureTimeMillis
 
@@ -37,24 +43,35 @@ class CustomMap : ViewTouchParent {
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private var smap : ShapeMap
+    private var first = true
 
     private var loc : UTMCoordinate = UTMCoordinate(31, 'N', 0.0, 0.0)
 
     private val locationServices = LocationServices()
 
+    private val pinTapBufferSize : Int = 10
+
     private val deviceLocPaint : Paint = Paint()
     private val deviceLocEdgePaint : Paint = Paint()
 
-    private val pin : Pin =
-        Pin(
-            UTMCoordinate(31, 'N', 314968.0, 4677733.6),
-            1,
-            PinType.TEXT,
-            "Test",
-            PinTextContent(),
-            60,
-            ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
-        )
+    private val pinList : MutableList<Pin> = mutableListOf(Pin(
+        UTMCoordinate(31, 'N', 314968.0, 4677733.6),
+        1,
+        PinType.TEXT,
+        "Test1",
+        PinContent(),
+        ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
+    ), Pin(
+        UTMCoordinate(31, 'N', 313368.0, 4671833.6),
+        1,
+        PinType.TEXT,
+        "Test2",
+        PinContent(),
+        ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
+    ))
+
+    private var statusBarHeight = 0
+    private val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
 
     private var camera: Camera
 
@@ -63,9 +80,8 @@ class CustomMap : ViewTouchParent {
         addChild(Zoomer(context, ::zoomMap))
         addChild(Scroller(context, ::moveMap))
         addChild(DoubleTapper(context, ::zoomOutMax))
+        Logger.log(LogType.Info,"CustomMap", "Init")
 
-
-        Log.d("CustomMap", "Init")
         val dir = File(context.filesDir, "mydir")
         val path1 = File(dir, "bt25mv10sh0f6422al1r020.shp")
         //val path2 = File(dir, "bt25mv10sh0f6422hp1r020.shp")
@@ -86,44 +102,60 @@ class CustomMap : ViewTouchParent {
         }
 
         camera = smap.initialize()
-        Log.i("CustomMap", "Parse file: $timeParse")
+        //Log.i("CustomMap", "Parse file: $timeParse")
 
         deviceLocPaint.color = Color.BLUE
         deviceLocEdgePaint.color = Color.WHITE
 
         locationServices.startPollThread(context, 5000, 0F, ::updateLoc)
+
+        if (resourceId > 0) {
+            statusBarHeight = resources.getDimensionPixelSize(resourceId)
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        camera.update()
-        val viewport = camera.getViewport(width.toDouble() / height)
+        val waspect = width.toDouble() / height
+        if(first){
+            val z = 1.0 / (waspect)
+            camera.maxZoom = z
+            camera.setZoom(z)
+            first = false
+        }
+        val res = camera.update()
+        if(res == UpdateResult.NOOP){
+            return
+        }
+        val viewport = camera.getViewport(waspect)
         val timeDraw = measureTimeMillis {
             canvas.drawColor(Color.rgb(234, 243, 245))
             smap.draw(canvas, width, height)
             drawDeviceLocation(
-                coordToScreen(loc, viewport, this),
+                coordToScreen(loc, viewport, width, height),
                 canvas,
                 deviceLocPaint,
                 deviceLocEdgePaint,
                 15F,
                 4F)
-            pin.draw(viewport, this, canvas)
-            
+            pinList.map { pin -> pin.draw(viewport, this, canvas) }
         }
-        Log.i("CustomMap", "Draw: $timeDraw")
-        invalidate()
+        Logger.log(LogType.Continuous, "CustomMap", "Draw MS: $timeDraw")
+        if(res == UpdateResult.ANIM)
+            invalidate()
     }
 
-    private fun updateLoc(newLoc : Pair<Double, Double>) {
+    private fun updateLoc(newLoc : p2) {
         loc = degreeToUTM(newLoc)
-        Log.d("CustomMap", "${loc.east}, ${loc.north}")
+        Logger.log(LogType.Event,"CustomMap", "${loc.east}, ${loc.north}")
     }
 
     fun zoomMap(zoomf: Float){
         val zoom = zoomf.toDouble()
         val deltaOne = 1.0 - zoom.coerceIn(0.5, 1.5)
         camera.zoomIn(1.0 + deltaOne)
+        if(camera.needsInvalidate())
+            invalidate()
     }
 
     fun moveMap(dxpxf: Float, dypxf: Float){
@@ -132,14 +164,32 @@ class CustomMap : ViewTouchParent {
         val dx = dxpx / width
         val dy = dypx / height
         camera.moveView(dx * 2, dy * -2)
+        if(camera.needsInvalidate())
+            invalidate()
     }
 
     fun zoomOutMax(){
-        camera.zoomOutMax(1500.0)
+        camera.zoomOutMax(500.0)
+        if(camera.needsInvalidate())
+            invalidate()
     }
 
     fun zoomToDevice(){
         camera.startAnimation(Triple(loc.east, loc.north, 0.02), 1500.0)
+        if(camera.needsInvalidate())
+            invalidate()
+    }
+
+    fun tapPin(tapLocation : p2){
+        val canvasTapLocation : p2 = Pair(tapLocation.first, tapLocation.second - statusBarHeight)
+        pinList.forEach{ p ->
+            if(!p.inScreen) return@forEach
+            if(pointInAABoundingBox(p.boundingBox.first, p.boundingBox.second, canvasTapLocation, pinTapBufferSize)){
+                //TODO: implement popup function here
+                Logger.log(LogType.Info, "CustomMap", "${p.title}: I have been tapped.")
+                return
+            }
+        }
     }
 
     fun toggleLayer(l: Int){
