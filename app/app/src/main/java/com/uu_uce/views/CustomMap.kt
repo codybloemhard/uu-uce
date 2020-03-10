@@ -55,22 +55,6 @@ class CustomMap : View {
     private lateinit var viewModel : PinViewModel
     private lateinit var lfOwner : LifecycleOwner
 
-    private val pinList : MutableList<Pin> = mutableListOf(Pin(
-        UTMCoordinate(31, 'N', 314968.0, 4677733.6),
-        1,
-        PinType.TEXT,
-        "Test1",
-        PinContent(),
-        ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
-    ), Pin(
-        UTMCoordinate(31, 'N', 313368.0, 4671833.6),
-        1,
-        PinType.TEXT,
-        "Test2",
-        PinContent(),
-        ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
-    ))
-
     private var statusBarHeight = 0
     private val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
 
@@ -128,9 +112,8 @@ class CustomMap : View {
                 deviceLocEdgePaint,
                 15F,
                 4F)
-            //pin.draw(viewport, this, canvas)
-            for (pint in pins) {
-                pint.draw(viewport, this, canvas)
+            for (pin in pins) {
+                pin.draw(viewport, this, canvas)
             }
 
         }
@@ -157,6 +140,8 @@ class CustomMap : View {
             processedPins.add(PinConversion(context).pinDataToPin(pin))
         }
         this.pins = processedPins
+        camera.forceChanged()
+        invalidate()
     }
 
     fun zoomMap(zoom: Double){
@@ -188,7 +173,7 @@ class CustomMap : View {
 
     fun tapPin(tapLocation : p2){
         val canvasTapLocation : p2 = Pair(tapLocation.first, tapLocation.second - statusBarHeight)
-        pinList.forEach{ p ->
+        pins.forEach{ p ->
             if(!p.inScreen) return@forEach
             if(pointInAABoundingBox(p.boundingBox.first, p.boundingBox.second, canvasTapLocation, pinTapBufferSize)){
                 //TODO: implement popup function here

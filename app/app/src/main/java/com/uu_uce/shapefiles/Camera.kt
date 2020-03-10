@@ -65,6 +65,10 @@ class Camera(
         return changed || isBusy()
     }
 
+    fun forceChanged(){
+        changed = true
+    }
+
     private fun setXy(xx: Double, yy: Double){
         changed = changed || xx != x || yy != y
         x = xx

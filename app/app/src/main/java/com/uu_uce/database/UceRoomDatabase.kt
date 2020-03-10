@@ -29,8 +29,8 @@ public abstract class UceRoomDatabase : RoomDatabase() {
 
         suspend fun populateDatabase(pinDao: PinDao) {
             pinDao.deleteAllPins()
-            var pin = PinData(1, "31N3149680N46777336E",1, "test", "testPin1", "test", 60)
-            var pin2 = PinData(2, "31N3133680N46718336E", 1, "test", "testPin2", "test", 60)
+            var pin = PinData(0,"31N3149680N46777336E",1, "test", "testPin1", "test", 60)
+            var pin2 = PinData(0, "31N3133680N46718336E", 1, "test", "testPin2", "test", 60)
 
             //var pin2 = PinData(2, "123456", 1, "test", "testPin2", "test", 1)
 
