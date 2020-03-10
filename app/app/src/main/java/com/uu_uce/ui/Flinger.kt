@@ -1,5 +1,6 @@
 package com.uu_uce.ui
 
+import android.content.Context
 import android.view.GestureDetector
 import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
@@ -11,7 +12,7 @@ enum class FlingDir{
 }
 
 class Flinger(
-        parent: AppCompatActivity,
+        parent: Context,
         var action: (FlingDir, Float) -> Unit)
         : TouchChild, GestureDetector.OnGestureListener{
     private var gestureDetector: GestureDetectorCompat? = null
