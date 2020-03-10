@@ -12,6 +12,6 @@
         android:paddingEnd="12dp"
         android:src="@drawable/logo"
         android:scaleType="fitCenter"
-        android:contentDescription="plaatje"/>
+        android:contentDescription="Plaatje"/>
 
 </LinearLayout>
