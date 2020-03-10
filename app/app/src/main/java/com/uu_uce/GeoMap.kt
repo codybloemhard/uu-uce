@@ -7,6 +7,8 @@ import com.uu_uce.ui.DoubleTapper
 import com.uu_uce.ui.Scroller
 import com.uu_uce.ui.TouchParent
 import com.uu_uce.ui.Zoomer
+import com.uu_uce.shapefiles.p2
+import com.uu_uce.ui.*
 import kotlinx.android.synthetic.main.activity_geo_map.*
 
 class GeoMap : TouchParent() {
@@ -17,6 +19,7 @@ class GeoMap : TouchParent() {
         addChild(Zoomer(this, ::onZoom))
         addChild(Scroller(this, ::onScroll))
         addChild(DoubleTapper(this, ::onDoubleTap))
+        addChild(SingleTapper(this, ::onSingleTap))
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         this.customMap.setViewModel(pinViewModel)
         this.customMap.setLifeCycleOwner(this)
@@ -35,5 +38,9 @@ class GeoMap : TouchParent() {
 
     private fun onDoubleTap(){
         this.customMap.zoomOutMax()
+    }
+
+    private fun onSingleTap(tapLocation : p2){
+        customMap.tapPin(tapLocation)
     }
 }

@@ -16,6 +16,10 @@ enum class AnimType{
     NONE, TRANS, OUT
 }
 
+enum class UpdateResult{
+    NOOP, REDRAW, ANIM
+}
+
 class Camera(
     private var x: Double,
     private var y: Double,
@@ -28,10 +32,11 @@ class Camera(
     private val maxDistXy = distXy(viewMin, viewMax)
 
     var maxZoom = 1.0
-    var minZoom = 0.0000000001
+    private var minZoom = 0.0000000001
 
     private var lastWoff = 0.0
     private var lastHoff = 0.0
+    private var changed = true
 
     private var animType: AnimType = AnimType.NONE
     private var animBegin = p3Zero
@@ -40,15 +45,15 @@ class Camera(
     private var animStartT = 0.0
     private var animT = 0.0
 
-    fun getViewport(waspect: Double): Pair<p3,p3>{
+    fun getViewport(wAspect: Double): Pair<p2,p2>{
         val w = viewMax.first - viewMin.first
         val h = viewMax.second - viewMin.second
-        val woff = w * waspect / 2.0 * zoom
+        val woff = w * wAspect / 2.0 * zoom
         val hoff = h / 2.0 * zoom
         lastWoff = woff
         lastHoff = hoff
-        val nmin = Triple(x - woff, y - hoff, Double.MIN_VALUE)
-        val nmax = Triple(x + woff, y + hoff, Double.MAX_VALUE)
+        val nmin = p2(x - woff, y - hoff)
+        val nmax = p2(x + woff, y + hoff)
         return Pair(nmin, nmax)
     }
 
@@ -56,24 +61,32 @@ class Camera(
         return animType != AnimType.NONE
     }
 
-    fun setPosCenter(){
-        if(isBusy()) return
-        x = mx
-        y = my
+    fun needsInvalidate(): Boolean{
+        return changed || isBusy()
     }
 
-    fun setPos(newX: Double, newY: Double){
+    private fun setXy(xx: Double, yy: Double){
+        changed = changed || xx != x || yy != y
+        x = xx
+        y = yy
+    }
+
+    private fun setPosCenter(){
+        if(isBusy()) return
+        setXy(mx, my)
+    }
+
+    private fun setPos(newX: Double, newY: Double){
         if(isBusy()) return
         val minx = viewMin.first + lastWoff
         val maxx = viewMax.first - lastWoff
         val miny = viewMin.second + lastHoff
         val maxy = viewMax.second - lastHoff
-        if(minx >= maxx || miny >= maxy){
+        if(minx >= maxx || miny >= maxy)
             setPosCenter()
-        }else{
-            x = newX.coerceIn(minx, maxx)
-            y = newY.coerceIn(miny, maxy)
-        }
+        else
+            setXy(newX.coerceIn(minx, maxx),newY.coerceIn(miny, maxy))
+
     }
 
     fun moveView(dx: Double, dy: Double){
@@ -85,15 +98,20 @@ class Camera(
         return zoom
     }
 
+    private fun setZ(zz: Double){
+        changed = changed || zoom != zz
+        zoom = zz
+    }
+
     fun setZoom(newZoom: Double){
         if(isBusy()) return
-        zoom = newZoom.coerceIn(minZoom, maxZoom)
+        setZ(newZoom.coerceIn(minZoom, maxZoom))
     }
 
     fun zoomIn(factor: Double){
         if(isBusy()) return
-        zoom *= factor
-        zoom = zoom.coerceIn(minZoom, maxZoom)
+        val z = zoom * factor
+        setZ(z.coerceIn(minZoom, maxZoom))
     }
 
     fun zoomOutMax(duration: Double){
@@ -120,13 +138,21 @@ class Camera(
         return -(t - 1.0).pow(2.0) + 1.0
     }
 
-    fun update(){
-        if(!isBusy()) return
+    //Updates and returns true if viewport has changed
+    fun update(): UpdateResult{
+        if(!changed && !isBusy()){
+            return UpdateResult.NOOP
+        }
+        changed = false
         when(animType){
             AnimType.NONE -> {}
             AnimType.TRANS -> updateTrans()
             AnimType.OUT -> updateOut()
         }
+        return if(isBusy())
+            UpdateResult.ANIM
+        else
+            UpdateResult.REDRAW
     }
 
     private fun updateOut(){

@@ -1,7 +1,9 @@
 package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
-import android.util.Log
+import com.uu_uce.mapOverlay.aaBoundingBoxIntersect
+import com.uu_uce.misc.LogType
+import com.uu_uce.misc.Logger
 import diewald_shapeFile.files.shp.SHP_File
 import kotlin.math.log
 import kotlin.math.pow
@@ -35,8 +37,8 @@ class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
 
     private fun createBB(){
         val bminmax = mergeBBs(
-            allShapes.map{ s -> s.bmin},
-            allShapes.map{ s -> s.bmax})
+            allShapes.map{ s -> s.bMin},
+            allShapes.map{ s -> s.bMax})
         bmin = bminmax.first
         bmax = bminmax.second
     }
@@ -104,19 +106,19 @@ class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
         }
     }
 
-    fun draw(canvas: Canvas, type: LayerType, topleft: p3, botright: p3, width: Int, height: Int, zoomLevel: Int){
+    fun draw(canvas: Canvas, type: LayerType, viewport : Pair<p2,p2>, width: Int, height: Int, zoomLevel: Int){
         if(allShapes.isEmpty()) return
 
-        Log.d("zoom", zoomLevel.toString())
+        Logger.log(LogType.Continuous, "zoom", zoomLevel.toString())
 
         var shapeCount = 0
         for(i in zoomShapes[zoomLevel].indices){
             val shape = zoomShapes[zoomLevel][i]
-            if(aabbIntersect(shape.bmin,shape.bmax,topleft,botright)) {
-                shape.draw(canvas, type, topleft, botright, width, height)
+            if(aaBoundingBoxIntersect(shape.bMin, shape.bMax, viewport.first, viewport.second)) {
+                shape.draw(canvas, type, viewport, width, height)
                 shapeCount++
             }
         }
-        Log.d("ShapeMap", "Shapes drawn: $shapeCount / ${allShapes.size}")
+        Logger.log(LogType.Continuous, "ShapeMap", "Shapes drawn: $shapeCount / ${allShapes.size}")
     }
 }
