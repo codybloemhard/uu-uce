@@ -5,9 +5,19 @@ This is the repository for the android app.
 ## Other Repositories and Sources
 ### bin-buffer
 bin-buffer is a Rust crate to convert data to binairy buffers.
+
+
 [bin-buffer on crates.io](https://crates.io/crates/bin_buffer)
+
+
 [bin-buffer on rust docs](https://docs.rs/bin_buffer/)
+
+
 [bin-buffer on github](https://github.com/ocdy1001/bin-buffer)
 ### shapefile-linter
+
+
 shapefile-linter is a Rust crate to lint, clean and compress shapefiles.
+
+
 [shapefile-linter on github](https://github.com/ocdy1001/shapefile-linter)
