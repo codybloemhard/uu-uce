@@ -8,7 +8,12 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import com.uu_uce.R
+import com.uu_uce.database.PinData
+import com.uu_uce.database.PinViewModel
+import com.uu_uce.database.PinConversion
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation
 import com.uu_uce.pins.Pin
@@ -37,6 +42,9 @@ class CustomMap : View {
 
     private val deviceLocPaint : Paint = Paint()
     private val deviceLocEdgePaint : Paint = Paint()
+    private var pins : List<Pin> = emptyList<Pin>()
+    private lateinit var viewModel : PinViewModel
+    private lateinit var lfOwner : LifecycleOwner
 
     private val pin : Pin =
         Pin(
@@ -72,7 +80,6 @@ class CustomMap : View {
 
         deviceLocPaint.color = Color.BLUE
         deviceLocEdgePaint.color = Color.WHITE
-
         locationServices.startPollThread(context, 5000, 0F, ::updateLoc)
     }
 
@@ -90,7 +97,10 @@ class CustomMap : View {
                 deviceLocEdgePaint,
                 15F,
                 4F)
-            pin.draw(viewport, this, canvas)
+            //pin.draw(viewport, this, canvas)
+            for (pint in pins) {
+                pint.draw(viewport, this, canvas)
+            }
             
         }
         Log.i("CustomMap", "Draw: $timeDraw")
@@ -100,6 +110,21 @@ class CustomMap : View {
     private fun updateLoc(newLoc : Pair<Double, Double>) {
         loc = degreeToUTM(newLoc)
         Log.d("CustomMap", "${loc.east}, ${loc.north}")
+    }
+
+    fun updatePins(){
+        viewModel.allPinData.observe(lfOwner, Observer { pins ->
+            // Update the cached copy of the words in the adapter.
+            pins?.let { setPins(it) }
+        })
+    }
+
+    private fun setPins(pins: List<PinData>) {
+        var processedPins = mutableListOf<Pin>()
+        for(pin in pins) {
+            processedPins.add(PinConversion(context).pinDataToPin(pin))
+        }
+        this.pins = processedPins
     }
 
     fun zoomMap(zoom: Double){
@@ -119,5 +144,13 @@ class CustomMap : View {
 
     fun zoomToDevice(){
         camera.startAnimation(Triple(loc.east, loc.north, 0.02), 1500.0)
+    }
+
+    fun setViewModel(vm: PinViewModel) {
+        viewModel = vm
+    }
+
+    fun setLifeCycleOwner(lifecycleOwner: LifecycleOwner) {
+        lfOwner = lifecycleOwner
     }
 }

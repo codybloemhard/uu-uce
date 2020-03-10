@@ -1,6 +1,8 @@
 package com.uu_uce
 
 import android.os.Bundle
+import androidx.lifecycle.ViewModelProvider
+import com.uu_uce.database.PinViewModel
 import com.uu_uce.ui.DoubleTapper
 import com.uu_uce.ui.Scroller
 import com.uu_uce.ui.TouchParent
@@ -8,12 +10,17 @@ import com.uu_uce.ui.Zoomer
 import kotlinx.android.synthetic.main.activity_geo_map.*
 
 class GeoMap : TouchParent() {
+    public lateinit var pinViewModel: PinViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_geo_map)
         addChild(Zoomer(this, ::onZoom))
         addChild(Scroller(this, ::onScroll))
         addChild(DoubleTapper(this, ::onDoubleTap))
+        pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
+        this.customMap.setViewModel(pinViewModel)
+        this.customMap.setLifeCycleOwner(this)
+        this.customMap.updatePins()
 
         button2.setOnClickListener{customMap.zoomToDevice()}
     }
