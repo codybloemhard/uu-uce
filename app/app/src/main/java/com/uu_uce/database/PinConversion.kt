@@ -6,7 +6,6 @@ import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.pins.Pin
 import com.uu_uce.pins.PinContent
-import com.uu_uce.pins.PinTextContent
 import com.uu_uce.pins.PinType
 import com.uu_uce.services.UTMCoordinate
 
@@ -30,7 +29,7 @@ class PinConversion(context: Context){
 
     fun stringToPinContent(type: String): PinContent {
 
-        return PinTextContent()
+        return PinContent()
     }
 
     fun stringToDrawable(type: String): Drawable {
@@ -45,7 +44,6 @@ class PinConversion(context: Context){
             stringToPinType(pinData.type)           ,
             pinData.title                           ,
             stringToPinContent(pinData.content)     ,
-            60                              ,
             stringToDrawable(pinData.type)
         )
 
