@@ -2,7 +2,6 @@ package com.uu_uce
 
 import android.content.Intent
 import android.os.Bundle
-import com.uu_uce.pins.PinActivity
 import com.uu_uce.ui.TouchParent
 
 class MainActivity : TouchParent() {
