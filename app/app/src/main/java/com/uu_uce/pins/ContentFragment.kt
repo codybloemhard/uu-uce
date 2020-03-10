@@ -1,16 +1,14 @@
-package com.uu_uce
+package com.uu_uce.pins
 
 import android.os.Bundle
-import android.view.InflateException
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.uu_uce.pins.Pin
-import com.uu_uce.pins.PinType
+import com.uu_uce.R
 
-class ContentFragment : Fragment() {
+class ContentFragment(pin : Pin) : Fragment() {
 
     companion object{
         var pin: Pin? = null
@@ -37,7 +35,6 @@ class ContentFragment : Fragment() {
 
             }
         }
-
         return contentView
     }
 }
