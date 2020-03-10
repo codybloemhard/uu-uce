@@ -28,7 +28,7 @@ class ContentFragment : Fragment() {
                 contentView = inflater.inflate(R.layout.popup_window_text_content, container)
 
                 val windowContent = contentView?.findViewById<TextView>(R.id.text_content)
-                windowContent?.text = pin?.content?.getTextContent()
+                windowContent?.text = getString(R.string.sample_text)
             }
             PinType.IMAGE -> {
                 contentView = inflater.inflate(R.layout.popup_window_image_content, container)

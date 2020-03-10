@@ -31,7 +31,7 @@ class PinActivity : AppCompatActivity() {
         ptc.text = getString(R.string.sample_text)
         val pin =
             getDrawable(R.drawable.ic_show_infographic)?.let {
-                Pin(UTMCoordinate(31, 'N', 0.0, 0.0),0, PinType.IMAGE, title, ptc, 60,
+                Pin(UTMCoordinate(31, 'N', 0.0, 0.0),0, PinType.TEXT, title, ptc, 60,
                     it
                 )
             }
