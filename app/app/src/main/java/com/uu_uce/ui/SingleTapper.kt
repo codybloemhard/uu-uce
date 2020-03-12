@@ -1,5 +1,6 @@
 package com.uu_uce.ui
 
+import android.app.Activity
 import android.view.GestureDetector
 import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
@@ -7,8 +8,8 @@ import androidx.core.view.GestureDetectorCompat
 import com.uu_uce.shapefiles.p2
 
 class SingleTapper(
-    parent: AppCompatActivity,
-    var action: (p2) -> Unit)
+    val parent: AppCompatActivity,
+    val action: (p2, Activity) -> Unit)
     : TouchChild,
     GestureDetector.OnGestureListener,
     GestureDetector.OnDoubleTapListener{
@@ -24,7 +25,7 @@ class SingleTapper(
         }
 
         override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
-            action(Pair((e?.x ?: 0.0f).toDouble(), (e?.y ?: 0.0f).toDouble()))
+            action(Pair((e?.x ?: 0.0f).toDouble(), (e?.y ?: 0.0f).toDouble()), parent)
             return true
         }
 

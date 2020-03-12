@@ -65,7 +65,7 @@ class Pin(
         image.draw(canvas)
     }
 
-    fun openPopupWindow(parentLayout: ConstraintLayout, activity : Activity) {
+    fun openPopupWindow(parentView: View, activity : Activity) {
         // make sure we can access the Pin in the fragment
 
         val layoutInflater = activity.layoutInflater
@@ -78,7 +78,7 @@ class Pin(
         val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
         windowTitle.text = title
 
-        popupWindow.showAtLocation(parentLayout, Gravity.CENTER, 0, 0)
+        popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
 
         val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
 

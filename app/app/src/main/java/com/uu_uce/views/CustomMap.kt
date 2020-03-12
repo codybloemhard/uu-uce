@@ -1,5 +1,6 @@
 package com.uu_uce.views
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -7,6 +8,7 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.mapOverlay.coordToScreen
@@ -27,6 +29,7 @@ import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.ShapeMap
 import com.uu_uce.shapefiles.UpdateResult
 import com.uu_uce.shapefiles.p2
+import kotlinx.android.synthetic.main.activity_geo_map.view.*
 import java.io.File
 import kotlin.system.measureTimeMillis
 
@@ -84,6 +87,7 @@ class CustomMap : View {
         val timeParse = measureTimeMillis {
             smap.addLayer(LayerType.Height, file)
         }
+
         camera = smap.initialize()
         //Log.i("CustomMap", "Parse file: $timeParse")
 
@@ -160,12 +164,12 @@ class CustomMap : View {
             invalidate()
     }
 
-    fun tapPin(tapLocation : p2){
+    fun tapPin(tapLocation : p2, activity : Activity){
         val canvasTapLocation : p2 = Pair(tapLocation.first, tapLocation.second - statusBarHeight)
         pinList.forEach{ p ->
             if(!p.inScreen) return@forEach
             if(pointInAABoundingBox(p.boundingBox.first, p.boundingBox.second, canvasTapLocation, pinTapBufferSize)){
-                //TODO: implement popup function here
+                p.openPopupWindow(this, activity)
                 Logger.log(LogType.Info, "CustomMap", "${p.title}: I have been tapped.")
                 return
             }

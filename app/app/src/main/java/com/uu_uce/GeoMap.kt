@@ -1,5 +1,6 @@
 package com.uu_uce
 
+import android.app.Activity
 import android.os.Bundle
 import com.uu_uce.shapefiles.p2
 import com.uu_uce.ui.*
@@ -29,7 +30,7 @@ class GeoMap : TouchParent() {
         this.customMap.zoomOutMax()
     }
 
-    private fun onSingleTap(tapLocation : p2){
-        customMap.tapPin(tapLocation)
+    private fun onSingleTap(tapLocation : p2, activity : Activity){
+        customMap.tapPin(tapLocation, activity)
     }
 }

@@ -10,7 +10,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.uu_uce.R
 
 class PinActivity : AppCompatActivity() {
-    private fun openPopupWindow(parentLayout: ConstraintLayout, pin: Pin) {
+   /* private fun openPopupWindow(parentLayout: ConstraintLayout, pin: Pin) {
         // make sure we can access the Pin in the fragment
         ContentFragment.pin = pin
 
@@ -38,5 +38,5 @@ class PinActivity : AppCompatActivity() {
                 ft.remove(cf).commit()
             }
         }
-    }
+    }*/
 }
