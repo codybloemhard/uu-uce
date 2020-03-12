@@ -35,6 +35,7 @@ class ContentFragment() : Fragment() {
 
             }
         }
+
         return contentView
     }
 }

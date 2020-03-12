@@ -7,6 +7,7 @@ import com.uu_uce.ui.*
 import kotlinx.android.synthetic.main.activity_geo_map.*
 
 class GeoMap : TouchParent() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_geo_map)
@@ -31,6 +32,6 @@ class GeoMap : TouchParent() {
     }
 
     private fun onSingleTap(tapLocation : p2, activity : Activity){
-        customMap.tapPin(tapLocation, activity)
+        customMap.tapPin(tapLocation,  activity, supportFragmentManager)
     }
 }
