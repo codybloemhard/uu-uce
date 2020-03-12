@@ -12,7 +12,7 @@ import com.uu_uce.services.UTMCoordinate
 class PinConversion(context: Context){
 
     private var resource = context.resources
-    fun stringToUtm(coord: String): UTMCoordinate {
+    private fun stringToUtm(coord: String): UTMCoordinate {
         val regex = "(\\d+|[a-zA-Z])".toRegex()
         val s = regex.findAll(coord)
         return UTMCoordinate(s.elementAt(0).value.toInt()       ,
@@ -22,29 +22,50 @@ class PinConversion(context: Context){
 
     }
 
-    fun stringToPinType(type: String): PinType {
+    private fun stringToPinType(type: String): PinType {
 
         return PinType.TEXT
     }
 
-    fun stringToPinContent(type: String): PinContent {
+    private fun stringToPinContent(type: String): PinContent {
 
         return PinContent()
     }
 
-    fun stringToDrawable(type: String): Drawable {
+    private fun stringToDrawable(type: String, difficulty: Int): Drawable {
 
-        return ResourcesCompat.getDrawable(resource, R.drawable.pin, null) ?: error ("Image not found")
+        var s  = "ic_pin"
+        s += when (type) {
+            "TEXT"  -> "_text"
+            "VIDEO" -> "_video"
+            "IMAGE" -> "_picture"
+            else -> {
+                "_link"
+            }
+        }
+        s += when (difficulty) {
+            1 -> "_groen"
+            2 -> "_oranje"
+            3 -> "_rood"
+            else -> {
+                "_grijs"
+            }
+        }
+        return ResourcesCompat.getDrawable(
+            resource, resource.getIdentifier(s, "drawable",
+             "com.uu_uce"
+         ), null) ?: ResourcesCompat.getDrawable(resource, R.drawable.pin, null) ?: error ("Image not found")
+
     }
 
-    public fun pinDataToPin(pinData: PinData): Pin {
+    fun pinDataToPin(pinData: PinData): Pin {
         return Pin(
             stringToUtm(pinData.location)           , //location
             pinData.difficulty                      ,
             stringToPinType(pinData.type)           ,
             pinData.title                           ,
             stringToPinContent(pinData.content)     ,
-            stringToDrawable(pinData.type)
+            stringToDrawable(pinData.type, pinData.difficulty)
         )
 
     }
