@@ -3,9 +3,7 @@ package com.uu_uce.ui
 import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
 
-interface TouchChild{
-    fun getOnTouchEvent(event: MotionEvent?)
-}
+
 
 open class TouchParent: AppCompatActivity(){
     private var children = mutableListOf<TouchChild>()

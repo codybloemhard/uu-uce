@@ -1,6 +1,7 @@
 package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
@@ -69,7 +70,7 @@ class ShapeZ {
 
     fun draw(
         canvas: Canvas,
-        type: LayerType,
+        paint: Paint,
         viewport : Pair<p2, p2>,
         width: Int,
         height: Int

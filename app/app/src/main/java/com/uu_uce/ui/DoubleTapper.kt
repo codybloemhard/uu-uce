@@ -1,12 +1,13 @@
 package com.uu_uce.ui
 
+import android.content.Context
 import android.view.GestureDetector
 import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GestureDetectorCompat
 
 class DoubleTapper(
-    parent: AppCompatActivity,
+    parent: Context,
     var action: () -> Unit)
     : TouchChild,
     GestureDetector.OnGestureListener,

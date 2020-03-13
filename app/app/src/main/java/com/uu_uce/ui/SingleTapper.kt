@@ -1,5 +1,6 @@
 package com.uu_uce.ui
 
+import android.content.Context
 import android.view.GestureDetector
 import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
@@ -7,7 +8,7 @@ import androidx.core.view.GestureDetectorCompat
 import com.uu_uce.shapefiles.p2
 
 class SingleTapper(
-    parent: AppCompatActivity,
+    parent: Context,
     var action: (p2) -> Unit)
     : TouchChild,
     GestureDetector.OnGestureListener,

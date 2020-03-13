@@ -1,6 +1,7 @@
 package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
+import android.graphics.Paint
 import com.uu_uce.mapOverlay.aaBoundingBoxIntersect
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
@@ -19,7 +20,7 @@ class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
     private val zDensSorted: List<Int>
 
     init{
-        allShapes = shapeFile.shpShapes.map{ s -> ShapeZ(s)}
+        allShapes = shapeFile.shpShapes.map{ s -> ShapeZ(s) }
         allShapes = allShapes.sortedBy{ it.meanZ() }
 
         allShapes.map{
@@ -82,9 +83,9 @@ class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
                     val z = zDensSorted[indices[a]]
                     when {
                         shape.meanZ() == z -> {
-                            //shapes.add(ShapeZ((i+1).toDouble()/zs, allShapes[b]))
-                            val factor =(level + level.pow(3))/2
-                            shapes.add(ShapeZ((factor), allShapes[b]))
+                            shapes.add(allShapes[b])
+                            //val factor =(level + level.pow(3))/2
+                            //shapes.add(ShapeZ((factor), allShapes[b]))
                             b++
                         }
                         shape.meanZ() < z -> b++
@@ -106,7 +107,7 @@ class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
         }
     }
 
-    fun draw(canvas: Canvas, type: LayerType, viewport : Pair<p2,p2>, width: Int, height: Int, zoomLevel: Int){
+    fun draw(canvas: Canvas, paint: Paint, viewport : Pair<p2,p2>, width: Int, height: Int, zoomLevel: Int){
         if(allShapes.isEmpty()) return
 
         Logger.log(LogType.Continuous, "zoom", zoomLevel.toString())
@@ -115,7 +116,7 @@ class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
         for(i in zoomShapes[zoomLevel].indices){
             val shape = zoomShapes[zoomLevel][i]
             if(aaBoundingBoxIntersect(shape.bMin, shape.bMax, viewport.first, viewport.second)) {
-                shape.draw(canvas, type, viewport, width, height)
+                shape.draw(canvas, paint, viewport, width, height)
                 shapeCount++
             }
         }

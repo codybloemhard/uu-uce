@@ -1,12 +1,13 @@
 package com.uu_uce.ui
 
+import android.content.Context
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import androidx.appcompat.app.AppCompatActivity
 
 
 class Zoomer(
-    parent: AppCompatActivity,
+    parent: Context,
     var action: (Float) -> Unit)
     : TouchChild, ScaleGestureDetector.SimpleOnScaleGestureListener() {
     private var scaleGestureDetector: ScaleGestureDetector? = null

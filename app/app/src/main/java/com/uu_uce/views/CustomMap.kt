@@ -6,12 +6,12 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation
-import diewald_shapeFile.files.shp.SHP_File
 
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
@@ -25,12 +25,19 @@ import com.uu_uce.services.degreeToUTM
 import com.uu_uce.shapefiles.Camera
 import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.ShapeMap
+import com.uu_uce.ui.DoubleTapper
+import com.uu_uce.ui.Scroller
+import com.uu_uce.ui.ViewTouchParent
+import com.uu_uce.ui.Zoomer
+import diewald_shapeFile.files.shp.SHP_File
+import diewald_shapeFile.files.shp.shapeTypes.ShpShape
+import kotlinx.android.synthetic.main.activity_geo_map.view.*
 import com.uu_uce.shapefiles.UpdateResult
 import com.uu_uce.shapefiles.p2
 import java.io.File
 import kotlin.system.measureTimeMillis
 
-class CustomMap : View {
+class CustomMap : ViewTouchParent {
     constructor(context: Context): super(context)
     constructor(context: Context, attrs: AttributeSet): super(context, attrs)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
@@ -69,21 +76,31 @@ class CustomMap : View {
     private var camera: Camera
 
     init{
+        //setup touch events
+        addChild(Zoomer(context, ::zoomMap))
+        addChild(Scroller(context, ::moveMap))
+        addChild(DoubleTapper(context, ::zoomOutMax))
         Logger.log(LogType.Info,"CustomMap", "Init")
+
         val dir = File(context.filesDir, "mydir")
-        val path = File(dir, "bt25mv10sh0f6422al1r020.shp")
+        val path1 = File(dir, "bt25mv10sh0f6422al1r020.shp")
+        val path2 = File(dir, "bt25mv10sh0f6422hp1r020.shp")
         SHP_File.LOG_INFO = false
         SHP_File.LOG_ONLOAD_HEADER = false
         SHP_File.LOG_ONLOAD_CONTENT = false
-        val file = SHP_File(null, path)
+        val file1 = SHP_File(null, path1)
+        val file2 = SHP_File(null, path2)
         val timeRead = measureTimeMillis {
-            file.read()
+            file1.read()
+            file2.read()
         }
         Log.i("CustomMap", "Read file: $timeRead")
         smap = ShapeMap(10)
         val timeParse = measureTimeMillis {
-            smap.addLayer(LayerType.Height, file)
+            smap.addLayer(LayerType.Height, file1, context)
+            smap.addLayer(LayerType.Water, file2, context)
         }
+
         camera = smap.initialize()
         //Log.i("CustomMap", "Parse file: $timeParse")
 
@@ -133,14 +150,18 @@ class CustomMap : View {
         Logger.log(LogType.Event,"CustomMap", "${loc.east}, ${loc.north}")
     }
 
-    fun zoomMap(zoom: Double){
+    fun zoomMap(zoomf: Float){
+        val zoom = zoomf.toDouble()
         val deltaOne = 1.0 - zoom.coerceIn(0.5, 1.5)
         camera.zoomIn(1.0 + deltaOne)
         if(camera.needsInvalidate())
             invalidate()
     }
 
-    fun moveMap(dxpx: Double, dypx: Double){
+    fun moveMap(dxpxf: Float, dypxf: Float){
+        Logger.log(LogType.Continuous, "CustomMap", "$dypxf")
+        val dxpx = dxpxf.toDouble()
+        val dypx = dypxf.toDouble()
         val dx = dxpx / width
         val dy = dypx / height
         camera.moveView(dx * 2, dy * -2)
@@ -170,5 +191,9 @@ class CustomMap : View {
                 return
             }
         }
+    }
+
+    fun toggleLayer(l: Int){
+        smap.layerMask[l] = !smap.layerMask[l]
     }
 }
