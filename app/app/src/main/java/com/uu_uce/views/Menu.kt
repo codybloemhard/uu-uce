@@ -1,60 +1,52 @@
 package com.uu_uce.views
 
-import android.animation.ObjectAnimator
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Point
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
-import android.util.Log
-import android.view.Display
 import android.view.MotionEvent
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.updateLayoutParams
 import com.uu_uce.R
-import com.uu_uce.misc.LogType
-import com.uu_uce.misc.Logger
-import com.uu_uce.shapefiles.p2
-import com.uu_uce.ui.*
-import kotlinx.android.synthetic.main.activity_geo_map.*
 
-class Menu : ViewTouchParent {
+class Menu : View {
     constructor(context: Context): super(context)
     constructor(context: Context, attrs: AttributeSet): super(context, attrs)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private var dragStatus = DragStatus.Down
 
-    private val downPercent = 0.1f
-    private val barPercent = 0.2f
-    private val upPercent = 1f
-    private var downY = 200f
-    private var barY = 300f
-    private var upY = 600f
-    private var image : Drawable? = context.getDrawable(R.drawable.menu)
-    private var screenHeight = 0
+    private val menuChilds : MutableList<MenuChild> = mutableListOf()
+
+    val downPercent = 0.05f
+    val barPercent = 0.2f
+    val upPercent = 1f
+    var downY = 0f
+    var barY = 0f
+    var upY = 0f
+    var image : Drawable? = context.getDrawable(R.drawable.menu)
+    var screenSiz = 0
 
     init{
-        //addChild(Scroller(context, ::scroll))
-        addChild(SingleTapper(context, ::tap))
-
         //make the menu start at the bottom of the screen
-        var listener =
+        val listener =
             OnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
                 y = oldTop.toFloat()
             }
         addOnLayoutChangeListener(listener)
         post{
-            updateLayoutParams{height = screenHeight}
-            y = screenHeight - downY
+            updateLayoutParams{height = screenSiz}
+            y = screenSiz - downY
         }
     }
 
+    fun addMenuChild(child: MenuChild){
+        menuChilds.add(child)
+    }
+
     fun setScreenHeight(h: Int){
-        screenHeight = h
+        screenSiz = h
         downY = h * downPercent
         barY = h * barPercent
         upY = h * upPercent
@@ -63,20 +55,36 @@ class Menu : ViewTouchParent {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.drawColor(Color.argb(255,254,212,2))
-        image?.draw(canvas)
+        for(child in menuChilds)
+            child.onDraw(canvas)
     }
 
-    private fun tap(loc: p2){
+    fun open(){
         when(dragStatus){
             DragStatus.Down ->{
                 dragStatus = DragStatus.Bar
-                animate().y(screenHeight - barY)
+                animate().y(screenSiz - barY)
             }
             DragStatus.Bar ->{
                 dragStatus = DragStatus.Down
-                animate().y(screenHeight - downY)
+                animate().y(screenSiz - downY)
+            }
+            DragStatus.Up ->{
+
             }
         }
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        for(child in menuChilds){
+            if(child.onTouchEvent(event))
+                break
+        }
+        var x = event.x
+        var y = event.y
+        var rx = event.rawX
+        var ry = event.rawY
+        return true
     }
 }
 
