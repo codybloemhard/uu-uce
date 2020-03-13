@@ -5,13 +5,13 @@ import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.view.Gravity
 import android.view.View
-import com.uu_uce.mapOverlay.aaBoundingBoxContains
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.PopupWindow
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.fragment.app.FragmentManager
 import com.uu_uce.R
+import com.uu_uce.mapOverlay.aaBoundingBoxContains
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.screenToCoord
 import com.uu_uce.services.UTMCoordinate
@@ -65,8 +65,9 @@ class Pin(
         image.draw(canvas)
     }
 
-    fun openPopupWindow(parentView: View, activity : Activity) {
+    fun openPopupWindow(parentView: View, activity : Activity, fm : FragmentManager) {
         // make sure we can access the Pin in the fragment
+        ContentFragment.pin = this
 
         val layoutInflater = activity.layoutInflater
 
@@ -80,10 +81,16 @@ class Pin(
 
         popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
 
+        val ft = fm.beginTransaction()
+        val cf = fm.findFragmentById(R.id.ContentFragment)
+
         val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
 
         btnClosePopupWindow.setOnClickListener {
             popupWindow.dismiss()
+            if (cf != null) {
+                ft.remove(cf).commit()
+            }
         }
     }
 }

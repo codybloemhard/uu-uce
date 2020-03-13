@@ -28,7 +28,6 @@
             android:name=".GeoMap"
             android:label="@string/title_activity_geo_map"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".pins.PinActivity" />
     </application>
 
 </manifest>

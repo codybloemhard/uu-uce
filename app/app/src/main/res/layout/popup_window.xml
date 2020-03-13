@@ -48,7 +48,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!--<fragment
+            <fragment
                 android:id="@+id/ContentFragment"
                 android:name="com.uu_uce.pins.ContentFragment"
                 android:layout_width="match_parent"
@@ -57,7 +57,7 @@
                 app:layout_constraintBottom_toTopOf="@+id/popup_window_close_button"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/popup_window_title" />-->
+                app:layout_constraintTop_toBottomOf="@+id/popup_window_title" />
 
             <Button
                 android:id="@+id/popup_window_close_button"

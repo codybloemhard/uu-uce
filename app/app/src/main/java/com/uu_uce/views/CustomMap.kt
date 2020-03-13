@@ -8,28 +8,22 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
+import androidx.fragment.app.FragmentManager
 import com.uu_uce.R
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation
-import diewald_shapeFile.files.shp.SHP_File
-
+import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.pins.Pin
 import com.uu_uce.pins.PinContent
 import com.uu_uce.pins.PinType
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.services.degreeToUTM
-import com.uu_uce.shapefiles.Camera
-import com.uu_uce.shapefiles.LayerType
-import com.uu_uce.shapefiles.ShapeMap
-import com.uu_uce.shapefiles.UpdateResult
-import com.uu_uce.shapefiles.p2
-import kotlinx.android.synthetic.main.activity_geo_map.view.*
+import com.uu_uce.shapefiles.*
+import diewald_shapeFile.files.shp.SHP_File
 import java.io.File
 import kotlin.system.measureTimeMillis
 
@@ -182,12 +176,12 @@ class CustomMap : View {
             invalidate()
     }
 
-    fun tapPin(tapLocation : p2, activity : Activity){
+    fun tapPin(tapLocation : p2, activity : Activity, fm : FragmentManager){
         val canvasTapLocation : p2 = Pair(tapLocation.first, tapLocation.second - statusBarHeight)
         pinList.forEach{ p ->
             if(!p.inScreen) return@forEach
             if(pointInAABoundingBox(p.boundingBox.first, p.boundingBox.second, canvasTapLocation, pinTapBufferSize)){
-                p.openPopupWindow(this, activity)
+                p.openPopupWindow(this, activity, fm)
                 Logger.log(LogType.Info, "CustomMap", "${p.title}: I have been tapped.")
                 return
             }
