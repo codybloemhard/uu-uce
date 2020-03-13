@@ -84,21 +84,21 @@ class CustomMap : ViewTouchParent {
 
         val dir = File(context.filesDir, "mydir")
         val path1 = File(dir, "bt25mv10sh0f6422al1r020.shp")
-        //val path2 = File(dir, "bt25mv10sh0f6422hp1r020.shp")
+        val path2 = File(dir, "bt25mv10sh0f6422hp1r020.shp")
         SHP_File.LOG_INFO = false
         SHP_File.LOG_ONLOAD_HEADER = false
         SHP_File.LOG_ONLOAD_CONTENT = false
         val file1 = SHP_File(null, path1)
-        //val file2 = SHP_File(null, path2)
+        val file2 = SHP_File(null, path2)
         val timeRead = measureTimeMillis {
             file1.read()
-            //file2.read()
+            file2.read()
         }
         Log.i("CustomMap", "Read file: $timeRead")
         smap = ShapeMap(10)
         val timeParse = measureTimeMillis {
             smap.addLayer(LayerType.Height, file1, context)
-            //smap.addLayer(LayerType.Water, file2, context)
+            smap.addLayer(LayerType.Water, file2, context)
         }
 
         camera = smap.initialize()
