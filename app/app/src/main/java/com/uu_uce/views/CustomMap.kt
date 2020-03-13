@@ -159,6 +159,7 @@ class CustomMap : ViewTouchParent {
     }
 
     fun moveMap(dxpxf: Float, dypxf: Float){
+        Logger.log(LogType.Continuous, "CustomMap", "$dypxf")
         val dxpx = dxpxf.toDouble()
         val dypx = dypxf.toDouble()
         val dx = dxpx / width
