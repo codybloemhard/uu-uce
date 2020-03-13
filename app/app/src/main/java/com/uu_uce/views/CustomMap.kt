@@ -55,14 +55,32 @@ class CustomMap : View {
         1,
         PinType.TEXT,
         "Test1",
-        PinContent(),
+        PinContent("[\n" +
+                "        {\n" +
+                "            \"tag\"       : \"TEXT\",\n" +
+                "            \"content\"   : \"Ipsum Lorem\"\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"tag\"       : \"IMAGE\",\n" +
+                "            \"content\"   : \"/url/plaatje.png\"\n" +
+                "        }\n" +
+                "    ]"),
         ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
     ), Pin(
         UTMCoordinate(31, 'N', 313368.0, 4671833.6),
         1,
         PinType.TEXT,
         "Test2",
-        PinContent(),
+        PinContent("[\n" +
+                "        {\n" +
+                "            \"tag\"       : \"TEXT\",\n" +
+                "            \"content\"   : \"Ipsum Lorem\"\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"tag\"       : \"IMAGE\",\n" +
+                "            \"content\"   : \"/url/plaatje.png\"\n" +
+                "        }\n" +
+                "    ]"),
         ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
     ))
 

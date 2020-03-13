@@ -1,65 +1,97 @@
 package com.uu_uce.pins
 
 import android.util.JsonReader
-import android.util.JsonToken
-import java.io.InputStreamReader
+import java.io.StringReader
 
 
-class PinContent() {
-    /*val content : List<ContentBlock>
+class PinContent(contentString : String) {
+    private val content : List<ContentBlockInterface>
     init{
-        content = getContent(path)
+        content = getContent(contentString)
     }
 
-    private fun getContent(path : String) : List<ContentBlock>{
-            val reader : JsonReader = JsonReader(InputStreamReader(System.in));
-            reader.use { reader ->
-                return readContentBlocks(reader);
-            }
+    private fun getContent(contentString : String) : List<ContentBlockInterface>{
+            val reader = JsonReader(StringReader(contentString))
+
+            return readContentBlocks(reader)
         }
 
-    private fun readContentBlocks(reader : JsonReader) :  List<ContentBlock>{
-        val contentBlocks : MutableList<ContentBlock> = mutableListOf()
+    private fun readContentBlocks(reader : JsonReader) :  List<ContentBlockInterface>{
+        val contentBlocks : MutableList<ContentBlockInterface> = mutableListOf()
 
-        reader.beginArray();
+        reader.beginArray()
         while (reader.hasNext()) {
-            //contentBlocks.add(readBlock(reader));
+            contentBlocks.add(readBlock(reader))
         }
-        reader.endArray();
-        return contentBlocks;
+        reader.endArray()
+        return contentBlocks
     }
 
-    private fun readBlock(reader: JsonReader): ContentBlock? {
-        var id: Long = -1
-        var text: String? = null
-        var user: User? = null
-        var geo: List<Double?>? = null
+    private fun readBlock(reader: JsonReader): ContentBlockInterface {
+        var blockTag : BlockTag = BlockTag.UNDEFINED
+        var blockContent : ContentBlockInterface
         reader.beginObject()
         while (reader.hasNext()) {
-            val name = reader.nextName()
-            if (name == "id") {
-                id = reader.nextLong()
-            } else if (name == "text") {
-                text = reader.nextString()
-            } else if (name == "geo" && reader.peek() != JsonToken.NULL) {
-                geo = readDoublesArray(reader)
-            } else if (name == "user") {
-                user = readUser(reader)
-            } else {
-                reader.skipValue()
+            when (reader.nextName()) {
+                "tag" -> {
+                    blockTag = blockTagFromString(reader.nextString())
+                }
+                "content" -> {
+                    val returnBlock = when(blockTag){
+                        BlockTag.UNDEFINED  -> error("Undefined block tag")
+                        BlockTag.TEXT       -> TextContentBlock(reader.nextString())
+                        BlockTag.IMAGE      -> ImageContentBlock(reader.nextString())
+                        BlockTag.VIDEO      -> VideoContentBlock(reader.nextString())
+                    }
+                    reader.endObject()
+                    return returnBlock
+                }
+                else -> {
+                    error("Wrong content format")
+                }
             }
         }
-        reader.endObject()
-        return ContentBlock()
-        return ContentBlock()
+        error("Wrong content format")
     }
 }
 
-class ContentBlock(){
-
-}*/
+interface ContentBlockInterface{
+    fun drawContent()
 }
 
+class TextContentBlock(val text : String) : ContentBlockInterface{
+    override fun drawContent(){
+
+    }
+}
+
+class ImageContentBlock(val imagePath : String) : ContentBlockInterface{
+    override fun drawContent(){
+
+    }
+}
+
+class VideoContentBlock(val videoPath : String) : ContentBlockInterface{
+    override fun drawContent(){
+
+    }
+}
+
+enum class BlockTag{
+    UNDEFINED,
+    TEXT,
+    IMAGE,
+    VIDEO;
+}
+
+fun blockTagFromString(tagString : String) : BlockTag{
+    return when (tagString) {
+        "TEXT"  -> BlockTag.TEXT
+        "IMAGE" -> BlockTag.IMAGE
+        "VIDEO" -> BlockTag.VIDEO
+        else    ->  BlockTag.UNDEFINED
+    }
+}
 
 
 
