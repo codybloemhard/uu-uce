@@ -195,5 +195,7 @@ class CustomMap : ViewTouchParent {
 
     fun toggleLayer(l: Int){
         smap.layerMask[l] = !smap.layerMask[l]
+        camera.forceInvalidate()
+        invalidate()
     }
 }

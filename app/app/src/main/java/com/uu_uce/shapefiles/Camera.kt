@@ -61,6 +61,10 @@ class Camera(
         return animType != AnimType.NONE
     }
 
+    fun forceInvalidate(){
+        changed = true
+    }
+
     fun needsInvalidate(): Boolean{
         return changed || isBusy()
     }
