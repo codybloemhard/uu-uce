@@ -5,9 +5,9 @@ import java.io.StringReader
 
 
 class PinContent(contentString : String) {
-    private val content : List<ContentBlockInterface>
+    private val contentBlocks : List<ContentBlockInterface>
     init{
-        content = getContent(contentString)
+        contentBlocks = getContent(contentString)
     }
 
     private fun getContent(contentString : String) : List<ContentBlockInterface>{
@@ -56,23 +56,23 @@ class PinContent(contentString : String) {
 }
 
 interface ContentBlockInterface{
-    fun drawContent()
+    fun generateContent()
 }
 
 class TextContentBlock(val text : String) : ContentBlockInterface{
-    override fun drawContent(){
+    override fun generateContent(){
 
     }
 }
 
 class ImageContentBlock(val imagePath : String) : ContentBlockInterface{
-    override fun drawContent(){
+    override fun generateContent(){
 
     }
 }
 
 class VideoContentBlock(val videoPath : String) : ContentBlockInterface{
-    override fun drawContent(){
+    override fun generateContent(){
 
     }
 }
