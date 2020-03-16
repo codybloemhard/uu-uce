@@ -3,12 +3,12 @@ package com.uu_uce.pins
 import android.app.Activity
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
+import android.text.Layout
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.PopupWindow
-import android.widget.TextView
+import android.widget.*
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.FragmentManager
 import com.uu_uce.R
 import com.uu_uce.mapOverlay.aaBoundingBoxContains
@@ -66,9 +66,6 @@ class Pin(
     }
 
     fun openPopupWindow(parentView: View, activity : Activity, fm : FragmentManager) {
-        // make sure we can access the Pin in the fragment
-        ContentFragment.pin = this
-
         val layoutInflater = activity.layoutInflater
 
         // build an custom view (to be inflated on top of our current view & build it's popup window)
@@ -79,18 +76,16 @@ class Pin(
         val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
         windowTitle.text = title
 
-        popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
+        // add content to popup window
+        val layout : LinearLayout = customView.findViewById<LinearLayout>(R.id.scrollLayout)
+        content.contentBlocks.map { cB -> cB.generateContent(layout, activity) }
 
-        val ft = fm.beginTransaction()
-        val cf = fm.findFragmentById(R.id.ContentFragment)
+        popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
 
         val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
 
         btnClosePopupWindow.setOnClickListener {
             popupWindow.dismiss()
-            if (cf != null) {
-                ft.remove(cf).commit()
-            }
         }
     }
 }

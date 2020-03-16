@@ -49,32 +49,39 @@ class CustomMap : View {
         1,
         PinType.TEXT,
         "Test1",
-        PinContent("[\n" +
-                "        {\n" +
-                "            \"tag\"       : \"TEXT\",\n" +
-                "            \"content\"   : \"Ipsum Lorem\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"tag\"       : \"IMAGE\",\n" +
-                "            \"content\"   : \"/url/plaatje.png\"\n" +
-                "        }\n" +
-                "    ]"),
+        PinContent(
+            "[\n" +
+                    "        {\n" +
+                    "            \"tag\"       : \"TEXT\",\n" +
+                    "            \"content\"   : \"Image example\"\n" +
+                    "        },\n" +
+                    "        {\n" +
+                    "            \"tag\"       : \"IMAGE\",\n" +
+                    "            \"content\"   : \"logo.png\"\n" +
+                    "        },\n" +
+                    "        {\n" +
+                    "            \"tag\"       : \"IMAGE\",\n" +
+                    "            \"content\"   : \"logo.png\"\n" +
+                    "        }\n" +                    "    ]"
+        ),
         ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
     ), Pin(
         UTMCoordinate(31, 'N', 313368.0, 4671833.6),
         1,
-        PinType.TEXT,
+        PinType.IMAGE,
         "Test2",
-        PinContent("[\n" +
-                "        {\n" +
-                "            \"tag\"       : \"TEXT\",\n" +
-                "            \"content\"   : \"Ipsum Lorem\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "            \"tag\"       : \"IMAGE\",\n" +
-                "            \"content\"   : \"/url/plaatje.png\"\n" +
-                "        }\n" +
-                "    ]"),
+        PinContent(
+            "[\n" +
+                    "        {\n" +
+                    "            \"tag\"       : \"TEXT\",\n" +
+                    "            \"content\"   : \"Video example\"\n" +
+                    "        },\n" +
+                    "        {\n" +
+                    "            \"tag\"       : \"VIDEO\",\n" +
+                    "            \"content\"   : \"zoo.mp4\"\n" +
+                    "        }\n" +
+                    "    ]"
+        ),
         ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
     ))
 
