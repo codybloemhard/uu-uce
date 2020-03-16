@@ -2,16 +2,27 @@ package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.view.View
 import com.uu_uce.mapOverlay.aaBoundingBoxIntersect
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import diewald_shapeFile.files.shp.SHP_File
+import kotlinx.coroutines.*
+import java.io.File
 import kotlin.math.log
 import kotlin.math.pow
 
-class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
+class ShapeLayer(path: File, private val nrOfLODs: Int){
+    private var lastViewport: Pair<p2,p2> = Pair(p2Zero,p2Zero)
+    private var lastZoom: Int = -1
     private var allShapes: List<ShapeZ>
     private lateinit var zoomShapes: List<List<ShapeZ>>
+    private var chunksBackup: MutableMap<Triple<Int, Int, Int>, Chunk> = mutableMapOf()
+    private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk> = mutableMapOf()
+
+    private val chunkLoaders: MutableList<Pair<ChunkIndex,Job>> = mutableListOf()
+    private var loadedChunks = 1
+
     var bmin = p3Zero
         private set
     var bmax = p3Zero
@@ -20,7 +31,10 @@ class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
     private val zDensSorted: List<Int>
 
     init{
-        allShapes = shapeFile.shpShapes.map{ s -> ShapeZ(s) }
+        val shapefile = SHP_File(null, path)
+        shapefile.read()
+
+        allShapes = shapefile.shpShapes.map{ s -> ShapeZ(s) }
         allShapes = allShapes.sortedBy{ it.meanZ() }
 
         allShapes.map{
@@ -34,6 +48,10 @@ class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
 
         createBB()
         createZoomLevels()
+
+        for(i in 0 until nrOfLODs){
+            chunksBackup[Triple(0,0,i)] = Chunk(Triple(0,0,i),zoomShapes[i])
+        }
     }
 
     private fun createBB(){
@@ -107,19 +125,64 @@ class ShapeLayer(shapeFile: SHP_File, private val nrOfLODs: Int){
         }
     }
 
-    fun draw(canvas: Canvas, paint: Paint, viewport : Pair<p2,p2>, width: Int, height: Int, zoomLevel: Int){
+    private fun getNewOldChunks(viewport: Pair<p2,p2>, zoomLevel: Int) : Pair<List<ChunkIndex>,List<ChunkIndex>>{
+        val new: MutableList<ChunkIndex> = mutableListOf()
+        if(zoomLevel != lastZoom) new.add(Triple(0,0,zoomLevel))
+
+        val old: MutableList<Triple<Int,Int,Int>> = mutableListOf()
+        if(zoomLevel!= lastZoom)old.add(Triple(0,0,lastZoom))
+
+        return Pair(new.toList(),old.toList())
+    }
+
+    private fun shouldGetLoaded(chunkIndex: ChunkIndex, viewport: Pair<p2,p2>, zoom: Int): Boolean{
+        return chunkIndex.third == zoom
+    }
+
+    private fun updateChunks(viewport: Pair<p2,p2>, zoom: Int, map: ShapeMap){
+        for(i in chunkLoaders.size-1 downTo 0){
+            val (index,routine) = chunkLoaders[i]
+            if(!shouldGetLoaded(index, viewport, zoom))
+                routine.cancel()
+
+            if(routine.isCancelled || routine.isCompleted) {
+                chunkLoaders.removeAt(i)
+                continue
+            }
+        }
+
+        val (newChunks,oldChunks) = getNewOldChunks(viewport, zoom)
+
+        for (chunkIndex in newChunks) {
+            val c: Chunk = chunksBackup[chunkIndex] ?: continue
+            val routine = GlobalScope.launch {
+                delay(500)
+                chunks[chunkIndex] = c
+                loadedChunks++
+                map.invalidate()
+            }
+            chunkLoaders.add(Pair(chunkIndex, routine))
+        }
+
+        for (chunk in oldChunks) {
+            if(chunks.remove(chunk)!=null)
+                loadedChunks--
+        }
+
+        lastViewport = viewport
+        lastZoom = zoom
+        Logger.log(LogType.Continuous, "ShapeLayer", "loaded chunks: $loadedChunks")
+    }
+
+    fun draw(canvas: Canvas, paint: Paint, map: ShapeMap, viewport : Pair<p2,p2>, width: Int, height: Int, zoomLevel: Int){
         if(allShapes.isEmpty()) return
+
+        updateChunks(viewport, zoomLevel, map)
 
         Logger.log(LogType.Continuous, "zoom", zoomLevel.toString())
 
-        var shapeCount = 0
-        for(i in zoomShapes[zoomLevel].indices){
-            val shape = zoomShapes[zoomLevel][i]
-            if(aaBoundingBoxIntersect(shape.bMin, shape.bMax, viewport.first, viewport.second)) {
-                shape.draw(canvas, paint, viewport, width, height)
-                shapeCount++
-            }
+        for(chunk in chunks.values){
+            chunk.draw(canvas, paint, viewport, width, height)
         }
-        Logger.log(LogType.Continuous, "ShapeMap", "Shapes drawn: $shapeCount / ${allShapes.size}")
     }
 }

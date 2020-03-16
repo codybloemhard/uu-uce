@@ -76,6 +76,10 @@ class CustomMap : ViewTouchParent {
     private var camera: Camera
 
     init{
+        SHP_File.LOG_INFO = false
+        SHP_File.LOG_ONLOAD_HEADER = false
+        SHP_File.LOG_ONLOAD_CONTENT = false
+
         //setup touch events
         addChild(Zoomer(context, ::zoomMap))
         addChild(Scroller(context, ::moveMap))
@@ -83,23 +87,14 @@ class CustomMap : ViewTouchParent {
         Logger.log(LogType.Info,"CustomMap", "Init")
 
         val dir = File(context.filesDir, "mydir")
-        val path1 = File(dir, "bt25mv10sh0f6422al1r020.shp")
-        val path2 = File(dir, "bt25mv10sh0f6422hp1r020.shp")
-        SHP_File.LOG_INFO = false
-        SHP_File.LOG_ONLOAD_HEADER = false
-        SHP_File.LOG_ONLOAD_CONTENT = false
-        val file1 = SHP_File(null, path1)
-        val file2 = SHP_File(null, path2)
-        val timeRead = measureTimeMillis {
-            file1.read()
-            file2.read()
-        }
-        Log.i("CustomMap", "Read file: $timeRead")
-        smap = ShapeMap(10)
+        val path = File(dir, "bt25mv10sh0f6422al1r020.shp")
+
+        smap = ShapeMap(10, this)
         val timeParse = measureTimeMillis {
-            smap.addLayer(LayerType.Height, file1, context)
-            smap.addLayer(LayerType.Water, file2, context)
+            smap.addLayer(LayerType.Water, path, context)
         }
+
+
 
         camera = smap.initialize()
         //Log.i("CustomMap", "Parse file: $timeParse")
@@ -194,8 +189,6 @@ class CustomMap : ViewTouchParent {
     }
 
     fun toggleLayer(l: Int){
-        smap.layerMask[l] = !smap.layerMask[l]
-        camera.forceInvalidate()
-        invalidate()
+        smap.toggleLayer(l)
     }
 }
