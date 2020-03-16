@@ -9,7 +9,12 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import com.uu_uce.R
+import com.uu_uce.database.PinData
+import com.uu_uce.database.PinViewModel
+import com.uu_uce.database.PinConversion
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation
 
@@ -53,22 +58,9 @@ class CustomMap : ViewTouchParent {
 
     private val deviceLocPaint : Paint = Paint()
     private val deviceLocEdgePaint : Paint = Paint()
-
-    private val pinList : MutableList<Pin> = mutableListOf(Pin(
-        UTMCoordinate(31, 'N', 314968.0, 4677733.6),
-        1,
-        PinType.TEXT,
-        "Test1",
-        PinContent(),
-        ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
-    ), Pin(
-        UTMCoordinate(31, 'N', 313368.0, 4671833.6),
-        1,
-        PinType.TEXT,
-        "Test2",
-        PinContent(),
-        ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
-    ))
+    private var pins : List<Pin> = emptyList<Pin>()
+    private lateinit var viewModel : PinViewModel
+    private lateinit var lfOwner : LifecycleOwner
 
     private var statusBarHeight = 0
     private val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
@@ -106,7 +98,6 @@ class CustomMap : ViewTouchParent {
 
         deviceLocPaint.color = Color.BLUE
         deviceLocEdgePaint.color = Color.WHITE
-
         locationServices.startPollThread(context, 5000, 0F, ::updateLoc)
 
         if (resourceId > 0) {
@@ -138,7 +129,10 @@ class CustomMap : ViewTouchParent {
                 deviceLocEdgePaint,
                 15F,
                 4F)
-            pinList.map { pin -> pin.draw(viewport, this, canvas) }
+            for (pin in pins) {
+                pin.draw(viewport, this, canvas)
+            }
+
         }
         Logger.log(LogType.Continuous, "CustomMap", "Draw MS: $timeDraw")
         if(res == UpdateResult.ANIM)
@@ -150,9 +144,25 @@ class CustomMap : ViewTouchParent {
         Logger.log(LogType.Event,"CustomMap", "${loc.east}, ${loc.north}")
     }
 
-    fun zoomMap(zoomf: Float){
-        val zoom = zoomf.toDouble()
-        val deltaOne = 1.0 - zoom.coerceIn(0.5, 1.5)
+    fun updatePins(){
+        viewModel.allPinData.observe(lfOwner, Observer { pins ->
+            // Update the cached copy of the words in the adapter.
+            pins?.let { setPins(it) }
+        })
+    }
+
+    private fun setPins(pins: List<PinData>) {
+        var processedPins = mutableListOf<Pin>()
+        for(pin in pins) {
+            processedPins.add(PinConversion(context).pinDataToPin(pin))
+        }
+        this.pins = processedPins
+        camera.forceChanged()
+        invalidate()
+    }
+
+    fun zoomMap(zoom: Float){
+        val deltaOne = 1.0 - zoom.toDouble().coerceIn(0.5, 1.5)
         camera.zoomIn(1.0 + deltaOne)
         if(camera.needsInvalidate())
             invalidate()
@@ -183,7 +193,7 @@ class CustomMap : ViewTouchParent {
 
     fun tapPin(tapLocation : p2){
         val canvasTapLocation : p2 = Pair(tapLocation.first, tapLocation.second - statusBarHeight)
-        pinList.forEach{ p ->
+        pins.forEach{ p ->
             if(!p.inScreen) return@forEach
             if(pointInAABoundingBox(p.boundingBox.first, p.boundingBox.second, canvasTapLocation, pinTapBufferSize)){
                 //TODO: implement popup function here
@@ -193,9 +203,17 @@ class CustomMap : ViewTouchParent {
         }
     }
 
-    fun toggleLayer(l: Int){
+    fun toggleLayer(l: Int) {
         smap.layerMask[l] = !smap.layerMask[l]
-        camera.forceInvalidate()
+        camera.forceChanged()
         invalidate()
+    }
+
+    fun setViewModel(vm: PinViewModel) {
+        viewModel = vm
+    }
+
+    fun setLifeCycleOwner(lifecycleOwner: LifecycleOwner) {
+        lfOwner = lifecycleOwner
     }
 }

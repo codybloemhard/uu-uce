@@ -7,13 +7,16 @@ import android.os.Bundle
 import android.view.Display
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+import com.uu_uce.database.PinViewModel
 import com.uu_uce.shapefiles.p2
+import com.uu_uce.ui.*
 import com.uu_uce.views.MenuButton
 import kotlinx.android.synthetic.main.activity_geo_map.*
 import kotlinx.android.synthetic.main.activity_geo_map.view.*
 
-
 class GeoMap : AppCompatActivity() {
+    private lateinit var pinViewModel: PinViewModel
     private var screenDim = Point(0,0)
     private var statusBarHeight = 0
     private var resourceId = 0
@@ -21,6 +24,10 @@ class GeoMap : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_geo_map)
+        pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
+        this.customMap.setViewModel(pinViewModel)
+        this.customMap.setLifeCycleOwner(this)
+        this.customMap.updatePins()
 
         resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
         if (resourceId > 0) {
