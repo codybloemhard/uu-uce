@@ -21,7 +21,6 @@ class ShapeLayer(path: File, private val nrOfLODs: Int){
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk> = mutableMapOf()
 
     private val chunkLoaders: MutableList<Pair<ChunkIndex,Job>> = mutableListOf()
-    private var loadedChunks = 1
 
     var bmin = p3Zero
         private set
@@ -153,25 +152,44 @@ class ShapeLayer(path: File, private val nrOfLODs: Int){
 
         val (newChunks,oldChunks) = getNewOldChunks(viewport, zoom)
 
+        val routines: MutableList<Job> = mutableListOf()
         for (chunkIndex in newChunks) {
             val c: Chunk = chunksBackup[chunkIndex] ?: continue
             val routine = GlobalScope.launch {
                 delay(500)
-                chunks[chunkIndex] = c
-                loadedChunks++
+                synchronized(chunks) {
+                    chunks[chunkIndex] = c
+                }
                 map.invalidate()
             }
             chunkLoaders.add(Pair(chunkIndex, routine))
+            routines.add(routine)
         }
 
         for (chunk in oldChunks) {
-            if(chunks.remove(chunk)!=null)
-                loadedChunks--
+        GlobalScope.launch {
+            var ok = routines.isNotEmpty()
+            for(routine in routines){
+                routine.join()
+                if(routine.isCancelled) {
+                    ok = false
+                    break
+                }
+            }
+            if(ok) {
+                synchronized(chunks) {
+                    chunks.keys.removeAll{index ->
+                        !shouldGetLoaded(index,viewport,zoom)
+                    }
+                    var test = chunks
+                }
+
+            }
         }
 
         lastViewport = viewport
         lastZoom = zoom
-        Logger.log(LogType.Continuous, "ShapeLayer", "loaded chunks: $loadedChunks")
+        Logger.log(LogType.Continuous, "ShapeLayer", "loaded chunks: ${chunks.size}")
     }
 
     fun draw(canvas: Canvas, paint: Paint, map: ShapeMap, viewport : Pair<p2,p2>, width: Int, height: Int, zoomLevel: Int){
@@ -181,8 +199,10 @@ class ShapeLayer(path: File, private val nrOfLODs: Int){
 
         Logger.log(LogType.Continuous, "zoom", zoomLevel.toString())
 
-        for(chunk in chunks.values){
-            chunk.draw(canvas, paint, viewport, width, height)
+        synchronized(chunks) {
+            for(chunk in chunks.values) {
+                chunk.draw(canvas, paint, viewport, width, height)
+            }
         }
     }
 }
