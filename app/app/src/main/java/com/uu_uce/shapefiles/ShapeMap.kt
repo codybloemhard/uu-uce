@@ -42,11 +42,12 @@ fun mergeBBs(mins: List<p3>,maxs: List<p3>): Pair<p3,p3>{
 class ShapeMap(private val nrOfLODs: Int,
                private val view: View
 ){
-    private var layerMask = mutableListOf<Boolean>()
+    var layerMask = mutableListOf<Boolean>()
 
     private var layers = mutableListOf<Pair<LayerType,ShapeLayer>>()
     private var bMin = p3Zero
     private var bMax = p3Zero
+    private val zDens = hashMapOf<Int,Int>()
     private var zoomLevel = 5
 
     private val layerPaints : List<Paint>
@@ -79,7 +80,23 @@ class ShapeMap(private val nrOfLODs: Int,
         }
 
         Logger.log(LogType.Info,"ShapeMap", "Save: $timeSave")
+        val timeDens = measureTimeMillis {
+            layers.map{
+                l ->
+                val lDens = l.second.zDens
+                lDens.keys.map {
+                    key ->
+                    val old = zDens[key] ?: 0
+                    val local = lDens[key] ?: 0
+                    zDens.put(key, old + local)
+                }
+            }
+        }
+        Logger.log(LogType.Info,"ShapeMap", "Calc z density: $timeDens")
         Logger.log(LogType.Info, "ShapeMap", "bb: ($bMin),($bMax)")
+        zDens.keys.sorted().map{
+            key -> Logger.log(LogType.Info,"ShapeMap", "($key,${zDens[key]})")
+        }
 
         layerMask.add(true)
     }

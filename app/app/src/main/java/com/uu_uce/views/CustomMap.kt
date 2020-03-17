@@ -86,12 +86,16 @@ class CustomMap : ViewTouchParent {
         addChild(DoubleTapper(context, ::zoomOutMax))
         Logger.log(LogType.Info,"CustomMap", "Init")
 
-        smap = ShapeMap(10, this)
         val dir = File(context.filesDir, "mydir")
+        val path = File(dir, "bt25mv10sh0f6422al1r020.shp")
+
+        smap = ShapeMap(10, this)
         val timeParse = measureTimeMillis {
-            smap.addLayer(LayerType.Water, dir, context)
+            smap.addLayer(LayerType.Water, path, context)
         }
-        
+
+
+
         camera = smap.initialize()
         //Log.i("CustomMap", "Parse file: $timeParse")
 

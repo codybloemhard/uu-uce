@@ -8,9 +8,8 @@ import com.uu_uce.mapOverlay.aaBoundingBoxIntersect
 typealias ChunkIndex = Triple<Int,Int,Int>
 
 class Chunk(
-    var shapes: List<ShapeZ>,
-    var bmin: p3,
-    var bmax: p3
+    chunkIndex: ChunkIndex,
+    var shapes: List<ShapeZ>
 ) {
 
     fun draw(canvas: Canvas, paint: Paint, viewport : Pair<p2,p2>, width: Int, height: Int){

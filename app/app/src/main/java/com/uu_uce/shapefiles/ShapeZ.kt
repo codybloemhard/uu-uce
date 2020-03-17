@@ -1,6 +1,7 @@
 package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
@@ -11,20 +12,43 @@ import diewald_shapeFile.files.shp.shapeTypes.ShpShape
 
 class ShapeZ {
     private var type: ShapeType
-    var points: List<p2>
+    var points: List<Triple<Double, Double, Double>>
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     var bMin = p3Zero
         private set
     var bMax = p3Zero
         private set
 
-    constructor(t:ShapeType, p: List<p2>, bmi: p3, bma: p3){
-        type = t
-        points = p
-        bMin = bmi
-        bMax = bma
+    constructor(shape: ShpShape) {
+        when (shape.shapeType) {
+            ShpShape.Type.PolygonZ -> {
+                type = ShapeType.Polygon
+                val poly = (shape as ShpPolygon)
+                points = poly.points.map { point -> Triple(point[0], point[1], point[2]) }
+                updateBB(poly.boundingBox)
+            }
+            ShpShape.Type.PolyLineZ -> {
+                type = ShapeType.Polygon
+                val poly = (shape as ShpPolyLine)
+                points = poly.points.map { point -> Triple(point[0], point[1], point[2]) }
+                updateBB(poly.boundingBox)
+            }
+            ShpShape.Type.PointZ -> {
+                type = ShapeType.Point
+                val point = (shape as ShpPoint).point
+                points = listOf(Triple(point[0], point[1], point[2]))
+                bMin = Triple(point[0],point[1],point[2])
+                bMax = bMin.copy()
+            }
+            else -> {
+                Logger.log(LogType.NotImplemented,"ShapeZ", "Non supported type: ${shape.shapeType}")
+                type = ShapeType.Point
+                points = listOf()
+            }
+        }
     }
 
-    constructor(zoomPercentage: Double, baseShape: ShapeZ, bmi: p3, bma: p3){
+    constructor(zoomPercentage: Double, baseShape: ShapeZ){
         type = baseShape.type
         val mutablePoints = mutableListOf(baseShape.points.first())
         for(i in 1 until (baseShape.points.size * zoomPercentage).toInt()){
@@ -33,8 +57,15 @@ class ShapeZ {
         mutablePoints.add(baseShape.points.last())
         points = mutablePoints
 
-        bMin = bmi
-        bMax = bma
+        val minX = points.minBy{it.first}!!.first
+        val minY = points.minBy{it.second}!!.second
+        val minZ = points.minBy{it.third}!!.third
+        val maxX = points.maxBy{it.first}!!.first
+        val maxY = points.maxBy{it.second}!!.second
+        val maxZ = points.maxBy{it.third}!!.third
+
+        bMin = p3(minX,minY,minZ)
+        bMax = p3(maxX,maxY,maxZ)
     }
 
     fun draw(
@@ -60,6 +91,11 @@ class ShapeZ {
         }
 
         canvas.drawLines(drawPoints, paint)
+    }
+
+    private fun updateBB(bb: Array<DoubleArray>) {
+        bMin = Triple(bb[0][0], bb[1][0], bb[2][0])
+        bMax = Triple(bb[0][1], bb[1][1], bb[2][1])
     }
 
     fun meanZ(): Int{
