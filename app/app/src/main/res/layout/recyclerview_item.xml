@@ -2,13 +2,65 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/custom_border"
+    android:layout_marginBottom="5dp">
 
     <TextView
         android:id="@+id/textView"
         style="@style/pin_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/holo_orange_light"
+        android:textColor="@color/colorUU2"
+        android:textAlignment="center"
+        android:padding="5dp"
         app:layout_constraintTop_toTopOf="parent" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#DDDDDD"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/textView2"
+            style="@style/pin_coord"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/textView3"
+            style="@style/pin_coord"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <View
+                android:id="@+id/diff"
+                android:layout_height="20dp"
+                android:layout_width="20dp"
+                android:layout_gravity="center_vertical"
+                app:layout_constraintDimensionRatio="1:1"
+                android:background="#FF0000"
+                android:layout_marginStart="8dp"/>
+            <TextView
+            android:id="@+id/textView4"
+            style="@style/pin_coord"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+                android:layout_width="0dp" />
+        </LinearLayout>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/open"
+            android:textAllCaps="false"
+            android:background="@drawable/light_border"/>
+    </LinearLayout>
+
 </LinearLayout>
