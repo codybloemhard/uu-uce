@@ -103,7 +103,7 @@ class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
 
 class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : Uri, private val title : String) : ContentBlockInterface{
     override fun generateContent(layout : LinearLayout, activity : Activity){
-        val relativeLayout = RelativeLayout(activity)
+        val relativeLayout = RelativeLayout(activity) //TODO: maybe make this an constraintlayout?
         val thumbnail = ImageView(activity)
 
         // Create thumbnail image
@@ -111,12 +111,12 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
             val blackBox = CardView(activity)
             blackBox.setCardBackgroundColor(Color.BLACK) //TODO: maybe just set backgroundcolor of the layout to black?
             relativeLayout.addView(blackBox)
-
         }
         else{
             thumbnail.setImageURI(thumbnailURI)
             relativeLayout.addView(thumbnail)
         }
+
         relativeLayout.setBackgroundColor(Color.GREEN) //TODO: ADDED FOR DEBUGGING PURPOSES
         relativeLayout.layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 600) //TODO: don't do magical numbers
 
