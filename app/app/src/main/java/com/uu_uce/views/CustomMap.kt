@@ -80,7 +80,7 @@ class CustomMap : View {
                     "        {\n" +
                     "            \"tag\"       : \"VIDEO\",\n" +
                     "            \"content\"   : \"zoo.mp4\",\n" +
-                    "            \"thumbnail\" : \"zoothumbnail.PNG\",\n" +
+                    "            \"thumbnail\" : \"zoothumbnail.png\",\n" +
                     "            \"title\" : \"zoo\"\n" +
                     "        },\n" +
                     "        {\n" +

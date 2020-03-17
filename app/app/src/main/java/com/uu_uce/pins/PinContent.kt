@@ -8,7 +8,6 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import android.widget.LinearLayout
 import androidx.cardview.widget.CardView
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
@@ -104,29 +103,33 @@ class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
 
 class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : Uri, private val title : String) : ContentBlockInterface{
     override fun generateContent(layout : LinearLayout, activity : Activity){
-        val frameLayout = FrameLayout(activity)
+        val relativeLayout = RelativeLayout(activity)
+        val thumbnail = ImageView(activity)
+
         // Create thumbnail image
         if(thumbnailURI == Uri.EMPTY){
             val blackBox = CardView(activity)
-            blackBox.setCardBackgroundColor(Color.BLACK)
-            frameLayout.addView(blackBox)
+            blackBox.setCardBackgroundColor(Color.BLACK) //TODO: maybe just set backgroundcolor of the layout to black?
+            relativeLayout.addView(blackBox)
 
         }
         else{
-            val thumbnail = ImageView(activity)
             thumbnail.setImageURI(thumbnailURI)
-            frameLayout.addView(thumbnail)
+            relativeLayout.addView(thumbnail)
         }
+        relativeLayout.setBackgroundColor(Color.GREEN) //TODO: ADDED FOR DEBUGGING PURPOSES
+        relativeLayout.layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 600) //TODO: don't do magical numbers
 
         // Create play button
-        val button = Button(activity)
-        button.background = ResourcesCompat.getDrawable(activity.resources, R.drawable.play, null) ?: error ("Image not found")
-        button.setOnClickListener{openVideoView(videoURI, title, activity)}
-        button.layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        frameLayout.addView(button)
+        val playButton = ImageView(activity)
+        playButton.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.play, null) ?: error ("Image not found"))
+        playButton.scaleType = ImageView.ScaleType.FIT_CENTER //TODO: find correct scaletype
+
 
         // Add thumbnail and button
-        layout.addView(frameLayout)
+        relativeLayout.addView(playButton)
+        layout.addView(relativeLayout)
+        relativeLayout.setOnClickListener{openVideoView(videoURI, title, activity)}
     }
 
     private fun openVideoView(videoURI: Uri, videoTitle : String, activity : Activity){
