@@ -62,7 +62,8 @@ class CustomMap : View {
                     "        {\n" +
                     "            \"tag\"       : \"IMAGE\",\n" +
                     "            \"content\"   : \"logo.png\"\n" +
-                    "        }\n" +                    "    ]"
+                    "        }\n" +
+                    "    ]"
         ),
         ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
     ), Pin(
@@ -78,7 +79,17 @@ class CustomMap : View {
                     "        },\n" +
                     "        {\n" +
                     "            \"tag\"       : \"VIDEO\",\n" +
-                    "            \"content\"   : \"zoo.mp4\"\n" +
+                    "            \"content\"   : \"zoo.mp4\",\n" +
+                    "            \"thumbnail\" : \"zoothumbnail.PNG\",\n" +
+                    "            \"title\" : \"zoo\"\n" +
+                    "        },\n" +
+                    "        {\n" +
+                    "            \"tag\"       : \"IMAGE\",\n" +
+                    "            \"content\"   : \"logo.png\"\n" +
+                    "        },\n" +
+                    "        {\n" +
+                    "            \"tag\"       : \"IMAGE\",\n" +
+                    "            \"content\"   : \"logo.png\"\n" +
                     "        }\n" +
                     "    ]"
         ),
