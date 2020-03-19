@@ -53,23 +53,23 @@ class CustomMap : View {
             "[\n" +
                     "        {\n" +
                     "            \"tag\"       : \"TEXT\",\n" +
-                    "            \"content\"   : \"Image example\"\n" +
+                    "            \"text\"   : \"Image example\"\n" +
                     "        },\n" +
                     "        {\n" +
                     "            \"tag\"       : \"IMAGE\",\n" +
-                    "            \"content\"   : \"test.png\"\n" +
+                    "            \"file_name\"   : \"test.png\"\n" +
                     "        },\n" +
                     "        {\n" +
                     "            \"tag\"       : \"IMAGE\",\n" +
-                    "            \"content\"   : \"test.png\"\n" +
+                    "            \"file_name\"   : \"test.png\"\n" +
                     "        },\n" +
                     "        {\n" +
                     "            \"tag\"       : \"IMAGE\",\n" +
-                    "            \"content\"   : \"test.png\"\n" +
+                    "            \"file_name\"   : \"test.png\"\n" +
                     "        },\n" +
                     "        {\n" +
                     "            \"tag\"       : \"IMAGE\",\n" +
-                    "            \"content\"   : \"test.png\"\n" +
+                    "            \"file_name\"   : \"test.png\"\n" +
                     "        }\n" +
                     "    ]"
         ),
@@ -83,11 +83,11 @@ class CustomMap : View {
             "[\n" +
                     "        {\n" +
                     "            \"tag\"       : \"TEXT\",\n" +
-                    "            \"content\"   : \"Video example\"\n" +
+                    "            \"text\"   : \"Video example\"\n" +
                     "        },\n" +
                     "        {\n" +
                     "            \"tag\"       : \"VIDEO\",\n" +
-                    "            \"content\"   : \"zoo.mp4\",\n" +
+                    "            \"file_name\"   : \"zoo.mp4\",\n" +
                     "            \"thumbnail\" : \"zoothumbnail.png\",\n" +
                     "            \"title\" : \"zoo\"\n" +
                     "        }\n" +

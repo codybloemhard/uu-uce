@@ -8,9 +8,10 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.cardview.widget.CardView
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
+import com.uu_uce.misc.LogType
+import com.uu_uce.misc.Logger
 import java.io.StringReader
 
 
@@ -41,7 +42,8 @@ class PinContent(contentString: String) {
         val dir             = "file:///data/data/com.uu_uce/files/pin_content/"
 
         var blockTag        = BlockTag.UNDEFINED
-        var contentString   = ""
+        var textString   = ""
+        var fileName        = ""
         var title           = ""
         var thumbnailURI    = Uri.EMPTY
 
@@ -50,20 +52,28 @@ class PinContent(contentString: String) {
             when (reader.nextName()) {
                 "tag" -> {
                     blockTag = blockTagFromString(reader.nextString())
+                    if(blockTag == BlockTag.UNDEFINED) error("Undefined block tag")
                 }
-                "content" -> {
-                    contentString = when(blockTag){
+                "text" -> {
+                    textString = reader.nextString()
+                    //if(blockTag != BlockTag.TEXT) //TODO: alert user that only TextContentBlock uses text
+                }
+                "file_name" -> {
+                    fileName = when(blockTag) {
                         BlockTag.UNDEFINED  -> error("Undefined block tag")
-                        BlockTag.TEXT       -> reader.nextString()
+                        BlockTag.TEXT       -> error("Undefined function") //TODO: Add reading text from file
                         BlockTag.IMAGE      -> dir + "images/" + reader.nextString()
                         BlockTag.VIDEO      -> dir + "videos/" + reader.nextString()
                     }
                 }
+
                 "title" -> {
                     title = reader.nextString()
+                    //if(blockTag != BlockTag.VIDEO) //TODO: alert user that only VideoContentBlock uses title
                 }
                 "thumbnail" -> {
                     thumbnailURI = Uri.parse(dir + "videos/thumbnails/" + reader.nextString())
+                    //if(blockTag != BlockTag.VIDEO) //TODO: alert user that only VideoContentBlock uses thumbnail
                 }
                 else -> {
                     error("Wrong content format")
@@ -73,9 +83,9 @@ class PinContent(contentString: String) {
         reader.endObject()
         return when(blockTag){
             BlockTag.UNDEFINED  -> error("Undefined block tag")
-            BlockTag.TEXT       -> TextContentBlock(contentString)
-            BlockTag.IMAGE      -> ImageContentBlock(Uri.parse(contentString))
-            BlockTag.VIDEO      -> VideoContentBlock(Uri.parse(contentString), thumbnailURI, title)
+            BlockTag.TEXT       -> TextContentBlock(textString)
+            BlockTag.IMAGE      -> ImageContentBlock(Uri.parse(fileName))
+            BlockTag.VIDEO      -> VideoContentBlock(Uri.parse(fileName), thumbnailURI, title)
         }
     }
 }
