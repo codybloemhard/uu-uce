@@ -11,6 +11,7 @@ import kotlinx.coroutines.*
 import java.io.File
 import kotlin.math.log
 import kotlin.math.pow
+import kotlin.system.measureTimeMillis
 
 class ShapeLayer(path: File, private val nrOfLODs: Int){
     private var lastViewport: Pair<p2,p2> = Pair(p2Zero,p2Zero)
@@ -29,11 +30,13 @@ class ShapeLayer(path: File, private val nrOfLODs: Int){
 
 
     init{
-        val index = ChunkIndex(0,0,nrOfLODs-1)
+        val index = ChunkIndex(0,0,0)
+        val time = System.currentTimeMillis()
         val chunk = binShapeReader.getChunk(index)
         chunks[index] = chunk
         bmin = chunk.bmin
         bmax = chunk.bmax
+        Logger.log(LogType.Info, "ShapeLayer", "loadTime: ${System.currentTimeMillis() - time}")
     }
 
     private fun getNewOldChunks(viewport: Pair<p2,p2>, zoomLevel: Int) : Pair<List<ChunkIndex>,List<ChunkIndex>>{
@@ -67,11 +70,13 @@ class ShapeLayer(path: File, private val nrOfLODs: Int){
         val routines: MutableList<Job> = mutableListOf()
         for (chunkIndex in newChunks) {
             val routine = GlobalScope.launch {
+                val time = System.currentTimeMillis()
                 val c: Chunk = binShapeReader.getChunk(chunkIndex)
                 synchronized(chunks) {
                     chunks[chunkIndex] = c
                 }
                 map.invalidate()
+                Logger.log(LogType.Continuous, "ShapeLayer", "loadTime: ${System.currentTimeMillis() - time}")
             }
             chunkLoaders.add(Pair(chunkIndex, routine))
             routines.add(routine)
@@ -99,7 +104,6 @@ class ShapeLayer(path: File, private val nrOfLODs: Int){
 
         lastViewport = viewport
         lastZoom = zoom
-        Logger.log(LogType.Continuous, "ShapeLayer", "loaded chunks: ${chunks.size}")
     }
 
     fun draw(canvas: Canvas, paint: Paint, map: ShapeMap, viewport : Pair<p2,p2>, width: Int, height: Int, zoomLevel: Int){

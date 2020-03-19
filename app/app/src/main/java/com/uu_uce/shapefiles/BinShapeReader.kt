@@ -1,21 +1,24 @@
 package com.uu_uce.shapefiles
 
+import com.uu_uce.misc.LogType
+import com.uu_uce.misc.Logger
 import java.io.File
 import kotlin.math.log
 import kotlin.math.pow
 
-interface ShapeGetter{
+interface ChunkGetter{
     fun getChunk(cIndex: ChunkIndex):Chunk
 }
 
 @ExperimentalUnsignedTypes
 class FileReader(file: File){
     private var index = 0
-    private var bytes: ByteArray
+    private var bytes: UByteArray
 
     init{
         val inputStream = file.inputStream()
-        bytes = inputStream.readBytes()
+        bytes = inputStream.readBytes().toUByteArray()
+        inputStream.close()
     }
 
 
@@ -46,8 +49,9 @@ class FileReader(file: File){
 class BinShapeReader(
     var dir: File,
     var nrOfLODs: Int
-): ShapeGetter {
+): ChunkGetter {
     override fun getChunk(cIndex: ChunkIndex): Chunk {
+        val time = System.currentTimeMillis()
         val file = File(dir, "test.obj")
         val reader = FileReader(file)
 
@@ -78,6 +82,8 @@ class BinShapeReader(
             ShapeZ(ShapeType.Polygon, points, bb1, bb2)
         }
 
+        val time1 = System.currentTimeMillis() - time
+
         //create zoom levels
         chunkShapes = chunkShapes.sortedBy{ it.meanZ() }
 
@@ -96,58 +102,56 @@ class BinShapeReader(
         var curPow = log(zDensSorted.size.toDouble(), 2.0).toInt() + 1
         var curStep = 0
         var stepSize: Int = 1 shl curPow
-        var zoomShapes = List(nrOfLODs) { i ->
-            val level = (i + 1).toDouble() / nrOfLODs
-            val factor = maxOf(level.pow(3), 0.1)
-            val totalHeights =
-                if (i == nrOfLODs - 1) zDensSorted.size
-                else (factor * zDensSorted.size).toInt()
 
-            while (nrHeights < totalHeights) {
-                val index: Int = curStep * stepSize
-                if (index >= zDensSorted.size) {
-                    curPow--
-                    stepSize = 1 shl curPow
-                    curStep = 1
-                    continue
-                }
-                if (indices.contains(index))
-                    throw Exception("uh oh")
+        var i = cIndex.third
+        val level = (i + 1).toDouble() / nrOfLODs
+        val factor = maxOf(level.pow(3), 0.1)
+        val totalHeights =
+            if (i == nrOfLODs - 1) zDensSorted.size
+            else (factor * zDensSorted.size).toInt()
 
-                indices.add(index)
-                nrHeights++
-                curStep += 2
+        while (nrHeights < totalHeights) {
+            val index: Int = curStep * stepSize
+            if (index >= zDensSorted.size) {
+                curPow--
+                stepSize = 1 shl curPow
+                curStep = 1
+                continue
             }
+            if (indices.contains(index))
+                throw Exception("uh oh")
 
-            val shapes: MutableList<ShapeZ> = mutableListOf()
-            indices.sort()
-            if (indices.isNotEmpty()) {
-                var a = 0
-                var b = 0
-                while (a < indices.size && b < chunkShapes.size) {
-                    val shape = chunkShapes[b]
-                    val z = zDensSorted[indices[a]]
-                    when {
-                        shape.meanZ() == z -> {
-                            shapes.add(chunkShapes[b])
-                            //val factor =(level + level.pow(3))/2
-                            //shapes.add(ShapeZ((factor), allShapes[b]))
-                            b++
-                        }
-                        shape.meanZ() < z -> b++
-                        else -> a++
+            indices.add(index)
+            nrHeights++
+            curStep += 2
+        }
+
+        val shapes: MutableList<ShapeZ> = mutableListOf()
+        indices.sort()
+        if (indices.isNotEmpty()) {
+            var a = 0
+            var b = 0
+            while (a < indices.size && b < chunkShapes.size) {
+                val shape = chunkShapes[b]
+                val z = zDensSorted[indices[a]]
+                when {
+                    shape.meanZ() == z -> {
+                        shapes.add(chunkShapes[b])
+                        //val factor =(level + level.pow(3))/2
+                        //shapes.add(ShapeZ((factor), allShapes[b]))
+                        b++
                     }
+                    shape.meanZ() < z -> b++
+                    else -> a++
                 }
             }
-
-            shapes
-        }
-        zoomShapes.map { ss ->
-            ss.map { s ->
-                s.points.size
-            }
         }
 
-        return Chunk(chunkShapes, bmin, bmax)
+        val time2 = System.currentTimeMillis() - time - time1
+
+        Logger.log(LogType.Continuous, "BinShapeReader", "first part: $time1")
+        Logger.log(LogType.Continuous, "BinShapeReader", "second part: $time2")
+
+        return Chunk(shapes, bmin, bmax)
     }
 }

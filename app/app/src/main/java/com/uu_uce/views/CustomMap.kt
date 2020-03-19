@@ -80,13 +80,16 @@ class CustomMap : ViewTouchParent {
         SHP_File.LOG_ONLOAD_HEADER = false
         SHP_File.LOG_ONLOAD_CONTENT = false
 
+        Logger.setTagEnabled("CustomMap", false)
+        Logger.setTagEnabled("zoom", false)
+
         //setup touch events
         addChild(Zoomer(context, ::zoomMap))
         addChild(Scroller(context, ::moveMap))
         addChild(DoubleTapper(context, ::zoomOutMax))
         Logger.log(LogType.Info,"CustomMap", "Init")
 
-        smap = ShapeMap(10, this)
+        smap = ShapeMap(5, this)
         val dir = File(context.filesDir, "mydir")
         val timeParse = measureTimeMillis {
             smap.addLayer(LayerType.Water, dir, context)
