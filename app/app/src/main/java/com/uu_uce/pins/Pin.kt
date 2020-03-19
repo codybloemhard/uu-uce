@@ -3,13 +3,13 @@ package com.uu_uce.pins
 import android.app.Activity
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
-import android.text.Layout
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.fragment.app.FragmentManager
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.PopupWindow
+import android.widget.TextView
 import com.uu_uce.R
 import com.uu_uce.mapOverlay.aaBoundingBoxContains
 import com.uu_uce.mapOverlay.coordToScreen
@@ -65,7 +65,7 @@ class Pin(
         image.draw(canvas)
     }
 
-    fun openPopupWindow(parentView: View, activity : Activity, fm : FragmentManager) {
+    fun openPopupWindow(parentView: View, activity : Activity) {
         val layoutInflater = activity.layoutInflater
 
         // build an custom view (to be inflated on top of our current view & build it's popup window)

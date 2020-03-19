@@ -9,7 +9,6 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
-import androidx.fragment.app.FragmentManager
 import com.uu_uce.R
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation
@@ -194,12 +193,12 @@ class CustomMap : View {
             invalidate()
     }
 
-    fun tapPin(tapLocation : p2, activity : Activity, fm : FragmentManager){
+    fun tapPin(tapLocation : p2, activity : Activity){
         val canvasTapLocation : p2 = Pair(tapLocation.first, tapLocation.second - statusBarHeight)
         pinList.forEach{ p ->
             if(!p.inScreen) return@forEach
             if(pointInAABoundingBox(p.boundingBox.first, p.boundingBox.second, canvasTapLocation, pinTapBufferSize)){
-                p.openPopupWindow(this, activity, fm)
+                p.openPopupWindow(this, activity)
                 Logger.log(LogType.Info, "CustomMap", "${p.title}: I have been tapped.")
                 return
             }

@@ -10,8 +10,10 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
-import com.uu_uce.misc.LogType
-import com.uu_uce.misc.Logger
+import org.videolan.libvlc.LibVLC
+import org.videolan.libvlc.Media
+import org.videolan.libvlc.MediaPlayer
+import org.videolan.libvlc.util.VLCVideoLayout
 import java.io.StringReader
 
 
@@ -113,6 +115,7 @@ class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
 
 class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : Uri, private val title : String) : ContentBlockInterface{
     override fun generateContent(layout : LinearLayout, activity : Activity){
+
         val relativeLayout = RelativeLayout(activity) //TODO: maybe make this an constraintlayout?
 
         // Create thumbnail image
@@ -150,12 +153,7 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         val videoTitleText = customView.findViewById<TextView>(R.id.video_title_text)
         videoTitleText.text = videoTitle
 
-        val videoPlayer = customView.findViewById<VideoView>(R.id.video_player)
-        videoPlayer.setVideoURI(videoURI)
-        val mediaController = MediaController(activity)
-        videoPlayer.setMediaController(mediaController)
-        mediaController.setAnchorView(customView)
-        videoPlayer.start()
+        initializeVideoPlayer(videoURI, customView, activity)
 
         val parentView = activity.findViewById<View>(R.id.geoMapLayout)
         popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
@@ -165,6 +163,26 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         btnClosePopupWindow.setOnClickListener {
             popupWindow.dismiss()
         }
+    }
+
+    private fun initializeVideoPlayer(videoURI: Uri, view: View, activity: Activity) {
+        val videoPlayer: VLCVideoLayout = view.findViewById(R.id.video_player)
+
+        /* PLEASE KEEP COMMENTED: NEED THIS FOR FURTHER DEVELOPMENT
+        val playerSurface: SurfaceView = activity.findViewById(R.id.player_surface)
+        val surfaceHolder = playerSurface.holder
+        val surface = surfaceHolder.surface
+        val surfaceFrame: FrameLayout = activity.findViewById(R.id.player_surface_frame)
+         */
+
+        val libVLC: LibVLC = LibVLC(activity)
+        val mediaPlayer: MediaPlayer = MediaPlayer(libVLC)
+
+        mediaPlayer.attachViews(videoPlayer, null, false, false)
+        val media: Media = Media(libVLC, videoURI)
+        mediaPlayer.media = media
+        media.release()
+        mediaPlayer.play()
     }
 }
 

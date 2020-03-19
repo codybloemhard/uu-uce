@@ -11,7 +11,7 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/popup_window_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_centerInParent="true"
         app:cardBackgroundColor="#ffffff"
         app:cardCornerRadius="4dp"
@@ -31,12 +31,13 @@
             android:minHeight="300dp">
 
             <ScrollView
+                android:id="@+id/scroll_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toTopOf="@+id/popup_window_close_button"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toBottomOf="parent">
 
                 <LinearLayout
                     android:id="@+id/scrollLayout"

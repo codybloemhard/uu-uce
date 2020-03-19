@@ -32,6 +32,6 @@ class GeoMap : TouchParent() {
     }
 
     private fun onSingleTap(tapLocation : p2, activity : Activity){
-        customMap.tapPin(tapLocation,  activity, supportFragmentManager)
+        customMap.tapPin(tapLocation,  activity)
     }
 }
