@@ -98,6 +98,7 @@ class ShapeMap(private val nrOfLODs: Int,
 
     fun toggleLayer(l: Int){
         layerMask[l] = !layerMask[l]
+        invalidate()
     }
 
     fun invalidate(){
