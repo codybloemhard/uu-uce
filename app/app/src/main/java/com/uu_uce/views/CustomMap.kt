@@ -125,6 +125,7 @@ class CustomMap : ViewTouchParent {
         val timeDraw = measureTimeMillis {
             canvas.drawColor(Color.rgb(234, 243, 245))
             smap.draw(canvas, width, height)
+
             drawDeviceLocation(
                 coordToScreen(loc, viewport, width, height),
                 canvas,
@@ -132,9 +133,8 @@ class CustomMap : ViewTouchParent {
                 deviceLocEdgePaint,
                 15F,
                 4F)
-            for (pin in pins) {
-                pin.draw(viewport, this, canvas)
-            }
+
+            pins.map{ pin -> pin.draw(viewport, this, canvas) }
 
         }
         Logger.log(LogType.Continuous, "CustomMap", "Draw MS: $timeDraw")
