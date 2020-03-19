@@ -57,26 +57,27 @@ class BinShapeReader(
 
         val xoff = reader.readLong().toDouble()
         val yoff = reader.readLong().toDouble()
-        val bmin = p3(reader.readShort().toDouble() + xoff, reader.readShort().toDouble() + yoff, reader.readShort().toDouble())
-        val bmax = p3(reader.readShort().toDouble() + xoff, reader.readShort().toDouble() + yoff, reader.readShort().toDouble())
+        val mult = reader.readLong().toDouble()
+        val bmin = p3(reader.readShort().toDouble()/mult + xoff, reader.readShort().toDouble()/mult + yoff, reader.readShort().toDouble())
+        val bmax = p3(reader.readShort().toDouble()/mult + xoff, reader.readShort().toDouble()/mult + yoff, reader.readShort().toDouble())
 
         val nrShapes = reader.readLong()
         var chunkShapes = List(nrShapes.toInt()) {
             val z = reader.readShort().toDouble()
             val bb1 = p3(
-                reader.readShort().toDouble() + xoff,
-                reader.readShort().toDouble() + yoff,
+                reader.readShort().toDouble()/mult + xoff,
+                reader.readShort().toDouble()/mult + yoff,
                 reader.readShort().toDouble()
             )
             val bb2 = p3(
-                reader.readShort().toDouble() + xoff,
-                reader.readShort().toDouble() + yoff,
+                reader.readShort().toDouble()/mult + xoff,
+                reader.readShort().toDouble()/mult + yoff,
                 reader.readShort().toDouble()
             )
 
             val nrPoints = reader.readLong()
             val points: List<p2> = List(nrPoints.toInt()) { j ->
-                p2(reader.readShort().toDouble() + xoff, reader.readShort().toDouble() + yoff)
+                p2(reader.readShort().toDouble()/mult + xoff, reader.readShort().toDouble()/mult + yoff)
             }
 
             ShapeZ(ShapeType.Polygon, points, bb1, bb2)
