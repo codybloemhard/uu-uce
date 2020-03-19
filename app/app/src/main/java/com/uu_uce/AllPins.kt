@@ -1,6 +1,8 @@
 package com.uu_uce
 
+import android.content.Context
 import android.content.DialogInterface
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AlertDialog
@@ -19,7 +21,7 @@ class AllPins : AppCompatActivity() {
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var pinViewModel: PinViewModel
     private var selectedOption: Int = 0
-
+    private lateinit var sharedPref : SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,11 +36,13 @@ class AllPins : AppCompatActivity() {
         }
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         pinViewModel.allPinData.observe(this, Observer { pins ->
-            pins?.let { viewAdapter.setPins(it) }
+            pins?.let { viewAdapter.setPins(sortList(it, sharedPref.getInt("selectedOption", 0))) }
         })
 
         val filterButton : FloatingActionButton = findViewById(R.id.fab)
         registerForContextMenu(filterButton)
+
+        sharedPref = this.getPreferences(Context.MODE_PRIVATE)
 
     }
 
@@ -49,17 +53,21 @@ class AllPins : AppCompatActivity() {
         val filterOptions : Array<String> = arrayOf("Title a-z", "Title z-a", "Difficulty easy-hard", "Difficulty hard-easy", "Type a-z", "Type z-a")
         builder
             .setTitle("Filter by:")
-            .setSingleChoiceItems(filterOptions, selectedOption, DialogInterface.OnClickListener {
+            .setSingleChoiceItems(filterOptions, sharedPref.getInt("selectedOption", 0), DialogInterface.OnClickListener {
                 dialog, which ->
                 selectedOption = which
                 dialog.dismiss()
-                filterList(selectedOption)
+                sortList(selectedOption)
+                with(sharedPref.edit()) {
+                    putInt("selectedOption", selectedOption)
+                    apply()
+                }
             })
 
         builder.show()
     }
 
-    private fun filterList(category: Int){
+    private fun sortList(category: Int){
         val viewAdapter = PinListAdapter(this)
         recyclerView.adapter = viewAdapter
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
