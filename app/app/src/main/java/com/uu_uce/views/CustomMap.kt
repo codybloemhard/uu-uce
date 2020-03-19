@@ -57,11 +57,19 @@ class CustomMap : View {
                     "        },\n" +
                     "        {\n" +
                     "            \"tag\"       : \"IMAGE\",\n" +
-                    "            \"content\"   : \"logo.png\"\n" +
+                    "            \"content\"   : \"test.png\"\n" +
                     "        },\n" +
                     "        {\n" +
                     "            \"tag\"       : \"IMAGE\",\n" +
-                    "            \"content\"   : \"logo.png\"\n" +
+                    "            \"content\"   : \"test.png\"\n" +
+                    "        },\n" +
+                    "        {\n" +
+                    "            \"tag\"       : \"IMAGE\",\n" +
+                    "            \"content\"   : \"test.png\"\n" +
+                    "        },\n" +
+                    "        {\n" +
+                    "            \"tag\"       : \"IMAGE\",\n" +
+                    "            \"content\"   : \"test.png\"\n" +
                     "        }\n" +
                     "    ]"
         ),
@@ -82,14 +90,6 @@ class CustomMap : View {
                     "            \"content\"   : \"zoo.mp4\",\n" +
                     "            \"thumbnail\" : \"zoothumbnail.png\",\n" +
                     "            \"title\" : \"zoo\"\n" +
-                    "        },\n" +
-                    "        {\n" +
-                    "            \"tag\"       : \"IMAGE\",\n" +
-                    "            \"content\"   : \"logo.png\"\n" +
-                    "        },\n" +
-                    "        {\n" +
-                    "            \"tag\"       : \"IMAGE\",\n" +
-                    "            \"content\"   : \"logo.png\"\n" +
                     "        }\n" +
                     "    ]"
         ),

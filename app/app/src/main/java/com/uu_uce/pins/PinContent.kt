@@ -63,7 +63,7 @@ class PinContent(contentString: String) {
                     title = reader.nextString()
                 }
                 "thumbnail" -> {
-                    thumbnailURI = Uri.parse(dir + "thumbnails/" + reader.nextString())
+                    thumbnailURI = Uri.parse(dir + "videos/thumbnails/" + reader.nextString())
                 }
                 else -> {
                     error("Wrong content format")
@@ -104,32 +104,30 @@ class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
 class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : Uri, private val title : String) : ContentBlockInterface{
     override fun generateContent(layout : LinearLayout, activity : Activity){
         val relativeLayout = RelativeLayout(activity) //TODO: maybe make this an constraintlayout?
-        val thumbnail = ImageView(activity)
 
         // Create thumbnail image
         if(thumbnailURI == Uri.EMPTY){
-            val blackBox = CardView(activity)
-            blackBox.setCardBackgroundColor(Color.BLACK) //TODO: maybe just set backgroundcolor of the layout to black?
-            relativeLayout.addView(blackBox)
+            relativeLayout.setBackgroundColor(Color.BLACK)
         }
         else{
+            val thumbnail = ImageView(activity)
             thumbnail.setImageURI(thumbnailURI)
+            thumbnail.scaleType = ImageView.ScaleType.FIT_CENTER
             relativeLayout.addView(thumbnail)
         }
 
-        relativeLayout.setBackgroundColor(Color.GREEN) //TODO: ADDED FOR DEBUGGING PURPOSES
+        //relativeLayout.setBackgroundColor(Color.GREEN) //TODO: ADDED FOR DEBUGGING PURPOSES
         relativeLayout.layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 600) //TODO: don't do magical numbers
 
         // Create play button
         val playButton = ImageView(activity)
         playButton.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.play, null) ?: error ("Image not found"))
         playButton.scaleType = ImageView.ScaleType.FIT_CENTER //TODO: find correct scaletype
-
+        playButton.setOnClickListener{openVideoView(videoURI, title, activity)}
 
         // Add thumbnail and button
         relativeLayout.addView(playButton)
         layout.addView(relativeLayout)
-        relativeLayout.setOnClickListener{openVideoView(videoURI, title, activity)}
     }
 
     private fun openVideoView(videoURI: Uri, videoTitle : String, activity : Activity){
