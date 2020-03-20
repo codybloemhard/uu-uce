@@ -26,12 +26,12 @@ enum class PinType {
 }
 
 class Pin(
-    var coordinate  : UTMCoordinate,
+    private var coordinate  : UTMCoordinate,
     var difficulty  : Int,
     var type        : PinType,
     var title       : String,
-    var content     : PinContent,
-    var image       : Drawable
+    private var content     : PinContent,
+    private var image       : Drawable
 ) {
     private val pinSize = 60
     private val imageHeight = pinSize * (image.intrinsicHeight.toFloat() / image.intrinsicWidth.toFloat())
@@ -77,7 +77,7 @@ class Pin(
         windowTitle.text = title
 
         // add content to popup window
-        val layout : LinearLayout = customView.findViewById<LinearLayout>(R.id.scrollLayout)
+        val layout : LinearLayout = customView.findViewById(R.id.scrollLayout)
         content.contentBlocks.map { cB -> cB.generateContent(layout, activity) }
 
         popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
