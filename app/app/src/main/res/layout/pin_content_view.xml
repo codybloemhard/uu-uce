@@ -4,8 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#33000000"
-    android:gravity="center"
-    android:padding="5dp">
+    android:gravity="center">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/popup_window_view"

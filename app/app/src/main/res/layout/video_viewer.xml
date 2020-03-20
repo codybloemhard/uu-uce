@@ -38,7 +38,8 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="false" >
+        android:background="#000000"
+        android:fitsSystemWindows="false">
 
         <!-- PLEASE KEEP COMMENTED: NEED THIS FOR FURTHER DEVELOPMENT
 
@@ -53,7 +54,7 @@
                 android:id="@+id/player_surface"
                 android:layout_width="240dp"
                 android:layout_height="180dp">
-                -->
+
 
                 <org.videolan.libvlc.util.VLCVideoLayout
                     android:id="@+id/video_player"
@@ -62,13 +63,16 @@
                     android:layout_gravity="center"
                     android:fitsSystemWindows="false" />
 
-        <!--
-
             </SurfaceView>
 
         </FrameLayout>
         -->
 
+        <VideoView
+            android:id="@+id/video_player"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal" />
     </FrameLayout>
 
 </LinearLayout>

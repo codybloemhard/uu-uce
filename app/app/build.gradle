@@ -7,14 +7,6 @@ apply plugin: 'kotlin-android-extensions'
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
-    sourceSets {
-        main {
-            jni.srcDirs = []
-            // Prevent gradle from building native code with ndk; we have our own Makefile for it.
-            jniLibs.srcDir 'jni/libs' // Where generated .so files are placed
-            assets.srcDirs = ['src/main/assets', '../assets/']
-        }
-    }
     defaultConfig {
         applicationId "com.uu_uce"
         minSdkVersion 21
@@ -29,7 +21,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
 }
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
@@ -43,5 +34,4 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation files('libs/diewald_shapeFileReader.jar')
-    implementation 'org.videolan.android:libvlc-all:3.1.12'
 }

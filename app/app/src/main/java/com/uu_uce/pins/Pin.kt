@@ -69,7 +69,7 @@ class Pin(
         val layoutInflater = activity.layoutInflater
 
         // build an custom view (to be inflated on top of our current view & build it's popup window)
-        val customView = layoutInflater.inflate(R.layout.popup_window, null)
+        val customView = layoutInflater.inflate(R.layout.pin_content_view, null)
         val popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
         // add the title for the popup window

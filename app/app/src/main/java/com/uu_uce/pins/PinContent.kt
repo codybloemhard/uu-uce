@@ -1,6 +1,7 @@
 package com.uu_uce.pins
 
 import android.app.Activity
+import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.net.Uri
 import android.util.JsonReader
@@ -10,10 +11,6 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
-import org.videolan.libvlc.LibVLC
-import org.videolan.libvlc.Media
-import org.videolan.libvlc.MediaPlayer
-import org.videolan.libvlc.util.VLCVideoLayout
 import java.io.StringReader
 
 
@@ -153,7 +150,14 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         val videoTitleText = customView.findViewById<TextView>(R.id.video_title_text)
         videoTitleText.text = videoTitle
 
-        initializeVideoPlayer(videoURI, customView, activity)
+        val videoPlayer = customView.findViewById<VideoView>(R.id.video_player)
+        videoPlayer.setVideoURI(videoURI)
+        val mediaController = MediaController(activity)
+        videoPlayer.setMediaController(mediaController)
+        mediaController.setAnchorView(customView)
+        videoPlayer.start()
+
+        //initializeVideoPlayer(videoURI, customView, activity)
 
         val parentView = activity.findViewById<View>(R.id.geoMapLayout)
         popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
@@ -165,7 +169,7 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         }
     }
 
-    private fun initializeVideoPlayer(videoURI: Uri, view: View, activity: Activity) {
+    /*private fun initializeVideoPlayer(videoURI: Uri, view: View, activity: Activity) {
         val videoPlayer: VLCVideoLayout = view.findViewById(R.id.video_player)
 
         /* PLEASE KEEP COMMENTED: NEED THIS FOR FURTHER DEVELOPMENT
@@ -183,7 +187,7 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         mediaPlayer.media = media
         media.release()
         mediaPlayer.play()
-    }
+    }*/
 }
 
 enum class BlockTag{
