@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/video_viewer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#33000000"
@@ -8,9 +9,11 @@
     android:orientation="vertical">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/video_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF">
+        android:background="#FFFFFF"
+        android:visibility="visible">
 
         <TextView
             android:id="@+id/video_title_text"
@@ -36,6 +39,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <FrameLayout
+        android:id="@+id/video_player_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#000000"

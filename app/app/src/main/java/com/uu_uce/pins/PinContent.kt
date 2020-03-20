@@ -1,9 +1,10 @@
 package com.uu_uce.pins
 
 import android.app.Activity
-import android.content.pm.ActivityInfo
+import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.os.Bundle
 import android.util.JsonReader
 import android.view.Gravity
 import android.view.View
@@ -11,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
+import com.uu_uce.VideoViewer
 import java.io.StringReader
 
 
@@ -141,53 +143,11 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
     }
 
     private fun openVideoView(videoURI: Uri, videoTitle : String, activity : Activity){
-        val layoutInflater = activity.layoutInflater
-
-        // build an custom view (to be inflated on top of our current view & build it's popup window)
-        val customView = layoutInflater.inflate(R.layout.video_viewer, null)
-        val popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-
-        val videoTitleText = customView.findViewById<TextView>(R.id.video_title_text)
-        videoTitleText.text = videoTitle
-
-        val videoPlayer = customView.findViewById<VideoView>(R.id.video_player)
-        videoPlayer.setVideoURI(videoURI)
-        val mediaController = MediaController(activity)
-        videoPlayer.setMediaController(mediaController)
-        mediaController.setAnchorView(customView)
-        videoPlayer.start()
-
-        //initializeVideoPlayer(videoURI, customView, activity)
-
-        val parentView = activity.findViewById<View>(R.id.geoMapLayout)
-        popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
-
-        val btnClosePopupWindow = customView.findViewById<Button>(R.id.close_video_player)
-
-        btnClosePopupWindow.setOnClickListener {
-            popupWindow.dismiss()
-        }
+        val intent = Intent(activity, VideoViewer::class.java)
+        intent.putExtra("uri", videoURI)
+        intent.putExtra("title", videoTitle)
+        activity.startActivity(intent)
     }
-
-    /*private fun initializeVideoPlayer(videoURI: Uri, view: View, activity: Activity) {
-        val videoPlayer: VLCVideoLayout = view.findViewById(R.id.video_player)
-
-        /* PLEASE KEEP COMMENTED: NEED THIS FOR FURTHER DEVELOPMENT
-        val playerSurface: SurfaceView = activity.findViewById(R.id.player_surface)
-        val surfaceHolder = playerSurface.holder
-        val surface = surfaceHolder.surface
-        val surfaceFrame: FrameLayout = activity.findViewById(R.id.player_surface_frame)
-         */
-
-        val libVLC: LibVLC = LibVLC(activity)
-        val mediaPlayer: MediaPlayer = MediaPlayer(libVLC)
-
-        mediaPlayer.attachViews(videoPlayer, null, false, false)
-        val media: Media = Media(libVLC, videoURI)
-        mediaPlayer.media = media
-        media.release()
-        mediaPlayer.play()
-    }*/
 }
 
 enum class BlockTag{
