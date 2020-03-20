@@ -5,40 +5,26 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
-import android.util.Log
-import android.view.MotionEvent
-import android.view.View
-import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
-import com.uu_uce.R
+import com.uu_uce.database.PinConversion
 import com.uu_uce.database.PinData
 import com.uu_uce.database.PinViewModel
-import com.uu_uce.database.PinConversion
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation
-
+import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.pins.Pin
-import com.uu_uce.pins.PinContent
-import com.uu_uce.pins.PinType
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.services.degreeToUTM
-import com.uu_uce.shapefiles.Camera
-import com.uu_uce.shapefiles.LayerType
-import com.uu_uce.shapefiles.ShapeMap
+import com.uu_uce.shapefiles.*
 import com.uu_uce.ui.DoubleTapper
 import com.uu_uce.ui.Scroller
 import com.uu_uce.ui.ViewTouchParent
 import com.uu_uce.ui.Zoomer
 import diewald_shapeFile.files.shp.SHP_File
-import diewald_shapeFile.files.shp.shapeTypes.ShpShape
-import kotlinx.android.synthetic.main.activity_geo_map.view.*
-import com.uu_uce.shapefiles.UpdateResult
-import com.uu_uce.shapefiles.p2
 import java.io.File
 import kotlin.system.measureTimeMillis
 
@@ -58,7 +44,7 @@ class CustomMap : ViewTouchParent {
 
     private val deviceLocPaint : Paint = Paint()
     private val deviceLocEdgePaint : Paint = Paint()
-    private var pins : List<Pin> = emptyList<Pin>()
+    private var pins : List<Pin> = emptyList()
     private lateinit var viewModel : PinViewModel
     private lateinit var lfOwner : LifecycleOwner
 

@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.uu_uce.R
 
-class ContentFragment() : Fragment() {
+class ContentFragment : Fragment() {
 
     companion object{
         var pin: Pin? = null

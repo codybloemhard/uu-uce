@@ -5,15 +5,12 @@ import android.graphics.Paint
 import android.graphics.Point
 import android.os.Bundle
 import android.view.Display
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.uu_uce.database.PinViewModel
 import com.uu_uce.shapefiles.p2
-import com.uu_uce.ui.*
 import com.uu_uce.views.MenuButton
 import kotlinx.android.synthetic.main.activity_geo_map.*
-import kotlinx.android.synthetic.main.activity_geo_map.view.*
 
 class GeoMap : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel

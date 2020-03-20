@@ -4,13 +4,9 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.util.Log
 import android.view.View
-import android.widget.Button
-import androidx.constraintlayout.widget.ConstraintSet
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import diewald_shapeFile.files.shp.SHP_File
 import java.io.File
 import kotlin.system.measureTimeMillis
 
@@ -54,7 +50,7 @@ class ShapeMap(private val nrOfLODs: Int,
     private lateinit var camera: Camera
 
     init{
-        layerPaints = List<Paint>(LayerType.values().size){i ->
+        layerPaints = List(LayerType.values().size){ i ->
             val p = Paint()
             when(i){
                 LayerType.Water.value -> {

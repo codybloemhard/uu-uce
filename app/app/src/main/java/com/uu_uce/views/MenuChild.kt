@@ -1,7 +1,6 @@
 package com.uu_uce.views
 
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.view.MotionEvent
 

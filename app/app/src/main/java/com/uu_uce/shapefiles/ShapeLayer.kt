@@ -2,18 +2,14 @@ package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.view.View
-import com.uu_uce.mapOverlay.aaBoundingBoxIntersect
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import diewald_shapeFile.files.shp.SHP_File
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.io.File
-import kotlin.math.log
-import kotlin.math.pow
-import kotlin.system.measureTimeMillis
 
-class ShapeLayer(path: File, private val nrOfLODs: Int){
+class ShapeLayer(path: File, nrOfLODs: Int){
     private var lastViewport: Pair<p2,p2> = Pair(p2Zero,p2Zero)
     private var lastZoom: Int = -1
     private lateinit var zoomShapes: List<List<ShapeZ>>

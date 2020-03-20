@@ -2,7 +2,6 @@ package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.drawable.shapes.Shape
 import com.uu_uce.mapOverlay.aaBoundingBoxIntersect
 
 typealias ChunkIndex = Triple<Int,Int,Int>

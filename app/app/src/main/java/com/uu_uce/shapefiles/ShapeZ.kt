@@ -2,12 +2,6 @@ package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
 import android.graphics.Paint
-import com.uu_uce.misc.LogType
-import com.uu_uce.misc.Logger
-import diewald_shapeFile.files.shp.shapeTypes.ShpPoint
-import diewald_shapeFile.files.shp.shapeTypes.ShpPolyLine
-import diewald_shapeFile.files.shp.shapeTypes.ShpPolygon
-import diewald_shapeFile.files.shp.shapeTypes.ShpShape
 
 class ShapeZ {
     private var type: ShapeType
@@ -20,19 +14,6 @@ class ShapeZ {
     constructor(t:ShapeType, p: List<p2>, bmi: p3, bma: p3){
         type = t
         points = p
-        bMin = bmi
-        bMax = bma
-    }
-
-    constructor(zoomPercentage: Double, baseShape: ShapeZ, bmi: p3, bma: p3){
-        type = baseShape.type
-        val mutablePoints = mutableListOf(baseShape.points.first())
-        for(i in 1 until (baseShape.points.size * zoomPercentage).toInt()){
-            mutablePoints.add(baseShape.points[(i/zoomPercentage).toInt()])
-        }
-        mutablePoints.add(baseShape.points.last())
-        points = mutablePoints
-
         bMin = bmi
         bMax = bma
     }
