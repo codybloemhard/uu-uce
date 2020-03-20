@@ -26,9 +26,9 @@ abstract class UceRoomDatabase : RoomDatabase() {
 
         suspend fun populateDatabase(pinDao: PinDao) {
             pinDao.deleteAllPins()
-            val pin = PinData(0,"31N3149680N46777336E",1, "TEXT", "testPin1", "test", 60)
-            val pin2 = PinData(0, "31N3133680N46718336E", 2, "IMAGE", "testPin2", "test", 60)
-            val pin3 = PinData(0, "31N3130000N46710000E", 3, "NONE", "testPin3", "test", 60)
+            val pin = PinData(0,"31N3149680N46777336E",1, "TEXT", "testPin1", "[{\"tag\":\"TEXT\", \"content\":\"test\"}]", 60)
+            val pin2 = PinData(0, "31N3133680N46718336E", 2, "IMAGE", "testPin2", "[{\"tag\":\"TEXT\", \"content\":\"test\"}]", 60)
+            val pin3 = PinData(0, "31N3130000N46710000E", 3, "NONE", "testPin3", "[{\"tag\":\"TEXT\", \"content\":\"test\"}]", 60)
 
             pinDao.insert(pin)
             pinDao.insert(pin2)
@@ -55,6 +55,4 @@ abstract class UceRoomDatabase : RoomDatabase() {
             }
         }
     }
-
-
 }

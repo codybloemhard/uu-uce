@@ -3,6 +3,7 @@ package com.uu_uce
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Point
+import android.app.Activity
 import android.os.Bundle
 import android.view.Display
 import androidx.appcompat.app.AppCompatActivity
@@ -59,7 +60,7 @@ class GeoMap : AppCompatActivity() {
         menu.setScreenHeight(screenDim.y - statusBarHeight)
     }
 
-    private fun onSingleTap(tapLocation : p2){
-        customMap.tapPin(tapLocation)
+    private fun onSingleTap(tapLocation : p2, activity : Activity){
+        customMap.tapPin(tapLocation,  activity)
     }
 }

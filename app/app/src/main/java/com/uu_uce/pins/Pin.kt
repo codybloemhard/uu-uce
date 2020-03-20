@@ -5,13 +5,13 @@ import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.view.Gravity
 import android.view.View
-import com.uu_uce.mapOverlay.aaBoundingBoxContains
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import com.uu_uce.R
+import com.uu_uce.mapOverlay.aaBoundingBoxContains
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.screenToCoord
 import com.uu_uce.services.UTMCoordinate
@@ -30,7 +30,7 @@ class Pin(
     var difficulty  : Int,
     var type        : PinType,
     var title       : String,
-    var content     : PinContent,
+    private var content     : PinContent,
     private var image       : Drawable
 ) {
     private val pinSize = 60
@@ -65,20 +65,22 @@ class Pin(
         image.draw(canvas)
     }
 
-    fun openPopupWindow(parentLayout: ConstraintLayout, activity : Activity) {
-        // make sure we can access the Pin in the fragment
-
+    fun openPopupWindow(parentView: View, activity : Activity) {
         val layoutInflater = activity.layoutInflater
 
         // build an custom view (to be inflated on top of our current view & build it's popup window)
-        val customView = layoutInflater.inflate(R.layout.popup_window, null)
+        val customView = layoutInflater.inflate(R.layout.pin_content_view, null)
         val popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
         // add the title for the popup window
         val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
         windowTitle.text = title
 
-        popupWindow.showAtLocation(parentLayout, Gravity.CENTER, 0, 0)
+        // add content to popup window
+        val layout : LinearLayout = customView.findViewById(R.id.scrollLayout)
+        content.contentBlocks.map { cB -> cB.generateContent(layout, activity) }
+
+        popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
 
         val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
 

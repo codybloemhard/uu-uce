@@ -1,6 +1,7 @@
 package com.uu_uce.ui
 
 import android.content.Context
+import android.app.Activity
 import android.view.GestureDetector
 import android.view.MotionEvent
 import androidx.core.view.GestureDetectorCompat

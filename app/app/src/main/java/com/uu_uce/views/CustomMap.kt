@@ -1,5 +1,6 @@
 package com.uu_uce.views
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Canvas
@@ -8,9 +9,11 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.util.Log
 import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import com.uu_uce.AllPins
+import com.uu_uce.R
 import com.uu_uce.database.PinConversion
 import com.uu_uce.database.PinData
 import com.uu_uce.database.PinViewModel
@@ -20,6 +23,8 @@ import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.pins.Pin
+import com.uu_uce.pins.PinContent
+import com.uu_uce.pins.PinType
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.services.degreeToUTM
@@ -48,9 +53,62 @@ class CustomMap : ViewTouchParent {
 
     private val deviceLocPaint : Paint = Paint()
     private val deviceLocEdgePaint : Paint = Paint()
+
     private var pins : List<Pin> = emptyList()
     private lateinit var viewModel : PinViewModel
     private lateinit var lfOwner : LifecycleOwner
+
+    private val pinList : MutableList<Pin> = mutableListOf(Pin(
+        UTMCoordinate(31, 'N', 314968.0, 4677733.6),
+        1,
+        PinType.TEXT,
+        "Test1",
+        PinContent(
+            "[\n" +
+                    "        {\n" +
+                    "            \"tag\"       : \"TEXT\",\n" +
+                    "            \"text\"   : \"Image example\"\n" +
+                    "        },\n" +
+                    "        {\n" +
+                    "            \"tag\"       : \"IMAGE\",\n" +
+                    "            \"file_name\"   : \"test.png\"\n" +
+                    "        },\n" +
+                    "        {\n" +
+                    "            \"tag\"       : \"IMAGE\",\n" +
+                    "            \"file_name\"   : \"test.png\"\n" +
+                    "        },\n" +
+                    "        {\n" +
+                    "            \"tag\"       : \"IMAGE\",\n" +
+                    "            \"file_name\"   : \"test.png\"\n" +
+                    "        },\n" +
+                    "        {\n" +
+                    "            \"tag\"       : \"IMAGE\",\n" +
+                    "            \"file_name\"   : \"test.png\"\n" +
+                    "        }\n" +
+                    "    ]"
+        ),
+        ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
+    ), Pin(
+        UTMCoordinate(31, 'N', 313368.0, 4671833.6),
+        1,
+        PinType.IMAGE,
+        "Test2",
+        PinContent(
+            "[\n" +
+                    "        {\n" +
+                    "            \"tag\"       : \"TEXT\",\n" +
+                    "            \"text\"   : \"Video example\"\n" +
+                    "        },\n" +
+                    "        {\n" +
+                    "            \"tag\"       : \"VIDEO\",\n" +
+                    "            \"file_name\"   : \"zoo.mp4\",\n" +
+                    "            \"thumbnail\" : \"zoothumbnail.png\",\n" +
+                    "            \"title\" : \"zoo\"\n" +
+                    "        }\n" +
+                    "    ]"
+        ),
+        ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
+    ))
 
     private var statusBarHeight = 0
     private val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
@@ -76,7 +134,7 @@ class CustomMap : ViewTouchParent {
         val timeParse = measureTimeMillis {
             smap.addLayer(LayerType.Water, dir, context)
         }
-        
+
         camera = smap.initialize()
         //Log.i("CustomMap", "Parse file: $timeParse")
 
@@ -175,12 +233,12 @@ class CustomMap : ViewTouchParent {
             invalidate()
     }
 
-    fun tapPin(tapLocation : p2){
+    fun tapPin(tapLocation : p2, activity : Activity){
         val canvasTapLocation : p2 = Pair(tapLocation.first, tapLocation.second - statusBarHeight)
         pins.forEach{ p ->
             if(!p.inScreen) return@forEach
             if(pointInAABoundingBox(p.boundingBox.first, p.boundingBox.second, canvasTapLocation, pinTapBufferSize)){
-                //TODO: implement popup function here
+                p.openPopupWindow(this, activity)
                 Logger.log(LogType.Info, "CustomMap", "${p.title}: I have been tapped.")
                 return
             }

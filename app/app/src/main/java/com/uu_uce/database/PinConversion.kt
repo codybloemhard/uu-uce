@@ -28,12 +28,10 @@ class PinConversion(context: Context){
     }
 
     private fun stringToPinContent(type: String): PinContent {
-
-        return PinContent()
+        return PinContent(type)
     }
 
     private fun stringToDrawable(type: String, difficulty: Int): Drawable {
-
         var s  = "ic_pin"
         s += when (type) {
             "TEXT"  -> "_text"
