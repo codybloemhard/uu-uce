@@ -7,7 +7,7 @@ import com.uu_uce.mapOverlay.aaBoundingBoxIntersect
 typealias ChunkIndex = Triple<Int,Int,Int>
 
 class Chunk(
-    var shapes: List<ShapeZ>,
+    private var shapes: List<ShapeZ>,
     var bmin: p3,
     var bmax: p3
 ) {

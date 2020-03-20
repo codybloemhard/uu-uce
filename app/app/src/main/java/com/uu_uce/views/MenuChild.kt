@@ -24,7 +24,7 @@ class MenuButton(
     maxx: Float,
     maxy: Float,
     var action: () -> Unit,
-    var paint: Paint
+    private var paint: Paint
 ): MenuChild(minx, miny, maxx, maxy){
 
     override fun onDraw(canvas: Canvas) {

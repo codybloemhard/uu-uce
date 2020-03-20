@@ -3,20 +3,13 @@ package com.uu_uce.shapefiles
 import android.graphics.Canvas
 import android.graphics.Paint
 
-class ShapeZ {
-    private var type: ShapeType
-    var points: List<p2>
-    var bMin = p3Zero
+class ShapeZ(t: ShapeType, p: List<p2>, bmi: p3, bma: p3) {
+    private var type: ShapeType = t
+    private var points: List<p2> = p
+    var bMin = bmi
         private set
-    var bMax = p3Zero
+    var bMax = bma
         private set
-
-    constructor(t:ShapeType, p: List<p2>, bmi: p3, bma: p3){
-        type = t
-        points = p
-        bMin = bmi
-        bMax = bma
-    }
 
     fun draw(
         canvas: Canvas,

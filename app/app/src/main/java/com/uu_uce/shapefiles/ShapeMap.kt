@@ -109,7 +109,7 @@ class ShapeMap(private val nrOfLODs: Int,
 
         for(i in layers.indices) {
             if(layerMask[i]) {
-                var (t,l) = layers[i]
+                val (t,l) = layers[i]
                 l.draw(
                     canvas,
                     layerPaints[t.value],

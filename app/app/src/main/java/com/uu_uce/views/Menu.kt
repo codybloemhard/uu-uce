@@ -19,14 +19,14 @@ class Menu : View {
 
     private val menuChilds : MutableList<MenuChild> = mutableListOf()
 
-    val downPercent = 0.05f
-    val barPercent = 0.2f
-    val upPercent = 1f
+    private val downPercent = 0.05f
+    private val barPercent = 0.2f
+    private val upPercent = 1f
     var downY = 0f
     var barY = 0f
-    var upY = 0f
+    private var upY = 0f
     var image : Drawable? = context.getDrawable(R.drawable.menu)
-    var screenSiz = 0
+    private var screenSiz = 0
 
     init{
         //make the menu start at the bottom of the screen

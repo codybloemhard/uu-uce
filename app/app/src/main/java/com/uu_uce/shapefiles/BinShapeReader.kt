@@ -47,8 +47,8 @@ class FileReader(file: File){
 
 @ExperimentalUnsignedTypes
 class BinShapeReader(
-    var dir: File,
-    var nrOfLODs: Int
+    private var dir: File,
+    private var nrOfLODs: Int
 ): ChunkGetter {
     override fun getChunk(cIndex: ChunkIndex): Chunk {
         val time = System.currentTimeMillis()
@@ -104,7 +104,7 @@ class BinShapeReader(
         var curStep = 0
         var stepSize: Int = 1 shl curPow
 
-        var i = cIndex.third
+        val i = cIndex.third
         val level = (i + 1).toDouble() / nrOfLODs
         val factor = maxOf(level.pow(3), 0.1)
         val totalHeights =

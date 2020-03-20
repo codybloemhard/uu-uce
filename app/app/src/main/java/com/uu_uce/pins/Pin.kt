@@ -26,12 +26,12 @@ enum class PinType {
 }
 
 class Pin(
-    var coordinate  : UTMCoordinate,
+    private var coordinate  : UTMCoordinate,
     var difficulty  : Int,
     var type        : PinType,
     var title       : String,
     var content     : PinContent,
-    var image       : Drawable
+    private var image       : Drawable
 ) {
     private val pinSize = 60
     private val imageHeight = pinSize * (image.intrinsicHeight.toFloat() / image.intrinsicWidth.toFloat())

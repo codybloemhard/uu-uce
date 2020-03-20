@@ -6,16 +6,12 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
-import com.uu_uce.database.PinConversion
 import android.util.Log
-import android.view.MotionEvent
-import android.view.View
 import androidx.core.content.ContextCompat.startActivity
-import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import com.uu_uce.AllPins
-import com.uu_uce.R
+import com.uu_uce.database.PinConversion
 import com.uu_uce.database.PinData
 import com.uu_uce.database.PinViewModel
 import com.uu_uce.mapOverlay.coordToScreen
@@ -140,7 +136,7 @@ class CustomMap : ViewTouchParent {
     }
 
     private fun setPins(pins: List<PinData>) {
-        var processedPins = mutableListOf<Pin>()
+        val processedPins = mutableListOf<Pin>()
         for(pin in pins) {
             processedPins.add(PinConversion(context).pinDataToPin(pin))
         }
@@ -149,14 +145,14 @@ class CustomMap : ViewTouchParent {
         invalidate()
     }
 
-    fun zoomMap(zoom: Float){
+    private fun zoomMap(zoom: Float){
         val deltaOne = 1.0 - zoom.toDouble().coerceIn(0.5, 1.5)
         camera.zoomIn(1.0 + deltaOne)
         if(camera.needsInvalidate())
             invalidate()
     }
 
-    fun moveMap(dxpxf: Float, dypxf: Float){
+    private fun moveMap(dxpxf: Float, dypxf: Float){
         Logger.log(LogType.Continuous, "CustomMap", "$dypxf")
         val dxpx = dxpxf.toDouble()
         val dypx = dypxf.toDouble()
@@ -167,7 +163,7 @@ class CustomMap : ViewTouchParent {
             invalidate()
     }
 
-    fun zoomOutMax(){
+    private fun zoomOutMax(){
         camera.zoomOutMax(500.0)
         if(camera.needsInvalidate())
             invalidate()

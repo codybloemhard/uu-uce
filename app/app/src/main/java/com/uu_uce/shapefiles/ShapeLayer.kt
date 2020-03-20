@@ -12,7 +12,6 @@ import java.io.File
 class ShapeLayer(path: File, nrOfLODs: Int){
     private var lastViewport: Pair<p2,p2> = Pair(p2Zero,p2Zero)
     private var lastZoom: Int = -1
-    private lateinit var zoomShapes: List<List<ShapeZ>>
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk> = mutableMapOf()
 
     private val chunkLoaders: MutableList<Pair<ChunkIndex,Job>> = mutableListOf()

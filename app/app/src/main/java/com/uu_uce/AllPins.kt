@@ -53,7 +53,7 @@ class AllPins : AppCompatActivity() {
         val filterOptions : Array<String> = arrayOf("Title a-z", "Title z-a", "Difficulty easy-hard", "Difficulty hard-easy", "Type a-z", "Type z-a")
         builder
             .setTitle("Filter by:")
-            .setSingleChoiceItems(filterOptions, sharedPref.getInt("selectedOption", 0), DialogInterface.OnClickListener {
+            .setSingleChoiceItems(filterOptions, sharedPref.getInt("selectedOption", 0), {
                 dialog, which ->
                 selectedOption = which
                 dialog.dismiss()

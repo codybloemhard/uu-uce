@@ -9,7 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(entities = arrayOf(PinData::class), version = 1, exportSchema = false)
+@Database(entities = [PinData::class], version = 1, exportSchema = false)
 abstract class UceRoomDatabase : RoomDatabase() {
 
     abstract fun pinDao() : PinDao
@@ -26,9 +26,9 @@ abstract class UceRoomDatabase : RoomDatabase() {
 
         suspend fun populateDatabase(pinDao: PinDao) {
             pinDao.deleteAllPins()
-            var pin = PinData(0,"31N3149680N46777336E",1, "TEXT", "testPin1", "test", 60)
-            var pin2 = PinData(0, "31N3133680N46718336E", 2, "IMAGE", "testPin2", "test", 60)
-            var pin3 = PinData(0, "31N3130000N46710000E", 3, "NONE", "testPin3", "test", 60)
+            val pin = PinData(0,"31N3149680N46777336E",1, "TEXT", "testPin1", "test", 60)
+            val pin2 = PinData(0, "31N3133680N46718336E", 2, "IMAGE", "testPin2", "test", 60)
+            val pin3 = PinData(0, "31N3130000N46710000E", 3, "NONE", "testPin3", "test", 60)
 
             pinDao.insert(pin)
             pinDao.insert(pin2)

@@ -39,9 +39,9 @@ class GeoMap : AppCompatActivity() {
             p.color = Color.RED
             val t = Paint()
             t.color = Color.GREEN
-            var c1 = MenuButton((menu.width - menu.downY)/ 2, 0f, (menu.width + menu.downY)/ 2, menu.downY, { menu.open() }, p)
-            var c2 = MenuButton(20f, menu.downY, 20+(menu.barY - menu.downY), menu.barY, { customMap.toggleLayer(0) }, p)
-            var c3 = MenuButton(20+(menu.barY - menu.downY), menu.downY, 20+(2*(menu.barY - menu.downY)), menu.barY, { customMap.allPins() }, t)
+            val c1 = MenuButton((menu.width - menu.downY)/ 2, 0f, (menu.width + menu.downY)/ 2, menu.downY, { menu.open() }, p)
+            val c2 = MenuButton(20f, menu.downY, 20+(menu.barY - menu.downY), menu.barY, { customMap.toggleLayer(0) }, p)
+            val c3 = MenuButton(20+(menu.barY - menu.downY), menu.downY, 20+(2*(menu.barY - menu.downY)), menu.barY, { customMap.allPins() }, t)
             menu.addMenuChild(c1)
             menu.addMenuChild(c2)
             menu.addMenuChild(c3)
