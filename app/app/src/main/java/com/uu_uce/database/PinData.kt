@@ -11,6 +11,6 @@ open class PinData(
     var difficulty     : Int,
     var type           : String,
     var title          : String,
-    var content        : String, //JSON?
+    var content        : String,
     var size           : Int
 )

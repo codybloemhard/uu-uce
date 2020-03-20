@@ -59,8 +59,4 @@ class GeoMap : AppCompatActivity() {
         (Display::getSize)(windowManager.defaultDisplay, screenDim)
         menu.setScreenHeight(screenDim.y - statusBarHeight)
     }
-
-    private fun onSingleTap(tapLocation : p2, activity : Activity){
-        customMap.tapPin(tapLocation,  activity)
-    }
 }

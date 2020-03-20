@@ -27,8 +27,8 @@ class PinConversion(context: Context){
         return PinType.TEXT
     }
 
-    private fun stringToPinContent(type: String): PinContent {
-        return PinContent(type)
+    private fun stringToPinContent(content: String): PinContent {
+        return PinContent(content)
     }
 
     private fun stringToDrawable(type: String, difficulty: Int): Drawable {

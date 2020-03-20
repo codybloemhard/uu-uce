@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat.startActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LifecycleOwner
@@ -29,10 +30,7 @@ import com.uu_uce.services.LocationServices
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.services.degreeToUTM
 import com.uu_uce.shapefiles.*
-import com.uu_uce.ui.DoubleTapper
-import com.uu_uce.ui.Scroller
-import com.uu_uce.ui.ViewTouchParent
-import com.uu_uce.ui.Zoomer
+import com.uu_uce.ui.*
 import diewald_shapeFile.files.shp.SHP_File
 import java.io.File
 import kotlin.system.measureTimeMillis
@@ -58,58 +56,6 @@ class CustomMap : ViewTouchParent {
     private lateinit var viewModel : PinViewModel
     private lateinit var lfOwner : LifecycleOwner
 
-    private val pinList : MutableList<Pin> = mutableListOf(Pin(
-        UTMCoordinate(31, 'N', 314968.0, 4677733.6),
-        1,
-        PinType.TEXT,
-        "Test1",
-        PinContent(
-            "[\n" +
-                    "        {\n" +
-                    "            \"tag\"       : \"TEXT\",\n" +
-                    "            \"text\"   : \"Image example\"\n" +
-                    "        },\n" +
-                    "        {\n" +
-                    "            \"tag\"       : \"IMAGE\",\n" +
-                    "            \"file_name\"   : \"test.png\"\n" +
-                    "        },\n" +
-                    "        {\n" +
-                    "            \"tag\"       : \"IMAGE\",\n" +
-                    "            \"file_name\"   : \"test.png\"\n" +
-                    "        },\n" +
-                    "        {\n" +
-                    "            \"tag\"       : \"IMAGE\",\n" +
-                    "            \"file_name\"   : \"test.png\"\n" +
-                    "        },\n" +
-                    "        {\n" +
-                    "            \"tag\"       : \"IMAGE\",\n" +
-                    "            \"file_name\"   : \"test.png\"\n" +
-                    "        }\n" +
-                    "    ]"
-        ),
-        ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
-    ), Pin(
-        UTMCoordinate(31, 'N', 313368.0, 4671833.6),
-        1,
-        PinType.IMAGE,
-        "Test2",
-        PinContent(
-            "[\n" +
-                    "        {\n" +
-                    "            \"tag\"       : \"TEXT\",\n" +
-                    "            \"text\"   : \"Video example\"\n" +
-                    "        },\n" +
-                    "        {\n" +
-                    "            \"tag\"       : \"VIDEO\",\n" +
-                    "            \"file_name\"   : \"zoo.mp4\",\n" +
-                    "            \"thumbnail\" : \"zoothumbnail.png\",\n" +
-                    "            \"title\" : \"zoo\"\n" +
-                    "        }\n" +
-                    "    ]"
-        ),
-        ResourcesCompat.getDrawable(context.resources, R.drawable.pin, null) ?: error ("Image not found")
-    ))
-
     private var statusBarHeight = 0
     private val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
 
@@ -127,6 +73,7 @@ class CustomMap : ViewTouchParent {
         addChild(Zoomer(context, ::zoomMap))
         addChild(Scroller(context, ::moveMap))
         addChild(DoubleTapper(context, ::zoomOutMax))
+        addChild(SingleTapper(context as AppCompatActivity, ::tapPin))
         Logger.log(LogType.Info,"CustomMap", "Init")
 
         smap = ShapeMap(5, this)
@@ -233,7 +180,7 @@ class CustomMap : ViewTouchParent {
             invalidate()
     }
 
-    fun tapPin(tapLocation : p2, activity : Activity){
+    private fun tapPin(tapLocation : p2, activity : Activity){
         val canvasTapLocation : p2 = Pair(tapLocation.first, tapLocation.second - statusBarHeight)
         pins.forEach{ p ->
             if(!p.inScreen) return@forEach
