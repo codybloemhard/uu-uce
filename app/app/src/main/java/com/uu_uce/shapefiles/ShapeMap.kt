@@ -5,11 +5,13 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import androidx.constraintlayout.widget.ConstraintSet
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import diewald_shapeFile.files.shp.SHP_File
+import java.io.File
 import kotlin.system.measureTimeMillis
 
 typealias p2 = Pair<Double, Double>
@@ -37,13 +39,14 @@ fun mergeBBs(mins: List<p3>,maxs: List<p3>): Pair<p3,p3>{
     return Pair(Triple(bmin[0],bmin[1],bmin[2]),Triple(bmax[0],bmax[1],bmax[2]))
 }
 
-class ShapeMap(private val nrOfLODs: Int){
-    var layerMask = mutableListOf<Boolean>()
+class ShapeMap(private val nrOfLODs: Int,
+               private val view: View
+){
+    private var layerMask = mutableListOf<Boolean>()
 
     private var layers = mutableListOf<Pair<LayerType,ShapeLayer>>()
     private var bMin = p3Zero
     private var bMax = p3Zero
-    private val zDens = hashMapOf<Int,Int>()
     private var zoomLevel = 5
 
     private val layerPaints : List<Paint>
@@ -70,28 +73,13 @@ class ShapeMap(private val nrOfLODs: Int){
         }
     }
 
-    fun addLayer(type: LayerType, shpFile: SHP_File, context: Context){
+    fun addLayer(type: LayerType, path: File, context: Context){
         val timeSave = measureTimeMillis {
-            layers.add(Pair(type,ShapeLayer(shpFile, nrOfLODs)))
+            layers.add(Pair(type,ShapeLayer(path, nrOfLODs)))
         }
+
         Logger.log(LogType.Info,"ShapeMap", "Save: $timeSave")
-        val timeDens = measureTimeMillis {
-            layers.map{
-                l ->
-                val lDens = l.second.zDens
-                lDens.keys.map {
-                    key ->
-                    val old = zDens[key] ?: 0
-                    val local = lDens[key] ?: 0
-                    zDens.put(key, old + local)
-                }
-            }
-        }
-        Logger.log(LogType.Info,"ShapeMap", "Calc z density: $timeDens")
         Logger.log(LogType.Info, "ShapeMap", "bb: ($bMin),($bMax)")
-        zDens.keys.sorted().map{
-            key -> Log.i("ShapeMap", "($key,${zDens[key]})")
-        }
 
         layerMask.add(true)
     }
@@ -108,6 +96,16 @@ class ShapeMap(private val nrOfLODs: Int){
         return camera
     }
 
+    fun toggleLayer(l: Int){
+        layerMask[l] = !layerMask[l]
+        invalidate()
+    }
+
+    fun invalidate(){
+        camera.forceChanged()
+        view.invalidate()
+    }
+
     fun draw(canvas: Canvas, width: Int, height: Int){
         val waspect = width.toDouble() / height
         zoomLevel = maxOf(0,minOf(nrOfLODs-1, nrOfLODs - 1 - ((camera.getZoom()-0.01)/(1.0/waspect-0.01) * nrOfLODs).toInt()))
@@ -119,6 +117,7 @@ class ShapeMap(private val nrOfLODs: Int){
                 l.draw(
                     canvas,
                     layerPaints[t.value],
+                    this,
                     viewport,
                     width,
                     height,
