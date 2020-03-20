@@ -1,13 +1,21 @@
 package com.uu_uce.views
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import com.uu_uce.database.PinConversion
+import android.util.Log
+import android.view.MotionEvent
+import android.view.View
+import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
-import com.uu_uce.database.PinConversion
+import com.uu_uce.AllPins
+import com.uu_uce.R
 import com.uu_uce.database.PinData
 import com.uu_uce.database.PinViewModel
 import com.uu_uce.mapOverlay.coordToScreen
@@ -102,6 +110,7 @@ class CustomMap : ViewTouchParent {
         val timeDraw = measureTimeMillis {
             canvas.drawColor(Color.rgb(234, 243, 245))
             smap.draw(canvas, width, height)
+
             drawDeviceLocation(
                 coordToScreen(loc, viewport, width, height),
                 canvas,
@@ -109,9 +118,8 @@ class CustomMap : ViewTouchParent {
                 deviceLocEdgePaint,
                 15F,
                 4F)
-            for (pin in pins) {
-                pin.draw(viewport, this, canvas)
-            }
+
+            pins.map{ pin -> pin.draw(viewport, this, canvas) }
 
         }
         Logger.log(LogType.Continuous, "CustomMap", "Draw MS: $timeDraw")
@@ -193,5 +201,11 @@ class CustomMap : ViewTouchParent {
 
     fun setLifeCycleOwner(lifecycleOwner: LifecycleOwner) {
         lfOwner = lifecycleOwner
+    }
+
+    fun allPins() {
+        Log.i("test", "test123")
+        val i = Intent(context, AllPins::class.java)
+        startActivity(context, i, null)
     }
 }
