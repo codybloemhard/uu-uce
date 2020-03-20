@@ -166,7 +166,7 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
     }
 
     private fun initializeVideoPlayer(videoURI: Uri, view: View, activity: Activity) {
-        val videoPlayer: VLCVideoLayout = view.findViewById(R.id.video_player)
+        val videoPlayer: VLCVideoLayout = view.findViewById<VLCVideoLayout>(R.id.video_player)
 
         /* PLEASE KEEP COMMENTED: NEED THIS FOR FURTHER DEVELOPMENT
         val playerSurface: SurfaceView = activity.findViewById(R.id.player_surface)

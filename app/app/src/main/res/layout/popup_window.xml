@@ -22,49 +22,50 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/popup_window_background_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="12dp"
-            android:minHeight="300dp">
+            android:layout_height="match_parent">
 
-            <ScrollView
-                android:id="@+id/scroll_view"
+            <TextView
+                android:id="@+id/popup_window_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:gravity="bottom|start"
+                android:paddingStart="12dp"
+                android:paddingTop="20dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="10dp"
+                android:textColor="#DE000000"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <LinearLayout
+                android:id="@+id/linearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="605dp"
+                android:orientation="vertical"
                 app:layout_constraintBottom_toTopOf="@+id/popup_window_close_button"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="parent">
+                app:layout_constraintTop_toBottomOf="@+id/popup_window_title">
 
-                <LinearLayout
-                    android:id="@+id/scrollLayout"
+                <ScrollView
+                    android:id="@+id/scroll_view"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:layout_height="match_parent">
 
-                    <TextView
-                        android:id="@+id/popup_window_title"
+                    <LinearLayout
+                        android:id="@+id/scrollLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif"
-                        android:gravity="bottom|start"
-                        android:paddingStart="12dp"
-                        android:paddingTop="20dp"
-                        android:paddingEnd="12dp"
-                        android:paddingBottom="10dp"
-                        android:textColor="#DE000000"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:orientation="vertical">
 
-                </LinearLayout>
-            </ScrollView>
+                    </LinearLayout>
+                </ScrollView>
+
+            </LinearLayout>
 
             <Button
                 android:id="@+id/popup_window_close_button"
-                style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_marginEnd="8dp"
@@ -80,7 +81,6 @@
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
-
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
