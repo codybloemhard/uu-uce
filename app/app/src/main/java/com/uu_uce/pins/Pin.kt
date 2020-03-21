@@ -2,6 +2,8 @@ package com.uu_uce.pins
 
 import android.app.Activity
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.graphics.drawable.Drawable
 import android.view.Gravity
 import android.view.View
@@ -61,6 +63,7 @@ class Pin(
 
         inScreen = true
         boundingBox = Pair(p2(minX.toDouble(), minY.toDouble()), p2(maxX.toDouble(), maxY.toDouble()))
+
         image.setBounds(minX, minY, maxX, maxY)
         image.draw(canvas)
     }

@@ -19,6 +19,7 @@ import com.uu_uce.database.PinData
 import com.uu_uce.database.PinViewModel
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation
+import com.uu_uce.mapOverlay.pointDistance
 import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
@@ -44,6 +45,10 @@ class CustomMap : ViewTouchParent {
     private var first = true
 
     private var loc : UTMCoordinate = UTMCoordinate(31, 'N', 0.0, 0.0)
+    private var lastDrawnLoc : Pair<Float, Float> = Pair(0f, 0f)
+
+    // How much does the location have to change on the screen to warrant a redraw
+    private val locationAccuracy : Float = 5f
 
     private val locationServices = LocationServices()
 
@@ -117,13 +122,16 @@ class CustomMap : ViewTouchParent {
             smap.draw(canvas, width, height)
 
             Logger.log(LogType.Event, "DrawOverlay", "east: ${loc.east}, north: ${loc.north}")
+
+            val screenLoc = coordToScreen(loc, viewport, width, height)
             drawDeviceLocation(
-                coordToScreen(loc, viewport, width, height),
+                screenLoc,
                 canvas,
                 deviceLocPaint,
                 deviceLocEdgePaint,
                 15F,
                 4F)
+            lastDrawnLoc = screenLoc
 
             pins.map{ pin -> pin.draw(viewport, this, canvas) }
 
@@ -135,7 +143,17 @@ class CustomMap : ViewTouchParent {
 
     private fun updateLoc(newLoc : p2) {
         loc = degreeToUTM(newLoc)
-        invalidate()
+
+        val waspect = width.toDouble() / height
+        val viewport = camera.getViewport(waspect)
+        val screenLoc = coordToScreen(loc, viewport, width, height)
+
+        val distance = pointDistance(screenLoc, lastDrawnLoc)
+        if(distance > locationAccuracy){
+            camera.needsInvalidate()
+            Logger.log(LogType.Event,"CustomMap", "Redrawing, distance: $distance")
+        }
+        Logger.log(LogType.Event,"CustomMap", "No redraw needed")
         Logger.log(LogType.Event,"CustomMap", "${loc.east}, ${loc.north}")
     }
 
@@ -187,7 +205,7 @@ class CustomMap : ViewTouchParent {
     }
 
     private fun tapPin(tapLocation : p2, activity : Activity){
-        val canvasTapLocation : p2 = Pair(tapLocation.first, tapLocation.second - statusBarHeight)
+        val canvasTapLocation : p2 = Pair(tapLocation.first, tapLocation.second)
         pins.forEach{ p ->
             if(!p.inScreen) return@forEach
             if(pointInAABoundingBox(p.boundingBox.first, p.boundingBox.second, canvasTapLocation, pinTapBufferSize)){

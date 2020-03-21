@@ -7,6 +7,8 @@ import com.uu_uce.misc.Logger
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.shapefiles.p2
 import com.uu_uce.shapefiles.p3
+import kotlin.math.abs
+import kotlin.math.pow
 
 /*
 Calculates where on the screen a coordinate is.
@@ -84,6 +86,10 @@ fun pointInAABoundingBox(bbMin: p2, bbMax: p2, point : p2, bufferSize : Int) : B
                 point.second    < bbMax.second  + bufferSize    &&
                 point.second    > bbMin.second  - bufferSize
             )
+}
+
+fun pointDistance(p1 : Pair<Float, Float>, p2 : Pair<Float, Float>) : Double{
+    return abs((p1.first - p2.first).toDouble()).pow(2) + abs((p1.second - p2.second).toDouble()).pow(2)
 }
 
 /*
