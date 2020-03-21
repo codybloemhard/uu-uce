@@ -1,5 +1,6 @@
 package com.uu_uce.views
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -10,11 +11,9 @@ import android.util.AttributeSet
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat.startActivity
-import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import com.uu_uce.AllPins
-import com.uu_uce.R
 import com.uu_uce.database.PinConversion
 import com.uu_uce.database.PinData
 import com.uu_uce.database.PinViewModel
@@ -24,10 +23,9 @@ import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.pins.Pin
-import com.uu_uce.pins.PinContent
-import com.uu_uce.pins.PinType
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.UTMCoordinate
+import com.uu_uce.services.checkPermissions
 import com.uu_uce.services.degreeToUTM
 import com.uu_uce.shapefiles.*
 import com.uu_uce.ui.*
@@ -39,6 +37,8 @@ class CustomMap : ViewTouchParent {
     constructor(context: Context): super(context)
     constructor(context: Context, attrs: AttributeSet): super(context, attrs)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+
+    var permissionsNeeded = listOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
     private var smap : ShapeMap
     private var first = true
@@ -87,7 +87,11 @@ class CustomMap : ViewTouchParent {
 
         deviceLocPaint.color = Color.BLUE
         deviceLocEdgePaint.color = Color.WHITE
-        locationServices.startPollThread(context, 5000, 0F, ::updateLoc)
+
+        val missingPermissions = checkPermissions(context,permissionsNeeded + LocationServices.permissionsNeeded)
+        if(missingPermissions.count() == 0){
+            startLocServices()
+        }
 
         if (resourceId > 0) {
             statusBarHeight = resources.getDimensionPixelSize(resourceId)
@@ -112,6 +116,7 @@ class CustomMap : ViewTouchParent {
             canvas.drawColor(Color.rgb(234, 243, 245))
             smap.draw(canvas, width, height)
 
+            Logger.log(LogType.Event, "DrawOverlay", "east: ${loc.east}, north: ${loc.north}")
             drawDeviceLocation(
                 coordToScreen(loc, viewport, width, height),
                 canvas,
@@ -130,6 +135,7 @@ class CustomMap : ViewTouchParent {
 
     private fun updateLoc(newLoc : p2) {
         loc = degreeToUTM(newLoc)
+        invalidate()
         Logger.log(LogType.Event,"CustomMap", "${loc.east}, ${loc.north}")
     }
 
@@ -208,5 +214,9 @@ class CustomMap : ViewTouchParent {
         Log.i("test", "test123")
         val i = Intent(context, AllPins::class.java)
         startActivity(context, i, null)
+    }
+
+    fun startLocServices(){
+        locationServices.startPollThread(context, 5000, 0F, ::updateLoc)
     }
 }

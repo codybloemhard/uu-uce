@@ -1,7 +1,6 @@
 package com.uu_uce
 
 import android.content.Context
-import android.content.DialogInterface
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
@@ -53,8 +52,7 @@ class AllPins : AppCompatActivity() {
         val filterOptions : Array<String> = arrayOf("Title a-z", "Title z-a", "Difficulty easy-hard", "Difficulty hard-easy", "Type a-z", "Type z-a")
         builder
             .setTitle("Filter by:")
-            .setSingleChoiceItems(filterOptions, sharedPref.getInt("selectedOption", 0), {
-                dialog, which ->
+            .setSingleChoiceItems(filterOptions, sharedPref.getInt("selectedOption", 0)) { dialog, which ->
                 selectedOption = which
                 dialog.dismiss()
                 sortList(selectedOption)
@@ -62,7 +60,7 @@ class AllPins : AppCompatActivity() {
                     putInt("selectedOption", selectedOption)
                     apply()
                 }
-            })
+            }
 
         builder.show()
     }

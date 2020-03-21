@@ -1,15 +1,18 @@
 package com.uu_uce
 
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Point
-import android.app.Activity
 import android.os.Bundle
 import android.view.Display
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.uu_uce.database.PinViewModel
-import com.uu_uce.shapefiles.p2
+import com.uu_uce.misc.LogType
+import com.uu_uce.misc.Logger
+import com.uu_uce.services.LocationServices
+import com.uu_uce.services.getPermissions
 import com.uu_uce.views.MenuButton
 import kotlinx.android.synthetic.main.activity_geo_map.*
 
@@ -22,6 +25,9 @@ class GeoMap : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_geo_map)
+
+        getPermissions(this, this, LocationServices.permissionsNeeded + customMap.permissionsNeeded)
+
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         this.customMap.setViewModel(pinViewModel)
         this.customMap.setLifeCycleOwner(this)
@@ -58,5 +64,21 @@ class GeoMap : AppCompatActivity() {
     private fun initMenu(){
         (Display::getSize)(windowManager.defaultDisplay, screenDim)
         menu.setScreenHeight(screenDim.y - statusBarHeight)
+    }
+
+    // Respond to permission request
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode == 1) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                Logger.log(LogType.Info,"GPS", "Permissions granted")
+                customMap.startLocServices()
+            }
+            else
+                Logger.log(LogType.Info,"GPS", "Permissions were not granted")
+        }
     }
 }

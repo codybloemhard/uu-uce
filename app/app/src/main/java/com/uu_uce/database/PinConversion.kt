@@ -23,8 +23,12 @@ class PinConversion(context: Context){
     }
 
     private fun stringToPinType(type: String): PinType {
-
-        return PinType.TEXT
+        return when(type){
+            "TEXT" -> PinType.TEXT
+            "IMAGE" -> PinType.IMAGE
+            "VIDEO" -> PinType.VIDEO
+            else    -> error("unknown pin type")
+        }
     }
 
     private fun stringToPinContent(content: String): PinContent {

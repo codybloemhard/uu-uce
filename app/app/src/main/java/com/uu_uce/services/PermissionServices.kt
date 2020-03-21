@@ -14,7 +14,6 @@ Permissions of the form of Manifest.permission.ACCESS_COARSE_LOCATION.
 Does:
 Asks for permission to use those permissions.
 */
-
 fun getPermissions(context: Context, activity: Activity, permissions: List<String>) {
     val neededPermissions: MutableList<String> = mutableListOf()
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
@@ -26,4 +25,22 @@ fun getPermissions(context: Context, activity: Activity, permissions: List<Strin
     if(neededPermissions.size > 0){
         requestPermissions(activity, neededPermissions.toTypedArray(),1)
     }
+}
+
+/*
+Takes: a context and activity and a list of strings describing permissions.
+Usually, context = this.
+Permissions of the form of Manifest.permission.ACCESS_COARSE_LOCATION.
+Does:
+Returns a list of missing permissions.
+*/
+fun checkPermissions(context: Context, permissions: List<String>) : List<String>{
+    val neededPermissions: MutableList<String> = mutableListOf()
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return emptyList()
+    for (i in permissions) {
+        if (checkSelfPermission(context, i) != PackageManager.PERMISSION_GRANTED) {
+            neededPermissions.add(i)
+        }
+    }
+    return neededPermissions
 }

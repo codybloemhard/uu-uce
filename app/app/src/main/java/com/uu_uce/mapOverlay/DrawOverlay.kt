@@ -1,5 +1,9 @@
 package com.uu_uce.mapOverlay
 
+import android.graphics.Canvas
+import android.graphics.Paint
+import com.uu_uce.misc.LogType
+import com.uu_uce.misc.Logger
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.shapefiles.p2
 import com.uu_uce.shapefiles.p3
@@ -80,4 +84,16 @@ fun pointInAABoundingBox(bbMin: p2, bbMax: p2, point : p2, bufferSize : Int) : B
                 point.second    < bbMax.second  + bufferSize    &&
                 point.second    > bbMin.second  - bufferSize
             )
+}
+
+/*
+Calculates where on the screen a coordinate is.
+screenLoc: the coordinate on the screen where the device location should be drawn.
+canvas: the canvas that the location should be drawn on.
+It will draw a circle on the screen at the desired location.
+*/
+fun drawDeviceLocation(screenLoc : Pair<Float, Float>, canvas : Canvas, paint : Paint, edgePaint : Paint, size : Float, edgeSize : Float){
+    Logger.log(LogType.Event, "DrawOverlay", "x: ${screenLoc.first}, y: ${screenLoc.second}")
+    canvas.drawCircle(screenLoc.first, screenLoc.second, size + edgeSize, edgePaint)
+    canvas.drawCircle(screenLoc.first, screenLoc.second, size, paint)
 }

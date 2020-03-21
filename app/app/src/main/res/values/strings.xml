@@ -12,4 +12,6 @@
     <string name="pin_coordinates">Pin coordinates</string>
     <string name="pin_difficulty">Pin difficulty</string>
     <string name="pin_type">Pin type</string>
+    <string name="center_button">Center</string>
+    <string name="video_title_placeholder">Video title</string>
 </resources>
