@@ -38,7 +38,7 @@ To close the pin content end with a closing square bracket `]`.
 
 ## Example
 The following example will generate a block of text followed by an image and finally a video:
-```
+```json
 [
     {
         "tag"			: "TEXT",
