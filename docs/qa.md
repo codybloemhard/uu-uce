@@ -16,6 +16,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### QA Matrix
 | Version       | Date      | Unit tests    | Realworld tests       | Documentation | Lint Issues (Worst)   |
 | ------------- | --------- | ------------- | --------------------- | ------------- | --------------------- |
+| 0.1.8         | 22-3-2019 | 100%          | yes, in shape-linter  | 100%          | 0
 | 0.1.7         | 21-3-2019 | 100%          | yes, in shape-linter  | 100%          | 11 (Mild)
 | 0.1.6         | 18-3-2019 | 100%          | Yes, in shape-linter  | 100%          | NaN
 | 0.1.1/0.15    | 12-3-2019 | Some          | Yes, in shape-linter  | Some          | NaN
@@ -31,6 +32,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### QA Matrix
 | Version       | Date      | Unit tests    | Realworld tests       | Documentation | Lint Issues (Worst)   |
 |---------------|-----------|---------------|-----------------------|---------------|-----------------------|
+| 0.1.4         | 22-3-2019 | None          | Yes, in uu-uce        | Output        | 0
 | 0.1.3         | 18-3-2019 | None          | Yes, in uu-uce        | Output        | 9 (Severe)
 | 0.1.2         | 17-3-2019 | None          | Yes, in uu-uce        | Output        | NaN
 | 0.1.1         | 16-3-2019 | None          | None                  | Output        | NaN
