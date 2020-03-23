@@ -108,7 +108,7 @@ class CustomMap : ViewTouchParent {
         val waspect = width.toDouble() / height
         if(first){
             val z = 1.0 / (waspect)
-            camera.maxZoom = z
+            camera.maxZoom = maxOf(1.0,z)
             camera.setZoom(z)
             first = false
         }
