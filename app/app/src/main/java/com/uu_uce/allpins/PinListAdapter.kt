@@ -1,7 +1,6 @@
 package com.uu_uce.allpins
 
 import android.app.Activity
-import android.content.Context
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +10,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
 import com.uu_uce.database.PinData
-import com.uu_uce.pins.Pin
 import com.uu_uce.pins.PinContent
 import com.uu_uce.pins.openPinPopupWindow
 
