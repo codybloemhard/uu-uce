@@ -52,14 +52,14 @@ Used by shapefile-linter to save it's custom files for geological data.
 | 0.x.x     | ...       | None              | Only small issues         |
 | 0.0.1     | 8-2-2019  | None              | None                      |
 ### Test Coverage Matrix
-| Version   | Pixel 2 Emulator API 10 | Nokia 2 API 24  | One Plus  |
-|-----------|-------------------------|-----------------|-----------|
+| Version   | Pixel 2 Emulator API 10 | Nokia 2 API 24  | One Plus 5 API 28 |
+|-----------|-------------------------|-----------------|-------------------|
 | 0.3.1     | 100% tested | 100% tested | 100% tested
 | 0.x.x     | 100% tested | 100% tested | Partial: GPS, Map
 | 0.0.1     | 100% tested | None | None
 ### Test Issues Matrix
-| Version   | Pixel 2 Emulator API 29 | Nokia 2 API 24  | One Plus  |
-|-----------|-------------------------|-----------------|-----------|
+| Version   | Pixel 2 Emulator API 29 | Nokia 2 API 24  | One Plus 5 API 28 |
+|-----------|-------------------------|-----------------|-------------------|
 | 0.3.1     | None | None | None
 | 0.x.x     | None | Popup UI scaling (IC3) | Partialy Tested
 | 0.0.1     | None | Not Tested | Not Tested
