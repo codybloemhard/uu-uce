@@ -24,6 +24,7 @@ import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.pins.Pin
+import com.uu_uce.pins.openPinPopupWindow
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.services.checkPermissions
@@ -88,7 +89,7 @@ class CustomMap : ViewTouchParent {
         }
 
         camera = smap.initialize()
-        //Log.i("CustomMap", "Parse file: $timeParse")
+        Logger.log(LogType.Info, "CustomMap", "Parse file: $timeParse")
 
         deviceLocPaint.color = Color.BLUE
         deviceLocEdgePaint.color = Color.WHITE
@@ -209,8 +210,8 @@ class CustomMap : ViewTouchParent {
         pins.forEach{ p ->
             if(!p.inScreen) return@forEach
             if(pointInAABoundingBox(p.boundingBox.first, p.boundingBox.second, canvasTapLocation, pinTapBufferSize)){
-                p.openPopupWindow(this, activity)
-                Logger.log(LogType.Info, "CustomMap", "${p.title}: I have been tapped.")
+                openPinPopupWindow(p.getTitle(), p.getContent(), this, activity)
+                Logger.log(LogType.Info, "CustomMap", "A pin has been tapped.")
                 return
             }
         }
