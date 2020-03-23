@@ -11,7 +11,7 @@ import com.uu_uce.R
 import com.uu_uce.database.PinData
 
 class PinListAdapter internal constructor(
-    context: Context
+    private val context: Context
 ) : RecyclerView.Adapter<PinListAdapter.PinViewHolder>() {
 
     private val inflater: LayoutInflater = LayoutInflater.from(context)
@@ -37,19 +37,19 @@ class PinListAdapter internal constructor(
         holder.pinType.text = current.type
         when(current.difficulty){
             1 -> {
-                holder.pinDiff.text = "Easy"
+                holder.pinDiff.text = context.getString(R.string.easy)
                 holder.pinDiffC.setBackgroundColor(Color.parseColor("#00B222"))
             }
             2 -> {
-                holder.pinDiff.text = "Medium"
+                holder.pinDiff.text = context.getString(R.string.medium)
                 holder.pinDiffC.setBackgroundColor(Color.parseColor("#FF862F"))
             }
             3 -> {
-                holder.pinDiff.text = "Hard"
+                holder.pinDiff.text = context.getString(R.string.hard)
                 holder.pinDiffC.setBackgroundColor(Color.parseColor("#EC1A3D"))
             }
             else -> {
-                holder.pinDiff.text = "Unknown"
+                holder.pinDiff.text = context.getString(R.string.unknown)
                 holder.pinDiffC.setBackgroundColor(Color.parseColor("#686868"))
             }
         }

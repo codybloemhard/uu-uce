@@ -1,5 +1,6 @@
 package com.uu_uce.views
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -75,15 +76,12 @@ class Menu : View {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         for(child in menuChilds){
             if(child.onTouchEvent(event))
                 break
         }
-        var x = event.x
-        var y = event.y
-        var rx = event.rawX
-        var ry = event.rawY
         return true
     }
 }

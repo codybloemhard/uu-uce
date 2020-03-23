@@ -14,4 +14,8 @@
     <string name="pin_type">Pin type</string>
     <string name="center_button">Center</string>
     <string name="video_title_placeholder">Video title</string>
+    <string name="easy">Easy</string>
+    <string name="medium">Medium</string>
+    <string name="hard">Hard</string>
+    <string name="unknown">Unknown</string>
 </resources>
