@@ -59,12 +59,14 @@
                 app:layout_constraintTop_toTopOf="parent"
                 android:layout_width="0dp" />
         </LinearLayout>
+
         <Button
+            android:id="@+id/open_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/light_border"
             android:text="@string/open"
-            android:textAllCaps="false"
-            android:background="@drawable/light_border"/>
+            android:textAllCaps="false" />
     </LinearLayout>
 
 </LinearLayout>
