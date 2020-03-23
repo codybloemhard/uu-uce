@@ -48,19 +48,19 @@ class PinListAdapter internal constructor(
 
         when(current.difficulty){
             1 -> {
-                holder.pinDiff.text = "Easy"
+                holder.pinDiff.text = activity.getString(R.string.easy)
                 holder.pinDiffC.setBackgroundColor(Color.parseColor("#00B222"))
             }
             2 -> {
-                holder.pinDiff.text = "Medium"
+                holder.pinDiff.text = activity.getString(R.string.medium)
                 holder.pinDiffC.setBackgroundColor(Color.parseColor("#FF862F"))
             }
             3 -> {
-                holder.pinDiff.text = "Hard"
+                holder.pinDiff.text = activity.getString(R.string.hard)
                 holder.pinDiffC.setBackgroundColor(Color.parseColor("#EC1A3D"))
             }
             else -> {
-                holder.pinDiff.text = "Unknown"
+                holder.pinDiff.text = activity.getString(R.string.unknown)
                 holder.pinDiffC.setBackgroundColor(Color.parseColor("#686868"))
             }
         }

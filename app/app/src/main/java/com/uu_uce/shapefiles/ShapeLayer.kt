@@ -13,6 +13,7 @@ class ShapeLayer(path: File, nrOfLODs: Int){
     private var lastViewport: Pair<p2,p2> = Pair(p2Zero,p2Zero)
     private var lastZoom: Int = -1
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk> = mutableMapOf()
+    private val toRemove: HashSet<ChunkIndex> = hashSetOf()
 
     private val chunkLoaders: MutableList<Pair<ChunkIndex,Job>> = mutableListOf()
     @ExperimentalUnsignedTypes
@@ -49,18 +50,18 @@ class ShapeLayer(path: File, nrOfLODs: Int){
     }
 
     private fun updateChunks(viewport: Pair<p2,p2>, zoom: Int, map: ShapeMap){
-        for(i in chunkLoaders.size-1 downTo 0){
-            val (index,routine) = chunkLoaders[i]
+        chunkLoaders.filter{(index,routine) ->
             if(!shouldGetLoaded(index, viewport, zoom))
                 routine.cancel()
-
-            if(routine.isCancelled || routine.isCompleted) {
-                chunkLoaders.removeAt(i)
-                continue
-            }
+            (routine.isCancelled || routine.isCompleted)
         }
 
         val (newChunks,oldChunks) = getNewOldChunks(viewport, zoom)
+
+        synchronized(toRemove) {
+            toRemove.addAll(oldChunks)
+            toRemove.removeAll(newChunks)
+        }
 
         val routines: MutableList<Job> = mutableListOf()
         for (chunkIndex in newChunks) {
@@ -88,12 +89,11 @@ class ShapeLayer(path: File, nrOfLODs: Int){
             }
             if(ok) {
                 synchronized(chunks) {
-                    chunks.keys.removeAll{index ->
-                        !shouldGetLoaded(index,viewport,zoom)
-                    }
-                    var test = chunks
+                    chunks.keys.removeAll(toRemove)
                 }
-
+                synchronized(toRemove) {
+                    toRemove.clear()
+                }
             }
         }
 

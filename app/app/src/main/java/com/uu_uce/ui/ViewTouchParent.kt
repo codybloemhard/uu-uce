@@ -1,5 +1,6 @@
 package com.uu_uce.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -21,6 +22,7 @@ open class ViewTouchParent: View{
         setOnTouchListener { _, e -> updateChildren(e)}
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         return true
     }
