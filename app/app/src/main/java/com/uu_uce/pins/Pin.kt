@@ -14,6 +14,8 @@ import com.uu_uce.R
 import com.uu_uce.mapOverlay.aaBoundingBoxContains
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.screenToCoord
+import com.uu_uce.misc.LogType
+import com.uu_uce.misc.Logger
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.shapefiles.p2
 import com.uu_uce.shapefiles.p2Zero
@@ -26,12 +28,12 @@ enum class PinType {
 }
 
 class Pin(
-    private var coordinate  : UTMCoordinate,
-    var difficulty  : Int,
-    var type        : PinType,
-    var title       : String,
-    private var content     : PinContent,
-    private var image       : Drawable
+    private var coordinate      : UTMCoordinate,
+    private var difficulty      : Int,
+    private var type            : PinType,
+    private var title           : String,
+    private var content         : PinContent,
+    private var image           : Drawable
 ) {
     private val pinSize = 60
     private val imageHeight = pinSize * (image.intrinsicHeight.toFloat() / image.intrinsicWidth.toFloat())
@@ -54,7 +56,7 @@ class Pin(
         pinBbMax = screenToCoord(Pair(maxX.toFloat(), minY.toFloat()), viewport, view.width, view.height)
 
         if(!aaBoundingBoxContains(viewport.first, viewport.second, p2(pinBbMin.east, pinBbMin.north), p2(pinBbMax.east, pinBbMax.north))){
-            //Log.d("Pin.draw", "pin outside of viewport")
+            Logger.log(LogType.Event,"Pin", "Pin outside of viewport")
             inScreen = false
             return
         }
@@ -66,28 +68,36 @@ class Pin(
         image.draw(canvas)
     }
 
-    fun openPopupWindow(parentView: View, activity : Activity) {
-        val layoutInflater = activity.layoutInflater
+    fun getTitle() : String{
+        return title
+    }
 
-        // build an custom view (to be inflated on top of our current view & build it's popup window)
-        val customView = layoutInflater.inflate(R.layout.pin_content_view, null, false)
-        val popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+    fun getContent() : PinContent{
+        return content
+    }
+}
 
-        // add the title for the popup window
-        val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
-        windowTitle.text = title
+fun openPinPopupWindow(title : String, content : PinContent, parentView: View, activity : Activity) {
+    val layoutInflater = activity.layoutInflater
 
-        // add content to popup window
-        val layout : LinearLayout = customView.findViewById(R.id.scrollLayout)
-        content.contentBlocks.map { cB -> cB.generateContent(layout, activity) }
+    // build an custom view (to be inflated on top of our current view & build it's popup window)
+    val customView = layoutInflater.inflate(R.layout.pin_content_view, null, false)
+    val popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
-        popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
+    // add the title for the popup window
+    val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
+    windowTitle.text = title
 
-        val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
+    // add content to popup window
+    val layout : LinearLayout = customView.findViewById(R.id.scrollLayout)
+    content.contentBlocks.map { cB -> cB.generateContent(layout, activity) }
 
-        btnClosePopupWindow.setOnClickListener {
-            popupWindow.dismiss()
-        }
+    popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
+
+    val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
+
+    btnClosePopupWindow.setOnClickListener {
+        popupWindow.dismiss()
     }
 }
 
