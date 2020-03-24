@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -45,9 +46,11 @@ class AllPins : AppCompatActivity() {
         sharedPref = this.getPreferences(Context.MODE_PRIVATE)
 
         // TODO: make this a general function for every possible toolbar
-        val backButton : ImageButton = findViewById(R.id.back_button)
+        val toolbarBackButton = findViewById<ImageButton>(R.id.toolbar_back_button)
+        val toolbarTitle = findViewById<TextView>(R.id.toolbar_title)
+        toolbarTitle.text = "unfinished pins"
 
-        backButton.setOnClickListener {
+        toolbarBackButton.setOnClickListener {
             finish()
         }
 
