@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -42,6 +43,13 @@ class AllPins : AppCompatActivity() {
         registerForContextMenu(filterButton)
 
         sharedPref = this.getPreferences(Context.MODE_PRIVATE)
+
+        // TODO: make this a general function for every possible toolbar
+        val backButton : ImageButton = findViewById(R.id.back_button)
+
+        backButton.setOnClickListener {
+            finish()
+        }
 
     }
 
