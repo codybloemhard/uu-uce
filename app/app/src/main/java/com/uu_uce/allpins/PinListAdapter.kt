@@ -53,7 +53,6 @@ class PinListAdapter internal constructor(
                 holder.pinDiffC.setBackgroundColor(Color.parseColor("#686868"))
             }
         }
-
     }
 
     internal fun setPins(pins: List<PinData>) {

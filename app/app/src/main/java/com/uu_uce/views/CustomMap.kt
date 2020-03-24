@@ -24,6 +24,7 @@ import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.pins.Pin
+import com.uu_uce.pins.openPinPopupWindow
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.services.checkPermissions
@@ -61,9 +62,6 @@ class CustomMap : ViewTouchParent {
     private lateinit var viewModel : PinViewModel
     private lateinit var lfOwner : LifecycleOwner
 
-    private var statusBarHeight = 0
-    private val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
-
     private var camera: Camera
 
     init{
@@ -71,6 +69,7 @@ class CustomMap : ViewTouchParent {
         SHP_File.LOG_ONLOAD_HEADER = false
         SHP_File.LOG_ONLOAD_CONTENT = false
 
+        // Logger mask settings
         Logger.setTagEnabled("CustomMap", false)
         Logger.setTagEnabled("zoom", false)
 
@@ -81,25 +80,24 @@ class CustomMap : ViewTouchParent {
         addChild(SingleTapper(context as AppCompatActivity, ::tapPin))
         Logger.log(LogType.Info,"CustomMap", "Init")
 
+        // Parse shapes
         smap = ShapeMap(5, this)
         val dir = File(context.filesDir, "mydir")
         val timeParse = measureTimeMillis {
             smap.addLayer(LayerType.Water, dir, context)
         }
+        Log.i("CustomMap", "Parse file: $timeParse")
+
 
         camera = smap.initialize()
-        //Log.i("CustomMap", "Parse file: $timeParse")
 
         deviceLocPaint.color = Color.BLUE
         deviceLocEdgePaint.color = Color.WHITE
 
+        // Check permissions
         val missingPermissions = checkPermissions(context,permissionsNeeded + LocationServices.permissionsNeeded)
         if(missingPermissions.count() == 0){
             startLocServices()
-        }
-
-        if (resourceId > 0) {
-            statusBarHeight = resources.getDimensionPixelSize(resourceId)
         }
     }
 
@@ -134,7 +132,6 @@ class CustomMap : ViewTouchParent {
             lastDrawnLoc = screenLoc
 
             pins.map{ pin -> pin.draw(viewport, this, canvas) }
-
         }
         Logger.log(LogType.Continuous, "CustomMap", "Draw MS: $timeDraw")
         if(res == UpdateResult.ANIM)
@@ -142,6 +139,7 @@ class CustomMap : ViewTouchParent {
     }
 
     private fun updateLoc(newLoc : p2) {
+        // TODO: move location drawing to an overlaying transparent canvas to avoid unnecessary map drawing
         loc = degreeToUTM(newLoc)
 
         val waspect = width.toDouble() / height
@@ -209,8 +207,8 @@ class CustomMap : ViewTouchParent {
         pins.forEach{ p ->
             if(!p.inScreen) return@forEach
             if(pointInAABoundingBox(p.boundingBox.first, p.boundingBox.second, canvasTapLocation, pinTapBufferSize)){
-                p.openPopupWindow(this, activity)
-                Logger.log(LogType.Info, "CustomMap", "${p.title}: I have been tapped.")
+                openPinPopupWindow(p.getTitle(), p.getContent(), this, activity)
+                Logger.log(LogType.Info, "CustomMap", "${p.getTitle()}: I have been tapped.")
                 return
             }
         }
@@ -229,7 +227,6 @@ class CustomMap : ViewTouchParent {
     }
 
     fun allPins() {
-        Log.i("test", "test123")
         val i = Intent(context, AllPins::class.java)
         startActivity(context, i, null)
     }

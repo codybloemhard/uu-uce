@@ -42,7 +42,7 @@ class PinContent(contentString: String) {
         val dir             = "file:///data/data/com.uu_uce/files/pin_content/"
 
         var blockTag        = BlockTag.UNDEFINED
-        var textString   = ""
+        var textString      = ""
         var fileName        = ""
         var title           = ""
         var thumbnailURI    = Uri.EMPTY
@@ -132,7 +132,7 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
 
         // Create play button
         val playButton = ImageView(activity)
-        playButton.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.play, null) ?: error ("Image not found"))
+        playButton.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.ic_sprite_play, null) ?: error ("Image not found"))
         playButton.scaleType = ImageView.ScaleType.FIT_CENTER //TODO: find correct scaletype
         playButton.setOnClickListener{openVideoView(videoURI, title, activity)}
 
