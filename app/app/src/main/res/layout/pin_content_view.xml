@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#33000000"
@@ -23,28 +24,26 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/popup_window_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:gravity="bottom|start"
-                android:paddingStart="12dp"
-                android:paddingTop="20dp"
-                android:paddingEnd="12dp"
-                android:paddingBottom="10dp"
-                android:textColor="#DE000000"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintTop_toTopOf="parent" />
-
             <LinearLayout
                 android:id="@+id/linearLayout"
                 android:layout_width="match_parent"
-                android:layout_height="605dp"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
-                app:layout_constraintBottom_toTopOf="@+id/popup_window_close_button"
-                app:layout_constraintTop_toBottomOf="@+id/popup_window_title">
+                app:layout_constraintBottom_toTopOf="@+id/popup_window_close_button">
+
+                <TextView
+                    android:id="@+id/popup_window_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif"
+                    android:gravity="bottom|start"
+                    android:paddingStart="12dp"
+                    android:paddingTop="20dp"
+                    android:paddingEnd="12dp"
+                    android:paddingBottom="10dp"
+                    android:textColor="#DE000000"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
 
                 <ScrollView
                     android:id="@+id/scroll_view"

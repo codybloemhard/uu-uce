@@ -1,8 +1,12 @@
 package com.uu_uce.views
 
+import android.app.Activity
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.view.MotionEvent
+import android.widget.ImageButton
+import android.widget.TextView
+import com.uu_uce.R
 
 abstract class MenuChild(
     var minx: Float,
@@ -41,5 +45,15 @@ class MenuButton(
             }
         }
         return false
+    }
+}
+
+// TODO: wasn't sure on where to put this...
+fun onCreateToolbar(activity : Activity, title: String)
+{
+    activity.findViewById<TextView>(R.id.toolbar_title).text = title
+
+    activity.findViewById<ImageButton>(R.id.toolbar_back_button).setOnClickListener{
+        activity.finish()
     }
 }
