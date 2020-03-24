@@ -60,14 +60,22 @@ class PinConversion(context: Context){
 
     }
 
+    private fun stringToIds(ids : String) : List<Int>{
+        return ids.split(',').map{s -> s.toInt()}
+    }
+
     fun pinDataToPin(pinData: PinData): Pin {
         return Pin(
+            pinData.pinId                           ,
             stringToUtm(pinData.location)           , //location
             pinData.difficulty                      ,
             stringToPinType(pinData.type)           ,
             pinData.title                           ,
             stringToPinContent(pinData.content)     ,
-            stringToDrawable(pinData.type, pinData.difficulty)
+            stringToDrawable(pinData.type, pinData.difficulty),
+            pinData.status                          ,
+            stringToIds(pinData.predecessorIds)     ,
+            stringToIds(pinData.followIds)
         )
 
     }

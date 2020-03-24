@@ -11,9 +11,13 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
 import com.uu_uce.R
+import com.uu_uce.database.PinDao
+import com.uu_uce.database.PinViewModel
 import com.uu_uce.mapOverlay.aaBoundingBoxContains
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.screenToCoord
+import com.uu_uce.misc.LogType
+import com.uu_uce.misc.Logger
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.shapefiles.p2
 import com.uu_uce.shapefiles.p2Zero
@@ -26,13 +30,23 @@ enum class PinType {
 }
 
 class Pin(
-    private var coordinate  : UTMCoordinate,
-    var difficulty  : Int,
-    var type        : PinType,
-    var title       : String,
-    private var content     : PinContent,
-    private var image       : Drawable
+    private val id : Int,
+    private var coordinate      : UTMCoordinate,
+    private var difficulty      : Int,
+    private var type            : PinType,
+    private var title           : String,
+    private var content         : PinContent,
+    private var image           : Drawable,
+    private var status          : Int,              //0 : locked, 1 : unlocked, 2 : completed
+    private var predecessorIds  : List<Int>,
+    private var followIds       : List<Int>
 ) {
+    init{
+        predecessorIds.map{I ->
+            if(I == id) error("Pin can not be own predecessor")
+        }
+    }
+
     private val pinSize = 60
     private val imageHeight = pinSize * (image.intrinsicHeight.toFloat() / image.intrinsicWidth.toFloat())
 
@@ -54,40 +68,68 @@ class Pin(
         pinBbMax = screenToCoord(Pair(maxX.toFloat(), minY.toFloat()), viewport, view.width, view.height)
 
         if(!aaBoundingBoxContains(viewport.first, viewport.second, p2(pinBbMin.east, pinBbMin.north), p2(pinBbMax.east, pinBbMax.north))){
-            //Log.d("Pin.draw", "pin outside of viewport")
+            Logger.log(LogType.Event,"Pin", "Pin outside of viewport")
             inScreen = false
             return
         }
 
         inScreen = true
-        boundingBox = Pair(p2(minX.toDouble(), minY.toDouble()), p2(maxX.toDouble(), maxY.toDouble()))
+        if(status > 0){
+            boundingBox = Pair(p2(minX.toDouble(), minY.toDouble()), p2(maxX.toDouble(), maxY.toDouble()))
 
-        image.setBounds(minX, minY, maxX, maxY)
-        image.draw(canvas)
+            image.setBounds(minX, minY, maxX, maxY)
+            image.draw(canvas)
+        }
     }
 
-    fun openPopupWindow(parentView: View, activity : Activity) {
-        val layoutInflater = activity.layoutInflater
+    fun getTitle() : String{
+        return title
+    }
 
-        // build an custom view (to be inflated on top of our current view & build it's popup window)
-        val customView = layoutInflater.inflate(R.layout.pin_content_view, null, false)
-        val popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+    fun getContent() : PinContent{
+        return content
+    }
 
-        // add the title for the popup window
-        val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
-        windowTitle.text = title
-
-        // add content to popup window
-        val layout : LinearLayout = customView.findViewById(R.id.scrollLayout)
-        content.contentBlocks.map { cB -> cB.generateContent(layout, activity) }
-
-        popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
-
-        val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
-
-        btnClosePopupWindow.setOnClickListener {
-            popupWindow.dismiss()
+    fun complete(viewModel : PinViewModel, activePins : MutableList<Pin>, action: () -> Unit){
+        status = 2
+        viewModel.completePin(id)
+        if(followIds[0] != -1){
+            activePins.forEach{ pin ->
+                if(pin.id in followIds) pin.checkStatus(viewModel, action)}
         }
+    }
+
+    fun checkStatus(viewModel : PinViewModel, action : (() -> Unit)){
+        if(predecessorIds[0] != -1){
+            viewModel.getStatus(id, predecessorIds, action)
+        }
+        else{
+            action()
+        }
+    }
+}
+
+fun openPinPopupWindow(title : String, content : PinContent, parentView: View, activity : Activity) {
+    val layoutInflater = activity.layoutInflater
+
+    // build an custom view (to be inflated on top of our current view & build it's popup window)
+    val customView = layoutInflater.inflate(R.layout.pin_content_view, null, false)
+    val popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+
+    // add the title for the popup window
+    val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
+    windowTitle.text = title
+
+    // add content to popup window
+    val layout : LinearLayout = customView.findViewById(R.id.scrollLayout)
+    content.contentBlocks.map { cB -> cB.generateContent(layout, activity) }
+
+    popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
+
+    val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
+
+    btnClosePopupWindow.setOnClickListener {
+        popupWindow.dismiss()
     }
 }
 

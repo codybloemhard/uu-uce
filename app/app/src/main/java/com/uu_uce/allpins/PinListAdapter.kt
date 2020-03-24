@@ -60,8 +60,6 @@ class PinListAdapter internal constructor(
         notifyDataSetChanged()
     }
 
-
-
     override fun getItemCount(): Int {
         return pins.size
     }

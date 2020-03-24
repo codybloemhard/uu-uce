@@ -14,9 +14,7 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import com.uu_uce.AllPins
-import com.uu_uce.database.PinConversion
-import com.uu_uce.database.PinData
-import com.uu_uce.database.PinViewModel
+import com.uu_uce.database.*
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation
 import com.uu_uce.mapOverlay.pointDistance
@@ -58,7 +56,8 @@ class CustomMap : ViewTouchParent {
     private val deviceLocPaint : Paint = Paint()
     private val deviceLocEdgePaint : Paint = Paint()
 
-    private var pins : List<Pin> = emptyList()
+    private var pinList : MutableList<Pin> = mutableListOf()
+    private lateinit var pinsAdded : Array<Boolean>
     private lateinit var viewModel : PinViewModel
     private lateinit var lfOwner : LifecycleOwner
 
@@ -131,7 +130,7 @@ class CustomMap : ViewTouchParent {
                 4F)
             lastDrawnLoc = screenLoc
 
-            pins.map{ pin -> pin.draw(viewport, this, canvas) }
+            pinList.forEach{ pin -> pin.draw(viewport, this, canvas) }
         }
         Logger.log(LogType.Continuous, "CustomMap", "Draw MS: $timeDraw")
         if(res == UpdateResult.ANIM)
@@ -158,18 +157,20 @@ class CustomMap : ViewTouchParent {
     fun updatePins(){
         viewModel.allPinData.observe(lfOwner, Observer { pins ->
             // Update the cached copy of the words in the adapter.
+            viewModel.allPinData
             pins?.let { setPins(it) }
         })
     }
 
     private fun setPins(pins: List<PinData>) {
-        val processedPins = mutableListOf<Pin>()
         for(pin in pins) {
-            processedPins.add(PinConversion(context).pinDataToPin(pin))
+            var newPin = PinConversion(context).pinDataToPin(pin)
+            newPin.checkStatus(viewModel) {
+                pinList.add(newPin)
+                camera.forceChanged()
+                invalidate()
+            }
         }
-        this.pins = processedPins
-        camera.forceChanged()
-        invalidate()
     }
 
     private fun zoomMap(zoom: Float){
@@ -204,7 +205,7 @@ class CustomMap : ViewTouchParent {
 
     private fun tapPin(tapLocation : p2, activity : Activity){
         val canvasTapLocation : p2 = Pair(tapLocation.first, tapLocation.second)
-        pins.forEach{ p ->
+        pinList.forEach{ p ->
             if(!p.inScreen) return@forEach
             if(pointInAABoundingBox(p.boundingBox.first, p.boundingBox.second, canvasTapLocation, pinTapBufferSize)){
                 openPinPopupWindow(p.getTitle(), p.getContent(), this, activity)
@@ -218,15 +219,15 @@ class CustomMap : ViewTouchParent {
         smap.toggleLayer(l)
     }
 
-    fun setViewModel(vm: PinViewModel) {
+    fun setViewModel(vm: PinViewModel){
         viewModel = vm
     }
 
-    fun setLifeCycleOwner(lifecycleOwner: LifecycleOwner) {
+    fun setLifeCycleOwner(lifecycleOwner: LifecycleOwner){
         lfOwner = lifecycleOwner
     }
 
-    fun allPins() {
+    fun allPins(){
         val i = Intent(context, AllPins::class.java)
         startActivity(context, i, null)
     }

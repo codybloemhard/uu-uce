@@ -21,4 +21,12 @@ class PinViewModel(application: Application) : AndroidViewModel(application) {
     fun insert(pin: PinData) = viewModelScope.launch {
         repository.insert(pin)
     }
+
+    fun getStatus(pid : Int, predPids : List<Int>, action : (() -> Unit)) = viewModelScope.launch {
+        repository.getStatus(pid, predPids, action)
+    }
+
+    fun completePin(pid : Int) = viewModelScope.launch {
+        repository.setStatus(pid, 2)
+    }
 }

@@ -25,7 +25,6 @@ class Menu : View {
     var downY = 0f
     var barY = 0f
     private var upY = 0f
-    var image : Drawable? = context.getDrawable(R.drawable.menu)
     private var screenSiz = 0
 
     init{
