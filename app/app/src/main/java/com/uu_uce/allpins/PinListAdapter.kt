@@ -31,7 +31,7 @@ class PinListAdapter internal constructor(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PinViewHolder {
-        val itemView = inflater.inflate(R.layout.recyclerview_item, parent, false)
+        val itemView = inflater.inflate(R.layout.allpins_recyclerview_item, parent, false)
         return PinViewHolder(itemView)
     }
 

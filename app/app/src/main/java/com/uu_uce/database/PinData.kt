@@ -14,3 +14,11 @@ open class PinData(
     var content        : String,
     var size           : Int
 )
+
+@Entity(tableName = "mypins")
+open class LocalPinData(
+    @PrimaryKey(autoGenerate = true) var id : Int,
+    var location       : String,
+    var title          : String,
+    var content        : String
+)

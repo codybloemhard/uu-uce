@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#DF0808">
+
+        <TextView
+            android:id="@+id/no"
+            android:layout_weight="1"
+            android:text="#001" />
+
+        <TextView
+            android:id="@+id/location"
+            android:layout_weight="1"
+            android:text="17N 630084 4833438" />
+
+        <TextView
+            android:id="@+id/datetime"
+            android:layout_weight="1"
+            android:text="2020-03-24 19:38" />
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#2EFF00" >
+
+        <TextView
+            android:id="@+id/textView9"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:text="TextView" />
+
+        <ImageView
+            android:contentDescription="Picture Preview"
+            android:layout_width="100dp"
+            android:layout_height="100dp" />
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#2EFF00" >
+
+        <Button
+            android:text="show"
+            android:layout_weight="1" />
+
+    </TableRow>
+
+</TableLayout>
