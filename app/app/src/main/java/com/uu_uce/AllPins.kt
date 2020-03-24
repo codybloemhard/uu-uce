@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageButton
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -16,6 +14,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.allpins.PinListAdapter
 import com.uu_uce.database.PinData
 import com.uu_uce.database.PinViewModel
+import com.uu_uce.views.onCreateToolbar
 
 class AllPins : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
@@ -45,15 +44,7 @@ class AllPins : AppCompatActivity() {
 
         sharedPref = this.getPreferences(Context.MODE_PRIVATE)
 
-        // TODO: make this a general function for every possible toolbar
-        val toolbarBackButton = findViewById<ImageButton>(R.id.toolbar_back_button)
-        val toolbarTitle = findViewById<TextView>(R.id.toolbar_title)
-        toolbarTitle.text = "unfinished pins"
-
-        toolbarBackButton.setOnClickListener {
-            finish()
-        }
-
+        onCreateToolbar(this, "all pins")
     }
 
     fun openDialog(view: View) {
