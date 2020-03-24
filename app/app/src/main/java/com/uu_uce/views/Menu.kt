@@ -13,6 +13,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.updateLayoutParams
 import com.uu_uce.R
 import kotlinx.android.synthetic.main.activity_geo_map.*
+import kotlinx.android.synthetic.main.activity_geo_map.view.*
 
 class Menu : View {
     constructor(context: Context): super(context)
@@ -35,17 +36,9 @@ class Menu : View {
     init{
         paint.color = Color.argb(255, 241, 196, 15)
 
-        //make the menu start at the bottom of the screen
-        val listener =
-            OnLayoutChangeListener { _, _, _, _, _, _, oldTop, _, _ ->
-                y = oldTop.toFloat()
-            }
-        addOnLayoutChangeListener(listener)
-        post{
-            updateLayoutParams{height = screenSiz}
-            y = screenSiz - downY
-        }
+
     }
+
 
     fun addMenuChild(child: MenuChild){
         menuChilds.add(child)
@@ -56,6 +49,9 @@ class Menu : View {
         downY = h * downPercent
         barY = h * barPercent
         upY = h * upPercent
+
+        updateLayoutParams{height = screenSiz}
+        y = screenSiz - downY
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -86,9 +82,9 @@ class Menu : View {
     override fun onTouchEvent(event: MotionEvent): Boolean {
         for(child in menuChilds){
             if(child.onTouchEvent(event))
-                break
+                return true
         }
-        return true
+        return false
     }
 }
 

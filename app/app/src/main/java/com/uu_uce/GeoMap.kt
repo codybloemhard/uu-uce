@@ -40,7 +40,8 @@ class GeoMap : AppCompatActivity() {
         button.setOnClickListener{customMap.zoomToDevice()}
 
         initMenu()
-        menu.post {
+
+        menu.post{
             val button = ResourcesCompat.getDrawable(resources, R.drawable.logotp, null) ?: error ("Image not found")
             val menuDragUp = ResourcesCompat.getDrawable(resources, R.drawable.ic_menu_drag_up, null) ?: error ("Image not found")
             val menuDragDown = ResourcesCompat.getDrawable(resources, R.drawable.ic_menu_drag_down, null) ?: error ("Image not found")
@@ -52,6 +53,7 @@ class GeoMap : AppCompatActivity() {
             menu.addMenuChild(c1)
             menu.addMenuChild(c2)
             menu.addMenuChild(c3)
+            menu.invalidate()
         }
     }
 
