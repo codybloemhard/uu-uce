@@ -58,15 +58,17 @@ Used by shapefile-linter to save it's custom files for geological data.
 | 0.x.x     | 100% tested | 100% tested | Partial: GPS, Map
 | 0.0.1     | 100% tested | None | None
 ### Test Issues Matrix
-| Version   | Pixel 2 Emulator API 29 | Nokia 2 API 24  | One Plus 5 API 28 |
-|-----------|-------------------------|-----------------|-------------------|
-| 0.3.1     | None | None | None
-| 0.x.x     | None | Popup UI scaling (IC3) | Partialy Tested
-| 0.0.1     | None | Not Tested | Not Tested
+| Version   | Pixel 2 Emulator API 29   | Nokia 2 API 24            | One Plus 5 API 28 | Moto g5s+         |
+|-----------|---------------------------|---------------------------|-------------------|-------------------|
+| 0.3.1     | IK2                       | None                      | None              | IK1, IK2          |
+| 0.x.x     | None                      | Popup UI scaling (IC3)    | Partialy Tested   | Partially tested  |
+| 0.0.1     | None                      | Not Tested                | Not Tested        | Not tested        |
 ### Know Issues Matrix
 | Version       | ID    | What              |
 |---------------|-------|-------------------|
 | 0.3.1         | IK0   | Can't open popup from pin list menu
+| 0.3.1         | IK1   | Menu covers whole screen when phone is closed while running (on some devices)
+| 0.3.1         | IK2   | Text in pins partially overlaps
 ### Quality Checks Matrix
 | Since Version | ID    | What to check     |
 |---------------|-------|-------------------|
