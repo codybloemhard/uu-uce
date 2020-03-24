@@ -2,6 +2,8 @@ package com.uu_uce.views
 
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.drawable.Drawable
+import android.media.Image
 import android.view.MotionEvent
 
 abstract class MenuChild(
@@ -24,11 +26,12 @@ class MenuButton(
     maxx: Float,
     maxy: Float,
     var action: () -> Unit,
-    private var paint: Paint
+    private var image: Drawable
 ): MenuChild(minx, miny, maxx, maxy){
 
     override fun onDraw(canvas: Canvas) {
-        canvas.drawRect(minx, miny, maxx, maxy, paint)
+        image.setBounds(minx.toInt(), miny.toInt(), maxx.toInt(), maxy.toInt())
+        image.draw(canvas)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {

@@ -7,6 +7,7 @@ import android.graphics.Point
 import android.os.Bundle
 import android.view.Display
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import com.uu_uce.database.PinViewModel
 import com.uu_uce.misc.LogType
@@ -42,18 +43,20 @@ class GeoMap : AppCompatActivity() {
 
         initMenu()
         menu.post {
+            val image = ResourcesCompat.getDrawable(resources, R.drawable.ic_menu_drag_up, null) ?: error ("Image not found")
+
             val p = Paint()
             p.color = Color.RED
             val t = Paint()
             t.color = Color.GREEN
-            val c1 = MenuButton((menu.width - menu.downY)/ 2, 0f, (menu.width + menu.downY)/ 2, menu.downY, { menu.open() }, p)
-            val c2 = MenuButton(20f, menu.downY, 20+(menu.barY - menu.downY), menu.barY, { customMap.toggleLayer(0) }, p)
-            val c3 = MenuButton(20+(menu.barY - menu.downY), menu.downY, 20+(2*(menu.barY - menu.downY)), menu.barY, { customMap.allPins() }, t)
+            val menuPullWidth = menu.downY * image.intrinsicWidth / image.intrinsicHeight
+            val c1 = MenuButton((menu.width - menuPullWidth)/ 2, 0f, (menu.width + menuPullWidth)/ 2, menu.downY, { menu.open() }, image)
+            //val c2 = MenuButton(20f, menu.downY, 20+(menu.barY - menu.downY), menu.barY, { customMap.toggleLayer(0) }, p)
+            //val c3 = MenuButton(20+(menu.barY - menu.downY), menu.downY, 20+(2*(menu.barY - menu.downY)), menu.barY, { customMap.allPins() }, t)
             menu.addMenuChild(c1)
-            menu.addMenuChild(c2)
-            menu.addMenuChild(c3)
+            //menu.addMenuChild(c2)
+            //menu.addMenuChild(c3)
         }
-
     }
 
     override fun onResume() {

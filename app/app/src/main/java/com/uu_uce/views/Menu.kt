@@ -4,10 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.updateLayoutParams
 import com.uu_uce.R
 
@@ -20,19 +22,21 @@ class Menu : View {
 
     private val menuChilds : MutableList<MenuChild> = mutableListOf()
 
-    private val downPercent = 0.05f
+    private val downPercent = 0.035f
     private val barPercent = 0.2f
     private val upPercent = 1f
     var downY = 0f
     var barY = 0f
     private var upY = 0f
-    var image : Drawable? = context.getDrawable(R.drawable.menu)
     private var screenSiz = 0
+    private val paint = Paint()
 
     init{
+        paint.color = Color.argb(255, 241, 196, 15)
+
         //make the menu start at the bottom of the screen
         val listener =
-            OnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+            OnLayoutChangeListener { _, _, _, _, _, _, oldTop, _, _ ->
                 y = oldTop.toFloat()
             }
         addOnLayoutChangeListener(listener)
@@ -55,7 +59,7 @@ class Menu : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawColor(Color.argb(255,254,212,2))
+        canvas.drawRect(0f, downY, width.toFloat(), height.toFloat(), paint)
         for(child in menuChilds)
             child.onDraw(canvas)
     }

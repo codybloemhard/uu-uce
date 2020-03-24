@@ -117,6 +117,7 @@ class CustomMap : ViewTouchParent {
         if(res == UpdateResult.NOOP){
             return
         }
+
         val viewport = camera.getViewport(waspect)
         val timeDraw = measureTimeMillis {
             canvas.drawColor(Color.rgb(234, 243, 245))
