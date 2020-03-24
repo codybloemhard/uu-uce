@@ -20,25 +20,35 @@ abstract class MenuChild(
     }
 }
 
-class MenuButton(
+open class MenuButton(
     minx: Float,
     miny: Float,
     maxx: Float,
     maxy: Float,
-    var action: () -> Unit,
-    private var image: Drawable
+    var action: (MenuButton) -> Unit,
+    private var images: List<Drawable>,
+    private var menu: Menu
 ): MenuChild(minx, miny, maxx, maxy){
+    private var index = 0
+
+    constructor(minx: Float, miny: Float, maxx: Float, maxy: Float, action: (MenuButton) -> Unit, image: Drawable, menu: Menu) : this(minx,miny,maxx,maxy,action,listOf(image), menu)
 
     override fun onDraw(canvas: Canvas) {
-        image.setBounds(minx.toInt(), miny.toInt(), maxx.toInt(), maxy.toInt())
+        val image = images[index]
+        image.setBounds(minx.toInt(),miny.toInt(),maxx.toInt(),maxy.toInt())
         image.draw(canvas)
+    }
+
+    fun changeImage(){
+        index = (index + 1)%images.size
+        menu.invalidate()
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if(super.onTouchEvent(event)){
             when(event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    action()
+                    action(this)
                     return true
                 }
             }

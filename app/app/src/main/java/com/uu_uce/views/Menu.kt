@@ -12,6 +12,7 @@ import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.updateLayoutParams
 import com.uu_uce.R
+import kotlinx.android.synthetic.main.activity_geo_map.*
 
 class Menu : View {
     constructor(context: Context): super(context)
@@ -22,7 +23,7 @@ class Menu : View {
 
     private val menuChilds : MutableList<MenuChild> = mutableListOf()
 
-    private val downPercent = 0.035f
+    private val downPercent = 0.05f
     private val barPercent = 0.2f
     private val upPercent = 1f
     var downY = 0f
@@ -69,6 +70,7 @@ class Menu : View {
             DragStatus.Down ->{
                 dragStatus = DragStatus.Bar
                 animate().y(screenSiz - barY)
+
             }
             DragStatus.Bar ->{
                 dragStatus = DragStatus.Down
