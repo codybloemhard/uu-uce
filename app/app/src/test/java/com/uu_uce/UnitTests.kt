@@ -5,9 +5,13 @@ import com.uu_uce.mapOverlay.screenToCoord
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.services.degreeToUTM
 import com.uu_uce.services.latToUTMLetter
+import com.uu_uce.shapefiles.FileReader
 import com.uu_uce.shapefiles.p2
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import kotlin.random.Random
+import kotlin.random.nextUInt
+import kotlin.random.nextULong
 
 class UnitTests {
     private fun uglyLatToLetter(lat: Double): Char{
@@ -65,4 +69,51 @@ class UnitTests {
         assertEquals(mapCoordinate.east, coordinate.east, 0.1)
         assertEquals(mapCoordinate.north, coordinate.north, 0.1)
     }
+
+    @ExperimentalUnsignedTypes
+    @Test
+    fun testBinaryReader(){
+        val longs = ULongArray(20){ Random.nextULong()}
+        val ubytes: MutableList<UByte> = mutableListOf()
+        for(long in longs){
+            ubytes.add((long shr 56).toUByte())
+            ubytes.add((long shr 48).toUByte())
+            ubytes.add((long shr 40).toUByte())
+            ubytes.add((long shr 32).toUByte())
+            ubytes.add((long shr 24).toUByte())
+            ubytes.add((long shr 16).toUByte())
+            ubytes.add((long shr 8).toUByte())
+            ubytes.add((long shr 0).toUByte())
+        }
+        var reader = FileReader(ubytes.toUByteArray())
+        for(long in longs){
+            assertEquals(long, reader.readULong())
+        }
+
+        val ints = UIntArray(20){ Random.nextUInt()}
+        ubytes.clear()
+        for(int in ints){
+            ubytes.add((int shr 24).toUByte())
+            ubytes.add((int shr 16).toUByte())
+            ubytes.add((int shr 8).toUByte())
+            ubytes.add((int shr 0).toUByte())
+        }
+        reader = FileReader(ubytes.toUByteArray())
+        for(int in ints){
+            assertEquals(int, reader.readUInt())
+        }
+
+        val shorts = UIntArray(20){ Random.nextUInt()}
+        ubytes.clear()
+        for(short in shorts){
+            ubytes.add((short shr 8).toUByte())
+            ubytes.add((short shr 0).toUByte())
+        }
+        reader = FileReader(ubytes.toUByteArray())
+        for(short in shorts){
+            assertEquals(short.toUShort(), reader.readUShort())
+        }
+    }
+
+
 }

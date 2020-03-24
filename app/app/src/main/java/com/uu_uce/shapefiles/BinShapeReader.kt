@@ -11,37 +11,40 @@ interface ChunkGetter{
 }
 
 @ExperimentalUnsignedTypes
-class FileReader(file: File){
+class FileReader{
     private var index = 0
-    private var bytes: UByteArray
+    private var ubytes: UByteArray
 
-    init{
+    constructor(file: File){
         val inputStream = file.inputStream()
-        bytes = inputStream.readBytes().toUByteArray()
+        ubytes = inputStream.readBytes().toUByteArray()
         inputStream.close()
     }
 
-
-    fun readShort(): UShort{
-        return  ((bytes[index++].toUInt() shl 8) +
-                (bytes[index++].toUInt())).toUShort()
+    constructor(us: UByteArray){
+        ubytes = us
     }
 
-    fun readInt(): UInt{
-        return  (bytes[index++].toUInt() shl 24) +
-                (bytes[index++].toUInt() shl 16) +
-                (bytes[index++].toUInt() shl 8) +
-                (bytes[index++].toUInt())
+    fun readUShort(): UShort{
+        return  ((ubytes[index++].toUInt() shl 8) +
+                (ubytes[index++].toUInt())).toUShort()
     }
-    fun readLong(): ULong{
-        return  (bytes[index++].toULong() shl 56) +
-                (bytes[index++].toULong() shl 48) +
-                (bytes[index++].toULong() shl 40) +
-                (bytes[index++].toULong() shl 32) +
-                (bytes[index++].toULong() shl 24) +
-                (bytes[index++].toULong() shl 16) +
-                (bytes[index++].toULong() shl 8) +
-                (bytes[index++].toULong())
+
+    fun readUInt(): UInt{
+        return  (ubytes[index++].toUInt() shl 24) +
+                (ubytes[index++].toUInt() shl 16) +
+                (ubytes[index++].toUInt() shl 8) +
+                (ubytes[index++].toUInt())
+    }
+    fun readULong(): ULong{
+        return  (ubytes[index++].toULong() shl 56) +
+                (ubytes[index++].toULong() shl 48) +
+                (ubytes[index++].toULong() shl 40) +
+                (ubytes[index++].toULong() shl 32) +
+                (ubytes[index++].toULong() shl 24) +
+                (ubytes[index++].toULong() shl 16) +
+                (ubytes[index++].toULong() shl 8) +
+                (ubytes[index++].toULong())
     }
 }
 
@@ -55,29 +58,29 @@ class BinShapeReader(
         val file = File(dir, "test.obj")
         val reader = FileReader(file)
 
-        val xoff = reader.readLong().toDouble()
-        val yoff = reader.readLong().toDouble()
-        val mult = reader.readLong().toDouble()
-        val bmin = p3(reader.readShort().toDouble()/mult + xoff, reader.readShort().toDouble()/mult + yoff, reader.readShort().toDouble())
-        val bmax = p3(reader.readShort().toDouble()/mult + xoff, reader.readShort().toDouble()/mult + yoff, reader.readShort().toDouble())
+        val xoff = reader.readULong().toDouble()
+        val yoff = reader.readULong().toDouble()
+        val mult = reader.readULong().toDouble()
+        val bmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
+        val bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
 
-        val nrShapes = reader.readLong()
+        val nrShapes = reader.readULong()
         var chunkShapes = List(nrShapes.toInt()) {
-            val z = reader.readShort().toDouble()
+            val z = reader.readUShort().toDouble()
             val bb1 = p3(
-                reader.readShort().toDouble()/mult + xoff,
-                reader.readShort().toDouble()/mult + yoff,
-                reader.readShort().toDouble()
+                reader.readUShort().toDouble()/mult + xoff,
+                reader.readUShort().toDouble()/mult + yoff,
+                reader.readUShort().toDouble()
             )
             val bb2 = p3(
-                reader.readShort().toDouble()/mult + xoff,
-                reader.readShort().toDouble()/mult + yoff,
-                reader.readShort().toDouble()
+                reader.readUShort().toDouble()/mult + xoff,
+                reader.readUShort().toDouble()/mult + yoff,
+                reader.readUShort().toDouble()
             )
 
-            val nrPoints = reader.readLong()
+            val nrPoints = reader.readULong()
             val points: List<p2> = List(nrPoints.toInt()) { j ->
-                p2(reader.readShort().toDouble()/mult + xoff, reader.readShort().toDouble()/mult + yoff)
+                p2(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff)
             }
 
             ShapeZ(ShapeType.Polygon, points, bb1, bb2)
