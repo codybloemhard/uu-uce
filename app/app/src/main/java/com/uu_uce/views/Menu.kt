@@ -3,12 +3,11 @@ package com.uu_uce.views
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.view.View.OnLayoutChangeListener
 import androidx.core.view.updateLayoutParams
-import com.uu_uce.R
 
 class Menu : View {
     constructor(context: Context): super(context)

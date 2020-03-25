@@ -11,7 +11,6 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
 import com.uu_uce.R
-import com.uu_uce.database.PinDao
 import com.uu_uce.database.PinViewModel
 import com.uu_uce.mapOverlay.aaBoundingBoxContains
 import com.uu_uce.mapOverlay.coordToScreen
@@ -30,7 +29,7 @@ enum class PinType {
 }
 
 class Pin(
-    private val id : Int,
+    val id : Int,
     private var coordinate      : UTMCoordinate,
     private var difficulty      : Int,
     private var type            : PinType,
@@ -95,13 +94,13 @@ class Pin(
         viewModel.completePin(id)
         if(followIds[0] != -1){
             activePins.forEach{ pin ->
-                if(pin.id in followIds) pin.checkStatus(viewModel, action)}
+                if(pin.id in followIds) pin.tryUnlock(viewModel, action)}
         }
     }
 
-    fun checkStatus(viewModel : PinViewModel, action : (() -> Unit)){
-        if(predecessorIds[0] != -1){
-            viewModel.getStatus(id, predecessorIds, action)
+    fun tryUnlock(viewModel : PinViewModel, action : (() -> Unit)){
+        if(predecessorIds[0] != -1 && status < 1){
+            viewModel.tryUnlock(id, predecessorIds, action)
         }
         else{
             action()

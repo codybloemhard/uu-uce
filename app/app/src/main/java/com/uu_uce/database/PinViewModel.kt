@@ -22,8 +22,8 @@ class PinViewModel(application: Application) : AndroidViewModel(application) {
         repository.insert(pin)
     }
 
-    fun getStatus(pid : Int, predPids : List<Int>, action : (() -> Unit)) = viewModelScope.launch {
-        repository.getStatus(pid, predPids, action)
+    fun tryUnlock(pid : Int, predPids : List<Int>, action : (() -> Unit)) = viewModelScope.launch {
+        repository.tryUnlock(pid, predPids, action)
     }
 
     fun completePin(pid : Int) = viewModelScope.launch {

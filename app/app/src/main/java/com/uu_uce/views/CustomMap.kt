@@ -57,7 +57,7 @@ class CustomMap : ViewTouchParent {
     private val deviceLocEdgePaint : Paint = Paint()
 
     private var pinList : MutableList<Pin> = mutableListOf()
-    private lateinit var pinsAdded : Array<Boolean>
+    private var pinsAdded : MutableMap<Int, Boolean> = mutableMapOf() // TODO: replace with boolean array
     private lateinit var viewModel : PinViewModel
     private lateinit var lfOwner : LifecycleOwner
 
@@ -69,7 +69,7 @@ class CustomMap : ViewTouchParent {
         SHP_File.LOG_ONLOAD_CONTENT = false
 
         // Logger mask settings
-        Logger.setTagEnabled("CustomMap", false)
+        //Logger.setTagEnabled("CustomMap", false)
         Logger.setTagEnabled("zoom", false)
 
         //setup touch events
@@ -163,10 +163,15 @@ class CustomMap : ViewTouchParent {
     }
 
     private fun setPins(pins: List<PinData>) {
+        Logger.log(LogType.Info, "CustomMap", "setPins")
         for(pin in pins) {
-            var newPin = PinConversion(context).pinDataToPin(pin)
-            newPin.checkStatus(viewModel) {
+            val newPin = PinConversion(context).pinDataToPin(pin)
+            if(pinsAdded[newPin.id] == true){
+                continue
+            }
+            newPin.tryUnlock(viewModel) {
                 pinList.add(newPin)
+                pinsAdded[newPin.id] = true
                 camera.forceChanged()
                 invalidate()
             }
