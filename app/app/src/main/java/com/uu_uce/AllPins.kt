@@ -1,9 +1,12 @@
 package com.uu_uce
 
+import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageButton
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -14,7 +17,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.allpins.PinListAdapter
 import com.uu_uce.database.PinData
 import com.uu_uce.database.PinViewModel
-import com.uu_uce.views.onCreateToolbar
 
 class AllPins : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
@@ -26,11 +28,14 @@ class AllPins : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_all_pins)
+
+        onCreateToolbar(this, "all pins")
+
         viewManager = LinearLayoutManager(this)
 
         val viewAdapter = PinListAdapter(this)
 
-        recyclerView = findViewById<RecyclerView>(R.id.recyclerview).apply {
+        recyclerView = findViewById<RecyclerView>(R.id.allpins_recyclerview).apply {
             layoutManager = viewManager
             adapter = viewAdapter
         }
@@ -39,12 +44,10 @@ class AllPins : AppCompatActivity() {
             pins?.let { viewAdapter.setPins(sortList(it, sharedPref.getInt("selectedOption", 0))) }
         })
 
-        val filterButton : FloatingActionButton = findViewById(R.id.fab)
+        val filterButton : FloatingActionButton = findViewById<FloatingActionButton>(R.id.fab)
         registerForContextMenu(filterButton)
 
         sharedPref = this.getPreferences(Context.MODE_PRIVATE)
-
-        onCreateToolbar(this, "all pins")
     }
 
     fun openDialog(view: View) {
@@ -88,6 +91,16 @@ class AllPins : AppCompatActivity() {
             else -> {
                 pins
             }
+        }
+    }
+
+    // TODO: wasn't sure on where to put this...
+    fun onCreateToolbar(activity : Activity, title: String)
+    {
+        activity.findViewById<TextView>(R.id.toolbar_title).text = title
+
+        activity.findViewById<ImageButton>(R.id.toolbar_back_button).setOnClickListener{
+            activity.finish()
         }
     }
 

@@ -17,6 +17,7 @@ import com.uu_uce.AllPins
 import com.uu_uce.database.PinConversion
 import com.uu_uce.database.PinData
 import com.uu_uce.database.PinViewModel
+import com.uu_uce.fieldbook.FieldBook
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation
 import com.uu_uce.mapOverlay.pointDistance
@@ -233,6 +234,11 @@ class CustomMap : ViewTouchParent {
         Log.i("test", "test123")
         val i = Intent(context, AllPins::class.java)
         startActivity(context, i, null)
+    }
+
+    fun fieldBook() {
+        val i = Intent(context, FieldBook::class.java)
+        startActivity(context,i,null)
     }
 
     fun startLocServices(){

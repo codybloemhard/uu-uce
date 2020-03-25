@@ -46,12 +46,16 @@ class GeoMap : AppCompatActivity() {
             p.color = Color.RED
             val t = Paint()
             t.color = Color.GREEN
+            val q = Paint()
+            q.color = Color.BLUE
             val c1 = MenuButton((menu.width - menu.downY)/ 2, 0f, (menu.width + menu.downY)/ 2, menu.downY, { menu.open() }, p)
             val c2 = MenuButton(20f, menu.downY, 20+(menu.barY - menu.downY), menu.barY, { customMap.toggleLayer(0) }, p)
             val c3 = MenuButton(20+(menu.barY - menu.downY), menu.downY, 20+(2*(menu.barY - menu.downY)), menu.barY, { customMap.allPins() }, t)
+            val c4 = MenuButton(20+2*(menu.barY - menu.downY), menu.downY, 20+(3*(menu.barY - menu.downY)), menu.barY, { customMap.fieldBook() }, q)
             menu.addMenuChild(c1)
             menu.addMenuChild(c2)
             menu.addMenuChild(c3)
+            menu.addMenuChild(c4)
         }
 
     }
