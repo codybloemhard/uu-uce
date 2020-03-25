@@ -14,9 +14,9 @@ import com.uu_uce.R
 import com.uu_uce.VideoViewer
 import java.io.StringReader
 
-
 class PinContent(contentString: String) {
     val contentBlocks : List<ContentBlockInterface>
+    lateinit var parent : Pin
     init{
         contentBlocks = getContent(contentString)
     }

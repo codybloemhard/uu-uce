@@ -6,10 +6,7 @@ import android.graphics.drawable.Drawable
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.PopupWindow
-import android.widget.TextView
+import android.widget.*
 import com.uu_uce.R
 import com.uu_uce.database.PinViewModel
 import com.uu_uce.mapOverlay.aaBoundingBoxContains
@@ -25,7 +22,7 @@ import kotlin.math.roundToInt
 enum class PinType {
     TEXT,
     VIDEO,
-    IMAGE
+    IMAGE,
 }
 
 class Pin(
@@ -36,9 +33,10 @@ class Pin(
     private var title           : String,
     private var content         : PinContent,
     private var image           : Drawable,
-    private var status          : Int,              //0 : locked, 1 : unlocked, 2 : completed
+    private var status          : Int,              //-1 : recalculating, 0 : locked, 1 : unlocked, 2 : completed
     private var predecessorIds  : List<Int>,
-    private var followIds       : List<Int>
+    private var followIds       : List<Int>,
+    private val viewModel       : PinViewModel
 ) {
     init{
         predecessorIds.map{I ->
@@ -89,16 +87,20 @@ class Pin(
         return content
     }
 
-    fun complete(viewModel : PinViewModel, activePins : MutableList<Pin>, action: () -> Unit){
-        status = 2
-        viewModel.completePin(id)
-        if(followIds[0] != -1){
-            activePins.forEach{ pin ->
-                if(pin.id in followIds) pin.tryUnlock(viewModel, action)}
-        }
+    fun setStatus(newStatus : Int){
+        status = newStatus
     }
 
-    fun tryUnlock(viewModel : PinViewModel, action : (() -> Unit)){
+    fun getStatus(): Int{
+        return status
+    }
+
+    fun complete(){
+        if(status < 2)
+            viewModel.completePin(id, followIds)
+    }
+
+    fun tryUnlock(action : (() -> Unit)){
         if(predecessorIds[0] != -1 && status < 1){
             viewModel.tryUnlock(id, predecessorIds, action)
         }
@@ -126,9 +128,17 @@ fun openPinPopupWindow(title : String, content : PinContent, parentView: View, a
     popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
 
     val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
+    val checkBoxCompletePin = customView.findViewById<CheckBox>(R.id.complete_box)
+    checkBoxCompletePin.isChecked = (content.parent.getStatus() == 2)
 
     btnClosePopupWindow.setOnClickListener {
         popupWindow.dismiss()
+    }
+
+    checkBoxCompletePin.setOnClickListener{
+        if(checkBoxCompletePin.isChecked){
+            content.parent.complete()
+        }
     }
 }
 

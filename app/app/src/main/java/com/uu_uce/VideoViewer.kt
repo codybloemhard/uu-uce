@@ -15,6 +15,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 class VideoViewer : Activity() {
     private var uiVisible : Boolean = true
     private lateinit var mediaController : MediaController
+    private lateinit var videoPlayer : VideoView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.video_viewer)
@@ -22,7 +23,7 @@ class VideoViewer : Activity() {
         val videoTitleText = findViewById<TextView>(R.id.video_title_text)
         videoTitleText.text = intent.getStringExtra("title")
 
-        val videoPlayer = findViewById<VideoView>(R.id.video_player)
+        videoPlayer = findViewById(R.id.video_player)
         videoPlayer.setVideoURI(intent.getParcelableExtra("uri"))
 
         mediaController = object : MediaController(this) {
@@ -46,6 +47,18 @@ class VideoViewer : Activity() {
             val intent = Intent(this, GeoMap::class.java)
             startActivity(intent)
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?){
+        super.onSaveInstanceState(outState)
+        //TODO: find out why currentPosistion is always zero
+        outState?.putInt("prevVideoPos", videoPlayer.currentPosition)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        val videoPos = savedInstanceState.getInt("prevVideoPos")
+        videoPlayer.seekTo(videoPos)
     }
 
     private fun setUIVisibility(visible : Boolean){

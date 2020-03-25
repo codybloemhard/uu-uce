@@ -56,8 +56,8 @@ class CustomMap : ViewTouchParent {
     private val deviceLocPaint : Paint = Paint()
     private val deviceLocEdgePaint : Paint = Paint()
 
-    private var pinList : MutableList<Pin> = mutableListOf()
-    private var pinsAdded : MutableMap<Int, Boolean> = mutableMapOf() // TODO: replace with boolean array
+    private var pinList : MutableList<Pin> = mutableListOf()    // TODO: replace with array
+    private var pinStatuses : MutableMap<Int, Int> = mutableMapOf() // TODO: replace with array
     private lateinit var viewModel : PinViewModel
     private lateinit var lfOwner : LifecycleOwner
 
@@ -158,22 +158,52 @@ class CustomMap : ViewTouchParent {
         viewModel.allPinData.observe(lfOwner, Observer { pins ->
             // Update the cached copy of the words in the adapter.
             viewModel.allPinData
-            pins?.let { setPins(it) }
+            pins?.let {
+                updatePinStatuses(it)
+            }
         })
     }
 
-    private fun setPins(pins: List<PinData>) {
-        Logger.log(LogType.Info, "CustomMap", "setPins")
+    private fun updatePinStatuses(pins: List<PinData>) {
         for(pin in pins) {
-            val newPin = PinConversion(context).pinDataToPin(pin)
-            if(pinsAdded[newPin.id] == true){
+            if(pinStatuses[pin.pinId] == pin.status){
+                // Pin is present and unchanged
                 continue
             }
-            newPin.tryUnlock(viewModel) {
-                pinList.add(newPin)
-                pinsAdded[newPin.id] = true
-                camera.forceChanged()
-                invalidate()
+            when {
+                pinStatuses[pin.pinId] == null -> {
+                    // Pin was not yet present
+                    val newPin = PinConversion(context).pinDataToPin(pin, viewModel)
+                    newPin.tryUnlock {
+                        Logger.log(LogType.Info, "CustomMap", "Adding pin")
+                        pinList.add(newPin)
+                        pinStatuses[newPin.id] = pin.status
+                        camera.forceChanged()
+                        invalidate()
+                    }
+                }
+                pinStatuses[pin.pinId] == 0 -> {
+                    // Pin was locked (status = 0)
+                    val changedPin = pinList.find{p -> p.id == pin.pinId}
+
+                    changedPin?.tryUnlock {
+                        changedPin.setStatus(1)
+                        pinStatuses[changedPin.id] = 1
+                        camera.forceChanged()
+                        invalidate()
+                    }
+                }
+                else -> {
+                    // Pin was unlocked (status = 1)
+                    val changedPin = pinList.find{p -> p.id == pin.pinId}
+
+                    if (changedPin != null) {
+                        changedPin.setStatus(pin.status)
+                        pinStatuses[changedPin.id] = pin.status
+                        camera.forceChanged()
+                        invalidate()
+                    }
+                }
             }
         }
     }

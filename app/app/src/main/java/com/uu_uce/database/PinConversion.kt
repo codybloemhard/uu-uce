@@ -64,8 +64,8 @@ class PinConversion(context: Context){
         return ids.split(',').map{s -> s.toInt()}
     }
 
-    fun pinDataToPin(pinData: PinData): Pin {
-        return Pin(
+    fun pinDataToPin(pinData : PinData, viewModel : PinViewModel): Pin {
+        val pin = Pin(
             pinData.pinId                           ,
             stringToUtm(pinData.location)           , //location
             pinData.difficulty                      ,
@@ -75,8 +75,10 @@ class PinConversion(context: Context){
             stringToDrawable(pinData.type, pinData.difficulty),
             pinData.status                          ,
             stringToIds(pinData.predecessorIds)     ,
-            stringToIds(pinData.followIds)
+            stringToIds(pinData.followIds)          ,
+            viewModel
         )
-
+        pin.getContent().parent = pin
+        return pin
     }
 }

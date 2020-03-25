@@ -14,4 +14,5 @@
     <string name="pin_type">Pin type</string>
     <string name="center_button">Center</string>
     <string name="video_title_placeholder">Video title</string>
+    <string name="completed_text">Completed</string>
 </resources>
