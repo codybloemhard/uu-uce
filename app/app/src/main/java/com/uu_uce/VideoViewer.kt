@@ -39,19 +39,20 @@ class VideoViewer : Activity() {
         videoPlayer.setMediaController(mediaController)
         mediaController.setAnchorView(findViewById(R.id.video_player))
 
-        if(savedInstanceState != null){
-            val videoPos = savedInstanceState.getInt("prevVideoPos")
-            videoPlayer.seekTo(videoPos)
+        videoPlayer.setOnPreparedListener {
+            if(savedInstanceState != null){
+                val videoPos = savedInstanceState.getInt("prevVideoPos")
+                videoPlayer.seekTo(videoPos)
+            }
+            videoPlayer.start()
         }
-        videoPlayer.start()
 
         val closeVideoButton = findViewById<Button>(R.id.close_video_player)
 
         closeVideoButton.setOnClickListener {
-            /*videoPlayer.stopPlayback()
+            videoPlayer.stopPlayback()
             val intent = Intent(this, GeoMap::class.java)
-            startActivity(intent)*/
-            videoTitleText.text = videoPlayer.currentPosition.toString()
+            startActivity(intent)
         }
     }
 
