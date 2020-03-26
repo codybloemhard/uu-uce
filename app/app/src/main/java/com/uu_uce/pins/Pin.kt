@@ -17,6 +17,8 @@ import com.uu_uce.mapOverlay.screenToCoord
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.services.UTMCoordinate
+import com.uu_uce.services.getFiles
+import com.uu_uce.services.updateFiles
 import com.uu_uce.shapefiles.p2
 import com.uu_uce.shapefiles.p2Zero
 import kotlin.math.roundToInt
@@ -90,7 +92,12 @@ fun openPinPopupWindow(title : String, content : PinContent, parentView: View, a
 
     // add content to popup window
     val layout : LinearLayout = customView.findViewById(R.id.scrollLayout)
-    content.contentBlocks.map { cB -> cB.generateContent(layout, activity) }
+    content.contentBlocks.map { cB ->
+        val filePath : List<String> = cB.getFilePath()
+        updateFiles(filePath, activity){
+            cB.generateContent(layout, activity)
+        }
+    }
 
     popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
 

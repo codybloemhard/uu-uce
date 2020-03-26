@@ -26,7 +26,7 @@ class GeoMap : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_geo_map)
 
-        getPermissions(this, this, LocationServices.permissionsNeeded + customMap.permissionsNeeded)
+        getPermissions(this, LocationServices.permissionsNeeded + customMap.permissionsNeeded)
 
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         this.customMap.setViewModel(pinViewModel)

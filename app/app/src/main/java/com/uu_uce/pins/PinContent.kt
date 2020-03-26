@@ -1,9 +1,12 @@
 package com.uu_uce.pins
 
 import android.app.Activity
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.os.Environment
 import android.util.JsonReader
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -12,6 +15,7 @@ import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.VideoViewer
+import com.uu_uce.services.updateFiles
 import java.io.StringReader
 
 
@@ -40,9 +44,10 @@ class PinContent(contentString: String) {
 
     private fun readBlock(reader: JsonReader): ContentBlockInterface {
         val dir             = "file:///data/data/com.uu_uce/files/pin_content/"
+        val tempDir         = "/sdcard/Download/" // TODO: remove as soon as new server is available
 
         var blockTag        = BlockTag.UNDEFINED
-        var textString   = ""
+        var textString      = ""
         var fileName        = ""
         var title           = ""
         var thumbnailURI    = Uri.EMPTY
@@ -56,24 +61,21 @@ class PinContent(contentString: String) {
                 }
                 "text" -> {
                     textString = reader.nextString()
-                    //if(blockTag != BlockTag.TEXT) //TODO: alert user that only TextContentBlock uses text
                 }
                 "file_name" -> {
                     fileName = when(blockTag) {
                         BlockTag.UNDEFINED  -> error("Undefined block tag")
                         BlockTag.TEXT       -> error("Undefined function") //TODO: Add reading text from file
-                        BlockTag.IMAGE      -> dir + "images/" + reader.nextString()
-                        BlockTag.VIDEO      -> dir + "videos/" + reader.nextString()
+                        BlockTag.IMAGE      -> /*dir + "images/"*/ tempDir + reader.nextString()
+                        BlockTag.VIDEO      -> /*dir + "videos/"*/ tempDir + reader.nextString()
                     }
                 }
 
                 "title" -> {
                     title = reader.nextString()
-                    //if(blockTag != BlockTag.VIDEO) //TODO: alert user that only VideoContentBlock uses title
                 }
                 "thumbnail" -> {
-                    thumbnailURI = Uri.parse(dir + "videos/thumbnails/" + reader.nextString())
-                    //if(blockTag != BlockTag.VIDEO) //TODO: alert user that only VideoContentBlock uses thumbnail
+                    thumbnailURI = Uri.parse(/*dir + "videos/thumbnails/"*/ tempDir + reader.nextString())
                 }
                 else -> {
                     error("Wrong content format")
@@ -92,6 +94,7 @@ class PinContent(contentString: String) {
 
 interface ContentBlockInterface{
     fun generateContent(layout : LinearLayout, activity : Activity)
+    fun getFilePath() : List<String>
 }
 
 class TextContentBlock(private val textContent : String) : ContentBlockInterface{
@@ -101,6 +104,9 @@ class TextContentBlock(private val textContent : String) : ContentBlockInterface
         content.setPadding(12,12,12,20)
         layout.addView(content)
     }
+    override fun getFilePath() : List<String>{
+        return listOf()
+    }
 }
 
 class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
@@ -108,6 +114,10 @@ class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
         val content = ImageView(activity)
         content.setImageURI(imageURI)
         layout.addView(content)
+    }
+
+    override fun getFilePath() : List<String>{
+        return listOf(imageURI.toString())
     }
 }
 
@@ -141,11 +151,19 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         layout.addView(relativeLayout)
     }
 
+    override fun getFilePath() : List<String>{
+        if(thumbnailURI == Uri.EMPTY) return listOf()
+        return listOf(thumbnailURI.toString())
+    }
+
     private fun openVideoView(videoURI: Uri, videoTitle : String, activity : Activity){
         val intent = Intent(activity, VideoViewer::class.java)
-        intent.putExtra("uri", videoURI)
-        intent.putExtra("title", videoTitle)
-        activity.startActivity(intent)
+
+        updateFiles(listOf(videoURI.toString()), activity){
+            intent.putExtra("uri", videoURI)
+            intent.putExtra("title", videoTitle)
+            activity.startActivity(intent)
+        }
     }
 }
 
