@@ -15,6 +15,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 class VideoViewer : Activity() {
     private var uiVisible : Boolean = true
     private lateinit var mediaController : MediaController
+    private lateinit var videoPlayer : VideoView
+    private var prevVideoPos : Int = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.video_viewer)
@@ -22,7 +24,7 @@ class VideoViewer : Activity() {
         val videoTitleText = findViewById<TextView>(R.id.video_title_text)
         videoTitleText.text = intent.getStringExtra("title")
 
-        val videoPlayer = findViewById<VideoView>(R.id.video_player)
+        videoPlayer = findViewById<VideoView>(R.id.video_player)
         videoPlayer.setVideoURI(intent.getParcelableExtra("uri"))
 
         mediaController = object : MediaController(this) {
@@ -37,15 +39,34 @@ class VideoViewer : Activity() {
         videoPlayer.setMediaController(mediaController)
         mediaController.setAnchorView(findViewById(R.id.video_player))
 
+        if(savedInstanceState != null){
+            val videoPos = savedInstanceState.getInt("prevVideoPos")
+            videoPlayer.seekTo(videoPos)
+        }
         videoPlayer.start()
 
         val closeVideoButton = findViewById<Button>(R.id.close_video_player)
 
         closeVideoButton.setOnClickListener {
-            videoPlayer.stopPlayback()
+            /*videoPlayer.stopPlayback()
             val intent = Intent(this, GeoMap::class.java)
-            startActivity(intent)
+            startActivity(intent)*/
+            videoTitleText.text = videoPlayer.currentPosition.toString()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+    }
+
+    override fun onPause(){
+        prevVideoPos = videoPlayer.currentPosition
+        super.onPause()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt("prevVideoPos", prevVideoPos)
+        super.onSaveInstanceState(outState)
     }
 
     private fun setUIVisibility(visible : Boolean){
