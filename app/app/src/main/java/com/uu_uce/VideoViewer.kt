@@ -16,6 +16,9 @@ class VideoViewer : Activity() {
     private var uiVisible : Boolean = true
     private lateinit var mediaController : MediaController
     private lateinit var videoPlayer : VideoView
+
+    private var prevVideoPos : Int = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.video_viewer)
@@ -23,7 +26,7 @@ class VideoViewer : Activity() {
         val videoTitleText = findViewById<TextView>(R.id.video_title_text)
         videoTitleText.text = intent.getStringExtra("title")
 
-        videoPlayer = findViewById(R.id.video_player)
+        videoPlayer = findViewById<VideoView>(R.id.video_player)
         videoPlayer.setVideoURI(intent.getParcelableExtra("uri"))
 
         mediaController = object : MediaController(this) {
@@ -38,7 +41,13 @@ class VideoViewer : Activity() {
         videoPlayer.setMediaController(mediaController)
         mediaController.setAnchorView(findViewById(R.id.video_player))
 
-        videoPlayer.start()
+        videoPlayer.setOnPreparedListener {
+            if(savedInstanceState != null){
+                val videoPos = savedInstanceState.getInt("prevVideoPos")
+                videoPlayer.seekTo(videoPos)
+            }
+            videoPlayer.start()
+        }
 
         val closeVideoButton = findViewById<Button>(R.id.close_video_player)
 
@@ -49,16 +58,18 @@ class VideoViewer : Activity() {
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle?){
-        super.onSaveInstanceState(outState)
-        //TODO: find out why currentPosistion is always zero
-        outState?.putInt("prevVideoPos", videoPlayer.currentPosition)
+    override fun onDestroy() {
+        super.onDestroy()
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        val videoPos = savedInstanceState.getInt("prevVideoPos")
-        videoPlayer.seekTo(videoPos)
+    override fun onPause(){
+        prevVideoPos = videoPlayer.currentPosition
+        super.onPause()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt("prevVideoPos", prevVideoPos)
+        super.onSaveInstanceState(outState)
     }
 
     private fun setUIVisibility(visible : Boolean){
