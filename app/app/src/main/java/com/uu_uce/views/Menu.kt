@@ -4,12 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.view.View.OnLayoutChangeListener
 import androidx.core.view.updateLayoutParams
-import com.uu_uce.R
 
 class Menu : View {
     constructor(context: Context): super(context)
@@ -26,7 +25,6 @@ class Menu : View {
     var downY = 0f
     var barY = 0f
     private var upY = 0f
-    var image : Drawable? = context.getDrawable(R.drawable.menu)
     private var screenSiz = 0
 
     init{

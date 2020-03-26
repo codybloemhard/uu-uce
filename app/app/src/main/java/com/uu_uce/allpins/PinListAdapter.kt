@@ -62,15 +62,12 @@ class PinListAdapter internal constructor(
                 holder.pinDiffC.setBackgroundColor(Color.parseColor("#686868"))
             }
         }
-
     }
 
     internal fun setPins(pins: List<PinData>) {
         this.pins = pins
         notifyDataSetChanged()
     }
-
-
 
     override fun getItemCount(): Int {
         return pins.size

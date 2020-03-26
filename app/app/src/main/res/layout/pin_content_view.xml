@@ -24,42 +24,36 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <LinearLayout
-                android:id="@+id/linearLayout"
+        <TextView
+                android:id="@+id/popup_window_title"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                app:layout_constraintBottom_toTopOf="@+id/popup_window_close_button">
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:gravity="bottom|start"
+                android:paddingStart="12dp"
+                android:paddingTop="20dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="10dp"
+                android:textColor="#DE000000"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/popup_window_title"
+            <ScrollView
+                android:id="@+id/scroll_view"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toTopOf="@+id/popup_window_close_button"
+                app:layout_constraintTop_toBottomOf="@+id/popup_window_title">
+
+                <LinearLayout
+                    android:id="@+id/scrollLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif"
-                    android:gravity="bottom|start"
-                    android:paddingStart="12dp"
-                    android:paddingTop="20dp"
-                    android:paddingEnd="12dp"
-                    android:paddingBottom="10dp"
-                    android:textColor="#DE000000"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
+                    android:orientation="vertical">
 
-                <ScrollView
-                    android:id="@+id/scroll_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <LinearLayout
-                        android:id="@+id/scrollLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                    </LinearLayout>
-                </ScrollView>
-
-            </LinearLayout>
+                </LinearLayout>
+            </ScrollView>
 
             <Button
                 android:id="@+id/popup_window_close_button"
@@ -78,6 +72,14 @@
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
+
+            <CheckBox
+                android:id="@+id/complete_box"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/completed_text"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

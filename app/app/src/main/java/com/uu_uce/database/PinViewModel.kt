@@ -21,4 +21,18 @@ class PinViewModel(application: Application) : AndroidViewModel(application) {
     fun insert(pin: PinData) = viewModelScope.launch {
         repository.insert(pin)
     }
+
+    fun tryUnlock(pid : Int, predPids : List<Int>, action : (() -> Unit)) = viewModelScope.launch {
+        repository.tryUnlock(pid, predPids, action)
+    }
+
+    fun completePin(pid : Int, followPids : List<Int>) = viewModelScope.launch {
+        repository.setStatus(pid, 2)
+        if(followPids[0] != -1)
+            repository.setStatuses(followPids, -1)
+    }
+
+    fun createArrays(action : ((Int) -> Unit)) = viewModelScope.launch {
+        repository.createArrays(action)
+    }
 }

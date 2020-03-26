@@ -31,7 +31,7 @@ class GeoMap : AppCompatActivity() {
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         this.customMap.setViewModel(pinViewModel)
         this.customMap.setLifeCycleOwner(this)
-        this.customMap.updatePins()
+        this.customMap.initPinArrays()
 
         resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
         if (resourceId > 0) {
