@@ -1,7 +1,6 @@
 package com.uu_uce.database
 
 import androidx.room.Entity
-import androidx.room.Index
 import androidx.room.PrimaryKey
 
 

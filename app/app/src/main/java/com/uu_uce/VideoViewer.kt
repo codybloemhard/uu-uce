@@ -26,7 +26,7 @@ class VideoViewer : Activity() {
         val videoTitleText = findViewById<TextView>(R.id.video_title_text)
         videoTitleText.text = intent.getStringExtra("title")
 
-        videoPlayer = findViewById<VideoView>(R.id.video_player)
+        videoPlayer = findViewById(R.id.video_player)
         videoPlayer.setVideoURI(intent.getParcelableExtra("uri"))
 
         mediaController = object : MediaController(this) {
@@ -56,10 +56,6 @@ class VideoViewer : Activity() {
             val intent = Intent(this, GeoMap::class.java)
             startActivity(intent)
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
     }
 
     override fun onPause(){
