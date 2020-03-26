@@ -1,16 +1,22 @@
 package com.uu_uce.views
 
 import android.Manifest
+import android.R
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Point
+import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.util.Log
+import android.view.ViewGroup
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import com.uu_uce.AllPins
@@ -31,7 +37,9 @@ import com.uu_uce.services.checkPermissions
 import com.uu_uce.services.degreeToUTM
 import com.uu_uce.shapefiles.*
 import com.uu_uce.ui.*
+import com.uu_uce.ui.Scroller
 import diewald_shapeFile.files.shp.SHP_File
+import kotlinx.android.synthetic.main.activity_geo_map.view.*
 import java.io.File
 import kotlin.system.measureTimeMillis
 
@@ -65,43 +73,47 @@ class CustomMap : ViewTouchParent {
     private var statusBarHeight = 0
     private val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
 
-    private var camera: Camera
+    private var nrLayers = 0
+    private lateinit var camera: Camera
 
     init{
         SHP_File.LOG_INFO = false
         SHP_File.LOG_ONLOAD_HEADER = false
         SHP_File.LOG_ONLOAD_CONTENT = false
 
-        Logger.setTagEnabled("CustomMap", false)
-        Logger.setTagEnabled("zoom", false)
-
         //setup touch events
         addChild(Zoomer(context, ::zoomMap))
         addChild(Scroller(context, ::moveMap))
         addChild(DoubleTapper(context, ::zoomOutMax))
         addChild(SingleTapper(context as AppCompatActivity, ::tapPin))
-        Logger.log(LogType.Info,"CustomMap", "Init")
 
         smap = ShapeMap(5, this)
-        val dir = File(context.filesDir, "mydir")
-        val timeParse = measureTimeMillis {
-            smap.addLayer(LayerType.Water, dir, context)
-        }
-
-        camera = smap.initialize()
-        Logger.log(LogType.Info, "CustomMap", "Parse file: $timeParse")
 
         deviceLocPaint.color = Color.BLUE
         deviceLocEdgePaint.color = Color.WHITE
 
-        val missingPermissions = checkPermissions(context,permissionsNeeded + LocationServices.permissionsNeeded)
-        if(missingPermissions.count() == 0){
-            startLocServices()
-        }
-
         if (resourceId > 0) {
             statusBarHeight = resources.getDimensionPixelSize(resourceId)
         }
+    }
+
+    fun addLayer(lt: LayerType, path: File, scrollLayout: LinearLayout, menu: Menu, screenDim: Point){
+        smap.addLayer(lt, path, context)
+        camera = smap.initialize()
+
+        val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle)
+        btn.setImageResource(com.uu_uce.R.drawable.logotp)
+        val curLayers = nrLayers
+        btn.setOnClickListener{
+            toggleLayer(curLayers)
+        }
+        nrLayers++
+
+        val longest = maxOf(screenDim.x, screenDim.y)
+        val size = (longest*menu.buttonPercent).toInt()
+
+        btn.layoutParams = ViewGroup.LayoutParams(size, size)
+        scrollLayout.addView(btn)
     }
 
     override fun onDraw(canvas: Canvas) {

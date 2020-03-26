@@ -23,11 +23,42 @@
     <com.uu_uce.views.Menu
         android:id="@+id/menu"
         android:layout_width="match_parent"
-        android:layout_height="35dp"
+        android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="@+id/customMap"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageButton
+            android:id="@+id/open_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/ic_menu_drag_up"
+            android:contentDescription="@string/open"
+            android:text="@string/open"
+            tools:layout_editor_absoluteX="194dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/open_button"
+            android:background="@color/colorUU"
+            tools:layout_editor_absoluteY="28dp" />
+
+        <HorizontalScrollView
+            android:id="@+id/toggle_layer_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/open_button">
+
+            <LinearLayout
+                android:id="@+id/toggle_layer_layout"
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"/>
+
+        </HorizontalScrollView>
+    </com.uu_uce.views.Menu>
 
     <Button
         android:id="@+id/button"

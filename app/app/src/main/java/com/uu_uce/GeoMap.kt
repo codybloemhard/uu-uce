@@ -11,9 +11,12 @@ import com.uu_uce.database.PinViewModel
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.services.LocationServices
+import com.uu_uce.services.LocationServices.Companion.permissionsNeeded
+import com.uu_uce.services.checkPermissions
 import com.uu_uce.services.getPermissions
-import com.uu_uce.views.MenuButton
+import com.uu_uce.shapefiles.LayerType
 import kotlinx.android.synthetic.main.activity_geo_map.*
+import java.io.File
 
 class GeoMap : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel
@@ -25,7 +28,7 @@ class GeoMap : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_geo_map)
 
-        getPermissions(this, this, LocationServices.permissionsNeeded + customMap.permissionsNeeded)
+        getPermissions(this, this, permissionsNeeded + customMap.permissionsNeeded)
 
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         this.customMap.setViewModel(pinViewModel)
@@ -37,23 +40,20 @@ class GeoMap : AppCompatActivity() {
             statusBarHeight = resources.getDimensionPixelSize(resourceId)
         }
 
+        (Display::getSize)(windowManager.defaultDisplay, screenDim)
+        val dir = File(filesDir, "mydir")
+        customMap.addLayer(LayerType.Water, dir, toggle_layer_layout, menu, screenDim)
+
+        val missingPermissions = checkPermissions(this,customMap.permissionsNeeded + permissionsNeeded)
+        if(missingPermissions.count() == 0){
+            customMap.startLocServices()
+        }
+
         button.setOnClickListener{customMap.zoomToDevice()}
+        open_button.setOnClickListener{menu.dragButtonTap()}
 
-        initMenu()
-
-        menu.post{
-            val button = ResourcesCompat.getDrawable(resources, R.drawable.logotp, null) ?: error ("Image not found")
-            val menuDragUp = ResourcesCompat.getDrawable(resources, R.drawable.ic_menu_drag_up, null) ?: error ("Image not found")
-            val menuDragDown = ResourcesCompat.getDrawable(resources, R.drawable.ic_menu_drag_down, null) ?: error ("Image not found")
-
-            val dragWidth = menu.downY * menuDragUp.intrinsicWidth / menuDragUp.intrinsicHeight
-            val c1 = MenuButton((menu.width - dragWidth)/ 2, 0f, (menu.width + dragWidth)/ 2, menu.downY, { btn -> menu.open(); btn.changeImage() }, listOf(menuDragUp, menuDragDown), menu)
-            val c2 = MenuButton(20f, menu.downY, 20+(menu.barY - menu.downY), menu.barY, { customMap.toggleLayer(0) }, button, menu)
-            val c3 = MenuButton(20+(menu.barY - menu.downY), menu.downY, 20+(2*(menu.barY - menu.downY)), menu.barY, { customMap.allPins() }, button, menu)
-            menu.addMenuChild(c1)
-            menu.addMenuChild(c2)
-            menu.addMenuChild(c3)
-            menu.invalidate()
+        menu.post {
+            initMenu()
         }
     }
 
@@ -63,8 +63,7 @@ class GeoMap : AppCompatActivity() {
     }
 
     private fun initMenu(){
-        (Display::getSize)(windowManager.defaultDisplay, screenDim)
-        menu.setScreenHeight(screenDim.y - statusBarHeight)
+        menu.setScreenHeight(screenDim.y - statusBarHeight, open_button.height, toggle_layer_scroll.height)
     }
 
     // Respond to permission request
