@@ -43,8 +43,8 @@ class CustomMap : ViewTouchParent {
     private var smap : ShapeMap
     private var first = true
 
-    private var loc : UTMCoordinate = UTMCoordinate(31, 'N', 0.0, 0.0)
-    private var lastDrawnLoc : Pair<Float, Float> = Pair(0f, 0f)
+    private var loc             : UTMCoordinate = UTMCoordinate(31, 'N', 0.0, 0.0)
+    private var lastDrawnLoc    : Pair<Float, Float> = Pair(0f, 0f)
 
     // How much does the location have to change on the screen to warrant a redraw
     private val locationAccuracy : Float = 5f
@@ -53,19 +53,20 @@ class CustomMap : ViewTouchParent {
 
     private val pinTapBufferSize : Int = 10
 
-    private val deviceLocPaint : Paint = Paint()
-    private val deviceLocEdgePaint : Paint = Paint()
+    private val deviceLocPaint      : Paint = Paint()
+    private val deviceLocEdgePaint  : Paint = Paint()
 
-    private var pinList : MutableList<Pin> = mutableListOf()    // TODO: replace with array
-    private var pinStatuses : MutableMap<Int, Int> = mutableMapOf() // TODO: replace with array
-    private lateinit var viewModel : PinViewModel
-    private lateinit var lfOwner : LifecycleOwner
+    private var arraysReady = false
+    private lateinit var pins           : Array<Pin?>
+    private lateinit var pinStatuses    : Array<Int?>
+    private lateinit var viewModel      : PinViewModel
+    private lateinit var lfOwner        : LifecycleOwner
 
     private var camera: Camera
 
     init{
-        SHP_File.LOG_INFO = false
-        SHP_File.LOG_ONLOAD_HEADER = false
+        SHP_File.LOG_INFO           = false
+        SHP_File.LOG_ONLOAD_HEADER  = false
         SHP_File.LOG_ONLOAD_CONTENT = false
 
         // Logger mask settings
@@ -86,7 +87,6 @@ class CustomMap : ViewTouchParent {
             smap.addLayer(LayerType.Water, dir, context)
         }
         Log.i("CustomMap", "Parse file: $timeParse")
-
 
         camera = smap.initialize()
 
@@ -130,7 +130,11 @@ class CustomMap : ViewTouchParent {
                 4F)
             lastDrawnLoc = screenLoc
 
-            pinList.forEach{ pin -> pin.draw(viewport, this, canvas) }
+            if(!arraysReady) return
+            pins.forEach{ pin ->
+                if(pin == null) return@forEach
+                pin.draw(viewport, this, canvas)
+            }
         }
         Logger.log(LogType.Continuous, "CustomMap", "Draw MS: $timeDraw")
         if(res == UpdateResult.ANIM)
@@ -154,6 +158,15 @@ class CustomMap : ViewTouchParent {
         Logger.log(LogType.Event,"CustomMap", "${loc.east}, ${loc.north}")
     }
 
+    fun initPinArrays(){
+        viewModel.createArrays{ pinCount ->
+            pins = Array(pinCount){null}
+            pinStatuses = Array(pinCount){null}
+            arraysReady = true
+            updatePins()
+        }
+    }
+
     fun updatePins(){
         viewModel.allPinData.observe(lfOwner, Observer { pins ->
             // Update the cached copy of the words in the adapter.
@@ -164,8 +177,8 @@ class CustomMap : ViewTouchParent {
         })
     }
 
-    private fun updatePinStatuses(pins: List<PinData>) {
-        for(pin in pins) {
+    private fun updatePinStatuses(newPinData: List<PinData>) {
+        for(pin in newPinData) {
             if(pinStatuses[pin.pinId] == pin.status){
                 // Pin is present and unchanged
                 continue
@@ -176,7 +189,7 @@ class CustomMap : ViewTouchParent {
                     val newPin = PinConversion(context).pinDataToPin(pin, viewModel)
                     newPin.tryUnlock {
                         Logger.log(LogType.Info, "CustomMap", "Adding pin")
-                        pinList.add(newPin)
+                        pins[pin.pinId] = newPin
                         pinStatuses[newPin.id] = pin.status
                         camera.forceChanged()
                         invalidate()
@@ -184,7 +197,7 @@ class CustomMap : ViewTouchParent {
                 }
                 pinStatuses[pin.pinId] == 0 -> {
                     // Pin was locked (status = 0)
-                    val changedPin = pinList.find{p -> p.id == pin.pinId}
+                    val changedPin = pins[pin.pinId]
 
                     changedPin?.tryUnlock {
                         changedPin.setStatus(1)
@@ -195,7 +208,7 @@ class CustomMap : ViewTouchParent {
                 }
                 else -> {
                     // Pin was unlocked (status = 1)
-                    val changedPin = pinList.find{p -> p.id == pin.pinId}
+                    val changedPin = pins[pin.pinId]
 
                     if (changedPin != null) {
                         changedPin.setStatus(pin.status)
@@ -240,8 +253,8 @@ class CustomMap : ViewTouchParent {
 
     private fun tapPin(tapLocation : p2, activity : Activity){
         val canvasTapLocation : p2 = Pair(tapLocation.first, tapLocation.second)
-        pinList.forEach{ p ->
-            if(!p.inScreen) return@forEach
+        pins.forEach{ p ->
+            if(p == null || !p.inScreen) return@forEach
             if(pointInAABoundingBox(p.boundingBox.first, p.boundingBox.second, canvasTapLocation, pinTapBufferSize)){
                 openPinPopupWindow(p.getTitle(), p.getContent(), this, activity)
                 Logger.log(LogType.Info, "CustomMap", "${p.getTitle()}: I have been tapped.")

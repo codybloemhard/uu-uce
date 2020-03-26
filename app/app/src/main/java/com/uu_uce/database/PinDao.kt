@@ -33,6 +33,9 @@ interface PinDao {
     @Query("DELETE from pins")
     suspend fun deleteAllPins()
 
+    @Query("SELECT COUNT(pinId) FROM pins")
+    suspend fun countPins() : Int
+
     @Transaction
     suspend fun updateData(pins: List<PinData>) {
         deleteAllPins()

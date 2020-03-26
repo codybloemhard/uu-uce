@@ -31,4 +31,8 @@ class PinViewModel(application: Application) : AndroidViewModel(application) {
         if(followPids[0] != -1)
             repository.setStatuses(followPids, -1)
     }
+
+    fun createArrays(action : ((Int) -> Unit)) = viewModelScope.launch {
+        repository.createArrays(action)
+    }
 }

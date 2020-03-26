@@ -33,5 +33,8 @@ class PinRepository(private val pinDao : PinDao){
         pinDao.setStatuses(pids, value)
     }
 
-
+    suspend fun createArrays(action : ((Int) -> Unit)){
+        val pinCount = pinDao.countPins()
+        action(pinCount)
+    }
 }
