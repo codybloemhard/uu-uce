@@ -27,9 +27,11 @@ fun updateFiles(requiredFilePaths : List<String>, activity : Activity, onComplet
 
 fun findMissingFilePaths(requiredFilePaths : List<String>) : List<String>{
     val missingFilePaths : MutableList<String> = mutableListOf()
+    val adding : MutableMap<String, Boolean> = mutableMapOf()
     for(filePath in requiredFilePaths){
-        if(!File(filePath).exists()){
+        if(!File(filePath).exists() && !adding.containsKey(filePath)){
             missingFilePaths.add(filePath)
+            adding[filePath] = true
         }
     }
     return missingFilePaths
@@ -43,12 +45,10 @@ fun getFiles(requiredFilePaths : List<String>, activity: Activity, onCompleteAct
         val fileName = filePath.split('/').last()
         val request = DownloadManager.Request(Uri.parse(filePath))
         request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI)
-        request.setTitle("Download")
-        request.setDescription(fileName)
 
         //request.setDestinationUri(Uri.parse(filePath))
         request.setDestinationInExternalPublicDir(DIRECTORY_DOWNLOADS, fileName)
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN)
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
 
         manager.enqueue(request)
     }

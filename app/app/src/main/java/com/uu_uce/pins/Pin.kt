@@ -92,19 +92,23 @@ fun openPinPopupWindow(title : String, content : PinContent, parentView: View, a
 
     // add content to popup window
     val layout : LinearLayout = customView.findViewById(R.id.scrollLayout)
-    content.contentBlocks.map { cB ->
-        val filePath : List<String> = cB.getFilePath()
-        updateFiles(filePath, activity){
-            cB.generateContent(layout, activity)
-        }
+
+    val filePaths : MutableList<String> = mutableListOf()
+    content.contentBlocks.forEach { cb ->
+        cb.getFilePath().forEach{path -> filePaths.add(path)}
     }
 
-    popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
+    updateFiles(filePaths, activity){
+        content.contentBlocks.forEach{ cb ->
+            cb.generateContent(layout, activity)
+        }
+        popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
 
-    val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
+        val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
 
-    btnClosePopupWindow.setOnClickListener {
-        popupWindow.dismiss()
+        btnClosePopupWindow.setOnClickListener {
+            popupWindow.dismiss()
+        }
     }
 }
 
