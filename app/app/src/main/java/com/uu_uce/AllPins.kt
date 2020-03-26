@@ -17,6 +17,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.allpins.PinListAdapter
 import com.uu_uce.database.PinData
 import com.uu_uce.database.PinViewModel
+import com.uu_uce.ui.onCreateToolbar
 
 class AllPins : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
@@ -93,15 +94,4 @@ class AllPins : AppCompatActivity() {
             }
         }
     }
-
-    // TODO: wasn't sure on where to put this...
-    fun onCreateToolbar(activity : Activity, title: String)
-    {
-        activity.findViewById<TextView>(R.id.toolbar_title).text = title
-
-        activity.findViewById<ImageButton>(R.id.toolbar_back_button).setOnClickListener{
-            activity.finish()
-        }
-    }
-
 }

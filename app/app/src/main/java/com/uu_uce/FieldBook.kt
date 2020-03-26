@@ -1,10 +1,13 @@
-package com.uu_uce.fieldbook
+package com.uu_uce
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.uu_uce.R
+import com.uu_uce.fieldbook.Content
+import com.uu_uce.fieldbook.FieldbookAdapter
+import com.uu_uce.fieldbook.FieldbookEntry
+import com.uu_uce.ui.onCreateToolbar
 import java.text.DateFormat.getDateTimeInstance
 import java.util.*
 
@@ -26,7 +29,8 @@ class FieldBook : AppCompatActivity() {
                     listOf(
                         Content(
                             "TEXT",
-                            "Lorem Ipsum"),
+                            "Lorem Ipsum"
+                        ),
                         Content(
                             "IMAGE",
                             "file:///data/data/com.uu_uce/files/pin_content/images/test.png"
@@ -41,7 +45,8 @@ class FieldBook : AppCompatActivity() {
                     listOf(
                         Content(
                             "TEXT",
-                            "Lorem Ipsum"),
+                            "Lorem Ipsum"
+                        ),
                         Content(
                             "IMAGE",
                             "file:///data/data/com.uu_uce/files/pin_content/images/test.png"
@@ -53,8 +58,9 @@ class FieldBook : AppCompatActivity() {
 
         val recyclerView = findViewById<RecyclerView>(R.id.fieldbook_recyclerview)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = FieldbookAdapter(this, fieldbook)
+        recyclerView.adapter =
+            FieldbookAdapter(this, fieldbook)
 
-        //onCreateToolbar(this, "my fieldbook")
+        onCreateToolbar(this, "my fieldbook")
     }
 }

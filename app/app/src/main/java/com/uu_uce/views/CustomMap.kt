@@ -17,7 +17,7 @@ import com.uu_uce.AllPins
 import com.uu_uce.database.PinConversion
 import com.uu_uce.database.PinData
 import com.uu_uce.database.PinViewModel
-import com.uu_uce.fieldbook.FieldBook
+import com.uu_uce.FieldBook
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation
 import com.uu_uce.mapOverlay.pointDistance
@@ -31,7 +31,7 @@ import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.services.checkPermissions
 import com.uu_uce.services.degreeToUTM
 import com.uu_uce.shapefiles.*
-import com.uu_uce.ui.*
+import com.uu_uce.gestureDetection.*
 import diewald_shapeFile.files.shp.SHP_File
 import java.io.File
 import kotlin.system.measureTimeMillis

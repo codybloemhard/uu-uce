@@ -1,13 +1,15 @@
-package com.uu_uce.ui
+package com.uu_uce.gestureDetection
 
-import android.content.Context
+import android.app.Activity
 import android.view.GestureDetector
 import android.view.MotionEvent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GestureDetectorCompat
+import com.uu_uce.shapefiles.p2
 
-class DoubleTapper(
-    parent: Context,
-    var action: () -> Unit)
+class SingleTapper(
+    val parent: AppCompatActivity,
+    val action: (p2, Activity) -> Unit)
     : TouchChild,
     GestureDetector.OnGestureListener,
     GestureDetector.OnDoubleTapListener{
@@ -22,13 +24,13 @@ class DoubleTapper(
         gestureDetector?.onTouchEvent(event)
     }
 
-    override fun onDoubleTap(e: MotionEvent?): Boolean {
-        action()
+    override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
+        action(Pair((e?.x ?: 0.0f).toDouble(), (e?.y ?: 0.0f).toDouble()), parent)
         return true
     }
 
+    override fun onDoubleTap(e: MotionEvent?): Boolean { return true }
     override fun onDoubleTapEvent(e: MotionEvent?): Boolean { return true }
-    override fun onSingleTapConfirmed(e: MotionEvent?): Boolean { return true }
     override fun onShowPress(e: MotionEvent?) {}
     override fun onSingleTapUp(e: MotionEvent?): Boolean { return true }
     override fun onDown(e: MotionEvent?): Boolean { return false }
