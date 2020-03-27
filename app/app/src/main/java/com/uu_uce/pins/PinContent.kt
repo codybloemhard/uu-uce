@@ -18,9 +18,9 @@ import com.uu_uce.VideoViewer
 import com.uu_uce.services.updateFiles
 import java.io.StringReader
 
-
 class PinContent(contentString: String) {
     val contentBlocks : List<ContentBlockInterface>
+    lateinit var parent : Pin
     init{
         contentBlocks = getContent(contentString)
     }
@@ -142,7 +142,7 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
 
         // Create play button
         val playButton = ImageView(activity)
-        playButton.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.play, null) ?: error ("Image not found"))
+        playButton.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.ic_sprite_play, null) ?: error ("Image not found"))
         playButton.scaleType = ImageView.ScaleType.FIT_CENTER //TODO: find correct scaletype
         playButton.setOnClickListener{openVideoView(videoURI, title, activity)}
 
