@@ -1,5 +1,6 @@
 package com.uu_uce.views
 
+import android.animation.TimeInterpolator
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.RelativeLayout
@@ -20,35 +21,56 @@ class Menu : RelativeLayout {
 
     fun setScreenHeight(scrnHeight: Int, openBtnHeight: Int, scrollHeight: Int){
         screenHeight = scrnHeight
-        downY = openBtnHeight.toFloat()
-        barY = downY + scrollHeight.toFloat()
-        upY = scrnHeight.toFloat()
-
+        downY = screenHeight - openBtnHeight.toFloat()
+        barY = downY - scrollHeight.toFloat()
+        upY = 0f
         updateLayoutParams{height = screenHeight}
-        y = screenHeight - downY
+        y = downY
     }
 
-    fun open(){
+    fun snap(dx: Float, dy: Float){
+        when {
+            y > upY && y < barY -> {
+                if(dy > 0) bar()
+                else up()
+            }
+            y < downY -> {
+                if(dy > 0) down()
+                else bar()
+            }
+        }
+    }
+
+    fun drag(dx: Float, dy: Float){
+        y += dy
+    }
+
+    fun up(){
+        dragStatus = DragStatus.Up
+        animate().y(upY)
+    }
+
+    fun bar(){
         dragStatus = DragStatus.Bar
-        animate().y(screenHeight - barY)
+        animate().y(barY)
     }
 
-    fun close(){
+    fun down(){
         dragStatus = DragStatus.Down
-        animate().y(screenHeight - downY)
+        animate().y(downY)
     }
 
     fun dragButtonTap(){
         animate().y(y-100)
         when(dragStatus){
             DragStatus.Down ->{
-                open()
-
+                bar()
             }
             DragStatus.Bar ->{
-                close()
+                down()
             }
             DragStatus.Up ->{
+                down()
             }
         }
     }

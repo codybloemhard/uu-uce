@@ -1,16 +1,17 @@
 package com.uu_uce
 
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.graphics.Point
 import android.os.Bundle
 import android.view.Display
+import android.view.ViewGroup
+import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import com.uu_uce.database.PinViewModel
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.services.LocationServices
 import com.uu_uce.services.LocationServices.Companion.permissionsNeeded
 import com.uu_uce.services.checkPermissions
 import com.uu_uce.services.getPermissions
@@ -41,8 +42,18 @@ class GeoMap : AppCompatActivity() {
         }
 
         (Display::getSize)(windowManager.defaultDisplay, screenDim)
+        val longest = maxOf(screenDim.x, screenDim.y)
+        val size = (longest*menu.buttonPercent).toInt()
+
+        val btn = ImageButton(this, null, android.R.attr.buttonBarButtonStyle)
+        btn.setImageResource(R.drawable.logotp)
+        btn.setBackgroundColor(Color.BLUE)
+        btn.setOnClickListener{customMap.allPins()}
+        btn.layoutParams = ViewGroup.LayoutParams(size, size)
+        lower_menu_layout.addView(btn)
+
         val dir = File(filesDir, "mydir")
-        customMap.addLayer(LayerType.Water, dir, toggle_layer_layout, menu, screenDim)
+        customMap.addLayer(LayerType.Water, dir, toggle_layer_layout, size)
 
         val missingPermissions = checkPermissions(this,customMap.permissionsNeeded + permissionsNeeded)
         if(missingPermissions.count() == 0){
@@ -50,7 +61,9 @@ class GeoMap : AppCompatActivity() {
         }
 
         button.setOnClickListener{customMap.zoomToDevice()}
-        open_button.setOnClickListener{menu.dragButtonTap()}
+        dragButton.clickAction = {menu.dragButtonTap()}
+        dragButton.dragAction = {dx, dy -> menu.drag(dx,dy) }
+        dragButton.dragEndAction = {dx, dy -> menu.snap(dx, dy)}
 
         menu.post {
             initMenu()
@@ -63,7 +76,7 @@ class GeoMap : AppCompatActivity() {
     }
 
     private fun initMenu(){
-        menu.setScreenHeight(screenDim.y - statusBarHeight, open_button.height, toggle_layer_scroll.height)
+        menu.setScreenHeight(screenDim.y - statusBarHeight, dragButton.height, toggle_layer_scroll.height)
     }
 
     // Respond to permission request

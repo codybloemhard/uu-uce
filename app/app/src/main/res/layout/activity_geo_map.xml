@@ -27,20 +27,18 @@
         app:layout_constraintBottom_toBottomOf="@+id/customMap"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <ImageButton
-            android:id="@+id/open_button"
+        <com.uu_uce.views.DragButton
+            android:id="@+id/dragButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:background="@drawable/ic_menu_drag_up"
-            android:contentDescription="@string/open"
-            android:text="@string/open"
-            tools:layout_editor_absoluteX="194dp" />
+            android:contentDescription="@string/open"/>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/open_button"
+            android:layout_below="@id/dragButton"
             android:background="@color/colorUU"
             tools:layout_editor_absoluteY="28dp" />
 
@@ -48,7 +46,7 @@
             android:id="@+id/toggle_layer_scroll"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/open_button">
+            android:layout_below="@id/dragButton">
 
             <LinearLayout
                 android:id="@+id/toggle_layer_layout"
@@ -58,6 +56,13 @@
                 android:layout_gravity="center"/>
 
         </HorizontalScrollView>
+        <RelativeLayout
+            android:id="@+id/lower_menu_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/toggle_layer_scroll"
+            android:layout_centerHorizontal="true">
+        </RelativeLayout>
     </com.uu_uce.views.Menu>
 
     <Button

@@ -97,7 +97,7 @@ class CustomMap : ViewTouchParent {
         }
     }
 
-    fun addLayer(lt: LayerType, path: File, scrollLayout: LinearLayout, menu: Menu, screenDim: Point){
+    fun addLayer(lt: LayerType, path: File, scrollLayout: LinearLayout, buttonSize: Int){
         smap.addLayer(lt, path, context)
         camera = smap.initialize()
 
@@ -109,10 +109,7 @@ class CustomMap : ViewTouchParent {
         }
         nrLayers++
 
-        val longest = maxOf(screenDim.x, screenDim.y)
-        val size = (longest*menu.buttonPercent).toInt()
-
-        btn.layoutParams = ViewGroup.LayoutParams(size, size)
+        btn.layoutParams = ViewGroup.LayoutParams(buttonSize, buttonSize)
         scrollLayout.addView(btn)
     }
 

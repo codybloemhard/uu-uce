@@ -14,7 +14,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.allpins.PinListAdapter
 import com.uu_uce.database.PinData
 import com.uu_uce.database.PinViewModel
-import com.uu_uce.views.onCreateToolbar
 
 class AllPins : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
@@ -43,8 +42,6 @@ class AllPins : AppCompatActivity() {
         registerForContextMenu(filterButton)
 
         sharedPref = this.getPreferences(Context.MODE_PRIVATE)
-
-        onCreateToolbar(this, "all pins")
     }
 
     fun openDialog(view: View) {
