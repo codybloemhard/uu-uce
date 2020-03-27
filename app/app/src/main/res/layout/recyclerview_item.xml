@@ -58,6 +58,18 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
                 android:layout_width="0dp" />
+
+            <CheckBox
+                android:id="@+id/checkBox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:button="@null"
+                android:checked="false"
+                android:clickable="false"
+                android:drawableRight="?android:attr/listChoiceIndicatorMultiple"
+                android:gravity="center|right"
+                android:text="@string/completed_text" />
         </LinearLayout>
 
         <Button
