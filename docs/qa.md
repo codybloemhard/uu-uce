@@ -67,6 +67,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Know Issues Matrix
 | Version       | ID    | What              |
 |---------------|-------|-------------------|
+| 0.3.3         | IK4   | Empty screen comes up when you return from pin screen
 | 0.3.2         | IK3   | App crashes when opening pin from menu
 | 0.3.1         | IK2   | Text in pins partially overlaps
 | 0.3.1         | IK1   | Menu covers whole screen when phone is closed while running (on some devices)
