@@ -11,11 +11,13 @@ class PinViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: PinRepository
 
     val allPinData: LiveData<List<PinData>>
+    val allUnlockedPinData: LiveData<List<PinData>>
 
     init {
         val pinDao = UceRoomDatabase.getDatabase(application, viewModelScope).pinDao()
         repository = PinRepository(pinDao)
         allPinData = repository.allPins
+        allUnlockedPinData = repository.allUnlockedPins
     }
 
     fun insert(pin: PinData) = viewModelScope.launch {

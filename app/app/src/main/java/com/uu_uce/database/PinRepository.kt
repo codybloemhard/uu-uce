@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 class PinRepository(private val pinDao : PinDao){
 
     val allPins: LiveData<List<PinData>> = pinDao.getAllPins()
+    val allUnlockedPins: LiveData<List<PinData>> = pinDao.getAllUnlockedPins()
 
     suspend fun insert(pindata: PinData){
         pinDao.insert(pindata)
