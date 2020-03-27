@@ -16,7 +16,7 @@ class Menu : RelativeLayout {
     constructor(context: Context, attrs: AttributeSet): super(context, attrs)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    private var dragStatus = DragStatus.Down
+    var dragStatus = DragStatus.Down
 
     val buttonPercent = 0.1f
     var downY = 0f
@@ -24,24 +24,27 @@ class Menu : RelativeLayout {
     private var upY = 0f
     private var screenHeight = 0
 
-    fun setScreenHeight(scrnHeight: Int, openBtnHeight: Int, scrollHeight: Int){
+    fun setScreenHeight(scrnHeight: Int, openBtnHeight: Int, scrollHeight: Int, lowerMenuHeight: Int){
         screenHeight = scrnHeight
         downY = screenHeight - openBtnHeight.toFloat()
         barY = downY - scrollHeight.toFloat()
-        upY = 0f
+        upY = barY - lowerMenuHeight.toFloat()
         updateLayoutParams{height = screenHeight}
         y = downY
     }
 
     fun snap(dx: Float, dy: Float){
         when {
-            y > upY && y < barY -> {
-                if(dy > 0) bar()
-                else up()
+            y < upY ->{
+                up()
+            }
+            y < barY -> {
+                if(dy < 0) up()
+                else bar()
             }
             y < downY -> {
-                if(dy > 0) down()
-                else bar()
+                if(dy < 0) bar()
+                else down()
             }
         }
     }

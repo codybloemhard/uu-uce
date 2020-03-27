@@ -1,9 +1,12 @@
 package com.uu_uce
 
+import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageButton
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -42,12 +45,12 @@ class AllPins : AppCompatActivity() {
         registerForContextMenu(filterButton)
 
         sharedPref = this.getPreferences(Context.MODE_PRIVATE)
+
+        onCreateToolbar(this, "all pins")
     }
 
     fun openDialog(view: View) {
-        val builder : AlertDialog.Builder = this.let {
-            AlertDialog.Builder(it)
-        }
+        val builder : AlertDialog.Builder = AlertDialog.Builder(this)
         val filterOptions : Array<String> = arrayOf("Title a-z", "Title z-a", "Difficulty easy-hard", "Difficulty hard-easy", "Type a-z", "Type z-a")
         builder
             .setTitle("Filter by:")
@@ -88,4 +91,11 @@ class AllPins : AppCompatActivity() {
         }
     }
 
+    fun onCreateToolbar(activity : Activity, title: String) {
+        activity.findViewById<TextView>(R.id.toolbar_title).text = title
+
+        activity.findViewById<ImageButton>(R.id.toolbar_back_button).setOnClickListener {
+            activity.finish()
+        }
+    }
 }

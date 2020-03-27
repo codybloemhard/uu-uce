@@ -3,19 +3,23 @@ package com.uu_uce
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Point
+import android.graphics.Rect
 import android.os.Bundle
 import android.view.Display
+import android.view.MotionEvent
 import android.view.ViewGroup
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.uu_uce.database.PinViewModel
+import com.uu_uce.mapOverlay.aaBoundingBoxContains
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.services.LocationServices.Companion.permissionsNeeded
 import com.uu_uce.services.checkPermissions
 import com.uu_uce.services.getPermissions
 import com.uu_uce.shapefiles.LayerType
+import com.uu_uce.views.DragStatus
 import kotlinx.android.synthetic.main.activity_geo_map.*
 import java.io.File
 
@@ -70,6 +74,23 @@ class GeoMap : AppCompatActivity() {
         }
     }
 
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        /*if(ev.rawX > menu.x && ev.rawX < menu.x + menu.width && ev.rawY > menu.y && ev.rawY < menu.y + menu.height){
+            menu.down()
+            return true
+        }*/
+
+        return super.dispatchTouchEvent(ev)
+    }
+
+    override fun onBackPressed() {
+        if(menu.dragStatus != DragStatus.Down){
+            menu.down()
+            return
+        }
+        super.onBackPressed()
+    }
+
     override fun onResume() {
         super.onResume()
         customMap.updatePins()
@@ -77,7 +98,7 @@ class GeoMap : AppCompatActivity() {
     }
 
     private fun initMenu(){
-        menu.setScreenHeight(screenDim.y - statusBarHeight, dragButton.height, toggle_layer_scroll.height)
+        menu.setScreenHeight(screenDim.y - statusBarHeight, dragButton.height, toggle_layer_scroll.height, lower_menu_layout.height)
     }
 
     // Respond to permission request
