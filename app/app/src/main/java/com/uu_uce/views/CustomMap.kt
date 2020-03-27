@@ -283,4 +283,9 @@ class CustomMap : ViewTouchParent {
     fun startLocServices(){
         locationServices.startPollThread(context, 5000, 0F, ::updateLoc)
     }
+
+    fun redrawMap(){
+        camera.forceChanged()
+        invalidate()
+    }
 }

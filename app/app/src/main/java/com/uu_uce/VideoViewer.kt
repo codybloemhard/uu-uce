@@ -53,8 +53,7 @@ class VideoViewer : Activity() {
 
         closeVideoButton.setOnClickListener {
             videoPlayer.stopPlayback()
-            val intent = Intent(this, GeoMap::class.java)
-            startActivity(intent)
+            this.finish()
         }
     }
 

@@ -53,12 +53,12 @@ class GeoMap : AppCompatActivity() {
             menu.addMenuChild(c2)
             menu.addMenuChild(c3)
         }
-
     }
 
     override fun onResume() {
         super.onResume()
-        this.customMap.updatePins()
+        customMap.updatePins()
+        customMap.redrawMap()
     }
 
     private fun initMenu(){
