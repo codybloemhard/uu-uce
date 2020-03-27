@@ -138,6 +138,7 @@ class Pin(
 
         // add content to popup window
         val layout: LinearLayout = customView.findViewById(R.id.scrollLayout)
+
         val filePaths: MutableList<String> = mutableListOf()
         content.contentBlocks.forEach { cb ->
             cb.getFilePath().forEach { path -> filePaths.add(path) }
@@ -163,7 +164,6 @@ class Pin(
                     complete()
                 }
             }
-
         }
     }
 }
