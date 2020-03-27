@@ -34,7 +34,7 @@ class AllPins : AppCompatActivity() {
             adapter = viewAdapter
         }
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
-        pinViewModel.allPinData.observe(this, Observer { pins ->
+        pinViewModel.allUnlockedPinData.observe(this, Observer { pins ->
             pins?.let { viewAdapter.setPins(sortList(it, sharedPref.getInt("selectedOption", 0))) }
         })
 

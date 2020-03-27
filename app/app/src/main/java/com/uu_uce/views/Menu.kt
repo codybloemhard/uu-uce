@@ -2,8 +2,13 @@ package com.uu_uce.views
 
 import android.animation.TimeInterpolator
 import android.content.Context
-import android.util.AttributeSet
 import android.widget.RelativeLayout
+import android.graphics.Canvas
+import android.graphics.Color
+import android.util.AttributeSet
+import android.view.MotionEvent
+import android.view.View
+import android.view.View.OnLayoutChangeListener
 import androidx.core.view.updateLayoutParams
 
 class Menu : RelativeLayout {

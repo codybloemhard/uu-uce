@@ -16,11 +16,12 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### QA Matrix
 | Version       | Date      | Unit tests    | Realworld tests       | Documentation | Lint Issues (Worst)   |
 | ------------- | --------- | ------------- | --------------------- | ------------- | --------------------- |
-| 0.1.8         | 22-3-2019 | 100%          | yes, in shape-linter  | 100%          | 0
-| 0.1.7         | 21-3-2019 | 100%          | yes, in shape-linter  | 100%          | 11 (Mild)
-| 0.1.6         | 18-3-2019 | 100%          | Yes, in shape-linter  | 100%          | NaN
-| 0.1.1/0.15    | 12-3-2019 | Some          | Yes, in shape-linter  | Some          | NaN
-| 0.1.0         | 10-3-2019 | Some          | None                  | None          | NaN
+| 0.1.9         | 25-3-2020 | 100%          | yes, in shape-linter  | 100%          | 0
+| 0.1.8         | 22-3-2020 | 100%          | yes, in shape-linter  | 100%          | 0
+| 0.1.7         | 21-3-2020 | 100%          | yes, in shape-linter  | 100%          | 11 (Mild)
+| 0.1.6         | 18-3-2020 | 100%          | Yes, in shape-linter  | 100%          | NaN
+| 0.1.1/0.15    | 12-3-2020 | Some          | Yes, in shape-linter  | Some          | NaN
+| 0.1.0         | 10-3-2020 | Some          | None                  | None          | NaN
 ## shapefile-linter
 ### Tech Stack
 <span style="color:#88f">Language: </span><span style="color:#f88">Rust</span></br>
@@ -32,11 +33,11 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### QA Matrix
 | Version       | Date      | Unit tests    | Realworld tests       | Documentation | Lint Issues (Worst)   |
 |---------------|-----------|---------------|-----------------------|---------------|-----------------------|
-| 0.1.4         | 22-3-2019 | None          | Yes, in uu-uce        | Output        | 0
-| 0.1.3         | 18-3-2019 | None          | Yes, in uu-uce        | Output        | 9 (Severe)
-| 0.1.2         | 17-3-2019 | None          | Yes, in uu-uce        | Output        | NaN
-| 0.1.1         | 16-3-2019 | None          | None                  | Output        | NaN
-| 0.1.0         | 10-3-2019 | None          | None                  | None          | NaN
+| 0.1.4         | 22-3-2020 | None          | Yes, in uu-uce        | Output        | 0
+| 0.1.3         | 18-3-2020 | None          | Yes, in uu-uce        | Output        | 9 (Severe)
+| 0.1.2         | 17-3-2020 | None          | Yes, in uu-uce        | Output        | NaN
+| 0.1.1         | 16-3-2020 | None          | None                  | Output        | NaN
+| 0.1.0         | 10-3-2020 | None          | None                  | None          | NaN
 ## uu-uce
 <span style="color:#88f">Language: </span><span style="color:#f88">Kotlin</span></br>
 <span style="color:#88f">Development Platform: </span><span style="color:#f88">Linux / Windows</span></br>
@@ -48,9 +49,9 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### QA Matrix
 | Version   | Date      | Documentation     | Linting status            |
 |-----------|-----------|-------------------|---------------------------|
-| 0.3.1     | 21-3-2019 | Content format    | Kotlin ok, Android issues |
+| 0.3.1     | 21-3-2020 | Content format    | Kotlin ok, Android issues |
 | 0.x.x     | ...       | None              | Only small issues         |
-| 0.0.1     | 8-2-2019  | None              | None                      |
+| 0.0.1     | 8-2-2020  | None              | None                      |
 ### Test Coverage Matrix
 | Version   | Pixel 2 Emulator API 10 | Nokia 2 API 24  | One Plus 5 API 28 |
 |-----------|-------------------------|-----------------|-------------------|
@@ -66,12 +67,14 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Know Issues Matrix
 | Version       | ID    | What              |
 |---------------|-------|-------------------|
-| 0.3.1         | IK0   | Can't open popup from pin list menu
-| 0.3.1         | IK1   | Menu covers whole screen when phone is closed while running (on some devices)
+| 0.3.2         | IK3   | App crashes when opening pin from menu
 | 0.3.1         | IK2   | Text in pins partially overlaps
+| 0.3.1         | IK1   | Menu covers whole screen when phone is closed while running (on some devices)
+| 0.3.1         | IK0   | Can't open popup from pin list menu
 ### Quality Checks Matrix
 | Since Version | ID    | What to check     |
 |---------------|-------|-------------------|
+| 0.3.2         | IC8   | Open pin via menu
 | 0.3.1         | IC7   | Pins drawn, click on pin to open popup
 | 0.x.x         | IC6   | Pin list menu, UI scaling
 | 0.x.x         | IC5   | Enable, disable map layers
