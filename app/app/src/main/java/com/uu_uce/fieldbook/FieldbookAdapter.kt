@@ -8,10 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
-import com.uu_uce.pins.ImageContentBlock
-import com.uu_uce.pins.PinContent
-import com.uu_uce.pins.TextContentBlock
-import com.uu_uce.pins.VideoContentBlock
+import com.uu_uce.pins.*
 
 class FieldbookAdapter(val activity: Activity, private val fieldbook: List<FieldbookEntry>) : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>() {
 
@@ -61,7 +58,8 @@ class FieldbookAdapter(val activity: Activity, private val fieldbook: List<Field
         }
 
         holder.parentView.setOnClickListener {
-            //TODO: open popup/activity related to local pin
+            //TODO: this isn't the correct parentView
+            openPinPopupWindow(entry.location,content,holder.parentView,activity)
         }
     }
 }
