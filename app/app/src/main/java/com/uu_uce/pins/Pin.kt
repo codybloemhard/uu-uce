@@ -108,36 +108,37 @@ class Pin(
             action()
         }
     }
-}
 
-fun openPinPopupWindow(title : String, content : PinContent, parentView: View, activity : Activity) {
-    val layoutInflater = activity.layoutInflater
+    fun openPinPopupWindow(parentView: View, activity : Activity) {
+        val layoutInflater = activity.layoutInflater
 
-    // build an custom view (to be inflated on top of our current view & build it's popup window)
-    val customView = layoutInflater.inflate(R.layout.pin_content_view, null, false)
-    val popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        // build an custom view (to be inflated on top of our current view & build it's popup window)
+        val customView = layoutInflater.inflate(R.layout.pin_content_view, null, false)
+        val popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
-    // add the title for the popup window
-    val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
-    windowTitle.text = title
+        // add the title for the popup window
+        val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
+        windowTitle.text = title
 
-    // add content to popup window
-    val layout : LinearLayout = customView.findViewById(R.id.scrollLayout)
-    content.contentBlocks.map { cB -> cB.generateContent(layout, activity) }
+        // add content to popup window
+        val layout : LinearLayout = customView.findViewById(R.id.scrollLayout)
+        getContent().contentBlocks.map { cB -> cB.generateContent(layout, activity) }
 
-    popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
+        popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
 
-    val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
-    val checkBoxCompletePin = customView.findViewById<CheckBox>(R.id.complete_box)
-    checkBoxCompletePin.isChecked = (content.parent.getStatus() == 2)
+        val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
+        val checkBoxCompletePin = customView.findViewById<CheckBox>(R.id.complete_box)
 
-    btnClosePopupWindow.setOnClickListener {
-        popupWindow.dismiss()
-    }
+        checkBoxCompletePin.isChecked = (getStatus() == 2)
 
-    checkBoxCompletePin.setOnClickListener{
-        if(checkBoxCompletePin.isChecked){
-            content.parent.complete()
+        btnClosePopupWindow.setOnClickListener {
+            popupWindow.dismiss()
+        }
+
+        checkBoxCompletePin.setOnClickListener{
+            if(checkBoxCompletePin.isChecked){
+                complete()
+            }
         }
     }
 }

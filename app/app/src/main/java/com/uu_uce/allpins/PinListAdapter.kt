@@ -7,11 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
 import com.uu_uce.database.PinData
-import com.uu_uce.pins.PinContent
-import com.uu_uce.pins.openPinPopupWindow
+import com.uu_uce.database.PinConversion
+import com.uu_uce.database.PinViewModel
 
 class PinListAdapter internal constructor(
     private val activity: Activity
@@ -19,6 +21,7 @@ class PinListAdapter internal constructor(
 
     private val inflater: LayoutInflater = LayoutInflater.from(activity)
     private var pins = emptyList<PinData>()
+    private val pinViewModel: PinViewModel = ViewModelProvider(activity as ViewModelStoreOwner).get(PinViewModel::class.java)
 
     inner class PinViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         val parentView : View = itemView
@@ -41,7 +44,10 @@ class PinListAdapter internal constructor(
         holder.pinCoord.text = current.location
         holder.pinType.text = current.type
         holder.pinButton.setOnClickListener{
-            openPinPopupWindow(current.title, PinContent(current.content), holder.parentView, activity)
+            val pinConverter = PinConversion(activity)
+            val pin = pinConverter.pinDataToPin(current, pinViewModel)
+            pin.getContent().parent = pin
+            pin.openPinPopupWindow(holder.parentView, activity)
         }
 
         when(current.difficulty){

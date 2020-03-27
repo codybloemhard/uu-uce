@@ -22,7 +22,6 @@ import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.pins.Pin
-import com.uu_uce.pins.openPinPopupWindow
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.services.checkPermissions
@@ -257,7 +256,7 @@ class CustomMap : ViewTouchParent {
         pins.forEach{ p ->
             if(p == null || !p.inScreen) return@forEach
             if(pointInAABoundingBox(p.boundingBox.first, p.boundingBox.second, canvasTapLocation, pinTapBufferSize)){
-                openPinPopupWindow(p.getTitle(), p.getContent(), this, activity)
+                p.openPinPopupWindow(this, activity)
                 Logger.log(LogType.Info, "CustomMap", "${p.getTitle()}: I have been tapped.")
                 return
             }
