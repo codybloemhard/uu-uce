@@ -5,7 +5,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import com.uu_uce.R
 
-fun onCreateToolbar(activity : Activity, title: String)
+fun createTopbar(activity : Activity, title: String)
 {
     activity.findViewById<TextView>(R.id.toolbar_title).text = title
 

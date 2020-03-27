@@ -14,7 +14,6 @@ import com.uu_uce.R
 import com.uu_uce.VideoViewer
 import java.io.StringReader
 
-
 class PinContent(contentString: String) {
     val contentBlocks : List<ContentBlockInterface>
     init{
@@ -94,8 +93,8 @@ interface ContentBlockInterface{
     fun generateContent(layout : LinearLayout, activity : Activity)
 }
 
-class TextContentBlock(private val textContent : String) : ContentBlockInterface{
-    override fun generateContent(layout : LinearLayout, activity : Activity){
+class TextContentBlock(val textContent : String) : ContentBlockInterface {
+    override fun generateContent(layout : LinearLayout, activity : Activity) {
         val content = TextView(activity)
         content.text = textContent
         content.setPadding(12,12,12,20)
@@ -103,7 +102,7 @@ class TextContentBlock(private val textContent : String) : ContentBlockInterface
     }
 }
 
-class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
+class ImageContentBlock(val imageURI : Uri) : ContentBlockInterface{
     override fun generateContent(layout : LinearLayout, activity : Activity){
         val content = ImageView(activity)
         content.setImageURI(imageURI)
@@ -111,7 +110,7 @@ class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
     }
 }
 
-class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : Uri, private val title : String) : ContentBlockInterface{
+class VideoContentBlock(private val videoURI : Uri, val thumbnailURI : Uri, private val title : String) : ContentBlockInterface{
     override fun generateContent(layout : LinearLayout, activity : Activity){
 
         val relativeLayout = RelativeLayout(activity) //TODO: maybe make this an constraintlayout?

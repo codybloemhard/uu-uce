@@ -5,13 +5,11 @@ import androidx.room.PrimaryKey
 
 //TODO: What info are we going to store and how. Use JSON parser?
 
-@Entity(tableName = "mypins")
+@Entity(tableName = "fieldbook")
 open class FieldbookEntry(
     @PrimaryKey(autoGenerate = true) var id : Int,
     var location       : String,
     var dateTime       : String,
-    var content        : List<Content>,
+    var content        : String,
     var size           : Int
 )
-
-class Content(val type: String, val content: String)

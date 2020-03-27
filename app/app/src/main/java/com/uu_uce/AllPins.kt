@@ -17,7 +17,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.allpins.PinListAdapter
 import com.uu_uce.database.PinData
 import com.uu_uce.database.PinViewModel
-import com.uu_uce.ui.onCreateToolbar
+import com.uu_uce.ui.createTopbar
 
 class AllPins : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
@@ -30,7 +30,7 @@ class AllPins : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_all_pins)
 
-        onCreateToolbar(this, "all pins")
+        createTopbar(this, "all pins")
 
         viewManager = LinearLayoutManager(this)
 

@@ -8,6 +8,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
+import com.uu_uce.pins.ImageContentBlock
+import com.uu_uce.pins.PinContent
+import com.uu_uce.pins.TextContentBlock
+import com.uu_uce.pins.VideoContentBlock
 
 class FieldbookAdapter(val activity: Activity, private val fieldbook: List<FieldbookEntry>) : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>() {
 
@@ -33,20 +37,25 @@ class FieldbookAdapter(val activity: Activity, private val fieldbook: List<Field
         val entry : FieldbookEntry = fieldbook[position]
         holder.numberFb.text = addLeadingZeros(entry.id)
         holder.locationFb.text = entry.location
-        holder.datetimeFb.text = entry.dateTime.toString()
+        holder.datetimeFb.text = entry.dateTime
 
-        //TODO: get the content using the JSON parser
+        val content = PinContent(entry.content)
 
-        for (c in entry.content) {
-            if (c.type == "TEXT") {
-                holder.textFb.text = c.content
+        for (cB in content.contentBlocks)
+        {
+            if (cB is TextContentBlock) {
+                holder.textFb.text = cB.textContent
                 break
             }
         }
-
-        for (c in entry.content) {
-            if (c.type == "IMAGE") {
-                holder.imageFb.setImageURI(Uri.parse(c.content))
+        for (cB in content.contentBlocks)
+        {
+            if (cB is ImageContentBlock) {
+                holder.imageFb.setImageURI(cB.imageURI)
+                break
+            }
+            if (cB is VideoContentBlock) {
+                holder.imageFb.setImageURI(cB.thumbnailURI)
                 break
             }
         }
