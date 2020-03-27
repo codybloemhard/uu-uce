@@ -23,6 +23,7 @@ class Menu : RelativeLayout {
     var barY = 0f
     private var upY = 0f
     private var screenHeight = 0
+    private var minScroll = 0f
 
     fun setScreenHeight(scrnHeight: Int, openBtnHeight: Int, scrollHeight: Int, lowerMenuHeight: Int){
         screenHeight = scrnHeight
@@ -31,6 +32,7 @@ class Menu : RelativeLayout {
         upY = barY - lowerMenuHeight.toFloat()
         updateLayoutParams{height = screenHeight}
         y = downY
+        minScroll = screenHeight * 0.1f
     }
 
     fun snap(dx: Float, dy: Float){
@@ -46,11 +48,14 @@ class Menu : RelativeLayout {
                 if(dy < 0) bar()
                 else down()
             }
+            else -> {
+                down()
+            }
         }
     }
 
     fun drag(dx: Float, dy: Float){
-        y += dy
+        y = maxOf(y + dy, minScroll)
     }
 
     fun up(){
