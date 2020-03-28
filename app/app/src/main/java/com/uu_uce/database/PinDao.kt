@@ -43,5 +43,6 @@ interface PinDao {
     suspend fun updateData(pins: List<PinData>) {
         deleteAllPins()
         insertAll(pins)
+        countPins()
     }
 }

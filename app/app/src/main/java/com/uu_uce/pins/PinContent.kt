@@ -8,6 +8,8 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Environment
 import android.util.JsonReader
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -113,6 +115,7 @@ class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
     override fun generateContent(layout : LinearLayout, activity : Activity){
         val content = ImageView(activity)
         content.setImageURI(imageURI)
+
         layout.addView(content)
     }
 
@@ -133,7 +136,7 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         else{
             val thumbnail = ImageView(activity)
             thumbnail.setImageURI(thumbnailURI)
-            thumbnail.scaleType = ImageView.ScaleType.FIT_CENTER
+            thumbnail.scaleType = ImageView.ScaleType.CENTER
             relativeLayout.addView(thumbnail)
         }
 

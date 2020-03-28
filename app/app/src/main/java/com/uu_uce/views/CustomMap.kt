@@ -82,8 +82,9 @@ class CustomMap : ViewTouchParent {
         // Parse shapes
         smap = ShapeMap(5, this)
         val dir = File(context.filesDir, "mydir")
+        val tempDir = File("/sdcard/Download/")
         val timeParse = measureTimeMillis {
-            smap.addLayer(LayerType.Water, dir, context)
+            smap.addLayer(LayerType.Water, tempDir, context)
         }
         Log.i("CustomMap", "Parse file: $timeParse")
 
@@ -159,9 +160,10 @@ class CustomMap : ViewTouchParent {
     }
 
     fun initPinArrays(){
+        // TODO: Make sure all pins are added to this database before running this
         viewModel.createArrays{ pinCount ->
-            pins = Array(pinCount){null}
-            pinStatuses = Array(pinCount){null}
+            pins = Array(3){null}
+            pinStatuses = Array(3){null}
             arraysReady = true
             updatePins()
         }

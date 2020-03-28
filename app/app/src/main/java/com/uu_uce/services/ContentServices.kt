@@ -38,10 +38,11 @@ fun findMissingFilePaths(requiredFilePaths : List<String>) : List<String>{
 }
 
 fun getFiles(requiredFilePaths : List<String>, activity: Activity, onCompleteAction : (() -> Unit)){
-    val paths = listOf("https://cdn.filesend.jp/private/gzyfYl_REWa7bS4B7m0gZqucwaSr6ysvxHdmxnqBgnnTmx4SgCaytFtS5cJ8LTRK/test.png", "https://cdn.filesend.jp/private/Ghxa0g5o3Cbe0I4kB6xoCBeLh6S0KhadAMsnuvd7ivVOBLjU59YHG0nLn5U8JwYj/zoo.mp4", "https://cdn.filesend.jp/private/FOqUTH6cTImIIVkvazod_oJK8pmFZaWJmwW98c9F377fIXJpsyB5tqomsWuKjx00/zoothumbnail.png")
     val manager = activity.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
 
-    for(filePath in paths /*requiredFilePaths*/){ //TODO implement our own server
+    val downloadDone : MutableMap<Long, Boolean> = mutableMapOf()
+
+    for(filePath in requiredFilePaths){ //TODO implement our own server
         val fileName = filePath.split('/').last()
         val request = DownloadManager.Request(Uri.parse(filePath))
         request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI)
@@ -50,12 +51,20 @@ fun getFiles(requiredFilePaths : List<String>, activity: Activity, onCompleteAct
         request.setDestinationInExternalPublicDir(DIRECTORY_DOWNLOADS, fileName)
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
 
+        val id : Long = manager.enqueue(request)
+        downloadDone[id] = false
         manager.enqueue(request)
     }
 
     val onComplete: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctxt: Context, intent: Intent) {
-            onCompleteAction()
+            val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+            if(downloadDone[id] != null){
+                downloadDone[id] = true
+            }
+            if(downloadDone.all{entry -> entry.value}){
+                onCompleteAction()
+            }
         }
     }
     activity.registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))

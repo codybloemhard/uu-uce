@@ -31,7 +31,7 @@ class PinListAdapter internal constructor(
         val pinType: TextView = itemView.findViewById(R.id.textView3)
         val pinDiff: TextView = itemView.findViewById(R.id.textView4)
         val pinDiffC: View = itemView.findViewById(R.id.diff)
-        //val pinStatus: CheckBox = itemView.findViewById(R.id.complete_box)
+        val pinStatus: CheckBox = itemView.findViewById(R.id.checkBox)
         val pinButton: Button = itemView.findViewById(R.id.open_button)
     }
 
@@ -45,7 +45,7 @@ class PinListAdapter internal constructor(
         holder.pinTitle.text = current.title
         holder.pinCoord.text = current.location
         holder.pinType.text = current.type
-        //holder.pinStatus.isChecked = (current.status == 2)
+        holder.pinStatus.isChecked = (current.status == 2)
         holder.pinButton.setOnClickListener{
             val pinConverter = PinConversion(activity)
             val pin = pinConverter.pinDataToPin(current, pinViewModel)
@@ -73,8 +73,8 @@ class PinListAdapter internal constructor(
         }
     }
 
-    internal fun setPins(pins: List<PinData>) {
-        this.pins = pins
+    internal fun setPins(newPins: List<PinData>) {
+        pins = newPins
         notifyDataSetChanged()
     }
 
