@@ -10,13 +10,13 @@ import com.uu_uce.database.PinData
 interface FieldbookDao {
 
     @Query("SELECT * from fieldbook")
-    fun getAllFieldbookEntries() : List<FieldbookEntry>
+    fun getAllFieldbookEntries() : MutableList<FieldbookEntry>
 
 
     @Insert
-    fun insert(entry: FieldbookEntry)
+    suspend fun insert(entry: FieldbookEntry)
 
 
     @Query("DELETE from fieldbook")
-    fun deleteAllFieldbookEntries()
+    suspend fun deleteAllFieldbookEntries()
 }

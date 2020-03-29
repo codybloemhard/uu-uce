@@ -10,6 +10,8 @@ import com.uu_uce.fieldbook.FieldbookEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.text.DateFormat
+import java.util.*
 
 @Database(entities = [PinData::class, FieldbookEntry::class], version = 1, exportSchema = false)
 abstract class UceRoomDatabase : RoomDatabase() {
@@ -23,26 +25,44 @@ abstract class UceRoomDatabase : RoomDatabase() {
             super.onOpen(db)
             INSTANCE?.let { database ->
                 scope.launch(Dispatchers.IO) {
-                    populateDatabase(database.pinDao())
+                    populatePinTable(database.pinDao())
+                    //populateFieldbook(database.fieldbookDao())
                 }
             }
         }
 
-        suspend fun populateDatabase(pinDao: PinDao) {
-            val pins : MutableList<PinData> = mutableListOf()
-            pinDao.deleteAllPins()
-            val pin1 = PinData(0, "31N3149680N46777336E", 1, "TEXT" , "testPin1", "[{\"tag\":\"TEXT\", \"text\":\"test\"}]", 60)
-            val pin2 = PinData(1, "31N3133680N46718336E", 2, "IMAGE", "testPin2", "[{\"tag\":\"IMAGE\", \"file_name\":\"test.png\"}]", 60)
-            val pin3 = PinData(2, "31N3130000N46710000E", 3, "VIDEO", "testPin3", "[{\"tag\":\"VIDEO\", \"file_name\":\"zoo.mp4\", \"thumbnail\":\"zoothumbnail.png\", \"title\":\"zoo video\"}]", 60)
+        suspend fun populateFieldbook(fieldbookDao: FieldbookDao) {
+            val sdf = DateFormat.getDateTimeInstance()
+            val currentDate = sdf.format(Date())
 
-            pins.add(pin1)
-            pins.add(pin2)
-            pins.add(pin3)
+            val fieldbook: MutableList<FieldbookEntry> = mutableListOf(
+                FieldbookEntry(
+                    "31N3149680N46777336E",
+                    currentDate,
+                    "[{\"tag\":\"TEXT\",\"text\":\"Dit is een faketekst. Alles wat hier staat is slechts om een indruk te geven van het grafische effect van tekst op deze plek. Wat u hier leest is een voorbeeldtekst. Deze wordt later vervangen door de uiteindelijke tekst, die nu nog niet bekend is. De faketekst is dus een tekst die eigenlijk nergens over gaat. Het grappige is, dat mensen deze toch vaak lezen. Zelfs als men weet dat het om een faketekst gaat, lezen ze toch door.\"},{\"tag\":\"IMAGE\",\"file_name\":\"test.png\"}]",
+                    60
+                ),
+                FieldbookEntry(
+                    "31N3133680N46718336E",
+                    currentDate,
+                    "[{\"tag\":\"TEXT\",\"text\":\"Dit is een faketekst. Alles wat hier staat is slechts om een indruk te geven van het grafische effect van tekst op deze plek. Wat u hier leest is een voorbeeldtekst. Deze wordt later vervangen door de uiteindelijke tekst, die nu nog niet bekend is. De faketekst is dus een tekst die eigenlijk nergens over gaat. Het grappige is, dat mensen deze toch vaak lezen. Zelfs als men weet dat het om een faketekst gaat, lezen ze toch door.\"},{\"tag\":\"VIDEO\", \"file_name\":\"zoo.mp4\", \"thumbnail\":\"zoothumbnail.png\", \"title\":\"zoo video\"}]",
+                    60
+                )
+            )
 
-            populatePinTable(pinDao,pins)
+            fieldbookDao.deleteAllFieldbookEntries()
+
+            for (entry in fieldbook)
+                fieldbookDao.insert(entry)
         }
-        suspend fun populatePinTable(pinDao: PinDao, pins: List<PinData>) {
+        suspend fun populatePinTable(pinDao: PinDao) {
             pinDao.deleteAllPins()
+
+            val pins : MutableList<PinData> = mutableListOf(
+                PinData(0, "31N3149680N46777336E", 1, "TEXT" , "testPin1", "[{\"tag\":\"TEXT\", \"text\":\"test\"}]", 60) ,
+                PinData(1, "31N3133680N46718336E", 2, "IMAGE", "testPin2", "[{\"tag\":\"IMAGE\", \"file_name\":\"test.png\"}]", 60),
+                PinData(2, "31N3130000N46710000E", 3, "VIDEO", "testPin3", "[{\"tag\":\"VIDEO\", \"file_name\":\"zoo.mp4\", \"thumbnail\":\"zoothumbnail.png\", \"title\":\"zoo video\"}]", 60)
+            )
 
             for (pin in pins) {
                 pinDao.insert(pin)
@@ -63,6 +83,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
                     "uce_database"
                 )
                     .addCallback(UceDatabaseCallback(scope))
+                    .allowMainThreadQueries()
                     .build()
                 INSTANCE = instance
                 instance
