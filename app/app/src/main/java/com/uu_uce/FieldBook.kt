@@ -6,12 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.location.LocationListener
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.os.Looper
 import android.provider.MediaStore
 import android.view.Gravity
 import android.view.View
@@ -86,11 +84,12 @@ class FieldBook : AppCompatActivity() {
         popupWindow.isFocusable = true
         popupWindow.update()
 
+        val location: Pair<Double,Double>?
         val missingPermissions = checkPermissions(this,permissionsNeeded + LocationServices.permissionsNeeded)
         if(missingPermissions.count() == 0) {
-            //TODO: use existing LocationServices
-            //TODO: or copy all cases and exceptions
-            val locationManager: LocationManager = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            val locationManager = LocationServices.locationManager
+            val provider = LocationManager.GPS_PROVIDER
+            val lastKnownLocation = locationManager.getLastKnownLocation(provider)
             if (ActivityCompat.checkSelfPermission(
                     this,
                     Manifest.permission.ACCESS_FINE_LOCATION
@@ -108,6 +107,12 @@ class FieldBook : AppCompatActivity() {
                 // for ActivityCompat#requestPermissions for more details.
                 return
             }
+            location = Pair(lastKnownLocation.latitude,lastKnownLocation.longitude)
+
+            /*
+            //TODO: use existing LocationServices
+            //TODO: or copy all cases and exceptions
+            val locationManager: LocationManager = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
             val locationListener: LocationListener? = null
             locationManager.requestSingleUpdate(
                 LocationManager.GPS_PROVIDER,
@@ -116,6 +121,7 @@ class FieldBook : AppCompatActivity() {
             )
             val locationGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
             val location = Pair(locationGps.latitude, locationGps.longitude)
+             */
         }
 
         text = customView.findViewById(R.id.addText)
@@ -131,8 +137,7 @@ class FieldBook : AppCompatActivity() {
             val sdf = DateFormat.getDateTimeInstance()
             val currentDate = sdf.format(Date())
 
-
-            saveFieldbookEntry(textInput, bitmap, currentDate)
+            saveFieldbookEntry(textInput, bitmap, currentDate, location = null)
             popupWindow.dismiss()
         }
     }
@@ -211,7 +216,8 @@ class FieldBook : AppCompatActivity() {
     private fun saveFieldbookEntry(
         text: String,
         image: Bitmap,
-        currentDate: String
+        currentDate: String,
+        location: Pair<Double, Double>?
     ) {
 
     }
