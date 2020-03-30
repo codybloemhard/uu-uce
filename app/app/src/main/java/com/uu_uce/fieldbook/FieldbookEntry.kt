@@ -7,8 +7,8 @@ import androidx.room.PrimaryKey
 open class FieldbookEntry(
     var location       : String,
     var dateTime       : String,
-    var content        : String,
-    var size           : Int
+    var content        : String
 ) {
     @PrimaryKey(autoGenerate = true) var id: Int = 0
+    var size: Int = 60
 }

@@ -1,40 +1,59 @@
 package com.uu_uce
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.location.LocationListener
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.os.Looper
 import android.provider.MediaStore
-import android.text.Editable
 import android.view.Gravity
 import android.view.View
-import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.PopupWindow
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.database.UceRoomDatabase
 import com.uu_uce.fieldbook.FieldbookAdapter
 import com.uu_uce.fieldbook.FieldbookEntry
+import com.uu_uce.services.LocationServices
+import com.uu_uce.services.checkPermissions
 import com.uu_uce.ui.createTopbar
 import kotlinx.coroutines.MainScope
+import java.io.File
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class FieldBook : AppCompatActivity() {
+
+    var permissionsNeeded = listOf(
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        Manifest.permission.CAMERA
+    )
 
     lateinit var image: ImageView
     lateinit var text: EditText
     lateinit var imageUri: Uri
     lateinit var textInput: String
+    lateinit var bitmap: Bitmap
+
+    lateinit var currentPhotoPath: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,24 +82,57 @@ class FieldBook : AppCompatActivity() {
 
         popupWindow.showAtLocation(parent, Gravity.CENTER, 0, 0)
 
-        text = customView.findViewById(R.id.addText)
+        // makes sure the keyboard appears whenever we want to add text
+        popupWindow.isFocusable = true
+        popupWindow.update()
 
-        //TODO: should show keyboard, doesn't work as of yet
-        text.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
-                popupWindow.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE
+        val missingPermissions = checkPermissions(this,permissionsNeeded + LocationServices.permissionsNeeded)
+        if(missingPermissions.count() == 0) {
+            //TODO: use existing LocationServices
+            //TODO: or copy all cases and exceptions
+            val locationManager: LocationManager = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return
             }
+            val locationListener: LocationListener? = null
+            locationManager.requestSingleUpdate(
+                LocationManager.GPS_PROVIDER,
+                locationListener,
+                Looper.myLooper()
+            )
+            val locationGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            val location = Pair(locationGps.latitude, locationGps.longitude)
         }
 
+        text = customView.findViewById(R.id.addText)
+
         image = customView.findViewById(R.id.addImage)
-        val closePopup = customView.findViewById<Button>(R.id.close_fieldbook_popup)
 
         image.setOnClickListener {
             selectImage(this)
         }
 
+        val closePopup = customView.findViewById<Button>(R.id.close_fieldbook_popup)
         closePopup.setOnClickListener{
-            saveFieldbookEntry(textInput, imageUri)
+            val sdf = DateFormat.getDateTimeInstance()
+            val currentDate = sdf.format(Date())
+
+
+            saveFieldbookEntry(textInput, bitmap, currentDate)
             popupWindow.dismiss()
         }
     }
@@ -93,7 +145,25 @@ class FieldBook : AppCompatActivity() {
         dialog.setItems(options) { dialogInterface, which ->
 
             when (which) {
-                0 -> startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), 0)
+                0 -> {
+                    val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    /*
+                    val photoFile: File? = try {
+                        createImageFile()
+                    } catch (ex: IOException) {
+                        null
+                    }
+                    if (photoFile != null) {
+                        val photoUri: Uri = FileProvider.getUriForFile(
+                            this,
+                            "com.uu-uce.fileprovider",
+                            photoFile
+                        )
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                    }
+                     */
+                    startActivityForResult(takePictureIntent, 0)
+                }
                 1 -> startActivityForResult(Intent(Intent.ACTION_PICK,
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI), 1)
                 2 -> dialogInterface.dismiss()
@@ -101,6 +171,8 @@ class FieldBook : AppCompatActivity() {
         }
         dialog.show()
     }
+
+
 
     override fun onActivityResult(
         requestCode: Int,
@@ -111,18 +183,36 @@ class FieldBook : AppCompatActivity() {
         if (resultCode == Activity.RESULT_OK && data != null) {
 
             //TODO: this is just a thumbnail... get full size picture
-            when (resultCode) {
+            when (requestCode) {
                 0 -> {
-                    val imageBitmap = data.extras?.get("data") as Bitmap
-                    image.setImageBitmap(imageBitmap) }
+                    bitmap = data.extras?.get("data") as Bitmap
+                    image.setImageBitmap(bitmap) }
                 1 -> {
-                    val selectedImage: Uri? = data.data
-                    image.setImageURI(selectedImage) }
+                    imageUri = data.data!!
+                    image.setImageURI(imageUri) }
             }
         }
     }
 
-    private fun saveFieldbookEntry(text: String, image: Uri) {
+    private fun createImageFile(): File {
+        // Create an image file name
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale("nl_NL")).format(Date())
+        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "IMG_${timeStamp}_", /* prefix */
+            ".jpg", /* suffix */
+            storageDir /* directory */
+        ).also {
+            // Save a file: path for use with ACTION_VIEW intents
+            currentPhotoPath = it.absolutePath
+        }
+    }
+
+    private fun saveFieldbookEntry(
+        text: String,
+        image: Bitmap,
+        currentDate: String
+    ) {
 
     }
 
