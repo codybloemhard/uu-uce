@@ -142,31 +142,33 @@ class Pin(
         // add content to popup window
         val layout: LinearLayout = customView.findViewById(R.id.scrollLayout)
 
-        val filePaths: MutableList<String> = mutableListOf()
+        /*val filePaths: MutableList<String> = mutableListOf()
         content.contentBlocks.forEach { cb ->
             cb.getFilePath().forEach { path -> filePaths.add(path) }
+        }*/
+
+        content.contentBlocks.forEach { cb ->
+            cb.generateContent(layout, activity)
+        }
+        popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
+
+        val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
+        val checkBoxCompletePin = customView.findViewById<CheckBox>(R.id.complete_box)
+
+        checkBoxCompletePin.isChecked = (getStatus() == 2)
+
+        btnClosePopupWindow.setOnClickListener {
+            popupWindow.dismiss()
+        }
+        checkBoxCompletePin.setOnClickListener {
+            if (checkBoxCompletePin.isChecked) {
+                complete()
+            }
         }
 
-        updateFiles(filePaths, activity) {
-            content.contentBlocks.forEach { cb ->
-                cb.generateContent(layout, activity)
-            }
-            popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
+        /*updateFiles(filePaths, activity) {
 
-            val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
-            val checkBoxCompletePin = customView.findViewById<CheckBox>(R.id.complete_box)
-
-            checkBoxCompletePin.isChecked = (getStatus() == 2)
-
-            btnClosePopupWindow.setOnClickListener {
-                popupWindow.dismiss()
-            }
-            checkBoxCompletePin.setOnClickListener {
-                if (checkBoxCompletePin.isChecked) {
-                    complete()
-                }
-            }
-        }
+        }*/
     }
 }
 
