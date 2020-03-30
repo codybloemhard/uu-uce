@@ -2,19 +2,21 @@ package com.uu_uce
 
 import android.app.Activity
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
-import android.database.Cursor
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Editable
 import android.view.Gravity
 import android.view.View
+import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
-import android.widget.*
+import android.view.WindowManager
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.PopupWindow
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -31,6 +33,8 @@ class FieldBook : AppCompatActivity() {
 
     lateinit var image: ImageView
     lateinit var text: EditText
+    lateinit var imageUri: Uri
+    lateinit var textInput: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +64,14 @@ class FieldBook : AppCompatActivity() {
         popupWindow.showAtLocation(parent, Gravity.CENTER, 0, 0)
 
         text = customView.findViewById(R.id.addText)
+
+        //TODO: should show keyboard, doesn't work as of yet
+        text.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                popupWindow.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE
+            }
+        }
+
         image = customView.findViewById(R.id.addImage)
         val closePopup = customView.findViewById<Button>(R.id.close_fieldbook_popup)
 
@@ -68,7 +80,7 @@ class FieldBook : AppCompatActivity() {
         }
 
         closePopup.setOnClickListener{
-            saveFieldbookEntry(text.text, image)
+            saveFieldbookEntry(textInput, imageUri)
             popupWindow.dismiss()
         }
     }
@@ -110,7 +122,7 @@ class FieldBook : AppCompatActivity() {
         }
     }
 
-    private fun saveFieldbookEntry(text: Editable?, image: ImageView?) {
+    private fun saveFieldbookEntry(text: String, image: Uri) {
 
     }
 
