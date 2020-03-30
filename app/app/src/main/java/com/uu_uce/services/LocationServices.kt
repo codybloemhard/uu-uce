@@ -197,11 +197,17 @@ class LocationServices{
             }
         }
 
-        locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, locationListener, Looper.myLooper())
-        val locationGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+        var locationGps : Location? = null
+        if(hasGps){
+            locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, locationListener, Looper.myLooper())
+            locationGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+        }
 
-        locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, locationListener, Looper.myLooper())
-        val locationNetwork = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+        var locationNetwork : Location? = null
+        if(hasNetwork){
+            locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, locationListener, Looper.myLooper())
+            locationNetwork = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+        }
 
         /*
         Will call requestLocationUpdates with specified provider and start by entering the result of
@@ -233,7 +239,7 @@ class LocationServices{
         }
         else if(hasNetwork){
             Logger.log(LogType.Info,"LocationServices", "Gps unavailable, using network location")
-            startLocUpdates(LocationManager.GPS_PROVIDER)
+            startLocUpdates(LocationManager.NETWORK_PROVIDER)
             return LocationPollStartResult.NETWORK_ONLY
         }
         else{

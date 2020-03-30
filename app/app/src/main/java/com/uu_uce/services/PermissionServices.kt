@@ -14,7 +14,7 @@ Permissions of the form of Manifest.permission.ACCESS_COARSE_LOCATION.
 Does:
 Asks for permission to use those permissions.
 */
-fun getPermissions(activity: Activity, permissions: List<String>) {
+fun getPermissions(activity: Activity, permissions: List<String>, requestCode : Int) {
     val neededPermissions: MutableList<String> = mutableListOf()
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
     for (i in permissions) {
@@ -23,7 +23,7 @@ fun getPermissions(activity: Activity, permissions: List<String>) {
         }
     }
     if(neededPermissions.size > 0){
-        requestPermissions(activity, neededPermissions.toTypedArray(),1)
+        requestPermissions(activity, neededPermissions.toTypedArray(), requestCode)
     }
 }
 

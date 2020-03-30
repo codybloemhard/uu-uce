@@ -5,6 +5,7 @@ import android.R
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -28,10 +29,7 @@ import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.pins.Pin
-import com.uu_uce.services.LocationServices
-import com.uu_uce.services.UTMCoordinate
-import com.uu_uce.services.checkPermissions
-import com.uu_uce.services.degreeToUTM
+import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
 import com.uu_uce.ui.*
 import com.uu_uce.ui.Scroller
@@ -45,8 +43,6 @@ class CustomMap : ViewTouchParent {
     constructor(context: Context, attrs: AttributeSet): super(context, attrs)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    var permissionsNeeded = listOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-
     private var smap : ShapeMap
     private var first = true
 
@@ -55,6 +51,7 @@ class CustomMap : ViewTouchParent {
 
     // How much does the location have to change on the screen to warrant a redraw
     private val locationAccuracy : Float = 5f
+    var drawLocation : Boolean = false
 
     private val locationServices = LocationServices()
 
@@ -131,14 +128,16 @@ class CustomMap : ViewTouchParent {
             Logger.log(LogType.Event, "DrawOverlay", "east: ${loc.east}, north: ${loc.north}")
 
             val screenLoc = coordToScreen(loc, viewport, width, height)
-            drawDeviceLocation(
-                screenLoc,
-                canvas,
-                deviceLocPaint,
-                deviceLocEdgePaint,
-                15F,
-                4F)
-            lastDrawnLoc = screenLoc
+            if(drawLocation){
+                drawDeviceLocation(
+                    screenLoc,
+                    canvas,
+                    deviceLocPaint,
+                    deviceLocEdgePaint,
+                    15F,
+                    4F)
+                lastDrawnLoc = screenLoc
+            }
 
             if(!arraysReady) return
             pins.forEach{ pin ->
@@ -293,6 +292,16 @@ class CustomMap : ViewTouchParent {
 
     fun startLocServices(){
         locationServices.startPollThread(context, 5000, 0F, ::updateLoc)
+    }
+
+    fun tryStartLocServices(activity: Activity){
+        val missingPermissions = checkPermissions(activity, LocationServices.permissionsNeeded)
+        if(missingPermissions.count() > 0){
+            getPermissions(activity, missingPermissions, 2)
+        }
+        else{
+            startLocServices()
+        }
     }
 
     fun redrawMap(){

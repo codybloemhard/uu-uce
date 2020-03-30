@@ -1,9 +1,9 @@
 package com.uu_uce
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Point
-import android.graphics.Rect
 import android.os.Bundle
 import android.view.Display
 import android.view.MotionEvent
@@ -12,10 +12,9 @@ import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.uu_uce.database.PinViewModel
-import com.uu_uce.mapOverlay.aaBoundingBoxContains
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.services.LocationServices.Companion.permissionsNeeded
+import com.uu_uce.services.LocationServices
 import com.uu_uce.services.checkPermissions
 import com.uu_uce.services.getPermissions
 import com.uu_uce.shapefiles.LayerType
@@ -28,14 +27,21 @@ class GeoMap : AppCompatActivity() {
     private var screenDim = Point(0,0)
     private var statusBarHeight = 0
     private var resourceId = 0
+    private val permissionsNeeded = listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if(checkPermissions(this, permissionsNeeded).count() > 0){
+            getPermissions(this, permissionsNeeded, 1)
+        }
+        else{
+            start()
+        }
+    }
+
+    private fun start(){
         setContentView(R.layout.activity_geo_map)
-
-        //getPermissions(this, LocationServices.permissionsNeeded + customMap.permissionsNeeded)
-        getPermissions(this, permissionsNeeded + customMap.permissionsNeeded)
-
 
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         this.customMap.setViewModel(pinViewModel)
@@ -62,10 +68,8 @@ class GeoMap : AppCompatActivity() {
         val tempDir = File("/sdcard/Download/") // TODO: remove after demo
         customMap.addLayer(LayerType.Water, tempDir, toggle_layer_layout, size)
 
-        val missingPermissions = checkPermissions(this,customMap.permissionsNeeded + permissionsNeeded)
-        if(missingPermissions.count() == 0){
-            customMap.startLocServices()
-        }
+        customMap.tryStartLocServices(this)
+
 
         button.setOnClickListener{customMap.zoomToDevice()}
         dragButton.clickAction = {menu.dragButtonTap()}
@@ -97,28 +101,47 @@ class GeoMap : AppCompatActivity() {
     }
 
     override fun onResume() {
+        if(checkPermissions(this, LocationServices.permissionsNeeded + permissionsNeeded).count() == 0){
+            super.onResume()
+            customMap.updatePins()
+            customMap.redrawMap()
+        }
+
         super.onResume()
-        customMap.updatePins()
-        customMap.redrawMap()
     }
 
     private fun initMenu(){
         menu.setScreenHeight(screenDim.y - statusBarHeight, dragButton.height, toggle_layer_scroll.height, lower_menu_layout.height)
     }
 
-    // Respond to permission request
+    // Respond to permission request result
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        if (requestCode == 1) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                Logger.log(LogType.Info,"GPS", "Permissions granted")
-                customMap.startLocServices()
+        when (requestCode) {
+            1 -> {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    Logger.log(LogType.Info,"GeoMap", "Permissions granted")
+                    start()
+                }
+                else{
+                    Logger.log(LogType.Info,"GeoMap", "Permissions were not granted, asking again")
+                    getPermissions(this, permissionsNeeded, 1)
+                }
             }
-            else
-                Logger.log(LogType.Info,"GPS", "Permissions were not granted")
+            2 -> {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    Logger.log(LogType.Info,"CustomMap", "Permissions granted")
+                    customMap.drawLocation = true
+                    customMap.startLocServices()
+                }
+                else{
+                    Logger.log(LogType.Info,"CustomMap", "Permissions were not granted")
+                    customMap.drawLocation = false
+                }
+            }
         }
     }
 }

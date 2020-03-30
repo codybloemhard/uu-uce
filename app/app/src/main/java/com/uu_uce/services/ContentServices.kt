@@ -17,7 +17,7 @@ val permissionsNeeded = listOf(Manifest.permission.INTERNET, Manifest.permission
 fun updateFiles(requiredFilePaths : List<String>, activity : Activity, onCompleteAction : (() -> Unit)){
     val missingFiles = findMissingFilePaths(requiredFilePaths)
     if(missingFiles.count() > 0){
-        getPermissions(activity, permissionsNeeded)
+        getPermissions(activity, permissionsNeeded, 1)
         getFiles(missingFiles, activity, onCompleteAction)
     }
     else{
