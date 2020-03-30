@@ -2,19 +2,26 @@ package com.uu_uce
 
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.graphics.Paint
 import android.graphics.Point
+import android.graphics.Rect
 import android.os.Bundle
 import android.view.Display
+import android.view.MotionEvent
+import android.view.ViewGroup
+import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.uu_uce.database.PinViewModel
+import com.uu_uce.mapOverlay.aaBoundingBoxContains
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.services.LocationServices
+import com.uu_uce.services.LocationServices.Companion.permissionsNeeded
+import com.uu_uce.services.checkPermissions
 import com.uu_uce.services.getPermissions
-import com.uu_uce.views.MenuButton
+import com.uu_uce.shapefiles.LayerType
+import com.uu_uce.views.DragStatus
 import kotlinx.android.synthetic.main.activity_geo_map.*
+import java.io.File
 
 class GeoMap : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel
@@ -26,7 +33,9 @@ class GeoMap : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_geo_map)
 
-        getPermissions(this, LocationServices.permissionsNeeded + customMap.permissionsNeeded)
+        //getPermissions(this, LocationServices.permissionsNeeded + customMap.permissionsNeeded)
+        getPermissions(this, permissionsNeeded + customMap.permissionsNeeded)
+
 
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         this.customMap.setViewModel(pinViewModel)
@@ -38,21 +47,52 @@ class GeoMap : AppCompatActivity() {
             statusBarHeight = resources.getDimensionPixelSize(resourceId)
         }
 
-        button.setOnClickListener{customMap.zoomToDevice()}
+        (Display::getSize)(windowManager.defaultDisplay, screenDim)
+        val longest = maxOf(screenDim.x, screenDim.y)
+        val size = (longest*menu.buttonPercent).toInt()
 
-        initMenu()
-        menu.post {
-            val p = Paint()
-            p.color = Color.RED
-            val t = Paint()
-            t.color = Color.GREEN
-            val c1 = MenuButton((menu.width - menu.downY)/ 2, 0f, (menu.width + menu.downY)/ 2, menu.downY, { menu.open() }, p)
-            val c2 = MenuButton(20f, menu.downY, 20+(menu.barY - menu.downY), menu.barY, { customMap.toggleLayer(0) }, p)
-            val c3 = MenuButton(20+(menu.barY - menu.downY), menu.downY, 20+(2*(menu.barY - menu.downY)), menu.barY, { customMap.allPins() }, t)
-            menu.addMenuChild(c1)
-            menu.addMenuChild(c2)
-            menu.addMenuChild(c3)
+        val btn = ImageButton(this, null, android.R.attr.buttonBarButtonStyle)
+        btn.setImageResource(R.drawable.logotp)
+        btn.setBackgroundColor(Color.BLUE)
+        btn.setOnClickListener{customMap.allPins()}
+        btn.layoutParams = ViewGroup.LayoutParams(size, size)
+        lower_menu_layout.addView(btn)
+
+        val dir = File(filesDir, "mydir")
+        customMap.addLayer(LayerType.Water, dir, toggle_layer_layout, size)
+
+        val missingPermissions = checkPermissions(this,customMap.permissionsNeeded + permissionsNeeded)
+        if(missingPermissions.count() == 0){
+            customMap.startLocServices()
         }
+
+        button.setOnClickListener{customMap.zoomToDevice()}
+        dragButton.clickAction = {menu.dragButtonTap()}
+        dragButton.dragAction = {dx, dy -> menu.drag(dx,dy) }
+        dragButton.dragEndAction = {dx, dy -> menu.snap(dx, dy)}
+
+        menu.post {
+            initMenu()
+        }
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if(menu.dragStatus != DragStatus.Down &&
+            ev.action == MotionEvent.ACTION_DOWN &&
+            !(ev.rawX > menu.x && ev.rawX < menu.x + menu.width && ev.rawY > menu.y && ev.rawY < menu.y + menu.height)){
+            menu.down()
+            return true
+        }
+
+        return super.dispatchTouchEvent(ev)
+    }
+
+    override fun onBackPressed() {
+        if(menu.dragStatus != DragStatus.Down){
+            menu.down()
+            return
+        }
+        super.onBackPressed()
     }
 
     override fun onResume() {
@@ -62,8 +102,7 @@ class GeoMap : AppCompatActivity() {
     }
 
     private fun initMenu(){
-        (Display::getSize)(windowManager.defaultDisplay, screenDim)
-        menu.setScreenHeight(screenDim.y - statusBarHeight)
+        menu.setScreenHeight(screenDim.y - statusBarHeight, dragButton.height, toggle_layer_scroll.height, lower_menu_layout.height)
     }
 
     // Respond to permission request

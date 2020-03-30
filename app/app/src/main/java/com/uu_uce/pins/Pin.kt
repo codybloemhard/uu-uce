@@ -59,7 +59,11 @@ class Pin(
         val location: Pair<Float, Float> =
             coordToScreen(coordinate, viewport, view.width, view.height)
 
+        if(location.first.isNaN() || location.second.isNaN())
+            return //TODO fix dat dit gecalled wordt met nan
+
         val minX = (location.first - pinSize / 2).roundToInt()
+
         val minY = (location.second - imageHeight).roundToInt()
         val maxX = (location.first + pinSize / 2).roundToInt()
         val maxY = (location.second).roundToInt()

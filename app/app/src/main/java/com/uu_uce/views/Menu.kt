@@ -1,7 +1,8 @@
 package com.uu_uce.views
 
-import android.annotation.SuppressLint
+import android.animation.TimeInterpolator
 import android.content.Context
+import android.widget.RelativeLayout
 import android.graphics.Canvas
 import android.graphics.Color
 import android.util.AttributeSet
@@ -10,77 +11,81 @@ import android.view.View
 import android.view.View.OnLayoutChangeListener
 import androidx.core.view.updateLayoutParams
 
-class Menu : View {
+class Menu : RelativeLayout {
     constructor(context: Context): super(context)
     constructor(context: Context, attrs: AttributeSet): super(context, attrs)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    private var dragStatus = DragStatus.Down
+    var dragStatus = DragStatus.Down
 
-    private val menuChilds : MutableList<MenuChild> = mutableListOf()
-
-    private val downPercent = 0.05f
-    private val barPercent = 0.2f
-    private val upPercent = 1f
+    val buttonPercent = 0.1f
     var downY = 0f
     var barY = 0f
     private var upY = 0f
-    private var screenSiz = 0
+    private var screenHeight = 0
+    private var minScroll = 0f
 
-    init{
-        //make the menu start at the bottom of the screen
-        val listener =
-            OnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
-                y = oldTop.toFloat()
+    fun setScreenHeight(scrnHeight: Int, openBtnHeight: Int, scrollHeight: Int, lowerMenuHeight: Int){
+        screenHeight = scrnHeight
+        downY = screenHeight - openBtnHeight.toFloat()
+        barY = downY - scrollHeight.toFloat()
+        upY = barY - lowerMenuHeight.toFloat()
+        updateLayoutParams{height = screenHeight}
+        y = downY
+        minScroll = screenHeight * 0.1f
+    }
+
+    fun snap(dx: Float, dy: Float){
+        when {
+            y < upY ->{
+                up()
             }
-        addOnLayoutChangeListener(listener)
-        post{
-            updateLayoutParams{height = screenSiz}
-            y = screenSiz - downY
+            y < barY -> {
+                if(dy < 0) up()
+                else bar()
+            }
+            y < downY -> {
+                if(dy < 0) bar()
+                else down()
+            }
+            else -> {
+                down()
+            }
         }
     }
 
-    fun addMenuChild(child: MenuChild){
-        menuChilds.add(child)
+    fun drag(dx: Float, dy: Float){
+        y = maxOf(y + dy, minScroll)
     }
 
-    fun setScreenHeight(h: Int){
-        screenSiz = h
-        downY = h * downPercent
-        barY = h * barPercent
-        upY = h * upPercent
+    fun up(){
+        dragStatus = DragStatus.Up
+        animate().y(upY)
     }
 
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-        canvas.drawColor(Color.argb(255,254,212,2))
-        for(child in menuChilds)
-            child.onDraw(canvas)
+    fun bar(){
+        dragStatus = DragStatus.Bar
+        animate().y(barY)
     }
 
-    fun open(){
+    fun down(){
+        dragStatus = DragStatus.Down
+        animate().y(downY)
+    }
+
+    fun dragButtonTap(){
+        animate().y(y-100)
         when(dragStatus){
             DragStatus.Down ->{
-                dragStatus = DragStatus.Bar
-                animate().y(screenSiz - barY)
+                bar()
             }
             DragStatus.Bar ->{
-                dragStatus = DragStatus.Down
-                animate().y(screenSiz - downY)
+                down()
             }
             DragStatus.Up ->{
-
+                down()
             }
         }
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        for(child in menuChilds){
-            if(child.onTouchEvent(event))
-                break
-        }
-        return true
     }
 }
 
