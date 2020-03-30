@@ -65,8 +65,7 @@ class GeoMap : AppCompatActivity() {
         lower_menu_layout.addView(btn)
 
         val dir = File(filesDir, "mydir")
-        val tempDir = File("/sdcard/Download/") // TODO: remove after demo
-        customMap.addLayer(LayerType.Water, tempDir, toggle_layer_layout, size)
+        customMap.addLayer(LayerType.Water, dir, toggle_layer_layout, size)
 
         customMap.tryStartLocServices(this)
 
