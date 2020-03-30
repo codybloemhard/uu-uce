@@ -50,6 +50,8 @@ class Pin(
     var inScreen : Boolean = true
     var boundingBox : Pair<p2, p2> = Pair(p2Zero, p2Zero)
 
+    var popupWindow: PopupWindow? = null
+
     private var pinBbMin : UTMCoordinate = coordinate
     private var pinBbMax : UTMCoordinate = coordinate
 
@@ -117,7 +119,7 @@ class Pin(
 
         // build an custom view (to be inflated on top of our current view & build it's popup window)
         val customView = layoutInflater.inflate(R.layout.pin_content_view, null, false)
-        val popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
         // add the title for the popup window
         val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
@@ -127,7 +129,7 @@ class Pin(
         val layout : LinearLayout = customView.findViewById(R.id.scrollLayout)
         getContent().contentBlocks.map { cB -> cB.generateContent(layout, activity) }
 
-        popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
+        popupWindow?.showAtLocation(parentView, Gravity.CENTER, 0, 0)
 
         val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
         val checkBoxCompletePin = customView.findViewById<CheckBox>(R.id.complete_box)
@@ -135,7 +137,7 @@ class Pin(
         checkBoxCompletePin.isChecked = (getStatus() == 2)
 
         btnClosePopupWindow.setOnClickListener {
-            popupWindow.dismiss()
+            popupWindow?.dismiss()
         }
 
         checkBoxCompletePin.setOnClickListener{

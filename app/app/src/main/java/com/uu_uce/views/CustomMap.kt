@@ -93,9 +93,12 @@ class CustomMap : ViewTouchParent {
         deviceLocEdgePaint.color = Color.WHITE
     }
 
+    fun initializeCamera(){
+        camera = smap.initialize()
+    }
+
     fun addLayer(lt: LayerType, path: File, scrollLayout: LinearLayout, buttonSize: Int){
         smap.addLayer(lt, path, context)
-        camera = smap.initialize()
 
         val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle)
         btn.setImageResource(com.uu_uce.R.drawable.logotp)
@@ -263,14 +266,22 @@ class CustomMap : ViewTouchParent {
 
     private fun tapPin(tapLocation : p2, activity : Activity){
         val canvasTapLocation : p2 = Pair(tapLocation.first, tapLocation.second)
-        pins.forEach{ p ->
-            if(p == null || !p.inScreen) return@forEach
+        for(p in pins){
+            if(p == null || !p.inScreen) continue
             if(pointInAABoundingBox(p.boundingBox.first, p.boundingBox.second, canvasTapLocation, pinTapBufferSize)){
                 p.openPinPopupWindow(this, activity)
                 Logger.log(LogType.Info, "CustomMap", "${p.getTitle()}: I have been tapped.")
                 return
             }
         }
+    }
+
+    fun showingPopup(): PopupWindow?{
+        for(p in pins){
+            if(p?.popupWindow == null) continue
+            if(p.popupWindow!!.isShowing) return p.popupWindow
+        }
+        return null
     }
 
     fun toggleLayer(l: Int){
