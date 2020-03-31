@@ -2,12 +2,9 @@ package com.uu_uce.views
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.appcompat.widget.AppCompatImageView
-import com.uu_uce.misc.LogType
-import com.uu_uce.misc.Logger
 import kotlin.math.abs
 
 class DragButton: AppCompatImageView {

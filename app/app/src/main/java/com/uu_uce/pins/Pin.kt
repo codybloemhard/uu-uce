@@ -96,11 +96,11 @@ class Pin(
         status = newStatus
     }
 
-    fun getStatus(): Int{
+    private fun getStatus(): Int{
         return status
     }
 
-    fun complete(){
+    private fun complete(){
         if(status < 2)
             viewModel.completePin(id, followIds)
     }

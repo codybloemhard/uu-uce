@@ -2,10 +2,8 @@ package com.uu_uce
 
 import android.app.Activity
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.Button
 import android.widget.MediaController
 import android.widget.TextView
@@ -13,7 +11,6 @@ import android.widget.VideoView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import kotlinx.android.synthetic.main.video_viewer.*
 
 
 class VideoViewer : Activity() {

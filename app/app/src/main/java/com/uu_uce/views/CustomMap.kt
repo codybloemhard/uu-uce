@@ -8,19 +8,19 @@ import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Point
-import android.graphics.drawable.Drawable
 import android.util.AttributeSet
-import android.util.Log
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.PopupWindow
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat.startActivity
-import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import com.uu_uce.AllPins
-import com.uu_uce.database.*
+import com.uu_uce.database.PinConversion
+import com.uu_uce.database.PinData
+import com.uu_uce.database.PinViewModel
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation
 import com.uu_uce.mapOverlay.pointDistance
@@ -30,13 +30,10 @@ import com.uu_uce.misc.Logger
 import com.uu_uce.pins.Pin
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.UTMCoordinate
-import com.uu_uce.services.checkPermissions
 import com.uu_uce.services.degreeToUTM
 import com.uu_uce.shapefiles.*
 import com.uu_uce.ui.*
-import com.uu_uce.ui.Scroller
 import diewald_shapeFile.files.shp.SHP_File
-import kotlinx.android.synthetic.main.activity_geo_map.view.*
 import java.io.File
 import kotlin.system.measureTimeMillis
 
@@ -278,7 +275,7 @@ class CustomMap : ViewTouchParent {
         }
     }
 
-    fun toggleLayer(l: Int){
+    private fun toggleLayer(l: Int){
         smap.toggleLayer(l)
     }
 

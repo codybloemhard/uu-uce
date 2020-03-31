@@ -100,7 +100,7 @@ class AllPins : AppCompatActivity() {
         }
     }
 
-    fun onCreateToolbar(activity : Activity, title: String) {
+    private fun onCreateToolbar(activity : Activity, title: String) {
         activity.findViewById<TextView>(R.id.toolbar_title).text = title
 
         activity.findViewById<ImageButton>(R.id.toolbar_back_button).setOnClickListener {
