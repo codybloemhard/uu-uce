@@ -108,7 +108,7 @@ Will poll the location for you.
  */
 class LocationServices{
     companion object {
-        lateinit var locationManager: LocationManager
+        lateinit var lastKnownLocation: Location
         val permissionsNeeded = listOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
@@ -135,7 +135,7 @@ class LocationServices{
             return LocationPollStartResult.ALREADY_LIVE
         }
 
-        locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val hasGps = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
         val hasNetwork = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
         var networkProvider : String? = null

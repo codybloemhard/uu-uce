@@ -8,17 +8,17 @@ import kotlinx.coroutines.launch
 
 class PinViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository: PinRepository
+    private val pinRepository: PinRepository
 
     val allPinData: LiveData<List<PinData>>
 
     init {
         val pinDao = UceRoomDatabase.getDatabase(application, viewModelScope).pinDao()
-        repository = PinRepository(pinDao)
-        allPinData = repository.allPins
+        pinRepository = PinRepository(pinDao)
+        allPinData = pinRepository.allPins
     }
 
     fun insert(pin: PinData) = viewModelScope.launch {
-        repository.insert(pin)
+        pinRepository.insert(pin)
     }
 }

@@ -10,7 +10,7 @@ import com.uu_uce.database.PinData
 interface FieldbookDao {
 
     @Query("SELECT * from fieldbook")
-    fun getAllFieldbookEntries() : MutableList<FieldbookEntry>
+    fun getAllFieldbookEntries() : LiveData<MutableList<FieldbookEntry>>
 
 
     @Insert

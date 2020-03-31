@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.location.Location
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
@@ -21,12 +22,14 @@ import android.widget.PopupWindow
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.database.UceRoomDatabase
 import com.uu_uce.fieldbook.FieldbookAdapter
 import com.uu_uce.fieldbook.FieldbookEntry
+import com.uu_uce.fieldbook.FieldbookViewModel
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.checkPermissions
 import com.uu_uce.ui.createTopbar
@@ -57,17 +60,19 @@ class FieldBook : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_field_book)
 
+        val recyclerView = findViewById<RecyclerView>(R.id.fieldbook_recyclerview)
+        val parent = findViewById<View>(R.id.fieldbook_layout)
+        val addButton = findViewById<FloatingActionButton>(R.id.fieldbook_fab)
         createTopbar(this, "my fieldbook")
 
-        val fieldbook = getFieldbookData()
-
-        val recyclerView = findViewById<RecyclerView>(R.id.fieldbook_recyclerview)
+        val fieldbookAdapter = FieldbookAdapter(this)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = FieldbookAdapter(this, fieldbook)
+        recyclerView.adapter = fieldbookAdapter
 
-        val parent = findViewById<View>(R.id.fieldbook_layout)
-
-        val addButton = findViewById<FloatingActionButton>(R.id.fieldbook_fab)
+        val fieldbookViewModel = ViewModelProvider(this).get(FieldbookViewModel::class.java)
+        fieldbookViewModel.allFieldbookEntries.observe(this, androidx.lifecycle.Observer {
+            fieldbookAdapter.setFieldbook(it)
+        })
 
         addButton.setOnClickListener{
             openFieldbookAdderPopup(parent)
@@ -84,45 +89,8 @@ class FieldBook : AppCompatActivity() {
         popupWindow.isFocusable = true
         popupWindow.update()
 
-        val location: Pair<Double,Double>?
-        val missingPermissions = checkPermissions(this,permissionsNeeded + LocationServices.permissionsNeeded)
-        if(missingPermissions.count() == 0) {
-            val locationManager = LocationServices.locationManager
-            val provider = LocationManager.GPS_PROVIDER
-            val lastKnownLocation = locationManager.getLastKnownLocation(provider)
-            if (ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return
-            }
-            location = Pair(lastKnownLocation.latitude,lastKnownLocation.longitude)
-
-            /*
-            //TODO: use existing LocationServices
-            //TODO: or copy all cases and exceptions
-            val locationManager: LocationManager = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-            val locationListener: LocationListener? = null
-            locationManager.requestSingleUpdate(
-                LocationManager.GPS_PROVIDER,
-                locationListener,
-                Looper.myLooper()
-            )
-            val locationGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-            val location = Pair(locationGps.latitude, locationGps.longitude)
-             */
-        }
+        checkPermissions(this,permissionsNeeded + LocationServices.permissionsNeeded)
+        val location: Location = LocationServices.lastKnownLocation
 
         text = customView.findViewById(R.id.addText)
 
@@ -137,7 +105,7 @@ class FieldBook : AppCompatActivity() {
             val sdf = DateFormat.getDateTimeInstance()
             val currentDate = sdf.format(Date())
 
-            saveFieldbookEntry(textInput, bitmap, currentDate, location = null)
+            saveFieldbookEntry(textInput, bitmap, currentDate, location)
             popupWindow.dismiss()
         }
     }
@@ -177,8 +145,6 @@ class FieldBook : AppCompatActivity() {
         dialog.show()
     }
 
-
-
     override fun onActivityResult(
         requestCode: Int,
         resultCode: Int,
@@ -217,13 +183,8 @@ class FieldBook : AppCompatActivity() {
         text: String,
         image: Bitmap,
         currentDate: String,
-        location: Pair<Double, Double>?
+        location: Location
     ) {
 
-    }
-
-    fun getFieldbookData(): MutableList<FieldbookEntry> {
-        val fieldbookDao = UceRoomDatabase.getDatabase(this, MainScope()).fieldbookDao()
-        return fieldbookDao.getAllFieldbookEntries()
     }
 }

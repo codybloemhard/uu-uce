@@ -1,16 +1,18 @@
 package com.uu_uce.fieldbook
 
 import android.app.Activity
-import android.net.Uri
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
+import com.uu_uce.database.PinData
 import com.uu_uce.pins.*
 
-class FieldbookAdapter(val activity: Activity, private val fieldbook: List<FieldbookEntry>) : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>() {
+class FieldbookAdapter(val activity: Activity) : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>() {
+
+    private lateinit var fieldbook: MutableList<FieldbookEntry>
 
     class FieldbookViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val parentView = itemView
@@ -61,6 +63,11 @@ class FieldbookAdapter(val activity: Activity, private val fieldbook: List<Field
             //TODO: this isn't the correct parentView
             openPinPopupWindow(entry.location,content,holder.parentView,activity)
         }
+    }
+
+    fun setFieldbook(fieldbook: MutableList<FieldbookEntry>) {
+        this.fieldbook = fieldbook
+        notifyDataSetChanged()
     }
 }
 

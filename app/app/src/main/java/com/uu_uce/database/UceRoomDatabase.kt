@@ -81,7 +81,6 @@ abstract class UceRoomDatabase : RoomDatabase() {
                     "uce_database"
                 )
                     .addCallback(UceDatabaseCallback(scope))
-                    .allowMainThreadQueries()
                     .build()
                 INSTANCE = instance
                 instance
