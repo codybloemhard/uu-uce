@@ -53,7 +53,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 | 0.x.x     | ...       | None              | Only small issues         |
 | 0.0.1     | 8-2-2020  | None              | None                      |
 ### Test Coverage Matrix
-| Version   | Pixel 2 Emulator API 10 | Nokia 2 API 24  | One Plus 5 API 28 | Moto g7+ API 29 |
+| Version   | Pixel 2 Emulator API 29 | Nokia 2 API 24  | One Plus 5 API 28 | Moto g7+ API 29 |
 |-----------|-------------------------|-----------------|-------------------|-----------------|
 | 0.3.1     | 100% tested             | 100% tested     | 100% tested       | 0% tested       |
 | 0.x.x     | 100% tested             | 100% tested     | Partial: GPS, Map | 0% tested       |
@@ -67,7 +67,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Know Issues Matrix
 | Version       | ID    | What              |
 |---------------|-------|-------------------|
-| ???           | IK5   | App can not read file even though permission is given error: java.io.FileNotFoundException: /sdcard/Download/testmap.obj: open failed: EACCES (Permission denied)
+| 0.3.4         | IK5   | App can not read file even though permission is given error: java.io.FileNotFoundException: /sdcard/Download/testmap.obj: open failed: EACCES (Permission denied)
 | 0.3.3         | IK4   | Empty screen comes up when you return from pin screen
 | 0.3.2         | IK3   | App crashes when opening pin from menu
 | 0.3.1         | IK2   | Text in pins partially overlaps
