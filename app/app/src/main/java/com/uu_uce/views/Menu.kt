@@ -1,15 +1,11 @@
 package com.uu_uce.views
 
-import android.animation.TimeInterpolator
 import android.content.Context
-import android.widget.RelativeLayout
-import android.graphics.Canvas
-import android.graphics.Color
 import android.util.AttributeSet
-import android.view.MotionEvent
-import android.view.View
-import android.view.View.OnLayoutChangeListener
+import android.widget.RelativeLayout
 import androidx.core.view.updateLayoutParams
+import com.uu_uce.R
+import kotlinx.android.synthetic.main.activity_geo_map.view.*
 
 class Menu : RelativeLayout {
     constructor(context: Context): super(context)
@@ -19,8 +15,8 @@ class Menu : RelativeLayout {
     var dragStatus = DragStatus.Down
 
     val buttonPercent = 0.1f
-    var downY = 0f
-    var barY = 0f
+    private var downY = 0f
+    private var barY = 0f
     private var upY = 0f
     private var screenHeight = 0
     private var minScroll = 0f
@@ -58,19 +54,22 @@ class Menu : RelativeLayout {
         y = maxOf(y + dy, minScroll)
     }
 
-    fun up(){
+    private fun up(){
         dragStatus = DragStatus.Up
         animate().y(upY)
+        dragButton.setImageResource(R.drawable.ic_menu_drag_down)
     }
 
-    fun bar(){
+    private fun bar(){
         dragStatus = DragStatus.Bar
         animate().y(barY)
+        dragButton.setImageResource(R.drawable.ic_menu_drag_up)
     }
 
     fun down(){
         dragStatus = DragStatus.Down
         animate().y(downY)
+        dragButton.setImageResource(R.drawable.ic_menu_drag_up)
     }
 
     fun dragButtonTap(){
@@ -80,7 +79,7 @@ class Menu : RelativeLayout {
                 bar()
             }
             DragStatus.Bar ->{
-                down()
+                up()
             }
             DragStatus.Up ->{
                 down()

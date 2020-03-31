@@ -3,7 +3,6 @@ package com.uu_uce
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Point
-import android.graphics.Rect
 import android.os.Bundle
 import android.view.Display
 import android.view.MotionEvent
@@ -12,7 +11,6 @@ import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.uu_uce.database.PinViewModel
-import com.uu_uce.mapOverlay.aaBoundingBoxContains
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.services.LocationServices.Companion.permissionsNeeded
@@ -58,6 +56,7 @@ class GeoMap : AppCompatActivity() {
 
         val dir = File(filesDir, "mydir")
         customMap.addLayer(LayerType.Water, dir, toggle_layer_layout, size)
+        customMap.initializeCamera()
 
         val missingPermissions = checkPermissions(this,customMap.permissionsNeeded + permissionsNeeded)
         if(missingPermissions.count() == 0){
@@ -90,7 +89,8 @@ class GeoMap : AppCompatActivity() {
             menu.down()
             return
         }
-        super.onBackPressed()
+
+        customMap.activePopup?.dismiss()
     }
 
     override fun onResume() {

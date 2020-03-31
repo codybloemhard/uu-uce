@@ -1,7 +1,6 @@
 package com.uu_uce
 
 import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
@@ -10,6 +9,8 @@ import android.widget.MediaController
 import android.widget.TextView
 import android.widget.VideoView
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.uu_uce.misc.LogType
+import com.uu_uce.misc.Logger
 
 
 class VideoViewer : Activity() {
@@ -29,12 +30,22 @@ class VideoViewer : Activity() {
         videoPlayer = findViewById(R.id.video_player)
         videoPlayer.setVideoURI(intent.getParcelableExtra("uri"))
 
+        val act = this
+
+        val titleBar = findViewById<ConstraintLayout>(R.id.video_title)
+
         mediaController = object : MediaController(this) {
+            override fun show() {
+                super.show(0)
+                titleBar.visibility = View.VISIBLE
+            }
             override fun show(timeout: Int) {
                 super.show(0)
+                titleBar.visibility = View.VISIBLE
             }
-            override fun hide(){
-                super.show(0)
+            override fun hide() {
+                super.hide()
+                titleBar.visibility = View.GONE
             }
         }
 
@@ -47,14 +58,20 @@ class VideoViewer : Activity() {
                 videoPlayer.seekTo(videoPos)
             }
             videoPlayer.start()
+            mediaController.show(0)
         }
 
         val closeVideoButton = findViewById<Button>(R.id.close_video_player)
 
         closeVideoButton.setOnClickListener {
-            videoPlayer.stopPlayback()
             this.finish()
         }
+    }
+
+    override fun finish() {
+        mediaController.hide()
+        videoPlayer.stopPlayback()
+        super.finish()
     }
 
     override fun onPause(){
@@ -67,19 +84,16 @@ class VideoViewer : Activity() {
         super.onSaveInstanceState(outState)
     }
 
-    private fun setUIVisibility(visible : Boolean){
-        val titleBar = findViewById<ConstraintLayout>(R.id.video_title)
-        if(visible == uiVisible) return
+    private fun setUIVisibility(visible : Boolean): Boolean{ //returns whether visibility was changed
+        if(visible == uiVisible) return false
         if(visible){
-            titleBar.visibility = View.VISIBLE
             mediaController.show()
-            mediaController.visibility = View.VISIBLE
         }
         else{
-            titleBar.visibility = View.GONE
-            mediaController.visibility = View.INVISIBLE
+            mediaController.hide()
         }
         uiVisible = !uiVisible
+        return true
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -87,7 +101,12 @@ class VideoViewer : Activity() {
             setUIVisibility(!uiVisible)
             return true
         }
-        return  false
+        return false
+    }
+
+    override fun onBackPressed() {
+        Logger.log(LogType.Continuous, "VideoViewer", "test3")
+        finish()
     }
 
     // VLC player code
