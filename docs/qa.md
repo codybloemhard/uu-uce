@@ -62,7 +62,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 | Version   | Pixel 2 Emulator API 29   | Nokia 2 API 24            | One Plus 5 API 28 | Moto g5s+         | Moto g7+          |
 |-----------|---------------------------|---------------------------|-------------------|-------------------|-------------------|
 | 0.3.1     | IK2                       | None                      | None              | IK1, IK2          | IK5               |
-| 0.x.x     | None                      | Popup UI scaling (IC3)    | Partialy Tested   | Partially tested  | Partially tested  |
+| 0.x.x     | None                      | Popup UI scaling (IC3)    | Partialy Tested   | Partially tested  | Not tested        |
 | 0.0.1     | None                      | Not Tested                | Not Tested        | Not tested        | Not tested        |
 ### Know Issues Matrix
 | Version       | ID    | What              |
