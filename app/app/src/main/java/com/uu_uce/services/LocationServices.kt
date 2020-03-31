@@ -160,6 +160,7 @@ class LocationServices{
         val locationListener = object : LocationListener {
             override fun onLocationChanged(location: Location?) {
                 if (location != null) {
+                    lastKnownLocation = location
                     action(Pair(location.latitude, location.longitude))
                     Logger.log( LogType.Event,
                         "LocationServices",

@@ -41,7 +41,7 @@ class PinContent(contentString: String) {
         val dir             = "file:///data/data/com.uu_uce/files/pin_content/"
 
         var blockTag        = BlockTag.UNDEFINED
-        var textString   = ""
+        var textString      = ""
         var fileName        = ""
         var title           = ""
         var thumbnailURI    = Uri.EMPTY

@@ -7,12 +7,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
-import com.uu_uce.database.PinData
 import com.uu_uce.pins.*
 
 class FieldbookAdapter(val activity: Activity) : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>() {
 
-    private lateinit var fieldbook: MutableList<FieldbookEntry>
+    private var fieldbook: MutableList<FieldbookEntry> = mutableListOf()
 
     class FieldbookViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val parentView = itemView

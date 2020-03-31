@@ -4,10 +4,8 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.location.Location
-import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -21,26 +19,33 @@ import android.widget.ImageView
 import android.widget.PopupWindow
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.uu_uce.database.UceRoomDatabase
 import com.uu_uce.fieldbook.FieldbookAdapter
 import com.uu_uce.fieldbook.FieldbookEntry
 import com.uu_uce.fieldbook.FieldbookViewModel
+import com.uu_uce.pins.BlockTag
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.checkPermissions
+import com.uu_uce.services.getPermissions
 import com.uu_uce.ui.createTopbar
-import kotlinx.coroutines.MainScope
 import java.io.File
+import java.io.FileOutputStream
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.stream.Stream
 
 
 class FieldBook : AppCompatActivity() {
+
+    enum class DateTimeFormat{
+        FILE_PATH,
+        FIELDBOOK_ENTRY
+    }
 
     var permissionsNeeded = listOf(
         Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -50,11 +55,13 @@ class FieldBook : AppCompatActivity() {
 
     lateinit var image: ImageView
     lateinit var text: EditText
+
     lateinit var imageUri: Uri
-    lateinit var textInput: String
     lateinit var bitmap: Bitmap
 
     lateinit var currentPhotoPath: String
+
+    lateinit var fieldbookViewModel: FieldbookViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,7 +76,7 @@ class FieldBook : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = fieldbookAdapter
 
-        val fieldbookViewModel = ViewModelProvider(this).get(FieldbookViewModel::class.java)
+        fieldbookViewModel = ViewModelProvider(this).get(FieldbookViewModel::class.java)
         fieldbookViewModel.allFieldbookEntries.observe(this, androidx.lifecycle.Observer {
             fieldbookAdapter.setFieldbook(it)
         })
@@ -89,8 +96,10 @@ class FieldBook : AppCompatActivity() {
         popupWindow.isFocusable = true
         popupWindow.update()
 
-        checkPermissions(this,permissionsNeeded + LocationServices.permissionsNeeded)
-        val location: Location = LocationServices.lastKnownLocation
+        checkPermissions(this,permissionsNeeded + LocationServices.permissionsNeeded).let {
+            if (it.count()!=0)
+                getPermissions(this, this,it)
+        }
 
         text = customView.findViewById(R.id.addText)
 
@@ -103,9 +112,12 @@ class FieldBook : AppCompatActivity() {
         val closePopup = customView.findViewById<Button>(R.id.close_fieldbook_popup)
         closePopup.setOnClickListener{
             val sdf = DateFormat.getDateTimeInstance()
-            val currentDate = sdf.format(Date())
 
-            saveFieldbookEntry(textInput, bitmap, currentDate, location)
+            saveFieldbookEntry(
+                text.text.toString(),
+                bitmap,
+                getCurrentDateTime(DateTimeFormat.FIELDBOOK_ENTRY),
+                LocationServices.lastKnownLocation)
             popupWindow.dismiss()
         }
     }
@@ -167,7 +179,7 @@ class FieldBook : AppCompatActivity() {
 
     private fun createImageFile(): File {
         // Create an image file name
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale("nl_NL")).format(Date())
+        val timeStamp: String = getCurrentDateTime(DateTimeFormat.FILE_PATH)
         val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(
             "IMG_${timeStamp}_", /* prefix */
@@ -179,12 +191,71 @@ class FieldBook : AppCompatActivity() {
         }
     }
 
+    private fun getCurrentDateTime(dtf: DateTimeFormat): String {
+        val pattern: String = when(dtf) {
+            DateTimeFormat.FILE_PATH -> "yyyMMdd_HHmmss"
+            DateTimeFormat.FIELDBOOK_ENTRY -> "dd-MM-yyyy HH:mm"
+        }
+
+        return SimpleDateFormat(
+            pattern,
+            Locale("nl_NL")).format(Date()
+        )
+    }
+
     private fun saveFieldbookEntry(
         text: String,
         image: Bitmap,
         currentDate: String,
         location: Location
     ) {
+        val content = listOf(
+            Pair(
+                BlockTag.TEXT,
+                text
+            ),
+            Pair(
+                BlockTag.IMAGE,
+                saveBitmapToLocation(image)
+            )
+        )
 
+        val entry = FieldbookEntry(
+            location.toString(),
+            currentDate,
+            buildJSONContent(content)
+        ).also{
+            print(it)
+            //fieldbookViewModel.insert(it)
+        }
+    }
+
+    private fun saveBitmapToLocation(image: Bitmap): String {
+        val root = "data/data/com.uu_uce/files/fieldbook"
+        val myDir: File = File("$root/Pictures").also{
+            it.mkdirs()
+        }
+        val fileName = "IMG_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}.png"
+        val file = File(myDir,fileName)
+        FileOutputStream(file).also{
+            bitmap.compress(Bitmap.CompressFormat.PNG,100,it)
+        }.apply{
+            flush()
+            close()
+        }
+        return file.toUri().toString()
+    }
+
+    private fun buildJSONContent(contentList: List<Pair<BlockTag,String>>): String {
+        return  "[" +
+                    "{" +
+                        "\"tag\":\"${contentList.first().first}\"," +
+                        "\"text\":\"${contentList.first().second}\"" +
+                    "}," +
+                    "{" +
+                        "\"tag\":\"${contentList.last().first}\"," +
+                        "\"file_name\":\"${contentList.last().second}\"," +
+                    "}" +
+                "]"
     }
 }
