@@ -220,7 +220,7 @@ class FieldBook : AppCompatActivity() {
             )
         )
 
-        val entry = FieldbookEntry(
+        val entry = FieldbookEntry( //TODO: use UTM location
             location.toString(),
             currentDate,
             buildJSONContent(content)
