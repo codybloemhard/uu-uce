@@ -15,7 +15,6 @@ import com.uu_uce.mapOverlay.screenToCoord
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.services.UTMCoordinate
-import com.uu_uce.services.updateFiles
 import com.uu_uce.shapefiles.p2
 import com.uu_uce.shapefiles.p2Zero
 import kotlin.math.roundToInt

@@ -17,7 +17,6 @@ import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.VideoViewer
-import com.uu_uce.services.updateFiles
 import java.io.StringReader
 
 class PinContent(contentString: String) {
@@ -161,11 +160,9 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
     private fun openVideoView(videoURI: Uri, videoTitle : String, activity : Activity){
         val intent = Intent(activity, VideoViewer::class.java)
 
-        updateFiles(listOf(videoURI.toString()), activity){
-            intent.putExtra("uri", videoURI)
-            intent.putExtra("title", videoTitle)
-            activity.startActivity(intent)
-        }
+        intent.putExtra("uri", videoURI)
+        intent.putExtra("title", videoTitle)
+        activity.startActivity(intent)
     }
 }
 

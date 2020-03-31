@@ -1,23 +1,17 @@
 package com.uu_uce.views
 
-import android.Manifest
 import android.R
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Point
-import android.graphics.drawable.Drawable
 import android.util.AttributeSet
-import android.util.Log
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat.startActivity
-import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import com.uu_uce.AllPins
@@ -34,7 +28,6 @@ import com.uu_uce.shapefiles.*
 import com.uu_uce.ui.*
 import com.uu_uce.ui.Scroller
 import diewald_shapeFile.files.shp.SHP_File
-import kotlinx.android.synthetic.main.activity_geo_map.view.*
 import java.io.File
 import kotlin.system.measureTimeMillis
 
@@ -60,9 +53,8 @@ class CustomMap : ViewTouchParent {
     private val deviceLocPaint      : Paint = Paint()
     private val deviceLocEdgePaint  : Paint = Paint()
 
-    private var arraysReady = false
-    private lateinit var pins           : Array<Pin?>
-    private lateinit var pinStatuses    : Array<Int?>
+    private var pins                    : MutableMap<Int, Pin> = mutableMapOf()
+    private var pinStatuses             : MutableMap<Int, Int> = mutableMapOf()
     private lateinit var viewModel      : PinViewModel
     private lateinit var lfOwner        : LifecycleOwner
 
@@ -139,10 +131,8 @@ class CustomMap : ViewTouchParent {
                 lastDrawnLoc = screenLoc
             }
 
-            if(!arraysReady) return
-            pins.forEach{ pin ->
-                if(pin == null) return@forEach
-                pin.draw(viewport, this, canvas)
+            pins.forEach{ entry ->
+                entry.value.draw(viewport, this, canvas)
             }
         }
         Logger.log(LogType.Continuous, "CustomMap", "Draw MS: $timeDraw")
@@ -167,22 +157,12 @@ class CustomMap : ViewTouchParent {
         Logger.log(LogType.Event,"CustomMap", "${loc.east}, ${loc.north}")
     }
 
-    fun initPinArrays(){
-        // TODO: Make sure all pins are added to this database before running this
-        viewModel.createArrays{ pinCount ->
-            pins = Array(3){null}
-            pinStatuses = Array(3){null}
-            arraysReady = true
-            updatePins()
-        }
-    }
-
-    fun updatePins(){
+    fun setPins(){
         viewModel.allPinData.observe(lfOwner, Observer { pins ->
             // Update the cached copy of the words in the adapter.
             viewModel.allPinData
-            pins?.let {
-                updatePinStatuses(it)
+            pins?.let { newData ->
+                updatePinStatuses(newData)
             }
         })
     }
@@ -263,11 +243,12 @@ class CustomMap : ViewTouchParent {
 
     private fun tapPin(tapLocation : p2, activity : Activity){
         val canvasTapLocation : p2 = Pair(tapLocation.first, tapLocation.second)
-        pins.forEach{ p ->
-            if(p == null || !p.inScreen) return@forEach
-            if(pointInAABoundingBox(p.boundingBox.first, p.boundingBox.second, canvasTapLocation, pinTapBufferSize)){
-                p.openPinPopupWindow(this, activity)
-                Logger.log(LogType.Info, "CustomMap", "${p.getTitle()}: I have been tapped.")
+        pins.forEach{ entry ->
+            val pin = entry.value
+            if(!pin.inScreen) return@forEach
+            if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, canvasTapLocation, pinTapBufferSize)){
+                pin.openPinPopupWindow(this, activity)
+                Logger.log(LogType.Info, "CustomMap", "${pin.getTitle()}: I have been tapped.")
                 return
             }
         }

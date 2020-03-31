@@ -46,7 +46,7 @@ class GeoMap : AppCompatActivity() {
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         this.customMap.setViewModel(pinViewModel)
         this.customMap.setLifeCycleOwner(this)
-        this.customMap.initPinArrays()
+        this.customMap.setPins()
 
         resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
         if (resourceId > 0) {
@@ -102,7 +102,7 @@ class GeoMap : AppCompatActivity() {
     override fun onResume() {
         if(checkPermissions(this, LocationServices.permissionsNeeded + permissionsNeeded).count() == 0){
             super.onResume()
-            customMap.updatePins()
+            customMap.setPins()
             customMap.redrawMap()
         }
 
