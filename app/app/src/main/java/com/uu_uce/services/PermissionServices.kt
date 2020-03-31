@@ -7,6 +7,10 @@ import android.os.Build
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat.checkSelfPermission
 
+// Request codes
+const val EXTERNAL_FILES_REQUEST = 1
+const val LOCATION_REQUEST = 2
+
 /*
 Takes: a context and activity and a list of strings describing permissions.
 Usually, context = activity = this.

@@ -1,19 +1,14 @@
 package com.uu_uce.pins
 
 import android.app.Activity
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.Matrix
 import android.net.Uri
-import android.os.Environment
 import android.util.JsonReader
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.view.Gravity
+import android.view.ViewGroup
+import android.widget.*
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.VideoViewer
@@ -25,6 +20,7 @@ class PinContent(contentString: String) {
     init{
         contentBlocks = getContent(contentString)
     }
+
 
     private fun getContent(contentString: String) : List<ContentBlockInterface>{
             val reader = JsonReader(StringReader(contentString))
@@ -43,6 +39,7 @@ class PinContent(contentString: String) {
         return contentBlocks
     }
 
+    // Generate ContentBlock from JSON string
     private fun readBlock(reader: JsonReader): ContentBlockInterface {
         val dir             = "file:///data/data/com.uu_uce/files/pin_content/"
 
@@ -65,7 +62,7 @@ class PinContent(contentString: String) {
                 "file_name" -> {
                     fileName = when(blockTag) {
                         BlockTag.UNDEFINED  -> error("Undefined block tag")
-                        BlockTag.TEXT       -> error("Undefined function") //TODO: Add reading text from file
+                        BlockTag.TEXT       -> error("Undefined function") //TODO: Add reading text from file?
                         BlockTag.IMAGE      -> dir + "images/" + reader.nextString()
                         BlockTag.VIDEO      -> dir + "videos/" + reader.nextString()
                     }
@@ -125,31 +122,33 @@ class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
 class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : Uri, private val title : String) : ContentBlockInterface{
     override fun generateContent(layout : LinearLayout, activity : Activity){
 
-        val relativeLayout = RelativeLayout(activity) //TODO: maybe make this an constraintlayout?
+        val frameLayout = FrameLayout(activity)
 
         // Create thumbnail image
         if(thumbnailURI == Uri.EMPTY){
-            relativeLayout.setBackgroundColor(Color.BLACK)
+            frameLayout.setBackgroundColor(Color.BLACK)
         }
         else{
             val thumbnail = ImageView(activity)
             thumbnail.setImageURI(thumbnailURI)
             thumbnail.scaleType = ImageView.ScaleType.CENTER
-            relativeLayout.addView(thumbnail)
+            frameLayout.addView(thumbnail)
         }
 
-        //relativeLayout.setBackgroundColor(Color.GREEN) //TODO: ADDED FOR DEBUGGING PURPOSES
-        relativeLayout.layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 600) //TODO: don't do magical numbers
+        frameLayout.layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
 
         // Create play button
         val playButton = ImageView(activity)
         playButton.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.ic_sprite_play, null) ?: error ("Image not found"))
-        playButton.scaleType = ImageView.ScaleType.FIT_CENTER //TODO: find correct scaletype
+        playButton.scaleType = ImageView.ScaleType.CENTER_INSIDE
+        val buttonLayout = FrameLayout.LayoutParams(500, 500)
+        buttonLayout.gravity = Gravity.CENTER
+        playButton.layoutParams = buttonLayout
         playButton.setOnClickListener{openVideoView(videoURI, title, activity)}
 
         // Add thumbnail and button
-        relativeLayout.addView(playButton)
-        layout.addView(relativeLayout)
+        frameLayout.addView(playButton)
+        layout.addView(frameLayout)
     }
 
     override fun getFilePath() : List<String>{

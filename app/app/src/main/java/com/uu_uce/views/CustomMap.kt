@@ -37,29 +37,30 @@ class CustomMap : ViewTouchParent {
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private var smap : ShapeMap
-    private var first = true
+    private var firstDraw = true
 
-    private var loc             : UTMCoordinate = UTMCoordinate(31, 'N', 0.0, 0.0)
-    private var lastDrawnLoc    : Pair<Float, Float> = Pair(0f, 0f)
+    // Location
+    private val locationServices                            = LocationServices()
+    private val locationDeadZone    : Float                 = 5f // How much does the location have to change on the screen to warrant a redraw
+    private val locSize             : Int                   = 20
+    private var loc                 : UTMCoordinate         = UTMCoordinate(31, 'N', 0.0, 0.0)
+    private var lastDrawnLoc        : Pair<Float, Float>    = Pair(0f, 0f)
+    var locationAvailable           : Boolean               = false
 
-    // How much does the location have to change on the screen to warrant a redraw
-    private val locationAccuracy : Float = 5f
-    var drawLocation : Boolean = false
-
-    private val locationServices = LocationServices()
-
-    private val pinTapBufferSize : Int = 10
-
+    // Paints
     private val deviceLocPaint      : Paint = Paint()
     private val deviceLocEdgePaint  : Paint = Paint()
 
-    private var pins                    : MutableMap<Int, Pin> = mutableMapOf()
-    private var pinStatuses             : MutableMap<Int, Int> = mutableMapOf()
+    // Pins
+    private val pinTapBufferSize        : Int                   = 10
+    private var pins                    : MutableMap<Int, Pin>  = mutableMapOf()
+    private var pinStatuses             : MutableMap<Int, Int>  = mutableMapOf()
     private lateinit var viewModel      : PinViewModel
     private lateinit var lfOwner        : LifecycleOwner
 
+    // Map
     private var nrLayers = 0
-    private lateinit var camera: Camera
+    private lateinit var camera : Camera
 
     init{
         SHP_File.LOG_INFO           = false
@@ -67,8 +68,9 @@ class CustomMap : ViewTouchParent {
         SHP_File.LOG_ONLOAD_CONTENT = false
 
         // Logger mask settings
-        //Logger.setTagEnabled("CustomMap", false)
+        Logger.setTagEnabled("CustomMap", false)
         Logger.setTagEnabled("zoom", false)
+
         //setup touch events
         addChild(Zoomer(context, ::zoomMap))
         addChild(Scroller(context, ::moveMap))
@@ -78,6 +80,7 @@ class CustomMap : ViewTouchParent {
         // Parse shapes
         smap = ShapeMap(5, this)
 
+        // Init paints
         deviceLocPaint.color = Color.BLUE
         deviceLocEdgePaint.color = Color.WHITE
     }
@@ -100,12 +103,14 @@ class CustomMap : ViewTouchParent {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+
         val waspect = width.toDouble() / height
-        if(first){
+
+        if(firstDraw){
             val z = 1.0 / (waspect)
             camera.maxZoom = maxOf(1.0,z)
             camera.setZoom(z)
-            first = false
+            firstDraw = false
         }
         val res = camera.update()
         if(res == UpdateResult.NOOP){
@@ -113,26 +118,37 @@ class CustomMap : ViewTouchParent {
         }
 
         val viewport = camera.getViewport(waspect)
+
+        // Measure performance
         val timeDraw = measureTimeMillis {
+            // Set canvas background color
             canvas.drawColor(Color.rgb(234, 243, 245))
+
+            // Draw map
             smap.draw(canvas, width, height)
 
             Logger.log(LogType.Event, "DrawOverlay", "east: ${loc.east}, north: ${loc.north}")
 
-            val screenLoc = coordToScreen(loc, viewport, width, height)
-            if(drawLocation){
+            // Draw device location
+            val deviceScreenLoc = coordToScreen(loc, viewport, width, height)
+            val locInScreen =
+                deviceScreenLoc.first > 0 && deviceScreenLoc.first < width &&
+                deviceScreenLoc.second > 0 && deviceScreenLoc.second < height
+            if(locationAvailable && locInScreen){
                 drawDeviceLocation(
-                    screenLoc,
+                    deviceScreenLoc,
                     canvas,
                     deviceLocPaint,
                     deviceLocEdgePaint,
-                    15F,
-                    4F)
-                lastDrawnLoc = screenLoc
+                    locSize * 0.57f,
+                    locSize * 0.25f)
+                lastDrawnLoc = deviceScreenLoc
             }
 
+            // Draw pins
             pins.forEach{ entry ->
-                entry.value.draw(viewport, this, canvas)
+
+                entry.value.draw(viewport, width, height,this, canvas)
             }
         }
         Logger.log(LogType.Continuous, "CustomMap", "Draw MS: $timeDraw")
@@ -141,6 +157,7 @@ class CustomMap : ViewTouchParent {
     }
 
     private fun updateLoc(newLoc : p2) {
+        // Update called by locationManager
         // TODO: move location drawing to an overlaying transparent canvas to avoid unnecessary map drawing
         loc = degreeToUTM(newLoc)
 
@@ -148,8 +165,10 @@ class CustomMap : ViewTouchParent {
         val viewport = camera.getViewport(waspect)
         val screenLoc = coordToScreen(loc, viewport, width, height)
 
+        // Check if redraw is necessary
         val distance = pointDistance(screenLoc, lastDrawnLoc)
-        if(distance > locationAccuracy){
+
+        if(distance > locationDeadZone){
             camera.needsInvalidate()
             Logger.log(LogType.Event,"CustomMap", "Redrawing, distance: $distance")
         }
@@ -158,6 +177,7 @@ class CustomMap : ViewTouchParent {
     }
 
     fun setPins(){
+        // Set observer on pin database
         viewModel.allPinData.observe(lfOwner, Observer { pins ->
             // Update the cached copy of the words in the adapter.
             viewModel.allPinData
@@ -168,6 +188,7 @@ class CustomMap : ViewTouchParent {
     }
 
     private fun updatePinStatuses(newPinData: List<PinData>) {
+        // Update pins from new data
         for(pin in newPinData) {
             if(pinStatuses[pin.pinId] == pin.status){
                 // Pin is present and unchanged
@@ -186,7 +207,7 @@ class CustomMap : ViewTouchParent {
                     }
                 }
                 pinStatuses[pin.pinId] == 0 -> {
-                    // Pin was locked (status = 0)
+                    // Pin was present and locked (status = 0)
                     val changedPin = pins[pin.pinId]
 
                     changedPin?.tryUnlock {
@@ -197,7 +218,7 @@ class CustomMap : ViewTouchParent {
                     }
                 }
                 else -> {
-                    // Pin was unlocked (status = 1)
+                    // Pin was present and unlocked (status = 1)
                     val changedPin = pins[pin.pinId]
 
                     if (changedPin != null) {
@@ -242,11 +263,10 @@ class CustomMap : ViewTouchParent {
     }
 
     private fun tapPin(tapLocation : p2, activity : Activity){
-        val canvasTapLocation : p2 = Pair(tapLocation.first, tapLocation.second)
         pins.forEach{ entry ->
             val pin = entry.value
             if(!pin.inScreen) return@forEach
-            if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, canvasTapLocation, pinTapBufferSize)){
+            if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, pinTapBufferSize)){
                 pin.openPinPopupWindow(this, activity)
                 Logger.log(LogType.Info, "CustomMap", "${pin.getTitle()}: I have been tapped.")
                 return
@@ -266,22 +286,23 @@ class CustomMap : ViewTouchParent {
         lfOwner = lifecycleOwner
     }
 
-    fun allPins(){
+    fun startAllPins(){
         val i = Intent(context, AllPins::class.java)
         startActivity(context, i, null)
     }
 
     fun startLocServices(){
-        locationServices.startPollThread(context, 5000, 0F, ::updateLoc)
+        locationServices.startPollThread(context, 5000, locationDeadZone, ::updateLoc)
     }
 
     fun tryStartLocServices(activity: Activity){
         val missingPermissions = checkPermissions(activity, LocationServices.permissionsNeeded)
         if(missingPermissions.count() > 0){
-            getPermissions(activity, missingPermissions, 2)
+            getPermissions(activity, missingPermissions, LOCATION_REQUEST)
         }
         else{
             startLocServices()
+            locationAvailable = true
         }
     }
 

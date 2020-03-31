@@ -9,14 +9,13 @@ import android.view.Display
 import android.view.MotionEvent
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.uu_uce.database.PinViewModel
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.services.LocationServices
-import com.uu_uce.services.checkPermissions
-import com.uu_uce.services.getPermissions
+import com.uu_uce.services.*
 import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.views.DragStatus
 import kotlinx.android.synthetic.main.activity_geo_map.*
@@ -32,17 +31,20 @@ class GeoMap : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        start()
+        /* This may be needed if the maps are read out of external memory
         if(checkPermissions(this, permissionsNeeded).count() > 0){
-            getPermissions(this, permissionsNeeded, 1)
+            getPermissions(this, permissionsNeeded, EXTERNAL_FILES_REQUEST)
         }
         else{
             start()
-        }
+        }*/
     }
 
     private fun start(){
         setContentView(R.layout.activity_geo_map)
 
+        // Start database and get pins from database
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         this.customMap.setViewModel(pinViewModel)
         this.customMap.setLifeCycleOwner(this)
@@ -57,37 +59,48 @@ class GeoMap : AppCompatActivity() {
         val longest = maxOf(screenDim.x, screenDim.y)
         val size = (longest*menu.buttonPercent).toInt()
 
+        // Initialize menu
         val btn = ImageButton(this, null, android.R.attr.buttonBarButtonStyle)
         btn.setImageResource(R.drawable.logotp)
         btn.setBackgroundColor(Color.BLUE)
-        btn.setOnClickListener{customMap.allPins()}
+        btn.setOnClickListener{customMap.startAllPins()}
         btn.layoutParams = ViewGroup.LayoutParams(size, size)
         lower_menu_layout.addView(btn)
 
+        dragButton.clickAction      = {menu.dragButtonTap()}
+        dragButton.dragAction       = {dx, dy -> menu.drag(dx,dy) }
+        dragButton.dragEndAction    = {dx, dy -> menu.snap(dx, dy)}
+
+        menu.post {
+            initMenu()
+        }
+
+        // Read map
         val dir = File(filesDir, "mydir")
         customMap.addLayer(LayerType.Water, dir, toggle_layer_layout, size)
 
         customMap.tryStartLocServices(this)
 
-
-        button.setOnClickListener{customMap.zoomToDevice()}
-        dragButton.clickAction = {menu.dragButtonTap()}
-        dragButton.dragAction = {dx, dy -> menu.drag(dx,dy) }
-        dragButton.dragEndAction = {dx, dy -> menu.snap(dx, dy)}
-
-        menu.post {
-            initMenu()
+        // Set center on location button functionality
+        center_button.setOnClickListener{
+            if(customMap.locationAvailable){
+                customMap.zoomToDevice()
+            }
+            else{
+                Toast.makeText(this, "Location not avaiable", Toast.LENGTH_LONG).show()
+                getPermissions(this, LocationServices.permissionsNeeded, LOCATION_REQUEST)
+            }
         }
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        // Move the menu down when the map is tapped
         if(menu.dragStatus != DragStatus.Down &&
             ev.action == MotionEvent.ACTION_DOWN &&
             !(ev.rawX > menu.x && ev.rawX < menu.x + menu.width && ev.rawY > menu.y && ev.rawY < menu.y + menu.height)){
             menu.down()
             return true
         }
-
         return super.dispatchTouchEvent(ev)
     }
 
@@ -120,25 +133,25 @@ class GeoMap : AppCompatActivity() {
         grantResults: IntArray
     ) {
         when (requestCode) {
-            1 -> {
+            EXTERNAL_FILES_REQUEST -> {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     Logger.log(LogType.Info,"GeoMap", "Permissions granted")
                     start()
                 }
                 else{
                     Logger.log(LogType.Info,"GeoMap", "Permissions were not granted, asking again")
-                    getPermissions(this, permissionsNeeded, 1)
+                    getPermissions(this, permissionsNeeded, EXTERNAL_FILES_REQUEST)
                 }
             }
-            2 -> {
+            LOCATION_REQUEST -> {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                    Logger.log(LogType.Info,"CustomMap", "Permissions granted")
-                    customMap.drawLocation = true
+                    Logger.log(LogType.Info,"GeoMap", "Permissions granted")
+                    customMap.locationAvailable = true
                     customMap.startLocServices()
                 }
                 else{
-                    Logger.log(LogType.Info,"CustomMap", "Permissions were not granted")
-                    customMap.drawLocation = false
+                    Logger.log(LogType.Info,"GeoMap", "Permissions were not granted")
+                    customMap.locationAvailable = false
                 }
             }
         }

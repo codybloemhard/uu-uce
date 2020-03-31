@@ -14,10 +14,17 @@ import java.io.File
 
 val permissionsNeeded = listOf(Manifest.permission.INTERNET, Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
+/*
+Gets missing files by calling missingFiles and gets them by calling getFiles
+requiredPaths: A list of file paths to all files that are required to run onCompleteAction.
+activity: The activity from which this function is called.
+onCompleteAction : A function to be executed when all files are present.
+It will call getFiles for all missing files.
+ */
 fun updateFiles(requiredFilePaths : List<String>, activity : Activity, onCompleteAction : (() -> Unit)){
     val missingFiles = findMissingFilePaths(requiredFilePaths)
     if(missingFiles.count() > 0){
-        getPermissions(activity, permissionsNeeded, 1)
+        getPermissions(activity, permissionsNeeded, EXTERNAL_FILES_REQUEST)
         getFiles(missingFiles, activity, onCompleteAction)
     }
     else{
@@ -25,10 +32,15 @@ fun updateFiles(requiredFilePaths : List<String>, activity : Activity, onComplet
     }
 }
 
-fun findMissingFilePaths(requiredFilePaths : List<String>) : List<String>{
+/*
+Gets a list of the filepaths of missing files
+requestedPaths: A list of file paths to all files that are requested.
+It will return a list of the file paths of all missing files in String format.
+ */
+fun findMissingFilePaths(requestedFilePaths : List<String>) : List<String>{
     val missingFilePaths : MutableList<String> = mutableListOf()
     val adding : MutableMap<String, Boolean> = mutableMapOf()
-    for(filePath in requiredFilePaths){
+    for(filePath in requestedFilePaths){
         if(!File(filePath).exists() && !adding.containsKey(filePath)){
             missingFilePaths.add(filePath)
             adding[filePath] = true
@@ -37,6 +49,13 @@ fun findMissingFilePaths(requiredFilePaths : List<String>) : List<String>{
     return missingFilePaths
 }
 
+/*
+Downloads specified files and executes action when all requested files are present.
+requiredPaths: A list of file paths to all files that are to be downloaded.
+activity: The activity from which this function is called.
+onCompleteAction : A function to be executed when all files are present.
+It will download all files and start onCompleteAction.
+ */
 fun getFiles(requiredFilePaths : List<String>, activity: Activity, onCompleteAction : (() -> Unit)){
     val manager = activity.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
 
