@@ -114,12 +114,16 @@ class Pin(
         }
     }
 
-    fun openPinPopupWindow(parentView: View, activity : Activity) {
+    fun openPinPopupWindow(parentView: View, activity : Activity, onDissmissAction: () -> Unit) {
         val layoutInflater = activity.layoutInflater
 
         // build an custom view (to be inflated on top of our current view & build it's popup window)
         val customView = layoutInflater.inflate(R.layout.pin_content_view, null, false)
         popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        popupWindow?.setOnDismissListener {
+            popupWindow = null
+            onDissmissAction()
+        }
 
         // add the title for the popup window
         val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)

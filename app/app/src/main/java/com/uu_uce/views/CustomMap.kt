@@ -68,6 +68,7 @@ class CustomMap : ViewTouchParent {
     private lateinit var pinStatuses    : Array<Int?>
     private lateinit var viewModel      : PinViewModel
     private lateinit var lfOwner        : LifecycleOwner
+    var activePopup: PopupWindow? = null
 
     private var nrLayers = 0
     private lateinit var camera: Camera
@@ -269,19 +270,12 @@ class CustomMap : ViewTouchParent {
         for(p in pins){
             if(p == null || !p.inScreen) continue
             if(pointInAABoundingBox(p.boundingBox.first, p.boundingBox.second, canvasTapLocation, pinTapBufferSize)){
-                p.openPinPopupWindow(this, activity)
+                p.openPinPopupWindow(this, activity) {activePopup = null}
+                activePopup = p.popupWindow
                 Logger.log(LogType.Info, "CustomMap", "${p.getTitle()}: I have been tapped.")
                 return
             }
         }
-    }
-
-    fun showingPopup(): PopupWindow?{
-        for(p in pins){
-            if(p?.popupWindow == null) continue
-            if(p.popupWindow!!.isShowing) return p.popupWindow
-        }
-        return null
     }
 
     fun toggleLayer(l: Int){

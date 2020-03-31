@@ -90,7 +90,7 @@ class GeoMap : AppCompatActivity() {
             return
         }
 
-        customMap.showingPopup()?.dismiss()
+        customMap.activePopup?.dismiss()
     }
 
     override fun onResume() {

@@ -24,13 +24,14 @@ class AllPins : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel
     private var selectedOption: Int = 0
     private lateinit var sharedPref : SharedPreferences
+    private lateinit var viewAdapter: PinListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_all_pins)
         viewManager = LinearLayoutManager(this)
 
-        val viewAdapter = PinListAdapter(this)
+        viewAdapter = PinListAdapter(this)
 
         recyclerView = findViewById<RecyclerView>(R.id.recyclerview).apply {
             layoutManager = viewManager
@@ -47,6 +48,14 @@ class AllPins : AppCompatActivity() {
         sharedPref = this.getPreferences(Context.MODE_PRIVATE)
 
         onCreateToolbar(this, "all pins")
+    }
+
+    override fun onBackPressed() {
+        if(viewAdapter.activePopup != null) {
+            viewAdapter.activePopup?.dismiss()
+            return
+        }
+        super.onBackPressed()
     }
 
     fun openDialog(view: View) {
@@ -68,7 +77,7 @@ class AllPins : AppCompatActivity() {
     }
 
     private fun sortList(category: Int){
-        val viewAdapter = PinListAdapter(this)
+        viewAdapter = PinListAdapter(this)
         recyclerView.adapter = viewAdapter
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         pinViewModel.allPinData.observe(this, Observer { pins ->

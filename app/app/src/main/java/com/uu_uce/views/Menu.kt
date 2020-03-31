@@ -10,6 +10,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnLayoutChangeListener
 import androidx.core.view.updateLayoutParams
+import com.uu_uce.R
+import kotlinx.android.synthetic.main.activity_geo_map.view.*
 
 class Menu : RelativeLayout {
     constructor(context: Context): super(context)
@@ -61,16 +63,19 @@ class Menu : RelativeLayout {
     fun up(){
         dragStatus = DragStatus.Up
         animate().y(upY)
+        dragButton.setImageResource(R.drawable.ic_menu_drag_down)
     }
 
     fun bar(){
         dragStatus = DragStatus.Bar
         animate().y(barY)
+        dragButton.setImageResource(R.drawable.ic_menu_drag_up)
     }
 
     fun down(){
         dragStatus = DragStatus.Down
         animate().y(downY)
+        dragButton.setImageResource(R.drawable.ic_menu_drag_up)
     }
 
     fun dragButtonTap(){
@@ -80,7 +85,7 @@ class Menu : RelativeLayout {
                 bar()
             }
             DragStatus.Bar ->{
-                down()
+                up()
             }
             DragStatus.Up ->{
                 down()
