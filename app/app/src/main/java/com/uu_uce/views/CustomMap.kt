@@ -36,7 +36,6 @@ import com.uu_uce.services.degreeToUTM
 import com.uu_uce.shapefiles.*
 import com.uu_uce.ui.*
 import com.uu_uce.ui.Scroller
-import diewald_shapeFile.files.shp.SHP_File
 import kotlinx.android.synthetic.main.activity_geo_map.view.*
 import java.io.File
 import kotlin.system.measureTimeMillis
@@ -74,9 +73,7 @@ class CustomMap : ViewTouchParent {
     private lateinit var camera: Camera
 
     init{
-        SHP_File.LOG_INFO           = false
-        SHP_File.LOG_ONLOAD_HEADER  = false
-        SHP_File.LOG_ONLOAD_CONTENT = false
+        smap = ShapeMap(5, this)
 
         // Logger mask settings
         //Logger.setTagEnabled("CustomMap", false)
@@ -86,9 +83,9 @@ class CustomMap : ViewTouchParent {
         addChild(Scroller(context, ::moveMap))
         addChild(DoubleTapper(context, ::zoomOutMax))
         addChild(SingleTapper(context as AppCompatActivity, ::tapPin))
+        addChild(Releaser{smap.onTouchRelease(camera.getViewport(width.toDouble()/height))})
 
-        // Parse shapes
-        smap = ShapeMap(5, this)
+
 
         deviceLocPaint.color = Color.BLUE
         deviceLocEdgePaint.color = Color.WHITE
@@ -176,13 +173,6 @@ class CustomMap : ViewTouchParent {
             arraysReady = true
             updatePins()
         }
-    }
-
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        if(event.action == MotionEvent.ACTION_UP){
-            smap.onTouchRelease(camera.getViewport(width.toDouble()/height))
-        }
-        return super.onTouchEvent(event)
     }
 
     fun updatePins(){

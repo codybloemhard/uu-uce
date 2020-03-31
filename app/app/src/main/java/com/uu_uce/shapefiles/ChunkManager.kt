@@ -3,9 +3,7 @@ package com.uu_uce.shapefiles
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.internal.synchronized
 import kotlinx.coroutines.launch
 
 abstract class ChunkManager(protected val chunks: MutableMap<Triple<Int, Int, Int>, Chunk>, protected val chunkGetter: ChunkGetter){
@@ -13,7 +11,6 @@ abstract class ChunkManager(protected val chunks: MutableMap<Triple<Int, Int, In
     open fun updateOnTouchRelease(viewport: Pair<p2,p2>, zoom: Int, map: ShapeMap){}
 }
 
-@InternalCoroutinesApi
 class ScrollingLoader(chunks: MutableMap<Triple<Int, Int, Int>, Chunk>, chunkGetter: ChunkGetter): ChunkManager(chunks, chunkGetter){
     private val toRemove: HashSet<ChunkIndex> = hashSetOf()
     private val chunkLoaders: MutableList<Pair<ChunkIndex,Job>> = mutableListOf()
@@ -87,7 +84,6 @@ class ScrollingLoader(chunks: MutableMap<Triple<Int, Int, Int>, Chunk>, chunkGet
     }
 }
 
-@InternalCoroutinesApi
 class StopLoader(chunks: MutableMap<Triple<Int, Int, Int>, Chunk>, chunkGetter: ChunkGetter): ChunkManager(chunks, chunkGetter){
     private val chunkLoaders: MutableList<Pair<ChunkIndex,Job>> = mutableListOf()
 
@@ -137,6 +133,7 @@ class StopLoader(chunks: MutableMap<Triple<Int, Int, Int>, Chunk>, chunkGetter: 
 
                 }
             }
+            map.invalidate()
         }
     }
 
