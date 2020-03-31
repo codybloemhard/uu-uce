@@ -12,6 +12,7 @@ import android.graphics.Point
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.util.Log
+import android.view.MotionEvent
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -175,6 +176,13 @@ class CustomMap : ViewTouchParent {
             arraysReady = true
             updatePins()
         }
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        if(event.action == MotionEvent.ACTION_UP){
+            smap.onTouchRelease(camera.getViewport(width.toDouble()/height))
+        }
+        return super.onTouchEvent(event)
     }
 
     fun updatePins(){

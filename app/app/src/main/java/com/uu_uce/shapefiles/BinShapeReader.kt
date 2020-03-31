@@ -55,7 +55,7 @@ class BinShapeReader(
 ): ChunkGetter {
     override fun getChunk(cIndex: ChunkIndex): Chunk {
         val time = System.currentTimeMillis()
-        val file = File(dir, "test.obj")
+        val file = File(dir, "testmap.obj")
         val reader = FileReader(file)
 
         val xoff = reader.readULong().toDouble()

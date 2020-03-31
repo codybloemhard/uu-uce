@@ -102,6 +102,12 @@ class ShapeMap(private val nrOfLODs: Int,
         view.invalidate()
     }
 
+    fun onTouchRelease(viewport: Pair<p2,p2>){
+        for((_,layer) in layers){
+            layer.onTouchRelease(viewport, zoomLevel, this)
+        }
+    }
+
     fun draw(canvas: Canvas, width: Int, height: Int){
         val waspect = width.toDouble() / height
         zoomLevel = maxOf(0,minOf(nrOfLODs-1, nrOfLODs - 1 - ((camera.getZoom()-0.01)/(1.0/waspect-0.01) * nrOfLODs).toInt()))
