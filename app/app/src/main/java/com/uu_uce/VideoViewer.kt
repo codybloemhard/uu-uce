@@ -29,23 +29,21 @@ class VideoViewer : Activity() {
 
         videoPlayer = findViewById(R.id.video_player)
         videoPlayer.setVideoURI(intent.getParcelableExtra("uri"))
-
-        val act = this
-
         val titleBar = findViewById<ConstraintLayout>(R.id.video_title)
 
         mediaController = object : MediaController(this) {
             override fun show() {
-                super.show(0)
-                titleBar.visibility = View.VISIBLE
+                show(0)
             }
             override fun show(timeout: Int) {
                 super.show(0)
                 titleBar.visibility = View.VISIBLE
+                uiVisible = true
             }
             override fun hide() {
                 super.hide()
                 titleBar.visibility = View.GONE
+                uiVisible = false
             }
         }
 
@@ -84,49 +82,8 @@ class VideoViewer : Activity() {
         super.onSaveInstanceState(outState)
     }
 
-    private fun setUIVisibility(visible : Boolean): Boolean{ //returns whether visibility was changed
-        if(visible == uiVisible) return false
-        if(visible){
-            mediaController.show()
-        }
-        else{
-            mediaController.hide()
-        }
-        uiVisible = !uiVisible
-        return true
-    }
-
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if(event?.action == MotionEvent.ACTION_DOWN){
-            setUIVisibility(!uiVisible)
-            return true
-        }
-        return false
-    }
-
     override fun onBackPressed() {
         Logger.log(LogType.Continuous, "VideoViewer", "test3")
         finish()
     }
-
-    // VLC player code
-    /*private fun initializeVideoPlayer(videoURI: Uri, view: View, activity: Activity) {
-        val videoPlayer: VLCVideoLayout = view.findViewById(R.id.video_player)
-
-        /* PLEASE KEEP COMMENTED: NEED THIS FOR FURTHER DEVELOPMENT
-        val playerSurface: SurfaceView = activity.findViewById(R.id.player_surface)
-        val surfaceHolder = playerSurface.holder
-        val surface = surfaceHolder.surface
-        val surfaceFrame: FrameLayout = activity.findViewById(R.id.player_surface_frame)
-         */
-
-        val libVLC: LibVLC = LibVLC(activity)
-        val mediaPlayer: MediaPlayer = MediaPlayer(libVLC)
-
-        mediaPlayer.attachViews(videoPlayer, null, false, false)
-        val media: Media = Media(libVLC, videoURI)
-        mediaPlayer.media = media
-        media.release()
-        mediaPlayer.play()
-    }*/
 }
