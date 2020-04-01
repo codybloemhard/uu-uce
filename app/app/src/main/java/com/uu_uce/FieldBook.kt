@@ -223,10 +223,18 @@ class FieldBook : AppCompatActivity() {
         val entry = FieldbookEntry( //TODO: use UTM location
             location.toString(),
             currentDate,
-            buildJSONContent(content)
+            buildJSONContent(content).also{ jsonString ->
+                // added for debugging purposes
+                val root = "data/data/com.uu_uce/files/fieldbook"
+                val myDir: File = File("$root/Content").also{
+                    it.mkdirs()
+                }
+                val fileName = "TestContent.txt"
+                val file = File(myDir,fileName)
+                file.writeText(jsonString)
+            }
         ).also{
-            print(it)
-            //fieldbookViewModel.insert(it)
+            fieldbookViewModel.insert(it)
         }
     }
 
@@ -254,7 +262,7 @@ class FieldBook : AppCompatActivity() {
                     "}," +
                     "{" +
                         "\"tag\":\"${contentList.last().first}\"," +
-                        "\"file_name\":\"${contentList.last().second}\"," +
+                        "\"file_name\":\"${contentList.last().second}\"" +
                     "}" +
                 "]"
     }
