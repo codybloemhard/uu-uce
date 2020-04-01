@@ -81,12 +81,16 @@ class CustomMap : ViewTouchParent {
         addChild(Scroller(context, ::moveMap))
         addChild(DoubleTapper(context, ::zoomOutMax))
         addChild(SingleTapper(context as AppCompatActivity, ::tapPin))
-        addChild(Releaser {smap.onTouchRelease(camera.getViewport(width.toDouble()/height))})
+        addChild(Releaser {smap.onTouchRelease(camera.getViewport())})
 
 
 
         deviceLocPaint.color = Color.BLUE
         deviceLocEdgePaint.color = Color.WHITE
+
+        post{
+            camera.wAspect = width.toDouble()/height
+        }
     }
 
     //to be called after all addLayer calls
@@ -95,7 +99,7 @@ class CustomMap : ViewTouchParent {
     }
 
     fun addLayer(lt: LayerType, path: File, scrollLayout: LinearLayout, buttonSize: Int){
-        smap.addLayer(lt, path, context)
+        smap.addLayer(lt, path)
 
         val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle)
         btn.setImageResource(com.uu_uce.R.drawable.logotp)
@@ -123,7 +127,7 @@ class CustomMap : ViewTouchParent {
             return
         }
 
-        val viewport = camera.getViewport(waspect)
+        val viewport = camera.getViewport()
         val timeDraw = measureTimeMillis {
             canvas.drawColor(Color.rgb(234, 243, 245))
             smap.draw(canvas, width, height)
@@ -155,8 +159,7 @@ class CustomMap : ViewTouchParent {
         // TODO: move location drawing to an overlaying transparent canvas to avoid unnecessary map drawing
         loc = degreeToUTM(newLoc)
 
-        val waspect = width.toDouble() / height
-        val viewport = camera.getViewport(waspect)
+        val viewport = camera.getViewport()
         val screenLoc = coordToScreen(loc, viewport, width, height)
 
         val distance = pointDistance(screenLoc, lastDrawnLoc)

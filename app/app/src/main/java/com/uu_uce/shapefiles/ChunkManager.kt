@@ -65,7 +65,7 @@ class ScrollingLoader(chunks: MutableMap<Triple<Int, Int, Int>, Chunk>, chunkGet
                     chunks[chunkIndex] = c
                 }
                 map.invalidate()
-                Logger.log(LogType.Continuous, "ShapeLayer", "loadTime: ${System.currentTimeMillis() - time}")
+                Logger.log(LogType.Event, "ChunkManager", "loaded chunk $chunkIndex in time: ${System.currentTimeMillis() - time}")
             }
             chunkLoaders.add(Pair(chunkIndex, routine))
             routines.add(routine)
@@ -94,7 +94,7 @@ class ScrollingLoader(chunks: MutableMap<Triple<Int, Int, Int>, Chunk>, chunkGet
 }
 
 //loads new chunks only when the user is not moving the camera
-//less smooth, but much less resource intensive
+//less smooth, but also less resource intensive
 class StopLoader(chunks: MutableMap<Triple<Int, Int, Int>, Chunk>, chunkGetter: ChunkGetter): ChunkManager(chunks, chunkGetter){
     private var chunkLoaders: List<Pair<ChunkIndex,Job>> = listOf()
     private var chunksLoadedListener: Job? = null
@@ -102,7 +102,7 @@ class StopLoader(chunks: MutableMap<Triple<Int, Int, Int>, Chunk>, chunkGetter: 
     private fun cancelCurrentLoading(){
         synchronized(chunks) {
             if(chunksLoadedListener?.isActive == true)
-                Logger.log(LogType.Continuous, "ChunkManager", "canceled listener")
+                Logger.log(LogType.Continuous, "ChunkManager", "canceled listener ${chunkLoaders[0].first}")
             chunksLoadedListener?.cancel()
 
             for ((_, job) in chunkLoaders) {
@@ -118,10 +118,12 @@ class StopLoader(chunks: MutableMap<Triple<Int, Int, Int>, Chunk>, chunkGetter: 
     }
 
     override fun updateOnTouchRelease(viewport: Pair<p2, p2>, zoom: Int, map: ShapeMap){
+        Logger.log(LogType.Event, "ChunkManager", "release")
         cancelCurrentLoading()
 
         val activeChunks = getActiveChunks(viewport, zoom)
         val loadedChunks: MutableList<Chunk?> = MutableList(activeChunks.size){null}
+        Logger.log(LogType.Event, "ChunkManager", "loading ${activeChunks[0]}")
 
         chunkLoaders = List(activeChunks.size) {i ->
             val chunkIndex = activeChunks[i]
@@ -146,6 +148,7 @@ class StopLoader(chunks: MutableMap<Triple<Int, Int, Int>, Chunk>, chunkGetter: 
                     val index = activeChunks[i]
                     val chunk = loadedChunks[i] ?: continue
                     chunks[index] = chunk
+                    Logger.log(LogType.Event, "ChunkManager", "loaded chunk $index")
                 }
             }
             map.invalidate()

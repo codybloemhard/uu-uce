@@ -69,7 +69,7 @@ class ShapeMap(private val nrOfLODs: Int,
         }
     }
 
-    fun addLayer(type: LayerType, path: File, context: Context){
+    fun addLayer(type: LayerType, path: File){
         val timeSave = measureTimeMillis {
             layers.add(Pair(type,ShapeLayer(path, nrOfLODs)))
         }
@@ -89,6 +89,7 @@ class ShapeMap(private val nrOfLODs: Int,
         val mx = (bMin.first + bMax.first) / 2.0
         val my = (bMin.second + bMax.second) / 2.0
         camera = Camera(mx, my, 1.0, bMin, bMax)
+        camera.onAnimationEnd = ::onTouchRelease
         return camera
     }
 
@@ -111,7 +112,7 @@ class ShapeMap(private val nrOfLODs: Int,
     fun draw(canvas: Canvas, width: Int, height: Int){
         val waspect = width.toDouble() / height
         zoomLevel = maxOf(0,minOf(nrOfLODs-1, nrOfLODs - 1 - ((camera.getZoom()-0.01)/(1.0/waspect-0.01) * nrOfLODs).toInt()))
-        val viewport = camera.getViewport(waspect)
+        val viewport = camera.getViewport()
 
         for(i in layers.indices) {
             if(layerMask[i]) {

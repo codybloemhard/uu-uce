@@ -6,7 +6,6 @@ import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import java.io.File
 
-@ExperimentalUnsignedTypes
 class ShapeLayer(path: File, nrOfLODs: Int){
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk> = mutableMapOf()
 
