@@ -76,7 +76,7 @@ class GeoMap : AppCompatActivity() {
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         if(menu.dragStatus != DragStatus.Down &&
             ev.action == MotionEvent.ACTION_DOWN &&
-            !(ev.rawX > menu.x && ev.rawX < menu.x + menu.width && ev.rawY > menu.y && ev.rawY < menu.y + menu.height)){
+            !(ev.x > menu.x && ev.x < menu.x + menu.width && ev.y-statusBarHeight > menu.y && ev.y-statusBarHeight < menu.y + menu.height)){
             menu.down()
             return true
         }
