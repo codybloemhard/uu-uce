@@ -48,6 +48,22 @@ fun latToUTMLetter(lat: Double): Char{
 }
 
 data class UTMCoordinate(val zone : Int, val letter : Char, val east : Double, val north : Double)
+{
+    override fun toString(): String {
+        return  "$zone" +
+                "$letter" +
+                "${north.run{ 
+                    this*10
+        }.toInt()
+                }" +
+                "N" +
+                "${east.run{ 
+                    this*10
+        }.toInt()
+                }" +
+                "E"
+    }
+}
 
 /*
 Will convert latitude, longitude coordinate to UTM.

@@ -30,6 +30,7 @@ import com.uu_uce.fieldbook.FieldbookViewModel
 import com.uu_uce.pins.BlockTag
 import com.uu_uce.services.LocationServices
 import com.uu_uce.services.checkPermissions
+import com.uu_uce.services.degreeToUTM
 import com.uu_uce.services.getPermissions
 import com.uu_uce.ui.createTopbar
 import java.io.File
@@ -221,7 +222,7 @@ class FieldBook : AppCompatActivity() {
         )
 
         val entry = FieldbookEntry( //TODO: use UTM location
-            location.toString(),
+            degreeToUTM(Pair(location.latitude,location.longitude)).toString(),
             currentDate,
             buildJSONContent(content).also{ jsonString ->
                 // added for debugging purposes
