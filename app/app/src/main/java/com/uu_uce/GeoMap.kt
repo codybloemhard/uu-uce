@@ -28,6 +28,11 @@ class GeoMap : AppCompatActivity() {
     private var resourceId = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Logger.setTagEnabled("CustomMap", false)
+        Logger.setTagEnabled("LocationServices", false)
+        Logger.setTagEnabled("Pin", false)
+        Logger.setTagEnabled("DrawOverlay", false)
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_geo_map)
 

@@ -11,7 +11,7 @@ class ShapeLayer(path: File, nrOfLODs: Int){
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk> = mutableMapOf()
 
     private val chunkGetter= BinShapeReader(path, nrOfLODs)
-    private val chunkManager: ChunkManager = StopLoader(chunks, chunkGetter)
+    private val chunkManager: ChunkManager = ScrollingLoader(chunks, chunkGetter)
 
     var bmin: p3
         private set
@@ -21,12 +21,10 @@ class ShapeLayer(path: File, nrOfLODs: Int){
 
     init{
         val index = ChunkIndex(0,0,0)
-        val time = System.currentTimeMillis()
         val chunk = chunkGetter.getChunk(index)
         chunks[index] = chunk
         bmin = chunk.bmin
         bmax = chunk.bmax
-        Logger.log(LogType.Info, "ShapeLayer", "loadTime: ${System.currentTimeMillis() - time}")
     }
 
     fun onTouchRelease(viewport: Pair<p2, p2>, zoom: Int, map: ShapeMap){

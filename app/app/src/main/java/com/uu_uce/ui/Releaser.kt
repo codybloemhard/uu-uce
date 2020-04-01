@@ -8,5 +8,4 @@ class Releaser(
     override fun getOnTouchEvent(event: MotionEvent?) {
         if(event?.action == MotionEvent.ACTION_UP) action()
     }
-
 }

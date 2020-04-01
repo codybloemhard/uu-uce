@@ -6,16 +6,30 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
+//manages the loading and unloading of chunks
 abstract class ChunkManager(protected val chunks: MutableMap<Triple<Int, Int, Int>, Chunk>, protected val chunkGetter: ChunkGetter){
-    open fun updateOnMove(viewport: Pair<p2,p2>, zoom: Int, map: ShapeMap){}
+    protected var lastViewport: Pair<p2,p2> = Pair(p2Zero,p2Zero)
+    protected var lastZoom: Int = -1
+
+    open fun updateOnMove(viewport: Pair<p2,p2>, zoom: Int, map: ShapeMap){
+        lastViewport = viewport
+        lastZoom = zoom
+    }
     open fun updateOnTouchRelease(viewport: Pair<p2,p2>, zoom: Int, map: ShapeMap){}
+
+    protected fun shouldGetLoaded(chunkIndex: ChunkIndex, viewport: Pair<p2,p2>, zoom: Int): Boolean{
+        return chunkIndex.third == zoom
+    }
+
+    protected fun chunksChanged(viewport: Pair<p2,p2>, zoom: Int): Boolean{
+        return zoom != lastZoom
+    }
 }
 
+//attempts to load new chunks every time the camera moves (might not work properly with horizontal chunks)
 class ScrollingLoader(chunks: MutableMap<Triple<Int, Int, Int>, Chunk>, chunkGetter: ChunkGetter): ChunkManager(chunks, chunkGetter){
     private val toRemove: HashSet<ChunkIndex> = hashSetOf()
     private val chunkLoaders: MutableList<Pair<ChunkIndex,Job>> = mutableListOf()
-    private var lastViewport: Pair<p2,p2> = Pair(p2Zero,p2Zero)
-    private var lastZoom: Int = -1
 
     private fun getNewOldChunks(viewport: Pair<p2,p2>, zoomLevel: Int) : Pair<List<ChunkIndex>,List<ChunkIndex>>{
         val new: MutableList<ChunkIndex> = mutableListOf()
@@ -28,6 +42,7 @@ class ScrollingLoader(chunks: MutableMap<Triple<Int, Int, Int>, Chunk>, chunkGet
     }
 
     override fun updateOnMove(viewport: Pair<p2,p2>, zoom: Int, map: ShapeMap){
+        if(!chunksChanged(viewport,zoom)) return
         chunkLoaders.filter{(index,routine) ->
             if(!shouldGetLoaded(index, viewport, zoom))
                 routine.cancel()
@@ -74,63 +89,63 @@ class ScrollingLoader(chunks: MutableMap<Triple<Int, Int, Int>, Chunk>, chunkGet
                 }
             }
         }
-
-        lastViewport = viewport
-        lastZoom = zoom
-    }
-
-    private fun shouldGetLoaded(chunkIndex: ChunkIndex, viewport: Pair<p2,p2>, zoom: Int): Boolean{
-        return chunkIndex.third == zoom
+        super.updateOnMove(viewport, zoom, map)
     }
 }
 
+//loads new chunks only when the user is not moving the camera
+//less smooth, but much less resource intensive
 class StopLoader(chunks: MutableMap<Triple<Int, Int, Int>, Chunk>, chunkGetter: ChunkGetter): ChunkManager(chunks, chunkGetter){
-    private val chunkLoaders: MutableList<Pair<ChunkIndex,Job>> = mutableListOf()
+    private var chunkLoaders: List<Pair<ChunkIndex,Job>> = listOf()
+    private var chunksLoadedListener: Job? = null
+
+    private fun cancelCurrentLoading(){
+        synchronized(chunks) {
+            if(chunksLoadedListener?.isActive == true)
+                Logger.log(LogType.Continuous, "ChunkManager", "canceled listener")
+            chunksLoadedListener?.cancel()
+
+            for ((_, job) in chunkLoaders) {
+                job.cancel()
+            }
+        }
+    }
 
     override fun updateOnMove(viewport: Pair<p2, p2>, zoom: Int, map: ShapeMap) {
-        for((_,job) in chunkLoaders){
-            job.cancel()
-        }
-        chunkLoaders.clear()
+        if(!chunksChanged(viewport,zoom)) return
+        cancelCurrentLoading()
+        super.updateOnMove(viewport, zoom, map)
     }
 
     override fun updateOnTouchRelease(viewport: Pair<p2, p2>, zoom: Int, map: ShapeMap){
-        for((_,job) in chunkLoaders){
-            job.cancel()
-        }
-        chunkLoaders.clear()
-
+        cancelCurrentLoading()
 
         val activeChunks = getActiveChunks(viewport, zoom)
         val loadedChunks: MutableList<Chunk?> = MutableList(activeChunks.size){null}
 
-        val currentLoaders = List(activeChunks.size) {i ->
+        chunkLoaders = List(activeChunks.size) {i ->
             val chunkIndex = activeChunks[i]
             val job = GlobalScope.launch {
-                val c: Chunk = chunkGetter.getChunk(chunkIndex)
-                loadedChunks[i] = c
-            }
-            val pair = Pair(chunkIndex,job)
-            chunkLoaders.add(pair)
-            pair
-        }
-        GlobalScope.launch{
-            for((_,job) in currentLoaders) {
-                job.join()
-                if(job.isCancelled) {
-                    return@launch
+                if(!chunks.containsKey(chunkIndex)) {
+                    val c: Chunk = chunkGetter.getChunk(chunkIndex)
+                    loadedChunks[i] = c
                 }
             }
+            val pair = Pair(chunkIndex,job)
+            pair
+        }
 
-            //screen has been held still for long enough, jobs are all finished
+        chunksLoadedListener = GlobalScope.launch{
+            for((_,job) in chunkLoaders) {
+                job.join()
+            }
+            //screen has not moved for long enough, jobs are all finished
             synchronized(chunks) {
-                chunks.clear()
-
-                for (i in currentLoaders.indices) {
+                chunks.keys.removeAll{index -> !shouldGetLoaded(index, viewport, zoom) }
+                for (i in chunkLoaders.indices) {
                     val index = activeChunks[i]
                     val chunk = loadedChunks[i] ?: continue
                     chunks[index] = chunk
-
                 }
             }
             map.invalidate()

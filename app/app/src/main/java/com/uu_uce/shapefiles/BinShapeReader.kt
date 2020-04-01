@@ -10,6 +10,7 @@ interface ChunkGetter{
     fun getChunk(cIndex: ChunkIndex):Chunk
 }
 
+//simple reader that can read basic types from a binary file
 @ExperimentalUnsignedTypes
 class FileReader{
     private var index = 0
@@ -54,6 +55,7 @@ class BinShapeReader(
     private var nrOfLODs: Int
 ): ChunkGetter {
     override fun getChunk(cIndex: ChunkIndex): Chunk {
+        //find the correct file and read all information inside
         val time = System.currentTimeMillis()
         val file = File(dir, "testmap.obj")
         val reader = FileReader(file)
@@ -88,7 +90,7 @@ class BinShapeReader(
 
         val time1 = System.currentTimeMillis() - time
 
-        //create zoom levels
+        //create zoom levels (temporary)
         chunkShapes = chunkShapes.sortedBy{ it.meanZ() }
 
         val zDens = hashMapOf<Int,Int>()
@@ -122,8 +124,6 @@ class BinShapeReader(
                 curStep = 1
                 continue
             }
-            if (indices.contains(index))
-                throw Exception("uh oh")
 
             indices.add(index)
             nrHeights++

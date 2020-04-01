@@ -81,7 +81,7 @@ class CustomMap : ViewTouchParent {
         addChild(Scroller(context, ::moveMap))
         addChild(DoubleTapper(context, ::zoomOutMax))
         addChild(SingleTapper(context as AppCompatActivity, ::tapPin))
-        addChild(Releaser{smap.onTouchRelease(camera.getViewport(width.toDouble()/height))})
+        addChild(Releaser {smap.onTouchRelease(camera.getViewport(width.toDouble()/height))})
 
 
 
@@ -89,6 +89,7 @@ class CustomMap : ViewTouchParent {
         deviceLocEdgePaint.color = Color.WHITE
     }
 
+    //to be called after all addLayer calls
     fun initializeCamera(){
         camera = smap.initialize()
     }
