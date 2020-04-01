@@ -57,10 +57,9 @@ class FieldBook : AppCompatActivity() {
     lateinit var image: ImageView
     lateinit var text: EditText
 
-    lateinit var imageUri: Uri
-    lateinit var bitmap: Bitmap
+    private var imageUri: String = ""
 
-    lateinit var currentPhotoPath: String
+    private lateinit var currentPhotoPath: String
 
     lateinit var fieldbookViewModel: FieldbookViewModel
 
@@ -116,7 +115,7 @@ class FieldBook : AppCompatActivity() {
 
             saveFieldbookEntry(
                 text.text.toString(),
-                bitmap,
+                imageUri,
                 getCurrentDateTime(DateTimeFormat.FIELDBOOK_ENTRY),
                 LocationServices.lastKnownLocation)
             popupWindow.dismiss()
@@ -169,11 +168,14 @@ class FieldBook : AppCompatActivity() {
             //TODO: this is just a thumbnail... get full size picture
             when (requestCode) {
                 0 -> {
-                    bitmap = data.extras?.get("data") as Bitmap
-                    image.setImageBitmap(bitmap) }
-                1 -> {
-                    imageUri = data.data!!
-                    image.setImageURI(imageUri) }
+                    val bitmap = data.extras?.get("data") as Bitmap
+                    image.setImageBitmap(bitmap)
+                    imageUri = saveBitmapToLocation(bitmap)
+                }
+                1 -> { //TODO: move file & save to imageUri
+                    imageUri = data.data!!.toString()
+                    image.setImageURI(imageUri.toUri())
+                }
             }
         }
     }
@@ -206,7 +208,7 @@ class FieldBook : AppCompatActivity() {
 
     private fun saveFieldbookEntry(
         text: String,
-        image: Bitmap,
+        image: String,
         currentDate: String,
         location: Location
     ) {
@@ -217,11 +219,11 @@ class FieldBook : AppCompatActivity() {
             ),
             Pair(
                 BlockTag.IMAGE,
-                saveBitmapToLocation(image)
+                image
             )
         )
 
-        val entry = FieldbookEntry( //TODO: use UTM location
+        val entry = FieldbookEntry(
             degreeToUTM(Pair(location.latitude,location.longitude)).toString(),
             currentDate,
             buildJSONContent(content).also{ jsonString ->
@@ -247,7 +249,7 @@ class FieldBook : AppCompatActivity() {
         val fileName = "IMG_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}.png"
         val file = File(myDir,fileName)
         FileOutputStream(file).also{
-            bitmap.compress(Bitmap.CompressFormat.PNG,100,it)
+            image.compress(Bitmap.CompressFormat.PNG,100,it)
         }.apply{
             flush()
             close()

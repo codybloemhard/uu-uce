@@ -38,8 +38,6 @@ class PinContent(contentString: String) {
     }
 
     private fun readBlock(reader: JsonReader): ContentBlockInterface {
-        val dir             = "file:///data/data/com.uu_uce/files/pin_content/"
-
         var blockTag        = BlockTag.UNDEFINED
         var textString      = ""
         var fileName        = ""
@@ -61,8 +59,8 @@ class PinContent(contentString: String) {
                     fileName = when(blockTag) {
                         BlockTag.UNDEFINED  -> error("Undefined block tag")
                         BlockTag.TEXT       -> error("Undefined function") //TODO: Add reading text from file
-                        BlockTag.IMAGE      -> dir + "images/" + reader.nextString()
-                        BlockTag.VIDEO      -> dir + "videos/" + reader.nextString()
+                        BlockTag.IMAGE      -> reader.nextString()
+                        BlockTag.VIDEO      -> reader.nextString()
                     }
                 }
 
@@ -71,7 +69,7 @@ class PinContent(contentString: String) {
                     //if(blockTag != BlockTag.VIDEO) //TODO: alert user that only VideoContentBlock uses title
                 }
                 "thumbnail" -> {
-                    thumbnailURI = Uri.parse(dir + "videos/thumbnails/" + reader.nextString())
+                    thumbnailURI = Uri.parse(reader.nextString())
                     //if(blockTag != BlockTag.VIDEO) //TODO: alert user that only VideoContentBlock uses thumbnail
                 }
                 else -> {

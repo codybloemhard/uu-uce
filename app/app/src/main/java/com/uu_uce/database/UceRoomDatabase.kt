@@ -26,25 +26,22 @@ abstract class UceRoomDatabase : RoomDatabase() {
             INSTANCE?.let { database ->
                 scope.launch(Dispatchers.IO) {
                     populatePinTable(database.pinDao())
-                    //populateFieldbook(database.fieldbookDao())
+                    populateFieldbook(database.fieldbookDao())
                 }
             }
         }
 
         suspend fun populateFieldbook(fieldbookDao: FieldbookDao) {
-            val sdf = DateFormat.getDateTimeInstance()
-            val currentDate = sdf.format(Date())
-
             val fieldbook: MutableList<FieldbookEntry> = mutableListOf(
                 FieldbookEntry(
                     "31N3149680N46777336E",
-                    currentDate,
-                    "[{\"tag\":\"TEXT\",\"text\":\"Dit is een faketekst. Alles wat hier staat is slechts om een indruk te geven van het grafische effect van tekst op deze plek. Wat u hier leest is een voorbeeldtekst. Deze wordt later vervangen door de uiteindelijke tekst, die nu nog niet bekend is. De faketekst is dus een tekst die eigenlijk nergens over gaat. Het grappige is, dat mensen deze toch vaak lezen. Zelfs als men weet dat het om een faketekst gaat, lezen ze toch door.\"},{\"tag\":\"IMAGE\",\"file_name\":\"test.png\"}]"
+                    "04-05-1945 07:54",
+                    "[{\"tag\":\"TEXT\",\"text\":\"Dit is een faketekst. Alles wat hier staat is slechts om een indruk te geven van het grafische effect van tekst op deze plek. Wat u hier leest is een voorbeeldtekst. Deze wordt later vervangen door de uiteindelijke tekst, die nu nog niet bekend is. De faketekst is dus een tekst die eigenlijk nergens over gaat. Het grappige is, dat mensen deze toch vaak lezen. Zelfs als men weet dat het om een faketekst gaat, lezen ze toch door.\"},{\"tag\":\"IMAGE\",\"file_name\":\"file:///data/data/com.uu_uce/files/pin_content/images/test.png\"}]"
                 ),
                 FieldbookEntry(
                     "31N3133680N46718336E",
-                    currentDate,
-                    "[{\"tag\":\"TEXT\",\"text\":\"Dit is een faketekst. Alles wat hier staat is slechts om een indruk te geven van het grafische effect van tekst op deze plek. Wat u hier leest is een voorbeeldtekst. Deze wordt later vervangen door de uiteindelijke tekst, die nu nog niet bekend is. De faketekst is dus een tekst die eigenlijk nergens over gaat. Het grappige is, dat mensen deze toch vaak lezen. Zelfs als men weet dat het om een faketekst gaat, lezen ze toch door.\"},{\"tag\":\"VIDEO\", \"file_name\":\"zoo.mp4\", \"thumbnail\":\"zoothumbnail.png\", \"title\":\"zoo video\"}]"
+                    "01-01-1970 00:00",
+                    "[{\"tag\":\"TEXT\",\"text\":\"Dit is een faketekst. Alles wat hier staat is slechts om een indruk te geven van het grafische effect van tekst op deze plek. Wat u hier leest is een voorbeeldtekst. Deze wordt later vervangen door de uiteindelijke tekst, die nu nog niet bekend is. De faketekst is dus een tekst die eigenlijk nergens over gaat. Het grappige is, dat mensen deze toch vaak lezen. Zelfs als men weet dat het om een faketekst gaat, lezen ze toch door.\"},{\"tag\":\"VIDEO\", \"file_name\":\"file:///data/data/com.uu_uce/files/pin_content/videos/zoo.mp4\", \"thumbnail\":\"file:///data/data/com.uu_uce/files/pin_content/videos/thumbnails/zoothumbnail.png\", \"title\":\"zoo video\"}]"
                 )
             )
 
@@ -57,9 +54,30 @@ abstract class UceRoomDatabase : RoomDatabase() {
             pinDao.deleteAllPins()
 
             val pins : MutableList<PinData> = mutableListOf(
-                PinData(0, "31N3149680N46777336E", 1, "TEXT" , "testPin1", "[{\"tag\":\"TEXT\", \"text\":\"test\"}]", 60) ,
-                PinData(1, "31N3133680N46718336E", 2, "IMAGE", "testPin2", "[{\"tag\":\"IMAGE\", \"file_name\":\"test.png\"}]", 60),
-                PinData(2, "31N3130000N46710000E", 3, "VIDEO", "testPin3", "[{\"tag\":\"VIDEO\", \"file_name\":\"zoo.mp4\", \"thumbnail\":\"zoothumbnail.png\", \"title\":\"zoo video\"}]", 60)
+                PinData(
+                    0,
+                    "31N3149680N46777336E",
+                    1,
+                    "TEXT" ,
+                    "testPin1",
+                    "[{\"tag\":\"TEXT\", \"text\":\"test\"}]",
+                    60
+                ),
+                PinData(
+                    1,
+                    "31N3133680N46718336E",
+                    2,
+                    "IMAGE",
+                    "testPin2",
+                    "[{\"tag\":\"IMAGE\", \"file_name\":\"file:///data/data/com.uu_uce/files/pin_content/images/test.png\"}]", 60
+                ),
+                PinData(
+                    2,
+                    "31N3130000N46710000E",
+                    3,
+                    "VIDEO",
+                    "testPin3",
+                    "[{\"tag\":\"VIDEO\", \"file_name\":\"file:///data/data/com.uu_uce/files/pin_content/videos/zoo.mp4\", \"thumbnail\":\"file:///data/data/com.uu_uce/files/pin_content/videos/thumbnails/zoothumbnail.png\", \"title\":\"zoo video\"}]", 60)
             )
 
             for (pin in pins) {
