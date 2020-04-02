@@ -26,8 +26,8 @@ enum class PinType {
 class Pin(
     val id : Int,
     private var coordinate      : UTMCoordinate,
-    private var difficulty      : Int,
-    private var type            : PinType,
+    /*private var difficulty      : Int,
+    private var type            : PinType,*/
     private var title           : String,
     private var content         : PinContent,
     private var image           : Drawable,
@@ -48,9 +48,13 @@ class Pin(
     private val pinHeight =
         pinWidth * (image.intrinsicHeight.toFloat() / image.intrinsicWidth.toFloat())
 
+
     // Initialize variables used in checking for clicks
     var inScreen: Boolean = true
     var boundingBox: Pair<p2, p2> = Pair(p2Zero, p2Zero)
+
+    var popupWindow: PopupWindow? = null
+
 
     fun draw(viewport: Pair<p2, p2>, width : Int, height : Int, view: View, canvas: Canvas) {
         val screenLocation: Pair<Float, Float> =
@@ -88,16 +92,33 @@ class Pin(
         image.draw(canvas)
     }
 
-    fun openPinPopupWindow(parentView: View, activity: Activity) {
+    // Check if pin should be unlocked
+    fun tryUnlock(action : (() -> Unit)){
+        if(predecessorIds[0] != -1 && status < 1){
+            viewModel.tryUnlock(id, predecessorIds, action)
+        }
+        else{
+            action()
+        }
+    }
+
+    fun openPinPopupWindow(parentView: View, activity : Activity, onDissmissAction: () -> Unit) {
         val layoutInflater = activity.layoutInflater
 
         // Build an custom view (to be inflated on top of our current view & build it's popup window)
         val customView = layoutInflater.inflate(R.layout.pin_content_view, null, false)
-        val popupWindow = PopupWindow(
+
+        popupWindow = PopupWindow(
             customView,
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
+
+        popupWindow?.setOnDismissListener {
+            popupWindow = null
+            onDissmissAction()
+        }
+
 
         // Add the title for the popup window
         val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
@@ -111,30 +132,24 @@ class Pin(
             cb.generateContent(layout, activity)
         }
 
-        popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
+        // Open popup
+        popupWindow?.showAtLocation(parentView, Gravity.CENTER, 0, 0)
 
+        // Get elements
         val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
         val checkBoxCompletePin = customView.findViewById<CheckBox>(R.id.complete_box)
 
         // Set checkbox to correct state
         checkBoxCompletePin.isChecked = (getStatus() == 2)
 
+        // Set onClickListeners
         btnClosePopupWindow.setOnClickListener {
-            popupWindow.dismiss()
+            popupWindow?.dismiss()
         }
         checkBoxCompletePin.setOnClickListener {
             if (checkBoxCompletePin.isChecked) {
                 complete()
             }
-        }
-    }
-
-    // Check if pin should be unlocked
-    fun tryUnlock(action: (() -> Unit)) {
-        if (predecessorIds[0] != -1 && status < 1) {
-            viewModel.tryUnlock(id, predecessorIds, action)
-        } else {
-            action()
         }
     }
 

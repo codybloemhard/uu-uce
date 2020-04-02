@@ -8,14 +8,18 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.PopupWindow
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import com.uu_uce.AllPins
 import com.uu_uce.R
-import com.uu_uce.database.*
+import com.uu_uce.database.PinConversion
+import com.uu_uce.database.PinData
+import com.uu_uce.database.PinViewModel
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation
 import com.uu_uce.mapOverlay.pointDistance
@@ -26,7 +30,6 @@ import com.uu_uce.pins.Pin
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
 import com.uu_uce.ui.*
-import com.uu_uce.ui.Scroller
 import diewald_shapeFile.files.shp.SHP_File
 import java.io.File
 import kotlin.system.measureTimeMillis
@@ -57,6 +60,7 @@ class CustomMap : ViewTouchParent {
     private var pinStatuses             : MutableMap<Int, Int>  = mutableMapOf()
     private lateinit var viewModel      : PinViewModel
     private lateinit var lfOwner        : LifecycleOwner
+    var activePopup: PopupWindow? = null
 
     // Map
     private var nrLayers = 0
@@ -85,9 +89,12 @@ class CustomMap : ViewTouchParent {
         deviceLocEdgePaint.color = Color.WHITE
     }
 
+    fun initializeCamera(){
+        camera = smap.initialize()
+    }
+
     fun addLayer(lt: LayerType, path: File, scrollLayout: LinearLayout, buttonSize: Int){
         smap.addLayer(lt, path, context)
-        camera = smap.initialize()
 
         val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle)
         btn.setImageResource(R.drawable.logotp)
@@ -263,18 +270,19 @@ class CustomMap : ViewTouchParent {
     }
 
     private fun tapPin(tapLocation : p2, activity : Activity){
-        pins.forEach{ entry ->
+        for(entry in pins){
             val pin = entry.value
-            if(!pin.inScreen) return@forEach
+            if(!pin.inScreen) continue
             if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, pinTapBufferSize)){
-                pin.openPinPopupWindow(this, activity)
+                pin.openPinPopupWindow(this, activity) {activePopup = null}
+                activePopup = pin.popupWindow
                 Logger.log(LogType.Info, "CustomMap", "${pin.getTitle()}: I have been tapped.")
                 return
             }
         }
     }
 
-    fun toggleLayer(l: Int){
+    private fun toggleLayer(l: Int){
         smap.toggleLayer(l)
     }
 

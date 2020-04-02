@@ -68,10 +68,6 @@ class GeoMap : AppCompatActivity() {
         btn.layoutParams = ViewGroup.LayoutParams(size, size)
         lower_menu_layout.addView(btn)
 
-        dragButton.clickAction      = {menu.dragButtonTap()}
-        dragButton.dragAction       = {dx, dy -> menu.drag(dx,dy) }
-        dragButton.dragEndAction    = {dx, dy -> menu.snap(dx, dy)}
-
         menu.post {
             initMenu()
         }
@@ -79,6 +75,7 @@ class GeoMap : AppCompatActivity() {
         // Read map
         val dir = File(filesDir, "mydir")
         customMap.addLayer(LayerType.Water, dir, toggle_layer_layout, size)
+        customMap.initializeCamera()
 
         customMap.tryStartLocServices(this)
 
@@ -112,7 +109,8 @@ class GeoMap : AppCompatActivity() {
             menu.down()
             return
         }
-        super.onBackPressed()
+
+        customMap.activePopup?.dismiss()
     }
 
     override fun onResume() {

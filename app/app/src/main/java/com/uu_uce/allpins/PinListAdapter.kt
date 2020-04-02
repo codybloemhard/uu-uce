@@ -5,10 +5,7 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
@@ -28,6 +25,7 @@ class PinListAdapter internal constructor(
     private val inflater: LayoutInflater = LayoutInflater.from(activity)
     private var pins = emptyList<PinData>()
     private val pinViewModel: PinViewModel = ViewModelProvider(activity as ViewModelStoreOwner).get(PinViewModel::class.java)
+    var activePopup: PopupWindow? = null
 
     inner class PinViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         val parentView : View = itemView
@@ -54,7 +52,8 @@ class PinListAdapter internal constructor(
             val pinConverter = PinConversion(activity)
             val pin = pinConverter.pinDataToPin(current, pinViewModel)
             pin.getContent().parent = pin
-            pin.openPinPopupWindow(holder.parentView, activity)
+            pin.openPinPopupWindow(holder.parentView, activity) {activePopup = null}
+            activePopup = pin.popupWindow
         }
 
         when(current.difficulty){

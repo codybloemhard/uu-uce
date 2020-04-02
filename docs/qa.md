@@ -16,6 +16,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### QA Matrix
 | Version       | Date      | Unit tests    | Realworld tests       | Documentation | Lint Issues (Worst)   |
 | ------------- | --------- | ------------- | --------------------- | ------------- | --------------------- |
+| 0.1.10        | 31-3-2020 | 100%          | yes, in shape-linter  | 100%          | 0
 | 0.1.9         | 25-3-2020 | 100%          | yes, in shape-linter  | 100%          | 0
 | 0.1.8         | 22-3-2020 | 100%          | yes, in shape-linter  | 100%          | 0
 | 0.1.7         | 21-3-2020 | 100%          | yes, in shape-linter  | 100%          | 11 (Mild)
@@ -33,10 +34,10 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### QA Matrix
 | Version       | Date      | Unit tests    | Realworld tests       | Documentation | Lint Issues (Worst)   |
 |---------------|-----------|---------------|-----------------------|---------------|-----------------------|
-| 0.1.4         | 22-3-2020 | None          | Yes, in uu-uce        | Output        | 0
-| 0.1.3         | 18-3-2020 | None          | Yes, in uu-uce        | Output        | 9 (Severe)
-| 0.1.2         | 17-3-2020 | None          | Yes, in uu-uce        | Output        | NaN
-| 0.1.1         | 16-3-2020 | None          | None                  | Output        | NaN
+| 0.3.0         | 22-3-2020 | None          | Yes, in uu-uce        | Output        | 0
+| 0.2.2         | 18-3-2020 | None          | Yes, in uu-uce        | Output        | 9 (Severe)
+| 0.2.1         | 17-3-2020 | None          | Yes, in uu-uce        | Output        | NaN
+| 0.2.0         | 16-3-2020 | None          | None                  | Output        | NaN
 | 0.1.0         | 10-3-2020 | None          | None                  | None          | NaN
 ## uu-uce
 <span style="color:#88f">Language: </span><span style="color:#f88">Kotlin</span></br>
@@ -49,6 +50,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### QA Matrix
 | Version   | Date      | Documentation     | Linting status            |
 |-----------|-----------|-------------------|---------------------------|
+| 0.4.0     | 31-3-2020 | Content format    | Many things are unused    |
 | 0.3.1     | 21-3-2020 | Content format    | Kotlin ok, Android issues |
 | 0.x.x     | ...       | None              | Only small issues         |
 | 0.0.1     | 8-2-2020  | None              | None                      |
@@ -61,6 +63,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Test Issues Matrix
 | Version   | Pixel 2 Emulator API 29   | Nokia 2 API 24            | One Plus 5 API 28 | Moto g5s+         | Moto g7+          |
 |-----------|---------------------------|---------------------------|-------------------|-------------------|-------------------|
+| 0.4.0     | None                      |                           |                   |                   | Not tested        |
 | 0.3.1     | IK2                       | None                      | None              | IK1, IK2          | IK5               |
 | 0.x.x     | None                      | Popup UI scaling (IC3)    | Partialy Tested   | Partially tested  | Not tested        |
 | 0.0.1     | None                      | Not Tested                | Not Tested        | Not tested        | Not tested        |
@@ -89,6 +92,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Detailed Linting Status
 | Version   | Linting Details Kotlin: (Nr, Worst) Android: (Nr, Worst)  |
 |-----------|-----------------------------------------------------------|
+| 0.4.0     | Mostly unused ... errors, Kotlin: (7, mild) Android: (58: Medium)
 | 0.3.1     | Many Issues, Kotlin: (8, Mild) Android: (69, Major)
 | 0.x.x     | Kotlin minimal issues, Android increasing issues
 | 0.0.1     | Clean
