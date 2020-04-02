@@ -2,7 +2,6 @@ package com.uu_uce
 
 import android.app.Activity
 import android.os.Bundle
-import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
 import android.widget.MediaController
@@ -24,11 +23,14 @@ class VideoViewer : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.video_viewer)
 
+        // Set title in bar
         val videoTitleText = findViewById<TextView>(R.id.video_title_text)
         videoTitleText.text = intent.getStringExtra("title")
 
+        // Load video
         videoPlayer = findViewById(R.id.video_player)
         videoPlayer.setVideoURI(intent.getParcelableExtra("uri"))
+
         val titleBar = findViewById<ConstraintLayout>(R.id.video_title)
 
         mediaController = object : MediaController(this) {

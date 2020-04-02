@@ -35,24 +35,13 @@ enum class LocationPollStartResult{
     }
 }
 
-fun latToUTMLetter(lat: Double): Char{
-    val letters = listOf('C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M',
-        'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W')
-    var counter = -72
-    for(l in letters){
-        if(lat < counter)
-            return l
-        counter += 8
-    }
-    return 'X'
-}
-
 data class UTMCoordinate(val zone : Int, val letter : Char, val east : Double, val north : Double)
 
 /*
 Will convert latitude, longitude coordinate to UTM.
 degPos: a pair of doubles of the form (latitude, longitude).
 It will provide you with a triple of UTM coordinates of the form (letter, easting, northing).
+Source: https://stackoverflow.com/a/28224544
  */
 fun degreeToUTM(degPos : p2) : UTMCoordinate{
     var easting : Double
@@ -103,6 +92,18 @@ fun degreeToUTM(degPos : p2) : UTMCoordinate{
     return UTMCoordinate(zone, letter, easting, northing)
 }
 
+fun latToUTMLetter(lat: Double): Char{
+    val letters = listOf('C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M',
+        'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W')
+    var counter = -72
+    for(l in letters){
+        if(lat < counter)
+            return l
+        counter += 8
+    }
+    return 'X'
+}
+
 /*
 Will poll the location for you.
  */
@@ -119,7 +120,7 @@ class LocationServices{
     pollTimeMs: how long to wait to poll the location again.
     minDist: minimum distance parameter of android.location.LocationManager.requestLocationUpdates.
     action: a lambda function that will be called when a location is received.
-      It will provide you with the location as a tuple of Double.
+    It will provide you with the location as a tuple of Double.
      */
     fun startPollThread(
         context: Context,
@@ -134,11 +135,17 @@ class LocationServices{
             return LocationPollStartResult.ALREADY_LIVE
         }
 
+        // Initialize locationManager
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        // Check to see which providers are available
         val hasGps = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
         val hasNetwork = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+
+
         var networkProvider : String? = null
 
+        // No providers available
         if (!hasGps && !hasNetwork)
             return LocationPollStartResult.LOCATION_UNAVAILABLE
 
@@ -147,15 +154,20 @@ class LocationServices{
             "gpsEnabled: $hasGps, networkEnabled: $hasNetwork"
         )
 
+        // Set temporary result
         var result = PackageManager.PERMISSION_DENIED
+
+        // Check permissions
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             result = checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
             Logger.log(LogType.Info,"LocationServices", "permissions: $result")
         }
 
+        // Stop if permissions are not granted
         if (result != PackageManager.PERMISSION_GRANTED)
             return LocationPollStartResult.PERMISSIONS_DENIED
 
+        // Create locationListener
         val locationListener = object : LocationListener {
             override fun onLocationChanged(location: Location?) {
                 if (location != null) {
@@ -181,6 +193,7 @@ class LocationServices{
 
             override fun onProviderEnabled(provider: String?) {
                 Logger.log(LogType.Event,"LocationServices", "$provider now enabled")
+                // Restart network if network was down because of missing provider
                 if(!networkRunning && !networkKilled){
                     Logger.log(LogType.Info,"LocationServices", "Restarting network")
                     startPollThread(context, pollTimeMs, minDist, action)
@@ -189,6 +202,7 @@ class LocationServices{
 
             override fun onProviderDisabled(provider: String?) {
                 Logger.log(LogType.Event,"LocationServices", "$provider now disabled")
+                // Try to restart network if active provider was lost
                 if(networkProvider == provider){
                     Logger.log(LogType.Info,"LocationServices", "Active provider disabled, restarting network")
                     networkRunning = false
@@ -197,11 +211,18 @@ class LocationServices{
             }
         }
 
-        locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, locationListener, Looper.myLooper())
-        val locationGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+        // Get last known location for available networks
+        var locationGps : Location? = null
+        if(hasGps){
+            locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, locationListener, Looper.myLooper())
+            locationGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+        }
 
-        locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, locationListener, Looper.myLooper())
-        val locationNetwork = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+        var locationNetwork : Location? = null
+        if(hasNetwork){
+            locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, locationListener, Looper.myLooper())
+            locationNetwork = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+        }
 
         /*
         Will call requestLocationUpdates with specified provider and start by entering the result of
@@ -216,26 +237,33 @@ class LocationServices{
             networkProvider = provider
         }
 
+
         if(locationGps != null && locationNetwork != null && hasGps && hasNetwork){
+            // Network was more accurate starting network location
             if(locationGps.accuracy > locationNetwork.accuracy){
                 Logger.log(LogType.Info,"LocationServices", "Using network location")
                 startLocUpdates(LocationManager.NETWORK_PROVIDER)
-            }else{
+            }
+            // GPS was more accurate starting GPS location
+            else{
                 Logger.log(LogType.Info,"LocationServices", "Using gps location")
                 startLocUpdates(LocationManager.GPS_PROVIDER)
             }
             return LocationPollStartResult.HYBRID
         }
+        // No last known location using GPS
         else if(hasGps){
             Logger.log(LogType.Info,"LocationServices", "Defaulting to gps location")
             startLocUpdates(LocationManager.GPS_PROVIDER)
             return LocationPollStartResult.GPS_ONLY
         }
+        // No last known location using Network
         else if(hasNetwork){
             Logger.log(LogType.Info,"LocationServices", "Gps unavailable, using network location")
-            startLocUpdates(LocationManager.GPS_PROVIDER)
+            startLocUpdates(LocationManager.NETWORK_PROVIDER)
             return LocationPollStartResult.NETWORK_ONLY
         }
+        // No providers available
         else{
             return LocationPollStartResult.LOCATION_UNAVAILABLE
         }
