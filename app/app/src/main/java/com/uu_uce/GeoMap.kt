@@ -68,6 +68,10 @@ class GeoMap : AppCompatActivity() {
         btn.layoutParams = ViewGroup.LayoutParams(size, size)
         lower_menu_layout.addView(btn)
 
+        dragButton.clickAction      = {menu.dragButtonTap()}
+        dragButton.dragAction       = {dx, dy -> menu.drag(dx,dy)}
+        dragButton.dragEndAction    = {dx, dy -> menu.snap(dx, dy)}
+
         menu.post {
             initMenu()
         }

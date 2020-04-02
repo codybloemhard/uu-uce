@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
@@ -57,7 +58,7 @@ class AllPins : AppCompatActivity() {
         super.onBackPressed()
     }
 
-    fun openDialog() {
+    fun openDialog(view : View) {
         val builder : AlertDialog.Builder = AlertDialog.Builder(this)
         val filterOptions : Array<String> = arrayOf("Title a-z", "Title z-a", "Difficulty easy-hard", "Difficulty hard-easy", "Type a-z", "Type z-a")
         builder
