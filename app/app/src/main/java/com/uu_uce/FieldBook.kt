@@ -5,10 +5,10 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.location.Location
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
 import android.view.Gravity
 import android.view.View
@@ -38,15 +38,9 @@ import java.io.FileOutputStream
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.stream.Stream
 
 
 class FieldBook : AppCompatActivity() {
-
-    enum class DateTimeFormat{
-        FILE_PATH,
-        FIELDBOOK_ENTRY
-    }
 
     var permissionsNeeded = listOf(
         Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -54,12 +48,10 @@ class FieldBook : AppCompatActivity() {
         Manifest.permission.CAMERA
     )
 
-    lateinit var image: ImageView
+    lateinit var imageView: ImageView
     lateinit var text: EditText
 
     private var imageUri: String = ""
-
-    private lateinit var currentPhotoPath: String
 
     lateinit var fieldbookViewModel: FieldbookViewModel
 
@@ -103,9 +95,9 @@ class FieldBook : AppCompatActivity() {
 
         text = customView.findViewById(R.id.addText)
 
-        image = customView.findViewById(R.id.addImage)
+        imageView = customView.findViewById(R.id.addImage)
 
-        image.setOnClickListener {
+        imageView.setOnClickListener {
             selectImage(this)
         }
 
@@ -130,25 +122,7 @@ class FieldBook : AppCompatActivity() {
         dialog.setItems(options) { dialogInterface, which ->
 
             when (which) {
-                0 -> {
-                    val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                    /*
-                    val photoFile: File? = try {
-                        createImageFile()
-                    } catch (ex: IOException) {
-                        null
-                    }
-                    if (photoFile != null) {
-                        val photoUri: Uri = FileProvider.getUriForFile(
-                            this,
-                            "com.uu-uce.fileprovider",
-                            photoFile
-                        )
-                        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-                    }
-                     */
-                    startActivityForResult(takePictureIntent, 0)
-                }
+                0 -> startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), 0)
                 1 -> startActivityForResult(Intent(Intent.ACTION_PICK,
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI), 1)
                 2 -> dialogInterface.dismiss()
@@ -164,46 +138,20 @@ class FieldBook : AppCompatActivity() {
     ) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && data != null) {
-
-            //TODO: this is just a thumbnail... get full size picture
             when (requestCode) {
                 0 -> {
                     val bitmap = data.extras?.get("data") as Bitmap
-                    image.setImageBitmap(bitmap)
+                    imageView.setImageBitmap(bitmap)
                     imageUri = saveBitmapToLocation(bitmap)
                 }
-                1 -> { //TODO: move file & save to imageUri
-                    imageUri = data.data!!.toString()
-                    image.setImageURI(imageUri.toUri())
+                1 -> { //TODO: this is just a thumbnail... get full size picture
+                    val uri = data.data
+                    imageView.setImageURI(uri)
+                    if (uri != null)
+                        imageUri = moveImageFromGallery(uri)
                 }
             }
         }
-    }
-
-    private fun createImageFile(): File {
-        // Create an image file name
-        val timeStamp: String = getCurrentDateTime(DateTimeFormat.FILE_PATH)
-        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        return File.createTempFile(
-            "IMG_${timeStamp}_", /* prefix */
-            ".jpg", /* suffix */
-            storageDir /* directory */
-        ).also {
-            // Save a file: path for use with ACTION_VIEW intents
-            currentPhotoPath = it.absolutePath
-        }
-    }
-
-    private fun getCurrentDateTime(dtf: DateTimeFormat): String {
-        val pattern: String = when(dtf) {
-            DateTimeFormat.FILE_PATH -> "yyyMMdd_HHmmss"
-            DateTimeFormat.FIELDBOOK_ENTRY -> "dd-MM-yyyy HH:mm"
-        }
-
-        return SimpleDateFormat(
-            pattern,
-            Locale("nl_NL")).format(Date()
-        )
     }
 
     private fun saveFieldbookEntry(
@@ -223,7 +171,7 @@ class FieldBook : AppCompatActivity() {
             )
         )
 
-        val entry = FieldbookEntry(
+        FieldbookEntry(
             degreeToUTM(Pair(location.latitude,location.longitude)).toString(),
             currentDate,
             buildJSONContent(content).also{ jsonString ->
@@ -242,19 +190,35 @@ class FieldBook : AppCompatActivity() {
     }
 
     private fun saveBitmapToLocation(image: Bitmap): String {
-        val root = "data/data/com.uu_uce/files/fieldbook"
-        val myDir: File = File("$root/Pictures").also{
-            it.mkdirs()
-        }
-        val fileName = "IMG_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}.png"
-        val file = File(myDir,fileName)
-        FileOutputStream(file).also{
+        val file = imageLocation()
+
+        FileOutputStream(imageLocation()).also{
             image.compress(Bitmap.CompressFormat.PNG,100,it)
         }.apply{
             flush()
             close()
         }
+
         return file.toUri().toString()
+    }
+
+    private fun moveImageFromGallery(currentLocation: Uri): String {
+        return saveBitmapToLocation(
+            BitmapFactory.decodeStream(
+                contentResolver.openInputStream(
+                    currentLocation
+                )
+            )
+        )
+    }
+
+    private fun imageLocation(): File {
+        val root = "data/data/com.uu_uce/files/fieldbook"
+        val myDir: File = File("$root/Pictures").also{
+            it.mkdirs()
+        }
+        val fileName = "IMG_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}.png"
+        return File(myDir,fileName)
     }
 
     private fun buildJSONContent(contentList: List<Pair<BlockTag,String>>): String {
@@ -268,5 +232,22 @@ class FieldBook : AppCompatActivity() {
                         "\"file_path\":\"${contentList.last().second}\"" +
                     "}" +
                 "]"
+    }
+
+    enum class DateTimeFormat{
+        FILE_PATH,
+        FIELDBOOK_ENTRY
+    }
+
+    private fun getCurrentDateTime(dtf: DateTimeFormat): String {
+        val pattern: String = when(dtf) {
+            DateTimeFormat.FILE_PATH -> "yyyMMdd_HHmmss"
+            DateTimeFormat.FIELDBOOK_ENTRY -> "dd-MM-yyyy HH:mm"
+        }
+
+        return SimpleDateFormat(
+            pattern,
+            Locale("nl_NL")).format(Date()
+        )
     }
 }

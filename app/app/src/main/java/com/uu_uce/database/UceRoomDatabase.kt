@@ -26,7 +26,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
             INSTANCE?.let { database ->
                 scope.launch(Dispatchers.IO) {
                     populatePinTable(database.pinDao())
-                    populateFieldbook(database.fieldbookDao())
+                    //populateFieldbook(database.fieldbookDao())
                 }
             }
         }
