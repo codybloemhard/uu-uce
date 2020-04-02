@@ -11,7 +11,7 @@ import com.uu_uce.services.UTMCoordinate
 
 class PinConversion(context: Context){
 
-    private var resource = context.resources
+    private val resource = context.resources
     private fun stringToUtm(coord: String): UTMCoordinate {
         val regex = "(\\d+|[a-zA-Z])".toRegex()
         val s = regex.findAll(coord)
@@ -60,15 +60,25 @@ class PinConversion(context: Context){
 
     }
 
-    fun pinDataToPin(pinData: PinData): Pin {
-        return Pin(
+    private fun stringToIds(ids : String) : List<Int>{
+        return ids.split(',').map{s -> s.toInt()}
+    }
+
+    fun pinDataToPin(pinData : PinData, viewModel : PinViewModel): Pin {
+        val pin = Pin(
+            pinData.pinId                           ,
             stringToUtm(pinData.location)           , //location
-            pinData.difficulty                      ,
-            stringToPinType(pinData.type)           ,
+            /*pinData.difficulty                      ,
+            stringToPinType(pinData.type)           ,*/
             pinData.title                           ,
             stringToPinContent(pinData.content)     ,
-            stringToDrawable(pinData.type, pinData.difficulty)
+            stringToDrawable(pinData.type, pinData.difficulty),
+            pinData.status                          ,
+            stringToIds(pinData.predecessorIds)     ,
+            stringToIds(pinData.followIds)          ,
+            viewModel
         )
-
+        pin.getContent().parent = pin
+        return pin
     }
 }

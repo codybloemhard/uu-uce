@@ -45,7 +45,11 @@ class Camera(
     private var animStartT = 0.0
     private var animT = 0.0
 
-    fun getViewport(wAspect: Double): Pair<p2,p2>{
+    var wAspect = 0.0
+
+    var onAnimationEnd: (Pair<p2,p2>) -> Unit = {}
+
+    fun getViewport(): Pair<p2,p2>{
         val w = viewMax.first - viewMin.first
         val h = viewMax.second - viewMin.second
         val woff = w * wAspect / 2.0 * zoom
@@ -167,6 +171,7 @@ class Camera(
         zoom = animBegin.third + (animTarget.third - animBegin.third) * t
         if(ct > animStartT + animDuration){
             animType = AnimType.NONE
+            onAnimationEnd(getViewport())
             return
         }
     }
@@ -196,6 +201,7 @@ class Camera(
 
         if(ct > animStartT + animDuration){
             animType = AnimType.NONE
+            onAnimationEnd(getViewport())
             return
         }
     }

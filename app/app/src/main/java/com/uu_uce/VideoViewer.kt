@@ -1,94 +1,91 @@
 package com.uu_uce
 
 import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
-import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
 import android.widget.MediaController
 import android.widget.TextView
 import android.widget.VideoView
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.uu_uce.misc.LogType
+import com.uu_uce.misc.Logger
 
 
 class VideoViewer : Activity() {
     private var uiVisible : Boolean = true
     private lateinit var mediaController : MediaController
+    private lateinit var videoPlayer : VideoView
+
+    private var prevVideoPos : Int = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.video_viewer)
 
+        // Set title in bar
         val videoTitleText = findViewById<TextView>(R.id.video_title_text)
         videoTitleText.text = intent.getStringExtra("title")
 
-        val videoPlayer = findViewById<VideoView>(R.id.video_player)
+        // Load video
+        videoPlayer = findViewById(R.id.video_player)
         videoPlayer.setVideoURI(intent.getParcelableExtra("uri"))
 
+        val titleBar = findViewById<ConstraintLayout>(R.id.video_title)
+
         mediaController = object : MediaController(this) {
+            override fun show() {
+                show(0)
+            }
             override fun show(timeout: Int) {
                 super.show(0)
+                titleBar.visibility = View.VISIBLE
+                uiVisible = true
             }
-            override fun hide(){
-                super.show(0)
+            override fun hide() {
+                super.hide()
+                titleBar.visibility = View.GONE
+                uiVisible = false
             }
         }
 
         videoPlayer.setMediaController(mediaController)
         mediaController.setAnchorView(findViewById(R.id.video_player))
 
-        videoPlayer.start()
+        videoPlayer.setOnPreparedListener {
+            if(savedInstanceState != null){
+                val videoPos = savedInstanceState.getInt("prevVideoPos")
+                videoPlayer.seekTo(videoPos)
+            }
+            videoPlayer.start()
+            mediaController.show(0)
+        }
 
         val closeVideoButton = findViewById<Button>(R.id.close_video_player)
 
         closeVideoButton.setOnClickListener {
-            videoPlayer.stopPlayback()
-            val intent = Intent(this, GeoMap::class.java)
-            startActivity(intent)
+            this.finish()
         }
     }
 
-    private fun setUIVisibility(visible : Boolean){
-        val titleBar = findViewById<ConstraintLayout>(R.id.video_title)
-        if(visible == uiVisible) return
-        if(visible){
-            titleBar.visibility = View.VISIBLE
-            mediaController.show()
-            mediaController.visibility = View.VISIBLE
-        }
-        else{
-            titleBar.visibility = View.GONE
-            mediaController.visibility = View.INVISIBLE
-        }
-        uiVisible = !uiVisible
+    override fun finish() {
+        mediaController.hide()
+        videoPlayer.stopPlayback()
+        super.finish()
     }
 
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if(event?.action == MotionEvent.ACTION_DOWN){
-            setUIVisibility(!uiVisible)
-            return true
-        }
-        return  false
+    override fun onPause(){
+        prevVideoPos = videoPlayer.currentPosition
+        super.onPause()
     }
 
-    // VLC player code
-    /*private fun initializeVideoPlayer(videoURI: Uri, view: View, activity: Activity) {
-        val videoPlayer: VLCVideoLayout = view.findViewById(R.id.video_player)
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt("prevVideoPos", prevVideoPos)
+        super.onSaveInstanceState(outState)
+    }
 
-        /* PLEASE KEEP COMMENTED: NEED THIS FOR FURTHER DEVELOPMENT
-        val playerSurface: SurfaceView = activity.findViewById(R.id.player_surface)
-        val surfaceHolder = playerSurface.holder
-        val surface = surfaceHolder.surface
-        val surfaceFrame: FrameLayout = activity.findViewById(R.id.player_surface_frame)
-         */
-
-        val libVLC: LibVLC = LibVLC(activity)
-        val mediaPlayer: MediaPlayer = MediaPlayer(libVLC)
-
-        mediaPlayer.attachViews(videoPlayer, null, false, false)
-        val media: Media = Media(libVLC, videoURI)
-        mediaPlayer.media = media
-        media.release()
-        mediaPlayer.play()
-    }*/
+    override fun onBackPressed() {
+        Logger.log(LogType.Continuous, "VideoViewer", "test3")
+        finish()
+    }
 }

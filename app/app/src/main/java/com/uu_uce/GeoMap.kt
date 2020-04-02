@@ -1,88 +1,175 @@
 package com.uu_uce
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.graphics.Paint
 import android.graphics.Point
 import android.os.Bundle
 import android.view.Display
+import android.view.MotionEvent
+import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.uu_uce.database.PinViewModel
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.services.LocationServices
-import com.uu_uce.services.getPermissions
-import com.uu_uce.views.MenuButton
+import com.uu_uce.services.*
+import com.uu_uce.shapefiles.LayerType
+import com.uu_uce.views.DragStatus
 import kotlinx.android.synthetic.main.activity_geo_map.*
+import java.io.File
 
 class GeoMap : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel
+    private val permissionsNeeded = listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
     private var screenDim = Point(0,0)
     private var statusBarHeight = 0
     private var resourceId = 0
+    private var started = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Logger.setTagEnabled("CustomMap", false)
+        Logger.setTagEnabled("LocationServices", false)
+        Logger.setTagEnabled("Pin", false)
+        Logger.setTagEnabled("DrawOverlay", false)
+
         super.onCreate(savedInstanceState)
+
+        start()
+        /* This may be needed if the maps are read out of external memory
+        if(checkPermissions(this, permissionsNeeded).count() > 0){
+            getPermissions(this, permissionsNeeded, EXTERNAL_FILES_REQUEST)
+        }
+        else{
+            start()
+        }*/
+    }
+
+    private fun start(){
         setContentView(R.layout.activity_geo_map)
 
-        getPermissions(this, this, LocationServices.permissionsNeeded + customMap.permissionsNeeded)
-
+        // Start database and get pins from database
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         this.customMap.setViewModel(pinViewModel)
         this.customMap.setLifeCycleOwner(this)
-        this.customMap.updatePins()
+        this.customMap.setPins()
 
         resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
         if (resourceId > 0) {
             statusBarHeight = resources.getDimensionPixelSize(resourceId)
         }
 
-        button.setOnClickListener{customMap.zoomToDevice()}
+        (Display::getSize)(windowManager.defaultDisplay, screenDim)
+        val longest = maxOf(screenDim.x, screenDim.y)
+        val size = (longest*menu.buttonPercent).toInt()
 
-        initMenu()
+        // Initialize menu
+        val btn1 = ImageButton(this, null, android.R.attr.buttonBarButtonStyle)
+        btn1.setImageResource(R.drawable.logotp)
+        btn1.setBackgroundColor(Color.BLUE)
+        btn1.setOnClickListener{customMap.startAllPins()}
+        btn1.layoutParams = ViewGroup.LayoutParams(size, size)
+        lower_menu_layout.addView(btn1)
+
+        val btn2 = ImageButton(this, null, android.R.attr.buttonBarButtonStyle)
+        btn2.setImageResource(R.drawable.logotp)
+        btn2.setBackgroundColor(Color.GREEN)
+        btn2.setOnClickListener{customMap.startFieldBook()}
+        btn2.layoutParams = ViewGroup.LayoutParams(size, size)
+        lower_menu_layout.addView(btn2)
+
+        dragButton.clickAction      = {menu.dragButtonTap()}
+        dragButton.dragAction       = {dx, dy -> menu.drag(dx,dy)}
+        dragButton.dragEndAction    = {dx, dy -> menu.snap(dx, dy)}
+
         menu.post {
-            val p = Paint()
-            p.color = Color.RED
-            val t = Paint()
-            t.color = Color.GREEN
-            val q = Paint()
-            q.color = Color.BLUE
-            val c1 = MenuButton((menu.width - menu.downY)/ 2, 0f, (menu.width + menu.downY)/ 2, menu.downY, { menu.open() }, p)
-            val c2 = MenuButton(20f, menu.downY, 20+(menu.barY - menu.downY), menu.barY, { customMap.toggleLayer(0) }, p)
-            val c3 = MenuButton(20+(menu.barY - menu.downY), menu.downY, 20+(2*(menu.barY - menu.downY)), menu.barY, { customMap.allPins() }, t)
-            val c4 = MenuButton(20+2*(menu.barY - menu.downY), menu.downY, 20+(3*(menu.barY - menu.downY)), menu.barY, { customMap.fieldBook() }, q)
-            menu.addMenuChild(c1)
-            menu.addMenuChild(c2)
-            menu.addMenuChild(c3)
-            menu.addMenuChild(c4)
+            initMenu()
         }
 
+        // Read map
+        val dir = File(filesDir, "mydir")
+        customMap.addLayer(LayerType.Water, dir, toggle_layer_layout, size)
+        customMap.initializeCamera()
+
+        customMap.tryStartLocServices(this)
+
+        // Set center on location button functionality
+        center_button.setOnClickListener{
+            if(customMap.locationAvailable){
+                customMap.zoomToDevice()
+            }
+            else{
+                Toast.makeText(this, "Location not avaiable", Toast.LENGTH_LONG).show()
+                getPermissions(this, LocationServices.permissionsNeeded, LOCATION_REQUEST)
+            }
+        }
+
+        started = true
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        // Move the menu down when the map is tapped
+        if(menu.dragStatus != DragStatus.Down &&
+            ev.action == MotionEvent.ACTION_DOWN &&
+            !(ev.x > menu.x && ev.x < menu.x + menu.width && ev.y-statusBarHeight > menu.y && ev.y-statusBarHeight < menu.y + menu.height)){
+            menu.down()
+            return true
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
+    override fun onBackPressed() {
+        if(menu.dragStatus != DragStatus.Down){
+            menu.down()
+            return
+        }
+
+        customMap.activePopup?.dismiss()
     }
 
     override fun onResume() {
+        if(started){
+            super.onResume()
+            customMap.setPins()
+            customMap.redrawMap()
+        }
         super.onResume()
-        this.customMap.updatePins()
     }
 
     private fun initMenu(){
-        (Display::getSize)(windowManager.defaultDisplay, screenDim)
-        menu.setScreenHeight(screenDim.y - statusBarHeight)
+        menu.setScreenHeight(screenDim.y - statusBarHeight, dragButton.height, toggle_layer_scroll.height, lower_menu_layout.height)
     }
 
-    // Respond to permission request
+    // Respond to permission request result
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        if (requestCode == 1) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                Logger.log(LogType.Info,"GPS", "Permissions granted")
-                customMap.startLocServices()
+        when (requestCode) {
+            EXTERNAL_FILES_REQUEST -> {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    Logger.log(LogType.Info,"GeoMap", "Permissions granted")
+                    start()
+                }
+                else{
+                    Logger.log(LogType.Info,"GeoMap", "Permissions were not granted, asking again")
+                    getPermissions(this, permissionsNeeded, EXTERNAL_FILES_REQUEST)
+                }
             }
-            else
-                Logger.log(LogType.Info,"GPS", "Permissions were not granted")
+            LOCATION_REQUEST -> {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    Logger.log(LogType.Info,"GeoMap", "Permissions granted")
+                    customMap.locationAvailable = true
+                    customMap.startLocServices()
+                }
+                else{
+                    Logger.log(LogType.Info,"GeoMap", "Permissions were not granted")
+                    customMap.locationAvailable = false
+                }
+            }
         }
     }
 }

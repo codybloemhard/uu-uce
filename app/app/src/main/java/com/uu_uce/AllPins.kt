@@ -1,9 +1,12 @@
 package com.uu_uce
 
+import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageButton
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -22,6 +25,7 @@ class AllPins : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel
     private var selectedOption: Int = 0
     private lateinit var sharedPref : SharedPreferences
+    private lateinit var viewAdapter: PinListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +35,7 @@ class AllPins : AppCompatActivity() {
 
         viewManager = LinearLayoutManager(this)
 
-        val viewAdapter = PinListAdapter(this)
+        viewAdapter = PinListAdapter(this)
 
         recyclerView = findViewById<RecyclerView>(R.id.allpins_recyclerview).apply {
             layoutManager = viewManager
@@ -39,7 +43,7 @@ class AllPins : AppCompatActivity() {
         }
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         pinViewModel.allPinData.observe(this, Observer { pins ->
-            pins?.let { viewAdapter.setPins(sortList(it, sharedPref.getInt("selectedOption", 0))) }
+            pins?.let { viewAdapter.setPins(sortList(pins, sharedPref.getInt("selectedOption", 0)), pinViewModel) }
         })
 
         val filterButton : FloatingActionButton = findViewById<FloatingActionButton>(R.id.fab)
@@ -48,10 +52,16 @@ class AllPins : AppCompatActivity() {
         sharedPref = this.getPreferences(Context.MODE_PRIVATE)
     }
 
-    fun openDialog(view: View) {
-        val builder : AlertDialog.Builder = this.let {
-            AlertDialog.Builder(it)
+    override fun onBackPressed() {
+        if(viewAdapter.activePopup != null) {
+            viewAdapter.activePopup?.dismiss()
+            return
         }
+        super.onBackPressed()
+    }
+
+    fun openDialog(view : View) {
+        val builder : AlertDialog.Builder = AlertDialog.Builder(this)
         val filterOptions : Array<String> = arrayOf("Title a-z", "Title z-a", "Difficulty easy-hard", "Difficulty hard-easy", "Type a-z", "Type z-a")
         builder
             .setTitle("Filter by:")
@@ -69,12 +79,12 @@ class AllPins : AppCompatActivity() {
     }
 
     private fun sortList(category: Int){
-        val viewAdapter = PinListAdapter(this)
+        viewAdapter = PinListAdapter(this)
         recyclerView.adapter = viewAdapter
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         pinViewModel.allPinData.observe(this, Observer { pins ->
             pins?.let {
-                viewAdapter.setPins(sortList(it, category)) }
+                viewAdapter.setPins(sortList(it, category), pinViewModel) }
         })
     }
 

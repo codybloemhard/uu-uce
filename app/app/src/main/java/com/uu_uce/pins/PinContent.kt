@@ -5,10 +5,8 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.util.JsonReader
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.view.Gravity
+import android.widget.*
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.VideoViewer
@@ -16,9 +14,11 @@ import java.io.StringReader
 
 class PinContent(contentString: String) {
     val contentBlocks : List<ContentBlockInterface>
+    lateinit var parent : Pin
     init{
         contentBlocks = getContent(contentString)
     }
+
 
     private fun getContent(contentString: String) : List<ContentBlockInterface>{
             val reader = JsonReader(StringReader(contentString))
@@ -37,6 +37,7 @@ class PinContent(contentString: String) {
         return contentBlocks
     }
 
+    // Generate ContentBlock from JSON string
     private fun readBlock(reader: JsonReader): ContentBlockInterface {
         var blockTag        = BlockTag.UNDEFINED
         var textString      = ""
@@ -53,7 +54,6 @@ class PinContent(contentString: String) {
                 }
                 "text" -> {
                     textString = reader.nextString()
-                    //if(blockTag != BlockTag.TEXT) //TODO: alert user that only TextContentBlock uses text
                 }
                 "file_path" -> {
                     filePath = when(blockTag) {
@@ -66,7 +66,6 @@ class PinContent(contentString: String) {
 
                 "title" -> {
                     title = reader.nextString()
-                    //if(blockTag != BlockTag.VIDEO) //TODO: alert user that only VideoContentBlock uses title
                 }
                 "thumbnail" -> {
                     thumbnailURI = Uri.parse(reader.nextString())
@@ -89,6 +88,7 @@ class PinContent(contentString: String) {
 
 interface ContentBlockInterface{
     fun generateContent(layout : LinearLayout, activity : Activity)
+    fun getFilePath() : List<String>
 }
 
 class TextContentBlock(val textContent : String) : ContentBlockInterface {
@@ -98,48 +98,64 @@ class TextContentBlock(val textContent : String) : ContentBlockInterface {
         content.setPadding(12,12,12,20)
         layout.addView(content)
     }
+    override fun getFilePath() : List<String>{
+        return listOf()
+    }
 }
 
 class ImageContentBlock(val imageURI : Uri) : ContentBlockInterface{
     override fun generateContent(layout : LinearLayout, activity : Activity){
         val content = ImageView(activity)
         content.setImageURI(imageURI)
+
         layout.addView(content)
+    }
+
+    override fun getFilePath() : List<String>{
+        return listOf(imageURI.toString())
     }
 }
 
 class VideoContentBlock(private val videoURI : Uri, val thumbnailURI : Uri, private val title : String) : ContentBlockInterface{
     override fun generateContent(layout : LinearLayout, activity : Activity){
 
-        val relativeLayout = RelativeLayout(activity) //TODO: maybe make this an constraintlayout?
+        val frameLayout = FrameLayout(activity)
 
         // Create thumbnail image
         if(thumbnailURI == Uri.EMPTY){
-            relativeLayout.setBackgroundColor(Color.BLACK)
+            frameLayout.setBackgroundColor(Color.BLACK)
         }
         else{
             val thumbnail = ImageView(activity)
             thumbnail.setImageURI(thumbnailURI)
-            thumbnail.scaleType = ImageView.ScaleType.FIT_CENTER
-            relativeLayout.addView(thumbnail)
+            thumbnail.scaleType = ImageView.ScaleType.CENTER
+            frameLayout.addView(thumbnail)
         }
 
-        //relativeLayout.setBackgroundColor(Color.GREEN) //TODO: ADDED FOR DEBUGGING PURPOSES
-        relativeLayout.layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 600) //TODO: don't do magical numbers
+        frameLayout.layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
 
         // Create play button
         val playButton = ImageView(activity)
-        playButton.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.play, null) ?: error ("Image not found"))
-        playButton.scaleType = ImageView.ScaleType.FIT_CENTER //TODO: find correct scaletype
+        playButton.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.ic_sprite_play, null) ?: error ("Image not found"))
+        playButton.scaleType = ImageView.ScaleType.CENTER_INSIDE
+        val buttonLayout = FrameLayout.LayoutParams(500, 500) // TODO: convert dp to pixels
+        buttonLayout.gravity = Gravity.CENTER
+        playButton.layoutParams = buttonLayout
         playButton.setOnClickListener{openVideoView(videoURI, title, activity)}
 
         // Add thumbnail and button
-        relativeLayout.addView(playButton)
-        layout.addView(relativeLayout)
+        frameLayout.addView(playButton)
+        layout.addView(frameLayout)
+    }
+
+    override fun getFilePath() : List<String>{
+        if(thumbnailURI == Uri.EMPTY) return listOf()
+        return listOf(thumbnailURI.toString())
     }
 
     private fun openVideoView(videoURI: Uri, videoTitle : String, activity : Activity){
         val intent = Intent(activity, VideoViewer::class.java)
+
         intent.putExtra("uri", videoURI)
         intent.putExtra("title", videoTitle)
         activity.startActivity(intent)

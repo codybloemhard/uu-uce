@@ -41,18 +41,18 @@ import java.util.*
 
 class FieldBook : AppCompatActivity() {
 
-    var permissionsNeeded = listOf(
+    private var permissionsNeeded = listOf(
         Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.WRITE_EXTERNAL_STORAGE,
         Manifest.permission.CAMERA
     )
 
-    lateinit var imageView: ImageView
+    private lateinit var imageView: ImageView
     lateinit var text: EditText
 
     private var imageUri: String = ""
 
-    lateinit var fieldbookViewModel: FieldbookViewModel
+    private lateinit var fieldbookViewModel: FieldbookViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,9 +89,16 @@ class FieldBook : AppCompatActivity() {
         popupWindow.isFocusable = true
         popupWindow.update()
 
-        checkPermissions(this,permissionsNeeded + LocationServices.permissionsNeeded).let {
-            if (it.count()!=0)
-                getPermissions(this, this,it)
+        checkPermissions(this,permissionsNeeded).let {
+            for (item in it)
+                when(item) {
+                    Manifest.permission.READ_EXTERNAL_STORAGE ->
+                        getPermissions(this,permissionsNeeded,1)
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE ->
+                        getPermissions(this,permissionsNeeded,1)
+                    Manifest.permission.CAMERA ->
+                        getPermissions(this,permissionsNeeded,3)
+                }
         }
 
         text = customView.findViewById(R.id.addText)

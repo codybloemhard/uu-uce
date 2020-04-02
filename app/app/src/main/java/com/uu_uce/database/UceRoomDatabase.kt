@@ -10,15 +10,13 @@ import com.uu_uce.fieldbook.FieldbookEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.text.DateFormat
-import java.util.*
 
 @Database(entities = [PinData::class, FieldbookEntry::class], version = 1, exportSchema = false)
 abstract class UceRoomDatabase : RoomDatabase() {
 
-    abstract fun pinDao() : PinDao
+    abstract fun pinDao(): PinDao
 
-    abstract fun fieldbookDao() : FieldbookDao
+    abstract fun fieldbookDao(): FieldbookDao
 
     private class UceDatabaseCallback(private val scope: CoroutineScope) : RoomDatabase.Callback() {
         override fun onOpen(db: SupportSQLiteDatabase) {
@@ -50,34 +48,44 @@ abstract class UceRoomDatabase : RoomDatabase() {
             for (entry in fieldbook)
                 fieldbookDao.insert(entry)
         }
+
         suspend fun populatePinTable(pinDao: PinDao) {
             pinDao.deleteAllPins()
 
-            val pins : MutableList<PinData> = mutableListOf(
+            val pins: MutableList<PinData> = mutableListOf(
                 PinData(
                     0,
                     "31N3149680N46777336E",
                     1,
-                    "TEXT" ,
-                    "testPin1",
+                    "TEXT",
+                    "Text pin",
                     "[{\"tag\":\"TEXT\", \"text\":\"test\"}]",
-                    60
+                    1,
+                    "-1",
+                    "-1"
                 ),
                 PinData(
                     1,
                     "31N3133680N46718336E",
                     2,
                     "IMAGE",
-                    "testPin2",
-                    "[{\"tag\":\"IMAGE\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/images/test.png\"}]", 60
+                    "Image pin",
+                    "[{\"tag\":\"IMAGE\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/images/test.png\"}]",
+                    1,
+                    "-1",
+                    "2"
                 ),
                 PinData(
                     2,
                     "31N3130000N46710000E",
                     3,
                     "VIDEO",
-                    "testPin3",
-                    "[{\"tag\":\"VIDEO\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/videos/zoo.mp4\", \"thumbnail\":\"file:///data/data/com.uu_uce/files/pin_content/videos/thumbnails/zoothumbnail.png\", \"title\":\"zoo video\"}]", 60)
+                    "Video pin",
+                    "[{\"tag\":\"VIDEO\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/videos/zoo.mp4\", \"thumbnail\":\"file:///data/data/com.uu_uce/files/pin_content/videos/thumbnails/zoothumbnail.png\", \"title\":\"zoo video\"}]",
+                    0,
+                    "1",
+                    "-1"
+                )
             )
 
             for (pin in pins) {
@@ -86,13 +94,12 @@ abstract class UceRoomDatabase : RoomDatabase() {
         }
     }
 
-    companion object{
+    companion object {
         @Volatile
         private var INSTANCE: UceRoomDatabase? = null
 
         fun getDatabase(context: Context, scope: CoroutineScope): UceRoomDatabase {
-            return INSTANCE ?:
-            synchronized(this) {
+            return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     UceRoomDatabase::class.java,

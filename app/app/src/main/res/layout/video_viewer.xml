@@ -32,7 +32,7 @@
             android:layout_height="24dp"
             android:layout_marginStart="3dp"
             android:layout_marginTop="3dp"
-            android:background="@drawable/close"
+            android:background="@drawable/ic_sprite_exit"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

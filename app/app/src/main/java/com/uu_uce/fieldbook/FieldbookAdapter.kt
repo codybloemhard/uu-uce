@@ -3,12 +3,13 @@ package com.uu_uce.fieldbook
 import android.app.Activity
 import android.content.DialogInterface
 import android.net.Uri
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toFile
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
 import com.uu_uce.pins.*
@@ -16,6 +17,7 @@ import com.uu_uce.pins.*
 class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookViewModel) : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>() {
 
     private var fieldbook: MutableList<FieldbookEntry> = mutableListOf()
+    var activePopup: PopupWindow? = null
 
     class FieldbookViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val parentView = itemView
@@ -70,10 +72,50 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
             }
         }
 
-        holder.parentView.setOnClickListener {
-            //TODO: this isn't the correct parentView
-            openPinPopupWindow(entry.location,content,holder.parentView,activity)
-        }
+        holder.parentView.setOnClickListener (
+            View.OnClickListener(
+                fun (v) {
+                    val layoutInflater = activity.layoutInflater
+
+                    // Build an custom view (to be inflated on top of our current view & build it's popup window)
+                    val customView = layoutInflater.inflate(R.layout.pin_content_view, null, false)
+
+                    val popupWindow = PopupWindow(
+                        customView,
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+
+                    customView.findViewById<CheckBox>(R.id.complete_box).isEnabled = false
+                    customView.findViewById<CheckBox>(R.id.complete_box).isVisible = false
+                    customView.findViewById<CheckBox>(R.id.complete_box).isClickable = false
+
+                    // Add the title for the popup window
+                    val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
+                    windowTitle.text = entry.location
+
+                    // Add content to popup window
+                    val layout: LinearLayout = customView.findViewById(R.id.scrollLayout)
+
+                    // Fill layout of popup
+                    content.contentBlocks.forEach { cb ->
+                        cb.generateContent(layout, activity)
+                    }
+
+                    // Open popup
+                    popupWindow.showAtLocation(v, Gravity.CENTER, 0, 0)
+
+                    // Get elements
+                    val btnClosePopupWindow =
+                        customView.findViewById<Button>(R.id.popup_window_close_button)
+
+                    // Set onClickListeners
+                    btnClosePopupWindow.setOnClickListener {
+                        popupWindow.dismiss()
+                    }
+                }
+            )
+        )
 
         holder.parentView.setOnLongClickListener(
             View.OnLongClickListener(
