@@ -1,7 +1,6 @@
 package com.uu_uce.fieldbook
 
 import android.app.Activity
-import android.content.ContentResolver
 import android.content.DialogInterface
 import android.net.Uri
 import android.view.View
@@ -10,12 +9,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toFile
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStore
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
 import com.uu_uce.pins.*
-import java.io.File
 
 class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookViewModel) : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>() {
 
