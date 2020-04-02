@@ -32,8 +32,6 @@ class VideoViewer : Activity() {
         videoPlayer = findViewById(R.id.video_player)
         videoPlayer.setVideoURI(intent.getParcelableExtra("uri"))
 
-        val act = this
-
         val titleBar = findViewById<ConstraintLayout>(R.id.video_title)
 
         mediaController = object : MediaController(this) {
