@@ -23,10 +23,11 @@ import java.io.File
 
 class GeoMap : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel
+    private val permissionsNeeded = listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
     private var screenDim = Point(0,0)
     private var statusBarHeight = 0
     private var resourceId = 0
-    private val permissionsNeeded = listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+    private var started = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,6 +92,8 @@ class GeoMap : AppCompatActivity() {
                 getPermissions(this, LocationServices.permissionsNeeded, LOCATION_REQUEST)
             }
         }
+
+        started = true
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
@@ -113,12 +116,11 @@ class GeoMap : AppCompatActivity() {
     }
 
     override fun onResume() {
-        if(checkPermissions(this, LocationServices.permissionsNeeded + permissionsNeeded).count() == 0){
+        if(started){
             super.onResume()
             customMap.setPins()
             customMap.redrawMap()
         }
-
         super.onResume()
     }
 

@@ -7,7 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.recyclerview.widget.RecyclerView
@@ -20,6 +22,7 @@ class PinListAdapter internal constructor(
     private val activity: Activity
 ) : RecyclerView.Adapter<PinListAdapter.PinViewHolder>() {
 
+    private val resource = activity.resources
     private val inflater: LayoutInflater = LayoutInflater.from(activity)
     private var pins = emptyList<PinData>()
     private val pinViewModel: PinViewModel = ViewModelProvider(activity as ViewModelStoreOwner).get(PinViewModel::class.java)
@@ -28,7 +31,7 @@ class PinListAdapter internal constructor(
         val parentView : View = itemView
         val pinTitle: TextView = itemView.findViewById(R.id.textView)
         val pinCoord: TextView = itemView.findViewById(R.id.textView2)
-        val pinType: TextView = itemView.findViewById(R.id.textView3)
+        val pinType: ImageView = itemView.findViewById(R.id.type_image)
         val pinDiff: TextView = itemView.findViewById(R.id.textView4)
         val pinDiffC: View = itemView.findViewById(R.id.diff)
         val pinStatus: CheckBox = itemView.findViewById(R.id.checkBox)
@@ -44,7 +47,6 @@ class PinListAdapter internal constructor(
         val current = pins[position]
         holder.pinTitle.text = current.title
         holder.pinCoord.text = current.location
-        holder.pinType.text = current.type
         holder.pinStatus.isChecked = (current.status == 2)
         holder.pinButton.setOnClickListener{
             val pinConverter = PinConversion(activity)
@@ -70,6 +72,15 @@ class PinListAdapter internal constructor(
                 holder.pinDiff.text = activity.getString(R.string.unknown)
                 holder.pinDiffC.setBackgroundColor(Color.parseColor("#686868"))
             }
+        }
+
+        when(current.type){
+            "TEXT" -> holder.pinType.setImageDrawable(
+                ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_text_black, null) ?: error ("Image not found"))
+            "IMAGE" -> holder.pinType.setImageDrawable(
+            ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image_black, null) ?: error ("Image not found"))
+            "VIDEO" -> holder.pinType.setImageDrawable(
+            ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video_black, null) ?: error ("Image not found"))
         }
     }
 

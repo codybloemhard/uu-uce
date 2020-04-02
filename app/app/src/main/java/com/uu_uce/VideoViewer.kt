@@ -23,9 +23,11 @@ class VideoViewer : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.video_viewer)
 
+        // Set title in bar
         val videoTitleText = findViewById<TextView>(R.id.video_title_text)
         videoTitleText.text = intent.getStringExtra("title")
 
+        // Load video
         videoPlayer = findViewById(R.id.video_player)
         videoPlayer.setVideoURI(intent.getParcelableExtra("uri"))
 

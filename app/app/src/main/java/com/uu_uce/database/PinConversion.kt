@@ -11,7 +11,7 @@ import com.uu_uce.services.UTMCoordinate
 
 class PinConversion(context: Context){
 
-    private var resource = context.resources
+    private val resource = context.resources
     private fun stringToUtm(coord: String): UTMCoordinate {
         val regex = "(\\d+|[a-zA-Z])".toRegex()
         val s = regex.findAll(coord)

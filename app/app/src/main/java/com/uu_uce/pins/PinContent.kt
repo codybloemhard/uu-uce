@@ -141,7 +141,7 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         val playButton = ImageView(activity)
         playButton.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.ic_sprite_play, null) ?: error ("Image not found"))
         playButton.scaleType = ImageView.ScaleType.CENTER_INSIDE
-        val buttonLayout = FrameLayout.LayoutParams(500, 500)
+        val buttonLayout = FrameLayout.LayoutParams(500, 500) // TODO: convert dp to pixels
         buttonLayout.gravity = Gravity.CENTER
         playButton.layoutParams = buttonLayout
         playButton.setOnClickListener{openVideoView(videoURI, title, activity)}
