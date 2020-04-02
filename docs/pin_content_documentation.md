@@ -4,7 +4,7 @@ The content of a pin consists of multiple content blocks,
 this allows the user the ability to combine any amount of types of content in a single pin.
 
 ## Types of content blocks
-There are 3 different kinds of pin content blocks:
+There are 4 different kinds of pin content blocks:
 1. Text content
     Use: 		Displaying a string of text in the content of a pin.
     
@@ -18,6 +18,10 @@ There are 3 different kinds of pin content blocks:
     
     Parameters: `tag`, `file_name`, `thumbnail(?)`, `title(?)`
     (Parameters that are followed by `(?)` are optional and the `(?)` is not part of the parameter)
+4. Mutliple choice quiz
+	Use: 		Inserting buttons with different answers in the content of a pin.
+	
+	Parameters:	`tag`, `mc_correct_option`, `,mc_incorrect_option`
 
 ## Format
 We use a JSON text format for storing the pin content, it works as follows:
@@ -53,6 +57,11 @@ The following example will generate a block of text followed by an image and fin
         "file_name"	: "your_video_name.mp4",
         "thumbnail" : "your_thumbnail_name.png",
         "title"			: "Put video title here"
+    },
+	{
+        "tag" 					: "MCQUIZ",
+        "mc_correct_option"		: "The correct answer to the question",
+        "mc_incorrect_option" 	: "An incorrect answer to the question"
     }
 ]
 ```
@@ -60,6 +69,7 @@ The following example will generate a block of text followed by an image and fin
 Notes: 
 - The video content block has the optional parameters thumbnail and title, these can be left out although not recommended.
 - The order in which parameters are assigned is arbitrary.
+- A mutiple choice quiz is only valid if it has at least one correct and one incorrect answer.
 
 
 ## File location (developer only)

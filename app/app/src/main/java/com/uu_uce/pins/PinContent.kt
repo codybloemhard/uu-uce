@@ -5,14 +5,16 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.util.JsonReader
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.view.Gravity
+import android.view.View
+import android.widget.*
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.VideoViewer
+import com.uu_uce.misc.LogType
+import com.uu_uce.misc.Logger
 import java.io.StringReader
+
 
 class PinContent(contentString: String) {
     val contentBlocks : List<ContentBlockInterface>
@@ -41,11 +43,13 @@ class PinContent(contentString: String) {
     private fun readBlock(reader: JsonReader): ContentBlockInterface {
         val dir             = "file:///data/data/com.uu_uce/files/pin_content/"
 
-        var blockTag        = BlockTag.UNDEFINED
-        var textString      = ""
-        var fileName        = ""
-        var title           = ""
-        var thumbnailURI    = Uri.EMPTY
+        var blockTag                                    = BlockTag.UNDEFINED
+        var textString                                  = ""
+        var fileName                                    = ""
+        var title                                       = ""
+        var thumbnailURI                                = Uri.EMPTY
+        val mcCorrectOptions : MutableList<String>      = mutableListOf()
+        val mcIncorrectOptions : MutableList<String>    = mutableListOf()
 
         reader.beginObject()
         while (reader.hasNext()) {
@@ -64,6 +68,7 @@ class PinContent(contentString: String) {
                         BlockTag.TEXT       -> error("Undefined function") //TODO: Add reading text from file
                         BlockTag.IMAGE      -> dir + "images/" + reader.nextString()
                         BlockTag.VIDEO      -> dir + "videos/" + reader.nextString()
+                        BlockTag.MCQUIZ     -> error("Multiple choice blocks can not be loaded from file")
                     }
                 }
 
@@ -74,6 +79,12 @@ class PinContent(contentString: String) {
                 "thumbnail" -> {
                     thumbnailURI = Uri.parse(dir + "videos/thumbnails/" + reader.nextString())
                     //if(blockTag != BlockTag.VIDEO) //TODO: alert user that only VideoContentBlock uses thumbnail
+                }
+                "mc_correct_option" -> {
+                    mcCorrectOptions.add(reader.nextString())
+                }
+                "mc_incorrect_option" -> {
+                    mcIncorrectOptions.add(reader.nextString())
                 }
                 else -> {
                     error("Wrong content format")
@@ -86,6 +97,12 @@ class PinContent(contentString: String) {
             BlockTag.TEXT       -> TextContentBlock(textString)
             BlockTag.IMAGE      -> ImageContentBlock(Uri.parse(fileName))
             BlockTag.VIDEO      -> VideoContentBlock(Uri.parse(fileName), thumbnailURI, title)
+            BlockTag.QUIZMC     -> {
+                if(mcIncorrectOptions.count() < 1 && mcCorrectOptions.count() < 1) {
+                    error("Mutliple choice questions require at least one correct and one incorrect answer")
+                }
+                MCContentBlock( mcCorrectOptions, mcIncorrectOptions)
+            }
         }
     }
 }
@@ -149,19 +166,85 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
     }
 }
 
+class MCContentBlock(private val correctAnswers : List<String>, private val incorrectAnswers : List<String>) : ContentBlockInterface{
+    override fun generateContent(layout: LinearLayout, activity: Activity) {
+        val answers : MutableList<Pair<String, Boolean>> = mutableListOf()
+        for(answer in correctAnswers) answers.add(Pair(answer, true))
+        for(answer in incorrectAnswers) answers.add(Pair(answer, false))
+
+        val shuffledAnswers = answers.shuffled()
+        val table : TableLayout = TableLayout(activity)
+
+        var currentRow = TableRow(activity)
+        currentRow.gravity = Gravity.CENTER_HORIZONTAL
+        for(i in 0 until shuffledAnswers.count()){
+            val currentFrame = FrameLayout(activity)
+            val frameParams = TableRow.LayoutParams(
+                TableRow.LayoutParams.MATCH_PARENT,
+                TableRow.LayoutParams.MATCH_PARENT
+            )
+            frameParams.setMargins(5, 5, 5, 5)
+            if(shuffledAnswers[i].second){
+                currentFrame.setOnClickListener {
+                    Toast.makeText(activity, "Correct", Toast.LENGTH_SHORT).show()
+                }
+            }
+            else{
+                currentFrame.setOnClickListener {
+                    Toast.makeText(activity, "Incorrect", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            currentFrame.layoutParams = frameParams
+
+            val background = View(activity)
+            background.setBackgroundColor(Color.RED)
+            val backgroundParams = TableRow.LayoutParams(
+                330,
+                330
+            )
+            background.layoutParams = backgroundParams
+            currentFrame.addView(background)
+
+            val answer = TextView(activity)
+            answer.text = shuffledAnswers[i].first
+            answer.gravity = Gravity.CENTER
+            val textParams = TableLayout.LayoutParams(
+                TableRow.LayoutParams.MATCH_PARENT,
+                TableRow.LayoutParams.MATCH_PARENT
+            )
+            answer.layoutParams = textParams
+            currentFrame.addView(answer)
+
+            currentRow.addView(currentFrame)
+            if(i % 2 == 1){
+                table.addView(currentRow)
+                currentRow = TableRow(activity)
+                currentRow.gravity = Gravity.CENTER_HORIZONTAL
+            }
+        }
+        if(currentRow.childCount > 0){
+            table.addView(currentRow)
+        }
+        layout.addView(table)
+    }
+}
+
 enum class BlockTag{
     UNDEFINED,
     TEXT,
     IMAGE,
+    QUIZMC,
     VIDEO;
 }
 
 fun blockTagFromString(tagString : String) : BlockTag{
     return when (tagString) {
-        "TEXT"  -> BlockTag.TEXT
-        "IMAGE" -> BlockTag.IMAGE
-        "VIDEO" -> BlockTag.VIDEO
-        else    ->  BlockTag.UNDEFINED
+        "TEXT"      -> BlockTag.TEXT
+        "IMAGE"     -> BlockTag.IMAGE
+        "VIDEO"     -> BlockTag.VIDEO
+        "MCQUIZ"    -> BlockTag.MCQUIZ
+        else        -> BlockTag.UNDEFINED
     }
 }
 

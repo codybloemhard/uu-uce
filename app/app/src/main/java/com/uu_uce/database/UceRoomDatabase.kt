@@ -29,6 +29,8 @@ abstract class UceRoomDatabase : RoomDatabase() {
             pinList.add(PinData(0, "31N3149680N46777336E", 1, "TEXT" , "testPin1", "[{\"tag\":\"TEXT\", \"text\":\"test\"}]", 1, "-1", "-1"))
             pinList.add(PinData(1, "31N3133680N46718336E", 2, "IMAGE", "testPin2", "[{\"tag\":\"IMAGE\", \"file_name\":\"test.png\"}]", 1, "-1", "2"))
             pinList.add(PinData(2, "31N3130000N46710000E", 3, "VIDEO", "testPin3", "[{\"tag\":\"VIDEO\", \"file_name\":\"zoo.mp4\", \"thumbnail\":\"zoothumbnail.png\", \"title\":\"zoo video\"}]", 0, "1", "-1"))
+            pinList.add(PinData(3, "31N3130100N46710010E", 3, "IMAGE", "testPin4", "[{\"tag\":\"MCQUIZ\", \"mc_correct_option\" : \"Right\", \"mc_incorrect_option\" : \"Wrong\" , \"mc_correct_option\" : \"Also right\", \"mc_incorrect_option\" : \"Also wrong\"}]", 1, "-1", "-1"))
+
 
             pinDao.updateData(pinList)
         }
