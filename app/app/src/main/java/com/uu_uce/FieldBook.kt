@@ -20,7 +20,10 @@ import android.widget.PopupWindow
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.get
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -38,7 +41,6 @@ import java.io.FileOutputStream
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
-
 
 class FieldBook : AppCompatActivity() {
 
@@ -64,11 +66,13 @@ class FieldBook : AppCompatActivity() {
         val addButton = findViewById<FloatingActionButton>(R.id.fieldbook_fab)
         createTopbar(this, "my fieldbook")
 
-        val fieldbookAdapter = FieldbookAdapter(this)
+        fieldbookViewModel = ViewModelProvider(this).get(FieldbookViewModel::class.java)
+
+        val fieldbookAdapter = FieldbookAdapter(this,fieldbookViewModel)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = fieldbookAdapter
 
-        fieldbookViewModel = ViewModelProvider(this).get(FieldbookViewModel::class.java)
+
         fieldbookViewModel.allFieldbookEntries.observe(this, androidx.lifecycle.Observer {
             fieldbookAdapter.setFieldbook(it)
         })

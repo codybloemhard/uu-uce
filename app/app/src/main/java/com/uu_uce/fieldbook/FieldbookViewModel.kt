@@ -22,4 +22,8 @@ class FieldbookViewModel(application: Application): AndroidViewModel(application
     fun insert (fieldbookEntry: FieldbookEntry) = viewModelScope.launch {
         fieldbookRepository.insert(fieldbookEntry)
     }
+
+    fun delete (fieldbookEntry: FieldbookEntry) = viewModelScope.launch {
+        fieldbookRepository.delete(fieldbookEntry)
+    }
 }

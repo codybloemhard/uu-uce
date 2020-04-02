@@ -1,15 +1,23 @@
 package com.uu_uce.fieldbook
 
 import android.app.Activity
+import android.content.ContentResolver
+import android.content.DialogInterface
+import android.net.Uri
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.core.net.toFile
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStore
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
 import com.uu_uce.pins.*
+import java.io.File
 
-class FieldbookAdapter(val activity: Activity) : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>() {
+class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookViewModel) : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>() {
 
     private var fieldbook: MutableList<FieldbookEntry> = mutableListOf()
 
@@ -39,22 +47,30 @@ class FieldbookAdapter(val activity: Activity) : RecyclerView.Adapter<FieldbookA
 
         val content = PinContent(entry.content)
 
+        var uri: Uri = Uri.EMPTY
+
+        var displayingText = false
+        var displayingImage = false
+
         for (cB in content.contentBlocks)
         {
-            if (cB is TextContentBlock) {
+            if (displayingText && displayingImage)
+                break
+
+            if (cB is TextContentBlock && !displayingText) {
+                displayingText = true
                 holder.textFb.text = cB.textContent
-                break
-            }
-        }
-        for (cB in content.contentBlocks)
-        {
-            if (cB is ImageContentBlock) {
-                holder.imageFb.setImageURI(cB.imageURI)
-                break
-            }
-            if (cB is VideoContentBlock) {
-                holder.imageFb.setImageURI(cB.thumbnailURI)
-                break
+            } else if (!displayingImage) {
+                displayingImage = true
+
+                if (cB is ImageContentBlock) {
+                    uri = cB.imageURI
+                    holder.imageFb.setImageURI(uri)
+                }
+                if (cB is VideoContentBlock) {
+                    uri = cB.thumbnailURI
+                    holder.imageFb.setImageURI(uri)
+                }
             }
         }
 
@@ -62,6 +78,25 @@ class FieldbookAdapter(val activity: Activity) : RecyclerView.Adapter<FieldbookA
             //TODO: this isn't the correct parentView
             openPinPopupWindow(entry.location,content,holder.parentView,activity)
         }
+
+        holder.parentView.setOnLongClickListener(
+            View.OnLongClickListener(
+                fun (_): Boolean {
+                    AlertDialog.Builder(activity)
+                        .setTitle("Delete")
+                        .setMessage("Are you sure you want to delete this entry?")
+                        .setPositiveButton("YES") { _: DialogInterface, _: Int ->
+                            viewModel.delete(entry)
+                            uri.toFile().delete()
+                        }
+                        .setNegativeButton("NO") { _: DialogInterface, _: Int ->
+
+                        }
+                        .show()
+                    return true
+                }
+            )
+        )
     }
 
     fun setFieldbook(fieldbook: MutableList<FieldbookEntry>) {

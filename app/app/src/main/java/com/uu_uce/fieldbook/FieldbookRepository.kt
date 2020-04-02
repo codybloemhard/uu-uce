@@ -9,4 +9,8 @@ class FieldbookRepository(private val fieldbookDao: FieldbookDao) {
     suspend fun insert(fieldbookEntry: FieldbookEntry) {
         fieldbookDao.insert(fieldbookEntry)
     }
+
+    suspend fun delete(fieldbookEntry: FieldbookEntry) {
+        fieldbookDao.delete(fieldbookEntry)
+    }
 }
