@@ -15,7 +15,7 @@ abstract class ChunkManager(protected val chunks: MutableMap<Triple<Int, Int, In
         lastViewport = viewport
         lastZoom = zoom
     }
-    open fun updateOnTouchRelease(viewport: Pair<p2,p2>, zoom: Int, map: ShapeMap){}
+    open fun updateOnStop(viewport: Pair<p2,p2>, zoom: Int, map: ShapeMap){}
 
     protected fun shouldGetLoaded(chunkIndex: ChunkIndex, viewport: Pair<p2,p2>, zoom: Int): Boolean{
         return chunkIndex.third == zoom
@@ -117,7 +117,7 @@ class StopLoader(chunks: MutableMap<Triple<Int, Int, Int>, Chunk>, chunkGetter: 
         super.updateOnMove(viewport, zoom, map)
     }
 
-    override fun updateOnTouchRelease(viewport: Pair<p2, p2>, zoom: Int, map: ShapeMap){
+    override fun updateOnStop(viewport: Pair<p2, p2>, zoom: Int, map: ShapeMap){
         Logger.log(LogType.Event, "ChunkManager", "release")
         cancelCurrentLoading()
 

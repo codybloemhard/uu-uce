@@ -27,7 +27,7 @@ class ShapeLayer(path: File, nrOfLODs: Int){
     }
 
     fun onTouchRelease(viewport: Pair<p2, p2>, zoom: Int, map: ShapeMap){
-        chunkManager.updateOnTouchRelease(viewport, zoom, map)
+        chunkManager.updateOnStop(viewport, zoom, map)
     }
 
     fun draw(canvas: Canvas, paint: Paint, map: ShapeMap, viewport : Pair<p2,p2>, width: Int, height: Int, zoomLevel: Int){
