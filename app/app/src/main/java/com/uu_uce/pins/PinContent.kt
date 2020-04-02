@@ -40,7 +40,7 @@ class PinContent(contentString: String) {
     private fun readBlock(reader: JsonReader): ContentBlockInterface {
         var blockTag        = BlockTag.UNDEFINED
         var textString      = ""
-        var fileName        = ""
+        var filePath        = ""
         var title           = ""
         var thumbnailURI    = Uri.EMPTY
 
@@ -55,8 +55,8 @@ class PinContent(contentString: String) {
                     textString = reader.nextString()
                     //if(blockTag != BlockTag.TEXT) //TODO: alert user that only TextContentBlock uses text
                 }
-                "file_name" -> {
-                    fileName = when(blockTag) {
+                "file_path" -> {
+                    filePath = when(blockTag) {
                         BlockTag.UNDEFINED  -> error("Undefined block tag")
                         BlockTag.TEXT       -> error("Undefined function") //TODO: Add reading text from file
                         BlockTag.IMAGE      -> reader.nextString()
@@ -81,8 +81,8 @@ class PinContent(contentString: String) {
         return when(blockTag){
             BlockTag.UNDEFINED  -> error("Undefined block tag")
             BlockTag.TEXT       -> TextContentBlock(textString)
-            BlockTag.IMAGE      -> ImageContentBlock(Uri.parse(fileName))
-            BlockTag.VIDEO      -> VideoContentBlock(Uri.parse(fileName), thumbnailURI, title)
+            BlockTag.IMAGE      -> ImageContentBlock(Uri.parse(filePath))
+            BlockTag.VIDEO      -> VideoContentBlock(Uri.parse(filePath), thumbnailURI, title)
         }
     }
 }

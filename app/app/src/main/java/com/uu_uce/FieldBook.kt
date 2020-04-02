@@ -265,7 +265,7 @@ class FieldBook : AppCompatActivity() {
                     "}," +
                     "{" +
                         "\"tag\":\"${contentList.last().first}\"," +
-                        "\"file_name\":\"${contentList.last().second}\"" +
+                        "\"file_path\":\"${contentList.last().second}\"" +
                     "}" +
                 "]"
     }
