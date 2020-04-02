@@ -9,9 +9,7 @@ import android.view.ViewGroup
 import android.widget.*
 import com.uu_uce.R
 import com.uu_uce.database.PinViewModel
-import com.uu_uce.mapOverlay.aaBoundingBoxContains
 import com.uu_uce.mapOverlay.coordToScreen
-import com.uu_uce.mapOverlay.screenToCoord
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.services.UTMCoordinate

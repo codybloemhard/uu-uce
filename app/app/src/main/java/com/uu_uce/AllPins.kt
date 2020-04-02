@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
@@ -37,8 +36,8 @@ class AllPins : AppCompatActivity() {
             adapter = viewAdapter
         }
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
-        pinViewModel.allUnlockedPinData.observe(this, Observer { pins ->
-            pins?.let { viewAdapter.setPins(sortList(it, sharedPref.getInt("selectedOption", 0))) }
+        pinViewModel.allPinData.observe(this, Observer { pins ->
+            pins?.let { viewAdapter.setPins(sortList(pins, sharedPref.getInt("selectedOption", 0)), pinViewModel) }
         })
 
         val filterButton : FloatingActionButton = findViewById(R.id.fab)
@@ -49,7 +48,7 @@ class AllPins : AppCompatActivity() {
         onCreateToolbar(this, "all pins")
     }
 
-    fun openDialog(view: View) {
+    fun openDialog() {
         val builder : AlertDialog.Builder = AlertDialog.Builder(this)
         val filterOptions : Array<String> = arrayOf("Title a-z", "Title z-a", "Difficulty easy-hard", "Difficulty hard-easy", "Type a-z", "Type z-a")
         builder
@@ -73,7 +72,7 @@ class AllPins : AppCompatActivity() {
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         pinViewModel.allPinData.observe(this, Observer { pins ->
             pins?.let {
-                viewAdapter.setPins(sortList(it, category)) }
+                viewAdapter.setPins(sortList(it, category), pinViewModel) }
         })
     }
 

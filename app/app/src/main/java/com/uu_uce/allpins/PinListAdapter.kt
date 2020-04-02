@@ -17,6 +17,8 @@ import com.uu_uce.R
 import com.uu_uce.database.PinData
 import com.uu_uce.database.PinConversion
 import com.uu_uce.database.PinViewModel
+import com.uu_uce.misc.LogType
+import com.uu_uce.misc.Logger
 
 class PinListAdapter internal constructor(
     private val activity: Activity
@@ -84,8 +86,23 @@ class PinListAdapter internal constructor(
         }
     }
 
-    internal fun setPins(newPins: List<PinData>) {
-        pins = newPins
+    internal fun setPins(newPinData: List<PinData>, viewModel: PinViewModel) {
+        val tempPins : MutableList<PinData> = mutableListOf()
+        // Update pins from new data
+        for(newPin in newPinData) {
+            if(newPin.status > 0){
+                // Pin is not unlocked yet
+                tempPins.add(newPin)
+            }
+            else if (newPin.status == -1) {
+                // Pin needs recalculation
+                val predecessorIds = newPin.predecessorIds.split(',').map{id -> id.toInt()}
+                if (predecessorIds[0] != -1) {
+                    viewModel.tryUnlock(newPin.pinId, predecessorIds) {}
+                }
+            }
+        }
+        pins = tempPins
         notifyDataSetChanged()
     }
 

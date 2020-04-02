@@ -1,6 +1,5 @@
 package com.uu_uce.views
 
-import android.R
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -15,6 +14,7 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import com.uu_uce.AllPins
+import com.uu_uce.R
 import com.uu_uce.database.*
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation
@@ -90,7 +90,7 @@ class CustomMap : ViewTouchParent {
         camera = smap.initialize()
 
         val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle)
-        btn.setImageResource(com.uu_uce.R.drawable.logotp)
+        btn.setImageResource(R.drawable.logotp)
         val curLayers = nrLayers
         btn.setOnClickListener{
             toggleLayer(curLayers)

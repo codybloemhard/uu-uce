@@ -3,11 +3,9 @@ package com.uu_uce.pins
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.Matrix
 import android.net.Uri
 import android.util.JsonReader
 import android.view.Gravity
-import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
