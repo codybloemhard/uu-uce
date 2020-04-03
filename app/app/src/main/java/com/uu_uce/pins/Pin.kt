@@ -21,6 +21,7 @@ enum class PinType {
     TEXT,
     VIDEO,
     IMAGE,
+    MCQUIZ
 }
 
 class Pin(
@@ -69,6 +70,7 @@ class Pin(
         val maxX = (screenLocation.first + pinWidth / 2).roundToInt()
         val maxY = (screenLocation.second).roundToInt()
 
+        // Check whether pin is unlocked
         if (status == 0) return
 
         // Check whether pin is out of screen
@@ -84,7 +86,7 @@ class Pin(
         }
         inScreen = true
 
-        // Check whether pin is unlocked
+        // Set boundingbox for pin tapping
         boundingBox =
             Pair(p2(minX.toDouble(), minY.toDouble()), p2(maxX.toDouble(), maxY.toDouble()))
 
@@ -129,7 +131,7 @@ class Pin(
 
         // Fill layout of popup
         content.contentBlocks.forEach { cb ->
-            cb.generateContent(layout, activity)
+            cb.generateContent(layout, activity, this)
         }
 
         // Open popup

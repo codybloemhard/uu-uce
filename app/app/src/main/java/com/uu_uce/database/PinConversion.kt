@@ -15,19 +15,20 @@ class PinConversion(context: Context){
     private fun stringToUtm(coord: String): UTMCoordinate {
         val regex = "(\\d+|[a-zA-Z])".toRegex()
         val s = regex.findAll(coord)
-        return UTMCoordinate(s.elementAt(0).value.toInt()       ,
-                             s.elementAt(1).value.first()       ,
-                             s.elementAt(2).value.toDouble()/10    ,
-                             s.elementAt(4).value.toDouble()/10)
-
+        return UTMCoordinate(
+            s.elementAt(0).value.toInt(),
+            s.elementAt(1).value.first(),
+            s.elementAt(4).value.toDouble()/10,
+            s.elementAt(2).value.toDouble()/10)
     }
 
     private fun stringToPinType(type: String): PinType {
         return when(type){
-            "TEXT" -> PinType.TEXT
-            "IMAGE" -> PinType.IMAGE
-            "VIDEO" -> PinType.VIDEO
-            else    -> error("unknown pin type")
+            "TEXT"      -> PinType.TEXT
+            "IMAGE"     -> PinType.IMAGE
+            "VIDEO"     -> PinType.VIDEO
+            "MCQUIZ"    -> PinType.MCQUIZ
+            else        -> error("unknown pin type")
         }
     }
 
@@ -38,10 +39,11 @@ class PinConversion(context: Context){
     private fun stringToDrawable(type: String, difficulty: Int): Drawable {
         var s  = "ic_pin"
         s += when (type) {
-            "TEXT"  -> "_text"
-            "VIDEO" -> "_video"
-            "IMAGE" -> "_picture"
-            else -> {
+            "TEXT"      -> "_text"
+            "VIDEO"     -> "_video"
+            "IMAGE"     -> "_picture"
+            "MCQUIZ"    -> "_quest" // TODO: replace with mc sprite
+            else        -> {
                 "_link"
             }
         }

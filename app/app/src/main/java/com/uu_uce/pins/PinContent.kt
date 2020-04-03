@@ -105,12 +105,12 @@ class PinContent(contentString: String) {
 }
 
 interface ContentBlockInterface{
-    fun generateContent(layout : LinearLayout, activity : Activity)
+    fun generateContent(layout : LinearLayout, activity : Activity, parent : Pin)
     fun getFilePath() : List<String>
 }
 
 class TextContentBlock(private val textContent : String) : ContentBlockInterface{
-    override fun generateContent(layout : LinearLayout, activity : Activity){
+    override fun generateContent(layout : LinearLayout, activity : Activity, parent : Pin){
         val content = TextView(activity)
         content.text = textContent
         content.setPadding(12,12,12,20)
@@ -122,7 +122,7 @@ class TextContentBlock(private val textContent : String) : ContentBlockInterface
 }
 
 class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
-    override fun generateContent(layout : LinearLayout, activity : Activity){
+    override fun generateContent(layout : LinearLayout, activity : Activity, parent : Pin){
         val content = ImageView(activity)
         content.setImageURI(imageURI)
 
@@ -135,7 +135,7 @@ class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
 }
 
 class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : Uri, private val title : String) : ContentBlockInterface{
-    override fun generateContent(layout : LinearLayout, activity : Activity){
+    override fun generateContent(layout : LinearLayout, activity : Activity, parent : Pin){
 
         val frameLayout = FrameLayout(activity)
 
@@ -181,16 +181,19 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
 }
 
 class MCContentBlock(private val correctAnswers : List<String>, private val incorrectAnswers : List<String>) : ContentBlockInterface{
-    override fun generateContent(layout: LinearLayout, activity: Activity) {
+    override fun generateContent(layout: LinearLayout, activity: Activity, parent : Pin) {
         val answers : MutableList<Pair<String, Boolean>> = mutableListOf()
         for(answer in correctAnswers) answers.add(Pair(answer, true))
         for(answer in incorrectAnswers) answers.add(Pair(answer, false))
 
         val shuffledAnswers = answers.shuffled()
-        val table : TableLayout = TableLayout(activity)
 
+        // Create tableLayout with first row
+        val table = TableLayout(activity)
         var currentRow = TableRow(activity)
         currentRow.gravity = Gravity.CENTER_HORIZONTAL
+
+        // Insert answers into rows
         for(i in 0 until shuffledAnswers.count()){
             val currentFrame = FrameLayout(activity)
             val frameParams = TableRow.LayoutParams(
@@ -200,6 +203,8 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
             frameParams.setMargins(5, 5, 5, 5)
             if(shuffledAnswers[i].second){
                 currentFrame.setOnClickListener {
+                    parent.complete()
+                    parent.popupWindow?.dismiss()
                     Toast.makeText(activity, "Correct", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -244,7 +249,7 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
     }
 
     override fun getFilePath(): List<String> {
-        TODO("Not yet implemented")
+        return listOf()
     }
 }
 

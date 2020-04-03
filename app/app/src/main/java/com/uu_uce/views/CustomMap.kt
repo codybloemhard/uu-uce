@@ -269,9 +269,9 @@ class CustomMap : ViewTouchParent {
     }
 
     private fun tapPin(tapLocation : p2, activity : Activity){
-        for(entry in pins){
-            val pin = entry.value
-            if(!pin.inScreen) continue
+        for(entry in pins.toList().asReversed()){
+            val pin = entry.second
+            if(!pin.inScreen || pin.getStatus() < 1) continue
             if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, pinTapBufferSize)){
                 pin.openPinPopupWindow(this, activity) {activePopup = null}
                 activePopup = pin.popupWindow
