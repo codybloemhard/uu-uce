@@ -1,6 +1,5 @@
 package com.uu_uce.ui
 
-import android.content.Context
 import android.view.MotionEvent
 
 class Releaser(

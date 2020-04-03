@@ -11,8 +11,6 @@ import android.widget.*
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.VideoViewer
-import com.uu_uce.misc.LogType
-import com.uu_uce.misc.Logger
 import java.io.StringReader
 
 
@@ -22,6 +20,7 @@ class PinContent(contentString: String) {
     init{
         contentBlocks = getContent(contentString)
     }
+
 
     private fun getContent(contentString: String) : List<ContentBlockInterface>{
             val reader = JsonReader(StringReader(contentString))
@@ -40,6 +39,7 @@ class PinContent(contentString: String) {
         return contentBlocks
     }
 
+    // Generate ContentBlock from JSON string
     private fun readBlock(reader: JsonReader): ContentBlockInterface {
         val dir             = "file:///data/data/com.uu_uce/files/pin_content/"
 
@@ -60,12 +60,11 @@ class PinContent(contentString: String) {
                 }
                 "text" -> {
                     textString = reader.nextString()
-                    //if(blockTag != BlockTag.TEXT) //TODO: alert user that only TextContentBlock uses text
                 }
                 "file_name" -> {
                     fileName = when(blockTag) {
                         BlockTag.UNDEFINED  -> error("Undefined block tag")
-                        BlockTag.TEXT       -> error("Undefined function") //TODO: Add reading text from file
+                        BlockTag.TEXT       -> error("Undefined function") //TODO: Add reading text from file?
                         BlockTag.IMAGE      -> dir + "images/" + reader.nextString()
                         BlockTag.VIDEO      -> dir + "videos/" + reader.nextString()
                         BlockTag.MCQUIZ     -> error("Multiple choice blocks can not be loaded from file")
@@ -74,11 +73,9 @@ class PinContent(contentString: String) {
 
                 "title" -> {
                     title = reader.nextString()
-                    //if(blockTag != BlockTag.VIDEO) //TODO: alert user that only VideoContentBlock uses title
                 }
                 "thumbnail" -> {
                     thumbnailURI = Uri.parse(dir + "videos/thumbnails/" + reader.nextString())
-                    //if(blockTag != BlockTag.VIDEO) //TODO: alert user that only VideoContentBlock uses thumbnail
                 }
                 "mc_correct_option" -> {
                     mcCorrectOptions.add(reader.nextString())
@@ -109,6 +106,7 @@ class PinContent(contentString: String) {
 
 interface ContentBlockInterface{
     fun generateContent(layout : LinearLayout, activity : Activity)
+    fun getFilePath() : List<String>
 }
 
 class TextContentBlock(private val textContent : String) : ContentBlockInterface{
@@ -118,48 +116,64 @@ class TextContentBlock(private val textContent : String) : ContentBlockInterface
         content.setPadding(12,12,12,20)
         layout.addView(content)
     }
+    override fun getFilePath() : List<String>{
+        return listOf()
+    }
 }
 
 class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
     override fun generateContent(layout : LinearLayout, activity : Activity){
         val content = ImageView(activity)
         content.setImageURI(imageURI)
+
         layout.addView(content)
+    }
+
+    override fun getFilePath() : List<String>{
+        return listOf(imageURI.toString())
     }
 }
 
 class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : Uri, private val title : String) : ContentBlockInterface{
     override fun generateContent(layout : LinearLayout, activity : Activity){
 
-        val relativeLayout = RelativeLayout(activity) //TODO: maybe make this an constraintlayout?
+        val frameLayout = FrameLayout(activity)
 
         // Create thumbnail image
         if(thumbnailURI == Uri.EMPTY){
-            relativeLayout.setBackgroundColor(Color.BLACK)
+            frameLayout.setBackgroundColor(Color.BLACK)
         }
         else{
             val thumbnail = ImageView(activity)
             thumbnail.setImageURI(thumbnailURI)
-            thumbnail.scaleType = ImageView.ScaleType.FIT_CENTER
-            relativeLayout.addView(thumbnail)
+            thumbnail.scaleType = ImageView.ScaleType.CENTER
+            frameLayout.addView(thumbnail)
         }
 
-        //relativeLayout.setBackgroundColor(Color.GREEN) //TODO: ADDED FOR DEBUGGING PURPOSES
-        relativeLayout.layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 600) //TODO: don't do magical numbers
+        frameLayout.layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
 
         // Create play button
         val playButton = ImageView(activity)
         playButton.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.ic_sprite_play, null) ?: error ("Image not found"))
-        playButton.scaleType = ImageView.ScaleType.FIT_CENTER //TODO: find correct scaletype
+        playButton.scaleType = ImageView.ScaleType.CENTER_INSIDE
+        val buttonLayout = FrameLayout.LayoutParams(500, 500) // TODO: convert dp to pixels
+        buttonLayout.gravity = Gravity.CENTER
+        playButton.layoutParams = buttonLayout
         playButton.setOnClickListener{openVideoView(videoURI, title, activity)}
 
         // Add thumbnail and button
-        relativeLayout.addView(playButton)
-        layout.addView(relativeLayout)
+        frameLayout.addView(playButton)
+        layout.addView(frameLayout)
+    }
+
+    override fun getFilePath() : List<String>{
+        if(thumbnailURI == Uri.EMPTY) return listOf()
+        return listOf(thumbnailURI.toString())
     }
 
     private fun openVideoView(videoURI: Uri, videoTitle : String, activity : Activity){
         val intent = Intent(activity, VideoViewer::class.java)
+
         intent.putExtra("uri", videoURI)
         intent.putExtra("title", videoTitle)
         activity.startActivity(intent)
@@ -227,6 +241,10 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
             table.addView(currentRow)
         }
         layout.addView(table)
+    }
+
+    override fun getFilePath(): List<String> {
+        TODO("Not yet implemented")
     }
 }
 

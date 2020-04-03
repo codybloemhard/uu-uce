@@ -88,6 +88,12 @@ fun pointInAABoundingBox(bbMin: p2, bbMax: p2, point : p2, bufferSize : Int) : B
             )
 }
 
+/*
+Calculates the distance between two points.
+p1: The first point
+p2: The second point
+It will provide you with the distance between the points as a double.
+ */
 fun pointDistance(p1 : Pair<Float, Float>, p2 : Pair<Float, Float>) : Double{
     return abs((p1.first - p2.first).toDouble()).pow(2) + abs((p1.second - p2.second).toDouble()).pow(2)
 }

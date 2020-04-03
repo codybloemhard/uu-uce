@@ -38,8 +38,8 @@ class AllPins : AppCompatActivity() {
             adapter = viewAdapter
         }
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
-        pinViewModel.allUnlockedPinData.observe(this, Observer { pins ->
-            pins?.let { viewAdapter.setPins(sortList(it, sharedPref.getInt("selectedOption", 0))) }
+        pinViewModel.allPinData.observe(this, Observer { pins ->
+            pins?.let { viewAdapter.setPins(sortList(pins, sharedPref.getInt("selectedOption", 0)), pinViewModel) }
         })
 
         val filterButton : FloatingActionButton = findViewById(R.id.fab)
@@ -58,7 +58,7 @@ class AllPins : AppCompatActivity() {
         super.onBackPressed()
     }
 
-    fun openDialog(view: View) {
+    fun openDialog(view : View) {
         val builder : AlertDialog.Builder = AlertDialog.Builder(this)
         val filterOptions : Array<String> = arrayOf("Title a-z", "Title z-a", "Difficulty easy-hard", "Difficulty hard-easy", "Type a-z", "Type z-a")
         builder
@@ -82,7 +82,7 @@ class AllPins : AppCompatActivity() {
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         pinViewModel.allPinData.observe(this, Observer { pins ->
             pins?.let {
-                viewAdapter.setPins(sortList(it, category)) }
+                viewAdapter.setPins(sortList(it, category), pinViewModel) }
         })
     }
 

@@ -12,9 +12,6 @@ interface PinDao {
     @Query("SELECT * from pins")
     fun getAllPins() : LiveData<List<PinData>>
 
-    @Query("SELECT * from pins where status > 0")
-    fun getAllUnlockedPins() : LiveData<List<PinData>>
-
     @Query("SELECT status from pins where pinId = :pid")
     suspend fun getStatus(pid: Int) : Int
 
@@ -35,9 +32,6 @@ interface PinDao {
 
     @Query("DELETE from pins")
     suspend fun deleteAllPins()
-
-    @Query("SELECT COUNT(pinId) FROM pins")
-    suspend fun countPins() : Int
 
     @Transaction
     suspend fun updateData(pins: List<PinData>) {
