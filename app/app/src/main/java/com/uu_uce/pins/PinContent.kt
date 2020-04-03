@@ -97,7 +97,7 @@ class PinContent(contentString: String) {
             BlockTag.TEXT       -> TextContentBlock(textString)
             BlockTag.IMAGE      -> ImageContentBlock(Uri.parse(fileName))
             BlockTag.VIDEO      -> VideoContentBlock(Uri.parse(fileName), thumbnailURI, title)
-            BlockTag.QUIZMC     -> {
+            BlockTag.MCQUIZ     -> {
                 if(mcIncorrectOptions.count() < 1 && mcCorrectOptions.count() < 1) {
                     error("Mutliple choice questions require at least one correct and one incorrect answer")
                 }
@@ -234,7 +234,7 @@ enum class BlockTag{
     UNDEFINED,
     TEXT,
     IMAGE,
-    QUIZMC,
+    MCQUIZ,
     VIDEO;
 }
 
