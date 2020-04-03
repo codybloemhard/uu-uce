@@ -3,15 +3,13 @@ package com.uu_uce.shapefiles
 import android.graphics.Canvas
 import android.graphics.Paint
 
-class ShapeZ(t: ShapeType, p: List<p2>, bmi: p3, bma: p3) {
-    private var type: ShapeType = t
-    private var points: List<p2> = p
-    var bMin = bmi
-        private set
-    var bMax = bma
-        private set
+abstract class ShapeZ(var bmin: p3, var bmax: p3){
+    abstract fun draw(canvas: Canvas, paint: Paint, viewport: Pair<p2,p2>, width: Int, height: Int)
+}
 
-    fun draw(
+class HeightShapeZ(private var type: ShapeType, private var points: List<p2>, bmi: p3, bma: p3): ShapeZ(bmi,bma) {
+
+    override fun draw(
         canvas: Canvas,
         paint: Paint,
         viewport : Pair<p2, p2>,
@@ -37,6 +35,22 @@ class ShapeZ(t: ShapeType, p: List<p2>, bmi: p3, bma: p3) {
     }
 
     fun meanZ(): Int{
-        return ((bMin.third + bMax.third) / 2).toInt()
+        return ((bmin.third + bmax.third) / 2).toInt()
+    }
+}
+
+class PolygonZ(private var outerRings: List<List<p3>>, private var innerRings: List<List<p3>>, bmi: p3, bma:p3): ShapeZ(bmi,bma){
+    override fun draw(
+        canvas: Canvas,
+        paint: Paint,
+        viewport: Pair<p2, p2>,
+        width: Int,
+        height: Int
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    fun triangulate(){
+
     }
 }

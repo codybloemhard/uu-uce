@@ -15,6 +15,7 @@ typealias p3 = Triple<Double,Double,Double>
 
 val p2Zero = Pair(0.0,0.0)
 val p3Zero = Triple(0.0,0.0,0.0)
+val p3Max = Triple(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE)
 
 fun mergeBBs(mins: List<p3>,maxs: List<p3>): Pair<p3,p3>{
     var bmin = mutableListOf(Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE)
