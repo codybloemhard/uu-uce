@@ -34,6 +34,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### QA Matrix
 | Version       | Date      | Unit tests    | Realworld tests       | Documentation | Lint Issues (Worst)   |
 |---------------|-----------|---------------|-----------------------|---------------|-----------------------|
+| 0.4.0         | 6-4-2020  | None          | Yes, in uu-uce        | Output,Usage  | 6 (Mild, wip)
 | 0.3.0         | 22-3-2020 | None          | Yes, in uu-uce        | Output        | 0
 | 0.2.2         | 18-3-2020 | None          | Yes, in uu-uce        | Output        | 9 (Severe)
 | 0.2.1         | 17-3-2020 | None          | Yes, in uu-uce        | Output        | NaN
