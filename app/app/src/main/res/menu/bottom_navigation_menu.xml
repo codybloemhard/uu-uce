@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/fieldbook_navigation_home"
+        android:icon="@drawable/ic_fieldbook"
+        android:title="Fieldbook" />
+    <item
+        android:id="@+id/fieldbook_navigation_pinmap"
+        android:icon="@drawable/ic_pins"
+        android:title="Pinmap" />
+    <item
+        android:id="@+id/fieldbook_navigation_route"
+        android:icon="@drawable/ic_route"
+        android:title="Route" />
+</menu>
