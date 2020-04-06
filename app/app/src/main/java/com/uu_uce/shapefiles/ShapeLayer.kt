@@ -9,7 +9,7 @@ import java.io.File
 class ShapeLayer(path: File, nrOfLODs: Int){
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk> = mutableMapOf()
 
-    private val chunkGetter= HeightLineReader(path, nrOfLODs)
+    private val chunkGetter= PolygonReader(path, nrOfLODs)
     private val chunkManager: ChunkManager = ScrollingLoader(chunks, chunkGetter)
 
     var bmin: p3

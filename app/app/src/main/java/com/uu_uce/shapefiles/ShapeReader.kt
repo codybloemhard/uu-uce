@@ -60,14 +60,15 @@ class HeightLineReader(
     override fun getChunk(cIndex: ChunkIndex): Chunk {
         //find the correct file and read all information inside
         val time = System.currentTimeMillis()
-        val file = File(dir, "test.obj")
+        val file = File(dir, "height")
         val reader = FileReader(file)
 
         val xoff = reader.readULong().toDouble()
         val yoff = reader.readULong().toDouble()
+        val zoff = reader.readULong().toDouble() //not used
         val mult = reader.readULong().toDouble()
-        val bmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
-        val bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
+        val bmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult)
+        val bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult)
 
         val nrShapes = reader.readULong()
         var chunkShapes = List(nrShapes.toInt()) {
@@ -171,32 +172,21 @@ class PolygonReader(
     nrOfLODs: Int
 ): ChunkGetter(dir, nrOfLODs) {
     override fun getChunk(cIndex: ChunkIndex): Chunk {
-        val file = File(dir, "test.obj")
+        val file = File(dir, "river")
         val reader = FileReader(file)
 
         val xoff = reader.readULong().toDouble()
         val yoff = reader.readULong().toDouble()
         val zoff = reader.readULong().toDouble()
         val mult = reader.readULong().toDouble()
-        //val bmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
-        //val bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
-
-        //todo: remove temporary boundingbox calculation
-        val bmin = MutableList(3){Double.MAX_VALUE}
-        val bmax = MutableList(3){0.0}
+        val bmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
+        val bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
 
         val nrShapes = reader.readULong()
-        val shapes: List<PolygonZ> = List(nrShapes.toInt()) {
+        //todo remove 1 and put back nrshapes
+        val shapes: List<PolygonZ> = List(1.toInt()) {
             val bbmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult + zoff)
             val bbmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult + zoff)
-
-            //todo: remove temporary boundingbox calculation
-            bmin[0] = minOf(bmin[0], bbmin.first)
-            bmin[1] = minOf(bmin[1], bbmin.second)
-            bmin[2] = minOf(bmin[2], bbmin.third)
-            bmax[0] = maxOf(bmax[0], bbmax.first)
-            bmax[1] = maxOf(bmax[1], bbmax.second)
-            bmax[2] = maxOf(bmax[2], bbmax.third)
 
             val nrOuter = reader.readULong()
             val outerRings: List<List<p3>> = List(nrOuter.toInt()) {
@@ -214,15 +204,10 @@ class PolygonReader(
                 }
             }
 
-            val poly = PolygonZ(outerRings, innerRings, bbmin, bbmax)
-            poly.triangulate()
-            poly
+            PolygonZ(outerRings, innerRings, bbmin, bbmax)
         }
 
         //todo: remove temporary boundingbox calculation
-        val bminTrip = p3(bmin[0],bmin[1],bmin[2])
-        val bmaxTrip = p3(bmax[0], bmax[1], bmax[2])
-
-        return Chunk(shapes, bminTrip, bmaxTrip)
+        return Chunk(shapes, bmin, bmax)
     }
 }

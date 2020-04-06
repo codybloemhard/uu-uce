@@ -71,6 +71,9 @@ class CustomMap : ViewTouchParent {
     private lateinit var camera: Camera
 
     init{
+        //disable hardware acceleration for canvas.drawVertices
+        setLayerType(LAYER_TYPE_SOFTWARE, null)
+
         smap = ShapeMap(5, this)
 
         // Logger mask settings
