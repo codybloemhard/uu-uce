@@ -120,12 +120,14 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
         holder.parentView.setOnLongClickListener(
             View.OnLongClickListener(
                 fun (_): Boolean {
+                    println(uri)
                     AlertDialog.Builder(activity)
                         .setTitle("Delete")
                         .setMessage("Are you sure you want to delete this entry?")
                         .setPositiveButton("YES") { _: DialogInterface, _: Int ->
                             viewModel.delete(entry)
-                            uri.toFile().delete()
+                            if (uri != Uri.EMPTY)
+                                uri.toFile().delete()
                         }
                         .setNegativeButton("NO") { _: DialogInterface, _: Int ->
 

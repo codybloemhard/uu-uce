@@ -48,9 +48,9 @@ class FieldBook : AppCompatActivity() {
     )
 
     private lateinit var imageView: ImageView
-    lateinit var text: EditText
+    private lateinit var text: EditText
 
-    private var imageUri: String = ""
+    private var imageUri = ""
 
     private lateinit var fieldbookViewModel: FieldbookViewModel
 
@@ -80,6 +80,8 @@ class FieldBook : AppCompatActivity() {
     }
 
     private fun openFieldbookAdderPopup(parent: View) {
+        imageUri = ""
+
         val customView = layoutInflater.inflate(R.layout.add_fieldbook_popup, null, false)
         val popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
