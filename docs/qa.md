@@ -50,6 +50,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### QA Matrix
 | Version   | Date      | Documentation     | Linting status            |
 |-----------|-----------|-------------------|---------------------------|
+| 0.4.1     | 6-4-2020  | Content format    | New Issues pile up        |
 | 0.4.0     | 31-3-2020 | Content format    | Many things are unused    |
 | 0.3.1     | 21-3-2020 | Content format    | Kotlin ok, Android issues |
 | 0.x.x     | ...       | None              | Only small issues         |
@@ -57,12 +58,14 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Test Coverage Matrix
 | Version   | Pixel 2 Emulator API 29 | Nokia 2 API 24  | One Plus 5 API 28 | Moto g7+ API 29 |
 |-----------|-------------------------|-----------------|-------------------|-----------------|
+| 0.4.1     | 100% tested             | 100% tested
 | 0.3.1     | 100% tested             | 100% tested     | 100% tested       | 0% tested       |
 | 0.x.x     | 100% tested             | 100% tested     | Partial: GPS, Map | 0% tested       |
 | 0.0.1     | 100% tested             | None            | None              | None            |
 ### Test Issues Matrix
 | Version   | Pixel 2 Emulator API 29   | Nokia 2 API 24            | One Plus 5 API 28 | Moto g5s+         | Moto g7+          |
 |-----------|---------------------------|---------------------------|-------------------|-------------------|-------------------|
+| 0.4.1     | 
 | 0.4.0     | None                      |                           |                   |                   | Not tested        |
 | 0.3.1     | IK2                       | None                      | None              | IK1, IK2          | IK5               |
 | 0.x.x     | None                      | Popup UI scaling (IC3)    | Partialy Tested   | Partially tested  | Not tested        |
@@ -92,6 +95,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Detailed Linting Status
 | Version   | Linting Details Kotlin: (Nr, Worst) Android: (Nr, Worst)  |
 |-----------|-----------------------------------------------------------|
+| 0.4.1     | Issues expand again, Kotlin: (12, mild) Android (80: Major)
 | 0.4.0     | Mostly unused ... errors, Kotlin: (7, mild) Android: (58: Medium)
 | 0.3.1     | Many Issues, Kotlin: (8, Mild) Android: (69, Major)
 | 0.x.x     | Kotlin minimal issues, Android increasing issues

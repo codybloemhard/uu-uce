@@ -1,12 +1,9 @@
 package com.uu_uce
 
-import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageButton
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -46,7 +43,7 @@ class AllPins : AppCompatActivity() {
             pins?.let { viewAdapter.setPins(sortList(pins, sharedPref.getInt("selectedOption", 0)), pinViewModel) }
         })
 
-        val filterButton : FloatingActionButton = findViewById<FloatingActionButton>(R.id.fab)
+        val filterButton : FloatingActionButton = findViewById(R.id.fab)
         registerForContextMenu(filterButton)
 
         sharedPref = this.getPreferences(Context.MODE_PRIVATE)

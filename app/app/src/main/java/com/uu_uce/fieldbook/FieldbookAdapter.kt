@@ -21,11 +21,11 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
     class FieldbookViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val parentView = itemView
-        val numberFb = parentView.findViewById<TextView>(R.id.no)
-        val locationFb = parentView.findViewById<TextView>(R.id.pin_coordinates)
-        val datetimeFb = parentView.findViewById<TextView>(R.id.datetime)
-        val textFb = parentView.findViewById<TextView>(R.id.text_preview)
-        val imageFb = parentView.findViewById<ImageView>(R.id.image_preview)
+        val numberFb: TextView? = parentView.findViewById<TextView>(R.id.no)
+        val locationFb: TextView? = parentView.findViewById<TextView>(R.id.pin_coordinates)
+        val datetimeFb: TextView? = parentView.findViewById<TextView>(R.id.datetime)
+        val textFb: TextView? = parentView.findViewById<TextView>(R.id.text_preview)
+        val imageFb: ImageView? = parentView.findViewById<ImageView>(R.id.image_preview)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FieldbookViewHolder {
@@ -39,9 +39,9 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
     override fun onBindViewHolder(holder: FieldbookViewHolder, position: Int) {
         val entry : FieldbookEntry = fieldbook[position]
-        holder.numberFb.text = addLeadingZeros(entry.id)
-        holder.locationFb.text = entry.location
-        holder.datetimeFb.text = entry.dateTime
+        holder.numberFb?.text = addLeadingZeros(entry.id)
+        holder.locationFb?.text = entry.location
+        holder.datetimeFb?.text = entry.dateTime
 
         val content = PinContent(entry.content)
 
@@ -57,17 +57,17 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
             if (cB is TextContentBlock && !displayingText) {
                 displayingText = true
-                holder.textFb.text = cB.textContent
+                holder.textFb?.text = cB.textContent
             } else if (!displayingImage) {
                 displayingImage = true
 
                 if (cB is ImageContentBlock) {
                     uri = cB.imageURI
-                    holder.imageFb.setImageURI(uri)
+                    holder.imageFb?.setImageURI(uri)
                 }
                 if (cB is VideoContentBlock) {
                     uri = cB.thumbnailURI
-                    holder.imageFb.setImageURI(uri)
+                    holder.imageFb?.setImageURI(uri)
                 }
             }
         }
