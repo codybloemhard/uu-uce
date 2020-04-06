@@ -50,6 +50,7 @@ class PinContent(contentString: String) {
         var thumbnailURI                                = Uri.EMPTY
         val mcCorrectOptions : MutableList<String>      = mutableListOf()
         val mcIncorrectOptions : MutableList<String>    = mutableListOf()
+        var reward                                      = 0
 
         reader.beginObject()
         while (reader.hasNext()) {
@@ -83,6 +84,9 @@ class PinContent(contentString: String) {
                 "mc_incorrect_option" -> {
                     mcIncorrectOptions.add(reader.nextString())
                 }
+                "reward" ->{
+                    reward = reader.nextInt()
+                }
                 else -> {
                     error("Wrong content format")
                 }
@@ -98,7 +102,7 @@ class PinContent(contentString: String) {
                 if(mcIncorrectOptions.count() < 1 && mcCorrectOptions.count() < 1) {
                     error("Mutliple choice questions require at least one correct and one incorrect answer")
                 }
-                MCContentBlock( mcCorrectOptions, mcIncorrectOptions)
+                MCContentBlock( mcCorrectOptions, mcIncorrectOptions, reward)
             }
         }
     }
@@ -180,8 +184,10 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
     }
 }
 
-class MCContentBlock(private val correctAnswers : List<String>, private val incorrectAnswers : List<String>) : ContentBlockInterface{
+class MCContentBlock(private val correctAnswers : List<String>, private val incorrectAnswers : List<String>, private val reward : Int) : ContentBlockInterface{
     override fun generateContent(layout: LinearLayout, activity: Activity, parent : Pin) {
+        parent.addQuiz(reward)
+
         val answers : MutableList<Pair<String, Boolean>> = mutableListOf()
         for(answer in correctAnswers) answers.add(Pair(answer, true))
         for(answer in incorrectAnswers) answers.add(Pair(answer, false))
@@ -203,8 +209,7 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
             frameParams.setMargins(5, 5, 5, 5)
             if(shuffledAnswers[i].second){
                 currentFrame.setOnClickListener {
-                    parent.complete()
-                    parent.popupWindow?.dismiss()
+                    parent.finishQuiz()
                     Toast.makeText(activity, "Correct", Toast.LENGTH_SHORT).show()
                 }
             }

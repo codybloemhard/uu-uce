@@ -21,7 +21,7 @@ There are 4 different kinds of pin content blocks:
 4. Mutliple choice quiz
 	Use: 		Inserting buttons with different answers in the content of a pin.
 	
-	Parameters:	`tag`, `mc_correct_option`, `,mc_incorrect_option`
+	Parameters:	`tag`, `mc_correct_option`, `,mc_incorrect_option`, `reward`
 
 ## Format
 We use a JSON text format for storing the pin content, it works as follows:
@@ -61,7 +61,8 @@ The following example will generate a block of text followed by an image and fin
 	{
         "tag" 					: "MCQUIZ",
         "mc_correct_option"		: "The correct answer to the question",
-        "mc_incorrect_option" 	: "An incorrect answer to the question"
+        "mc_incorrect_option" 	: "An incorrect answer to the question",
+        "reward"                : 50
     }
 ]
 ```

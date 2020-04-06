@@ -56,6 +56,10 @@ class Pin(
 
     var popupWindow: PopupWindow? = null
 
+    // Quiz
+    private var unansweredCount = 0
+    private var totalReward     = 0
+
 
     fun draw(viewport: Pair<p2, p2>, width : Int, height : Int, view: View, canvas: Canvas) {
         val screenLocation: Pair<Float, Float> =
@@ -118,6 +122,12 @@ class Pin(
 
         popupWindow?.setOnDismissListener {
             popupWindow = null
+
+            if(unansweredCount == 0) {
+                complete()
+
+            }
+
             onDissmissAction()
         }
 
@@ -130,6 +140,7 @@ class Pin(
         val layout: LinearLayout = customView.findViewById(R.id.scrollLayout)
 
         // Fill layout of popup
+        resetQuizzes()
         content.contentBlocks.forEach { cb ->
             cb.generateContent(layout, activity, this)
         }
@@ -155,9 +166,23 @@ class Pin(
         }
     }
 
-    fun complete() {
+    private fun complete() {
         if (status < 2)
             viewModel.completePin(id, followIds)
+    }
+
+    fun addQuiz(reward : Int){
+        unansweredCount++
+        totalReward += reward
+    }
+
+    fun finishQuiz(){
+        unansweredCount--
+    }
+
+    private fun resetQuizzes(){
+        totalReward = 0
+        unansweredCount = 0
     }
 
     fun getTitle(): String {

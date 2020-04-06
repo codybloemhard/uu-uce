@@ -19,4 +19,7 @@
     <string name="hard">Hard</string>
     <string name="unknown">Unknown</string>
     <string name="completed_text">Completed</string>
+    <string name="quiz_result_image_description">Image of mascot with emotion matching quiz result</string>
+    <string name="quizresult_placeholder">QUIZRESULT</string>
+    <string name="quiz_complete_text_placeholder">CUSTOMTEXT</string>
 </resources>

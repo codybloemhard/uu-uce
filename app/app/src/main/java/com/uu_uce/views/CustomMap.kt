@@ -14,6 +14,7 @@ import android.widget.PopupWindow
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.uu_uce.AllPins
 import com.uu_uce.R
@@ -182,11 +183,10 @@ class CustomMap : ViewTouchParent {
         Logger.log(LogType.Event,"CustomMap", "${loc.east}, ${loc.north}")
     }
 
-    fun setPins(){
+    fun setPins(table : LiveData<List<PinData>>){
         // Set observer on pin database
-        viewModel.allPinData.observe(lfOwner, Observer { pins ->
+        table.observe(lfOwner, Observer { pins ->
             // Update the cached copy of the words in the adapter.
-            viewModel.allPinData
             pins?.let { newData ->
                 updatePinStatuses(newData)
             }
