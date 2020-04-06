@@ -109,12 +109,13 @@ class PinContent(contentString: String) {
 }
 
 interface ContentBlockInterface{
-    fun generateContent(layout : LinearLayout, activity : Activity, parent : Pin)
+    fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, parent : Pin)
     fun getFilePath() : List<String>
+    fun getBlockTag() : BlockTag
 }
 
 class TextContentBlock(private val textContent : String) : ContentBlockInterface{
-    override fun generateContent(layout : LinearLayout, activity : Activity, parent : Pin){
+    override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, parent : Pin){
         val content = TextView(activity)
         content.text = textContent
         content.setPadding(12,12,12,20)
@@ -123,10 +124,14 @@ class TextContentBlock(private val textContent : String) : ContentBlockInterface
     override fun getFilePath() : List<String>{
         return listOf()
     }
+
+    override fun getBlockTag(): BlockTag {
+        return BlockTag.TEXT
+    }
 }
 
 class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
-    override fun generateContent(layout : LinearLayout, activity : Activity, parent : Pin){
+    override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, parent : Pin){
         val content = ImageView(activity)
         content.setImageURI(imageURI)
 
@@ -136,10 +141,14 @@ class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
     override fun getFilePath() : List<String>{
         return listOf(imageURI.toString())
     }
+
+    override fun getBlockTag(): BlockTag {
+        return BlockTag.IMAGE
+    }
 }
 
 class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : Uri, private val title : String) : ContentBlockInterface{
-    override fun generateContent(layout : LinearLayout, activity : Activity, parent : Pin){
+    override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, parent : Pin){
 
         val frameLayout = FrameLayout(activity)
 
@@ -175,6 +184,10 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         return listOf(thumbnailURI.toString())
     }
 
+    override fun getBlockTag(): BlockTag {
+        return BlockTag.VIDEO
+    }
+
     private fun openVideoView(videoURI: Uri, videoTitle : String, activity : Activity){
         val intent = Intent(activity, VideoViewer::class.java)
 
@@ -185,8 +198,16 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
 }
 
 class MCContentBlock(private val correctAnswers : List<String>, private val incorrectAnswers : List<String>, private val reward : Int) : ContentBlockInterface{
-    override fun generateContent(layout: LinearLayout, activity: Activity, parent : Pin) {
-        parent.addQuiz(reward)
+    private var selectedAnswer : Int = -1
+    private lateinit var selectedBackground : View
+
+    override fun generateContent(blockId : Int, layout: LinearLayout, activity: Activity, parent : Pin) {
+        val unselectedColor = Color.GRAY
+        val selectedColor   = Color.BLACK
+        val correctColor    = Color.GREEN
+        val incorrectColor  = Color.RED
+        selectedBackground = View(activity)
+        parent.addQuestion(blockId, reward)
 
         val answers : MutableList<Pair<String, Boolean>> = mutableListOf()
         for(answer in correctAnswers) answers.add(Pair(answer, true))
@@ -207,22 +228,10 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
                 TableRow.LayoutParams.MATCH_PARENT
             )
             frameParams.setMargins(5, 5, 5, 5)
-            if(shuffledAnswers[i].second){
-                currentFrame.setOnClickListener {
-                    parent.finishQuiz()
-                    Toast.makeText(activity, "Correct", Toast.LENGTH_SHORT).show()
-                }
-            }
-            else{
-                currentFrame.setOnClickListener {
-                    Toast.makeText(activity, "Incorrect", Toast.LENGTH_SHORT).show()
-                }
-            }
 
             currentFrame.layoutParams = frameParams
 
             val background = View(activity)
-            background.setBackgroundColor(Color.RED)
             val backgroundParams = TableRow.LayoutParams(
                 330,
                 330
@@ -241,6 +250,31 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
             currentFrame.addView(answer)
 
             currentRow.addView(currentFrame)
+
+            if(parent.getStatus() < 2){
+                background.setBackgroundColor(unselectedColor)
+                currentFrame.setOnClickListener {
+                    selectedBackground.setBackgroundColor(unselectedColor)
+                    selectedAnswer = i
+                    selectedBackground = background
+                    background.setBackgroundColor(selectedColor)
+                    if(shuffledAnswers[i].second){
+                        parent.answerQuestion(blockId, reward)
+                    }
+                    else{
+                        parent.answerQuestion(blockId, 0)
+                    }
+                }
+            }
+            else{
+                if(shuffledAnswers[i].second){
+                    background.setBackgroundColor(correctColor)
+                }
+                else{
+                    background.setBackgroundColor(incorrectColor)
+                }
+            }
+
             if(i % 2 == 1){
                 table.addView(currentRow)
                 currentRow = TableRow(activity)
@@ -255,6 +289,10 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
 
     override fun getFilePath(): List<String> {
         return listOf()
+    }
+
+    override fun getBlockTag(): BlockTag {
+        return BlockTag.MCQUIZ
     }
 }
 

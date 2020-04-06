@@ -22,4 +22,12 @@
     <string name="quiz_result_image_description">Image of mascot with emotion matching quiz result</string>
     <string name="quizresult_placeholder">QUIZRESULT</string>
     <string name="quiz_complete_text_placeholder">CUSTOMTEXT</string>
+    <string name="reopen_button_success">See answers</string>
+    <string name="reopen_button_fail">Try again</string>
+    <string name="type_image_descripition">Image showing the type of the pin</string>
+    <string name="finish_text">Finish</string>
+    <string name="quiz_success_head">Quiz completed</string>
+    <string name="quiz_success_body">Congratulations! You completed the "%1$s" quiz with %2$d out of %3$d points.</string>
+    <string name="quiz_fail_head">Quiz failed!</string>
+    <string name="quiz_fail_body">Oh no… You did not get enough points to complete this quiz. Don\'t worry though, you can try again at any time.</string>
 </resources>
