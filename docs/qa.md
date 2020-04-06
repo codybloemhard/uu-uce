@@ -65,7 +65,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Test Issues Matrix
 | Version   | Pixel 2 Emulator API 29   | Nokia 2 API 24            | One Plus 5 API 28 | Moto g5s+         | Moto g7+          |
 |-----------|---------------------------|---------------------------|-------------------|-------------------|-------------------|
-| 0.4.1     | 
+| 0.4.1     | IK6                       | IK7
 | 0.4.0     | None                      |                           |                   |                   | Not tested        |
 | 0.3.1     | IK2                       | None                      | None              | IK1, IK2          | IK5               |
 | 0.x.x     | None                      | Popup UI scaling (IC3)    | Partialy Tested   | Partially tested  | Not tested        |
@@ -73,6 +73,8 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Know Issues Matrix
 | Version       | ID    | What              |
 |---------------|-------|-------------------|
+| 0.4.1         | IK7   | Crash on load: `Only the original thread that created a view hierarchy can touch its views`
+| 0.4.1         | IK6   | Image in fieldbook shows very small
 | 0.3.4         | IK5   | App can not read file even though permission is given error: java.io.FileNotFoundException: /sdcard/Download/testmap.obj: open failed: EACCES (Permission denied)
 | 0.3.3         | IK4   | Empty screen comes up when you return from pin screen
 | 0.3.2         | IK3   | App crashes when opening pin from menu
@@ -82,6 +84,9 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Quality Checks Matrix
 | Since Version | ID    | What to check     |
 |---------------|-------|-------------------|
+| 0.4.1         | IC11  | Open fieldbook item, ui scaling
+| 0.4.1         | IC10  | Add fieldbook item
+| 0.4.1         | IC9   | Open fieldbook
 | 0.3.2         | IC8   | Open pin via menu
 | 0.3.1         | IC7   | Pins drawn, click on pin to open popup
 | 0.x.x         | IC6   | Pin list menu, UI scaling
