@@ -249,6 +249,7 @@ class Pin(
             val btnClosePopupWindow = customView.findViewById<Button>(R.id.close_button)
             val btnOpenQuiz         = customView.findViewById<Button>(R.id.reopen_button)
             val rewardText          = customView.findViewById<TextView>(R.id.reward_text)
+            val rewardLayout        = customView.findViewById<LinearLayout>(R.id.reward_layout)
 
             // Set content based on result
             if(sufficient){
@@ -256,7 +257,7 @@ class Pin(
                 quizResultText.text = activity.getString(R.string.quiz_success_head)
                 completeText.text   = activity.getString(R.string.quiz_success_body, title, reward, totalReward)
                 btnOpenQuiz.text    = activity.getString(R.string.reopen_button_success)
-                rewardText.visibility = VISIBLE
+                rewardLayout.visibility = VISIBLE
                 rewardText.text = activity.getString(R.string.reward_string, reward)
             }
             else{
@@ -264,7 +265,7 @@ class Pin(
                 quizResultText.text = activity.getString(R.string.quiz_fail_head)
                 completeText.text   = activity.getString(R.string.quiz_fail_body)
                 btnOpenQuiz.text    = activity.getString(R.string.reopen_button_fail)
-                rewardText.visibility = GONE
+                rewardLayout.visibility = GONE
             }
 
             // Set buttons

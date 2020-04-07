@@ -58,7 +58,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/quiz_result_text" />
 
             <LinearLayout
-                android:id="@+id/linearLayout"
+                android:id="@+id/reward_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="20dp"
                 android:layout_marginTop="20dp"
@@ -94,7 +94,7 @@
                 android:text="@string/reopen_button_success"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+                app:layout_constraintTop_toBottomOf="@+id/reward_layout" />
 
             <Button
                 android:id="@+id/close_button"
