@@ -12,7 +12,7 @@ import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import com.uu_uce.database.PinViewModel
+import com.uu_uce.pinDatabase.PinViewModel
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.services.*
@@ -66,12 +66,19 @@ class GeoMap : AppCompatActivity() {
         val size = (longest*menu.buttonPercent).toInt()
 
         // Initialize menu
-        val btn = ImageButton(this, null, android.R.attr.buttonBarButtonStyle)
-        btn.setImageResource(R.drawable.logotp)
-        btn.setBackgroundColor(Color.BLUE)
-        btn.setOnClickListener{customMap.startAllPins()}
-        btn.layoutParams = ViewGroup.LayoutParams(size, size)
-        lower_menu_layout.addView(btn)
+        val btn1 = ImageButton(this, null, android.R.attr.buttonBarButtonStyle)
+        btn1.setImageResource(R.drawable.logotp)
+        btn1.setBackgroundColor(Color.BLUE)
+        btn1.setOnClickListener{customMap.startAllPins()}
+        btn1.layoutParams = ViewGroup.LayoutParams(size, size)
+        lower_menu_layout.addView(btn1)
+
+        val btn2 = ImageButton(this, null, android.R.attr.buttonBarButtonStyle)
+        btn2.setImageResource(R.drawable.logotp)
+        btn2.setBackgroundColor(Color.GREEN)
+        btn2.setOnClickListener{customMap.startFieldBook()}
+        btn2.layoutParams = ViewGroup.LayoutParams(size, size)
+        lower_menu_layout.addView(btn2)
 
         dragButton.clickAction      = {menu.dragButtonTap()}
         dragButton.dragAction       = {dx, dy -> menu.drag(dx,dy)}

@@ -8,6 +8,7 @@ import android.util.JsonReader
 import android.view.Gravity
 import android.view.View
 import android.widget.*
+import androidx.cardview.widget.CardView
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.VideoViewer
@@ -41,8 +42,6 @@ class PinContent(contentString: String) {
 
     // Generate ContentBlock from JSON string
     private fun readBlock(reader: JsonReader): ContentBlockInterface {
-        val dir             = "file:///data/data/com.uu_uce/files/pin_content/"
-
         var blockTag                                    = BlockTag.UNDEFINED
         var textString                                  = ""
         var fileName                                    = ""
@@ -62,12 +61,12 @@ class PinContent(contentString: String) {
                 "text" -> {
                     textString = reader.nextString()
                 }
-                "file_name" -> {
+                "file_path" -> {
                     fileName = when(blockTag) {
                         BlockTag.UNDEFINED  -> error("Undefined block tag")
                         BlockTag.TEXT       -> error("Undefined function") //TODO: Add reading text from file?
-                        BlockTag.IMAGE      -> dir + "images/" + reader.nextString()
-                        BlockTag.VIDEO      -> dir + "videos/" + reader.nextString()
+                        BlockTag.IMAGE      -> reader.nextString()
+                        BlockTag.VIDEO      -> reader.nextString()
                         BlockTag.MCQUIZ     -> error("Multiple choice blocks can not be loaded from file")
                     }
                 }
@@ -76,7 +75,8 @@ class PinContent(contentString: String) {
                     title = reader.nextString()
                 }
                 "thumbnail" -> {
-                    thumbnailURI = Uri.parse(dir + "videos/thumbnails/" + reader.nextString())
+                    thumbnailURI = Uri.parse(reader.nextString())
+                    //if(blockTag != BlockTag.VIDEO) //TODO: alert user that only VideoContentBlock uses thumbnail
                 }
                 "mc_correct_option" -> {
                     mcCorrectOptions.add(reader.nextString())
@@ -109,29 +109,29 @@ class PinContent(contentString: String) {
 }
 
 interface ContentBlockInterface{
-    fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, parent : Pin)
+    fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, parent : Pin?)
     fun getFilePath() : List<String>
-    fun getBlockTag() : BlockTag
 }
 
 class TextContentBlock(private val textContent : String) : ContentBlockInterface{
-    override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, parent : Pin){
+    override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, parent : Pin?){
         val content = TextView(activity)
         content.text = textContent
         content.setPadding(12,12,12,20)
         layout.addView(content)
     }
+
     override fun getFilePath() : List<String>{
         return listOf()
     }
 
-    override fun getBlockTag(): BlockTag {
-        return BlockTag.TEXT
+    fun getTextContent() : String{
+        return textContent
     }
 }
 
 class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
-    override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, parent : Pin){
+    override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, parent : Pin?){
         val content = ImageView(activity)
         content.setImageURI(imageURI)
 
@@ -142,14 +142,13 @@ class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
         return listOf(imageURI.toString())
     }
 
-    override fun getBlockTag(): BlockTag {
-        return BlockTag.IMAGE
+    fun getImageURI() : Uri{
+        return imageURI
     }
 }
 
 class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : Uri, private val title : String) : ContentBlockInterface{
-    override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, parent : Pin){
-
+    override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, parent : Pin?){
         val frameLayout = FrameLayout(activity)
 
         // Create thumbnail image
@@ -184,10 +183,6 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         return listOf(thumbnailURI.toString())
     }
 
-    override fun getBlockTag(): BlockTag {
-        return BlockTag.VIDEO
-    }
-
     private fun openVideoView(videoURI: Uri, videoTitle : String, activity : Activity){
         val intent = Intent(activity, VideoViewer::class.java)
 
@@ -195,18 +190,24 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         intent.putExtra("title", videoTitle)
         activity.startActivity(intent)
     }
+
+    fun getThumbnailURI() : Uri{
+        return thumbnailURI
+    }
 }
 
 class MCContentBlock(private val correctAnswers : List<String>, private val incorrectAnswers : List<String>, private val reward : Int) : ContentBlockInterface{
     private var selectedAnswer : Int = -1
-    private lateinit var selectedBackground : View
+    private lateinit var selectedBackground : CardView
 
-    override fun generateContent(blockId : Int, layout: LinearLayout, activity: Activity, parent : Pin) {
-        val unselectedColor = Color.GRAY
-        val selectedColor   = Color.BLACK
-        val correctColor    = Color.GREEN
-        val incorrectColor  = Color.RED
-        selectedBackground = View(activity)
+    override fun generateContent(blockId : Int, layout: LinearLayout, activity: Activity, parent : Pin?) {
+        if(parent == null) error("Mutliple choice quizzes can't be generated without a parent pin")
+
+        val unselectedColor = Color.parseColor("#2d98da")
+        val selectedColor   = Color.parseColor("#FD9644")
+        val correctColor    = Color.parseColor("#26DE81")
+        val incorrectColor  = Color.parseColor("#FC5C65")
+        selectedBackground = CardView(activity)
         parent.addQuestion(blockId, reward)
 
         val answers : MutableList<Pair<String, Boolean>> = mutableListOf()
@@ -227,16 +228,17 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.MATCH_PARENT
             )
-            frameParams.setMargins(5, 5, 5, 5)
+            frameParams.setMargins(10, 13, 10, 13)
 
             currentFrame.layoutParams = frameParams
 
-            val background = View(activity)
+            val background = CardView(activity)
             val backgroundParams = TableRow.LayoutParams(
                 330,
                 330
             )
             background.layoutParams = backgroundParams
+            background.radius = 15f
             currentFrame.addView(background)
 
             val answer = TextView(activity)
@@ -247,17 +249,17 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
                 TableRow.LayoutParams.MATCH_PARENT
             )
             answer.layoutParams = textParams
-            currentFrame.addView(answer)
+            background.addView(answer)
 
             currentRow.addView(currentFrame)
 
             if(parent.getStatus() < 2){
-                background.setBackgroundColor(unselectedColor)
+                background.setCardBackgroundColor(unselectedColor)
                 currentFrame.setOnClickListener {
-                    selectedBackground.setBackgroundColor(unselectedColor)
+                    selectedBackground.setCardBackgroundColor(unselectedColor)
                     selectedAnswer = i
                     selectedBackground = background
-                    background.setBackgroundColor(selectedColor)
+                    background.setCardBackgroundColor(selectedColor)
                     if(shuffledAnswers[i].second){
                         parent.answerQuestion(blockId, reward)
                     }
@@ -268,10 +270,10 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
             }
             else{
                 if(shuffledAnswers[i].second){
-                    background.setBackgroundColor(correctColor)
+                    background.setCardBackgroundColor(correctColor)
                 }
                 else{
-                    background.setBackgroundColor(incorrectColor)
+                    background.setCardBackgroundColor(incorrectColor)
                 }
             }
 
@@ -289,10 +291,6 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
 
     override fun getFilePath(): List<String> {
         return listOf()
-    }
-
-    override fun getBlockTag(): BlockTag {
-        return BlockTag.MCQUIZ
     }
 }
 

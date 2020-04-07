@@ -1,4 +1,4 @@
-package com.uu_uce.database
+package com.uu_uce.pinDatabase
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao

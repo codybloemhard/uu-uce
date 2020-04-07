@@ -70,13 +70,14 @@
                 android:layout_gravity="center"/>
 
         </HorizontalScrollView>
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/lower_menu_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/toggle_layer_scroll"
-            android:layout_centerHorizontal="true">
-        </RelativeLayout>
+            android:layout_centerHorizontal="true"
+            android:orientation="horizontal">
+        </LinearLayout>
     </com.uu_uce.views.Menu>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

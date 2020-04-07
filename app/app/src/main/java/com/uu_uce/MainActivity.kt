@@ -4,7 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.ui.TouchParent
+import com.uu_uce.gestureDetection.TouchParent
 
 class MainActivity : TouchParent() {
     override fun onCreate(savedInstanceState: Bundle?) {

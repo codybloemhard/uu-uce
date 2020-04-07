@@ -18,9 +18,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.uu_uce.AllPins
 import com.uu_uce.R
-import com.uu_uce.database.PinConversion
-import com.uu_uce.database.PinData
-import com.uu_uce.database.PinViewModel
+import com.uu_uce.pinDatabase.PinConversion
+import com.uu_uce.pinDatabase.PinData
+import com.uu_uce.pinDatabase.PinViewModel
+import com.uu_uce.FieldBook
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation
 import com.uu_uce.mapOverlay.pointDistance
@@ -30,8 +31,7 @@ import com.uu_uce.misc.Logger
 import com.uu_uce.pins.Pin
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
-import com.uu_uce.ui.*
-import com.uu_uce.ui.Scroller
+import com.uu_uce.gestureDetection.*
 import java.io.File
 import kotlin.system.measureTimeMillis
 
@@ -78,7 +78,11 @@ class CustomMap : ViewTouchParent {
         addChild(Scroller(context, ::moveMap))
         addChild(DoubleTapper(context, ::zoomOutMax))
         addChild(SingleTapper(context as AppCompatActivity, ::tapPin))
-        addChild(Releaser {smap.onTouchRelease(camera.getViewport())})
+        addChild(Releaser {
+            smap.onTouchRelease(
+                camera.getViewport()
+            )
+        })
 
 
 
@@ -296,6 +300,11 @@ class CustomMap : ViewTouchParent {
     fun startAllPins(){
         val i = Intent(context, AllPins::class.java)
         startActivity(context, i, null)
+    }
+
+    fun startFieldBook() {
+        val i = Intent(context, FieldBook::class.java)
+        startActivity(context,i,null)
     }
 
     fun startLocServices(){

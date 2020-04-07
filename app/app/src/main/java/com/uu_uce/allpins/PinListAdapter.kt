@@ -11,9 +11,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
-import com.uu_uce.database.PinConversion
-import com.uu_uce.database.PinData
-import com.uu_uce.database.PinViewModel
+import com.uu_uce.pinDatabase.PinConversion
+import com.uu_uce.pinDatabase.PinData
+import com.uu_uce.pinDatabase.PinViewModel
 
 class PinListAdapter internal constructor(
     private val activity: Activity
@@ -37,7 +37,7 @@ class PinListAdapter internal constructor(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PinViewHolder {
-        val itemView = inflater.inflate(R.layout.recyclerview_item, parent, false)
+        val itemView = inflater.inflate(R.layout.allpins_recyclerview_item, parent, false)
         return PinViewHolder(itemView)
     }
 

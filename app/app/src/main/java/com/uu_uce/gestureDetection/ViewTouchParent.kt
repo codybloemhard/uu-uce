@@ -1,4 +1,4 @@
-package com.uu_uce.ui
+package com.uu_uce.gestureDetection
 
 import android.annotation.SuppressLint
 import android.content.Context

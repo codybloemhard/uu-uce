@@ -1,12 +1,9 @@
 package com.uu_uce
 
-import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageButton
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -15,8 +12,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.allpins.PinListAdapter
-import com.uu_uce.database.PinData
-import com.uu_uce.database.PinViewModel
+import com.uu_uce.pinDatabase.PinData
+import com.uu_uce.pinDatabase.PinViewModel
+import com.uu_uce.ui.createTopbar
 
 class AllPins : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
@@ -29,11 +27,14 @@ class AllPins : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_all_pins)
+
+        createTopbar(this, "all pins")
+
         viewManager = LinearLayoutManager(this)
 
         viewAdapter = PinListAdapter(this)
 
-        recyclerView = findViewById<RecyclerView>(R.id.recyclerview).apply {
+        recyclerView = findViewById<RecyclerView>(R.id.allpins_recyclerview).apply {
             layoutManager = viewManager
             adapter = viewAdapter
         }
@@ -46,8 +47,6 @@ class AllPins : AppCompatActivity() {
         registerForContextMenu(filterButton)
 
         sharedPref = this.getPreferences(Context.MODE_PRIVATE)
-
-        onCreateToolbar(this, "all pins")
     }
 
     override fun onBackPressed() {
@@ -97,14 +96,6 @@ class AllPins : AppCompatActivity() {
             else -> {
                 pins
             }
-        }
-    }
-
-    private fun onCreateToolbar(activity : Activity, title: String) {
-        activity.findViewById<TextView>(R.id.toolbar_title).text = title
-
-        activity.findViewById<ImageButton>(R.id.toolbar_back_button).setOnClickListener {
-            activity.finish()
         }
     }
 }

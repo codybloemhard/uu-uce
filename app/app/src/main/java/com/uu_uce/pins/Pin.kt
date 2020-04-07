@@ -3,14 +3,13 @@ package com.uu_uce.pins
 import android.app.Activity
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
-import android.media.Image
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
-import com.uu_uce.database.PinViewModel
+import com.uu_uce.pinDatabase.PinViewModel
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
@@ -141,20 +140,19 @@ class Pin(
         var containsQuiz = false
         for(i in 0 until content.contentBlocks.count()){
             content.contentBlocks[i].generateContent(i, layout, activity, this)
-            if(content.contentBlocks[i].getBlockTag() == BlockTag.MCQUIZ) containsQuiz = true
+            if(content.contentBlocks[i] is MCContentBlock) containsQuiz = true
         }
 
         if(containsQuiz && status < 2){
             val finishButton = Button(activity)
             finishButton.text = activity.getString(R.string.finish_text)
             finishButton.setBackgroundColor(ResourcesCompat.getColor(activity.resources, R.color.colorUU, null))
-            finishButton.gravity = Gravity.CENTER_HORIZONTAL
             val buttonLayout = LinearLayout.LayoutParams(
-                TableRow.LayoutParams.MATCH_PARENT,
+                parentView.width * 2 / 3,
                 TableRow.LayoutParams.WRAP_CONTENT
             )
-            buttonLayout.setMargins(10, 0, 10, 0)
             finishButton.layoutParams = buttonLayout
+            finishButton.gravity = Gravity.CENTER_HORIZONTAL
             finishButton.setOnClickListener{
                 finishQuiz(activity, parentView)
             }

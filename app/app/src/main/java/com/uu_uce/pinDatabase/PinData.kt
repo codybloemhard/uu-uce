@@ -1,8 +1,7 @@
-package com.uu_uce.database
+package com.uu_uce.pinDatabase
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-
 
 @Entity(tableName = "pins")
 open class PinData(

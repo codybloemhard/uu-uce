@@ -36,6 +36,22 @@ enum class LocationPollStartResult{
 }
 
 data class UTMCoordinate(val zone : Int, val letter : Char, val east : Double, val north : Double)
+{
+    override fun toString(): String {
+        return  "$zone" +
+                "$letter" +
+                "${north.run{ 
+                    this*10
+        }.toInt()
+                }" +
+                "N" +
+                "${east.run{ 
+                    this*10
+        }.toInt()
+                }" +
+                "E"
+    }
+}
 
 /*
 Will convert latitude, longitude coordinate to UTM.
@@ -109,6 +125,7 @@ Will poll the location for you.
  */
 class LocationServices{
     companion object {
+        lateinit var lastKnownLocation: Location
         val permissionsNeeded = listOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
@@ -171,6 +188,7 @@ class LocationServices{
         val locationListener = object : LocationListener {
             override fun onLocationChanged(location: Location?) {
                 if (location != null) {
+                    lastKnownLocation = location
                     action(Pair(location.latitude, location.longitude))
                     Logger.log( LogType.Event,
                         "LocationServices",

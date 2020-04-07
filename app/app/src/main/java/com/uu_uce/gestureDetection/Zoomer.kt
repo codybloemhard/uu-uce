@@ -1,4 +1,4 @@
-package com.uu_uce.ui
+package com.uu_uce.gestureDetection
 
 import android.content.Context
 import android.view.MotionEvent
