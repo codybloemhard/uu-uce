@@ -14,8 +14,10 @@ typealias p2 = Pair<Double, Double>
 typealias p3 = Triple<Double,Double,Double>
 
 val p2Zero = Pair(0.0,0.0)
+val p3Min = Triple(Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE)
 val p3Zero = Triple(0.0,0.0,0.0)
 val p3Max = Triple(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE)
+val p3NaN = Triple(Double.NaN, Double.NaN, Double.NaN)
 
 fun mergeBBs(mins: List<p3>,maxs: List<p3>): Pair<p3,p3>{
     var bmin = mutableListOf(Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE)
@@ -70,9 +72,9 @@ class ShapeMap(private val nrOfLODs: Int,
         }
     }
 
-    fun addLayer(type: LayerType, path: File){
+    fun addLayer(type: LayerType, path: File, chunkGetter: ChunkGetter){
         val timeSave = measureTimeMillis {
-            layers.add(Pair(type,ShapeLayer(path, nrOfLODs)))
+            layers.add(Pair(type,ShapeLayer(path, chunkGetter)))
         }
 
         Logger.log(LogType.Info,"ShapeMap", "Save: $timeSave")

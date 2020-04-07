@@ -8,8 +8,7 @@ import kotlin.math.max
 import kotlin.math.pow
 
 abstract class ChunkGetter(
-    protected var dir: File,
-    protected var nrOfLODs: Int){
+    protected var dir: File){
     abstract fun getChunk(cIndex: ChunkIndex):Chunk
 }
 
@@ -54,9 +53,9 @@ class FileReader{
 
 @ExperimentalUnsignedTypes
 class HeightLineReader(
-    dir: File,
-    nrOfLODs: Int
-): ChunkGetter(dir,nrOfLODs) {
+    dir: File
+): ChunkGetter(dir) {
+    private val nrOfLODs = 5
     override fun getChunk(cIndex: ChunkIndex): Chunk {
         //find the correct file and read all information inside
         val time = System.currentTimeMillis()
@@ -168,9 +167,8 @@ class HeightLineReader(
 
 @ExperimentalUnsignedTypes
 class PolygonReader(
-    dir: File,
-    nrOfLODs: Int
-): ChunkGetter(dir, nrOfLODs) {
+    dir: File
+): ChunkGetter(dir) {
     override fun getChunk(cIndex: ChunkIndex): Chunk {
         val file = File(dir, "river")
         val reader = FileReader(file)

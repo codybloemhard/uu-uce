@@ -16,7 +16,9 @@ import com.uu_uce.misc.Logger
 import com.uu_uce.services.LocationServices.Companion.permissionsNeeded
 import com.uu_uce.services.checkPermissions
 import com.uu_uce.services.getPermissions
+import com.uu_uce.shapefiles.HeightLineReader
 import com.uu_uce.shapefiles.LayerType
+import com.uu_uce.shapefiles.PolygonReader
 import com.uu_uce.views.DragStatus
 import kotlinx.android.synthetic.main.activity_geo_map.*
 import java.io.File
@@ -59,8 +61,11 @@ class GeoMap : AppCompatActivity() {
         btn.layoutParams = ViewGroup.LayoutParams(size, size)
         lower_menu_layout.addView(btn)
 
+
+
         val dir = File(filesDir, "mydir")
-        customMap.addLayer(LayerType.Water, dir, toggle_layer_layout, size)
+        customMap.addLayer(LayerType.Water, dir, HeightLineReader(dir), toggle_layer_layout, size)
+        customMap.addLayer(LayerType.Water, dir, PolygonReader(dir),  toggle_layer_layout, size)
         customMap.initializeCamera()
 
         val missingPermissions = checkPermissions(this,customMap.permissionsNeeded + permissionsNeeded)

@@ -13,8 +13,9 @@ class Chunk(
 ) {
 
     fun draw(canvas: Canvas, paint: Paint, viewport : Pair<p2,p2>, width: Int, height: Int){
-        for(shape in shapes)
-            if(aaBoundingBoxIntersect(shape.bmin, shape.bmax, viewport.first, viewport.second))
-                shape.draw(canvas,paint,viewport,width,height)
+        for(shape in shapes) {
+            if (aaBoundingBoxIntersect(shape.bmin, shape.bmax, viewport.first, viewport.second))
+                shape.draw(canvas, paint, viewport, width, height)
+        }
     }
 }

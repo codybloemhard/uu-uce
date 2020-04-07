@@ -101,8 +101,8 @@ class CustomMap : ViewTouchParent {
         camera = smap.initialize()
     }
 
-    fun addLayer(lt: LayerType, path: File, scrollLayout: LinearLayout, buttonSize: Int){
-        smap.addLayer(lt, path)
+    fun addLayer(lt: LayerType, path: File, chunkGetter: ChunkGetter, scrollLayout: LinearLayout, buttonSize: Int){
+        smap.addLayer(lt, path, chunkGetter)
 
         val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle)
         btn.setImageResource(com.uu_uce.R.drawable.logotp)

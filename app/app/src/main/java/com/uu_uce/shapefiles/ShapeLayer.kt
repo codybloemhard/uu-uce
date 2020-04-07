@@ -6,10 +6,9 @@ import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import java.io.File
 
-class ShapeLayer(path: File, nrOfLODs: Int){
+class ShapeLayer(path: File, chunkGetter: ChunkGetter){
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk> = mutableMapOf()
 
-    private val chunkGetter= PolygonReader(path, nrOfLODs)
     private val chunkManager: ChunkManager = ScrollingLoader(chunks, chunkGetter)
 
     var bmin: p3

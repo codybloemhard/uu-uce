@@ -1,6 +1,5 @@
 package com.uu_uce.shapefiles
 
-import android.R.bool
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -56,6 +55,7 @@ class PolygonZ(private var outerRings: List<List<p3>>, private var innerRings: L
 
     init{
         vertices = outerRings[0]
+        mergeInner()
         removeDoubles()
         triangulate(vertices)
     }
@@ -76,13 +76,75 @@ class PolygonZ(private var outerRings: List<List<p3>>, private var innerRings: L
         val indices = triangles.map{i -> i.toShort()}.toShortArray()
 
         val colors = IntArray(verts.size){ Color.CYAN}
+        //val colors = null
 
         canvas.drawVertices(Canvas.VertexMode.TRIANGLES, verts.size, verts, 0, null, 0, colors, 0, indices, 0, indices.size, paint)
     }
 
+    private fun mergeInner(){
+        for(innerRing in innerRings){
+            //get rightmost point in inner ring
+            var rightmost = p3Min
+            var rightmostIndex = -1
+            for(i in innerRing.indices) {
+                val point = innerRing[i]
+                if (point.first > rightmost.first) {
+                    rightmost = point
+                    rightmostIndex = i
+                }
+            }
+
+            //calculate closest intersection with outer ring when going to the right
+            var p = p3NaN //second point on line of intersection
+            var intersect = p3NaN //actual intersection point
+            var bestDis = Double.MAX_VALUE
+            val x3 = rightmost.first
+            val y3 = rightmost.second
+            for(i in vertices.indices) {
+                val x1 = vertices[i].first
+                val y1 = vertices[i].second
+                val x2 = vertices[(i + 1) % vertices.size].first
+                val y2 = vertices[(i + 1) % vertices.size].second
+
+                val t = (y3 - y1) / (y2 - y1)
+                if (t < 0 || t > 1) continue
+
+                val x = x1 + t * (x2 - x1)
+                val curDis = x - x3
+                if(curDis<0 || curDis > bestDis) continue
+
+                bestDis = curDis
+                val z1 = vertices[i].third
+                val z2 = vertices[(i + 1) % vertices.size].third
+                val z = z1 + t * (z2 - z1)
+                p = vertices[(i + 1) % vertices.size]
+                intersect = p3(x,y3,z)
+            }
+
+            val newVertices: MutableList<p3> = mutableListOf()
+            for(point in vertices){
+                if(point == p){
+                    newVertices.add(intersect)
+
+                    var k = rightmostIndex
+                    var step = 0
+                    while(step < innerRing.size){
+                        newVertices.add(innerRing[k])
+                        k = (k+1)%innerRing.size
+                        step++
+                    }
+
+                    newVertices.add(innerRing[k])
+                    newVertices.add(intersect)
+                }
+                newVertices.add(point)
+            }
+            vertices = newVertices
+        }
+    }
+
     private fun removeDoubles(){
-        val hashset = LinkedHashSet(vertices)
-        vertices = hashset.toList()
+        vertices = vertices.filterIndexed{i, p -> vertices[(i+1)%vertices.size] != p}
     }
 
     private fun triangulate(originalPolygon: List<p3>){
@@ -103,8 +165,13 @@ class PolygonZ(private var outerRings: List<List<p3>>, private var innerRings: L
         //three consecutive indices form a triangle
         triangles = mutableListOf()
 
+        var step = 0
         var cur = remainingPolygon.first!!
         while(remainingPolygon.size > 3){
+            step++
+            if(step > 100000){
+                throw Exception("weird")
+            }
             if(!cur.value.ear) {
                 cur = cur.next!!
                 continue
@@ -143,7 +210,7 @@ class PolygonZ(private var outerRings: List<List<p3>>, private var innerRings: L
     }
 
     private fun isReflex(p: Node<PolyPoint>): Boolean{
-        //todo: make sure rotation is clockwise
+        //rotation of outer ring is always clockwise, inner always counter clockwise
         val ax = p.prev!!.value.point.first
         val ay = p.prev!!.value.point.second
         val bx = p.value.point.first
@@ -165,19 +232,23 @@ class PolygonZ(private var outerRings: List<List<p3>>, private var innerRings: L
         return true
     }
 
-    private fun isInside(p:p3, p0:p3 ,p1:p3 ,p2:p3): Boolean{
-        //check if p is inside the triangle (p0,p1,p2)
-        val d1 = sign(p, p0, p1)
-        val d2 = sign(p, p1, p2)
-        val d3 = sign(p, p2, p0)
+    fun isInside(p:p3, p0:p3, p1:p3, p2:p3):Boolean
+    {
+        val x = p.first
+        val y = p.second
+        val x1 = p0.first
+        val y1 = p0.second
+        val x2 = p1.first
+        val y2 = p1.second
+        val x3 = p2.first
+        val y3 = p2.second
 
-        val hasneg = d1 < 0 || d2 < 0 || d3 < 0
-        val haspos = d1 > 0 || d2 > 0 || d3 > 0
+        val denominator = ((y2 - y3)*(x1 - x3) + (x3 - x2)*(y1 - y3));
+        val a = ((y2 - y3)*(x - x3) + (x3 - x2)*(y - y3)) / denominator;
+        val b = ((y3 - y1)*(x - x3) + (x1 - x3)*(y - y3)) / denominator;
+        val c = 1 - a - b;
 
-        return !(hasneg && haspos)
-    }
-
-    private fun sign(p0: p3, p1: p3, p2: p3): Float {
-        return ((p0.first - p2.first) * (p1.second - p2.second) - (p1.first - p2.first) * (p0.second - p2.second)).toFloat()
+        val e = 0.0001
+        return (a in 0.0+e..1.0-e) && (b in 0.0+e..1.0-e) && (c in 0.0+e..1.0-e)
     }
 }
