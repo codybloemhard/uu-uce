@@ -1,15 +1,18 @@
 package com.uu_uce.pins
 
 import android.app.Activity
+import android.content.Context
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.view.Gravity
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
-import com.uu_uce.pinDatabase.PinViewModel
+import com.uu_uce.databases.PinViewModel
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
@@ -139,20 +142,20 @@ class Pin(
         resetQuestions()
         var containsQuiz = false
         for(i in 0 until content.contentBlocks.count()){
-            content.contentBlocks[i].generateContent(i, layout, activity, this)
+            content.contentBlocks[i].generateContent(i, layout, activity, parentView, this)
             if(content.contentBlocks[i] is MCContentBlock) containsQuiz = true
         }
 
         if(containsQuiz && status < 2){
             val finishButton = Button(activity)
             finishButton.text = activity.getString(R.string.finish_text)
-            finishButton.setBackgroundColor(ResourcesCompat.getColor(activity.resources, R.color.colorUU, null))
+            finishButton.background.setTint(ResourcesCompat.getColor(activity.resources, R.color.colorUU, null))
             val buttonLayout = LinearLayout.LayoutParams(
-                parentView.width * 2 / 3,
+                TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.WRAP_CONTENT
             )
+            buttonLayout.setMargins(parentView.width / 7, 0, parentView.width / 7, 0)
             finishButton.layoutParams = buttonLayout
-            finishButton.gravity = Gravity.CENTER_HORIZONTAL
             finishButton.setOnClickListener{
                 finishQuiz(activity, parentView)
             }
@@ -204,13 +207,20 @@ class Pin(
     private fun finishQuiz(activity : Activity, parentView: View){
         if(answered.all{b -> b}){
             // All questions answered
-            var reward = questionRewards.sum()
+            val reward = questionRewards.sum()
             popupWindow?.dismiss()
 
             var sufficient = false
             if(reward >= 0.55 * totalReward){
                 sufficient = true
                 complete()
+
+                val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
+                val prevPoints = sharedPref.getInt("com.uu_uce.USER_POINTS", 0)
+                with(sharedPref.edit()) {
+                    putInt("com.uu_uce.USER_POINTS", prevPoints + reward)
+                    apply()
+                }
             }
 
             //Open popup
@@ -238,19 +248,23 @@ class Pin(
             val completeText        = customView.findViewById<TextView>(R.id.complete_text)
             val btnClosePopupWindow = customView.findViewById<Button>(R.id.close_button)
             val btnOpenQuiz         = customView.findViewById<Button>(R.id.reopen_button)
+            val rewardText          = customView.findViewById<TextView>(R.id.reward_text)
 
             // Set content based on result
             if(sufficient){
                 georgeReaction.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.happy_george, null))
                 quizResultText.text = activity.getString(R.string.quiz_success_head)
                 completeText.text   = activity.getString(R.string.quiz_success_body, title, reward, totalReward)
-                btnOpenQuiz.text = activity.getString(R.string.reopen_button_success)
+                btnOpenQuiz.text    = activity.getString(R.string.reopen_button_success)
+                rewardText.visibility = VISIBLE
+                rewardText.text = activity.getString(R.string.reward_string, reward)
             }
             else{
                 georgeReaction.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.crying_george, null))
                 quizResultText.text = activity.getString(R.string.quiz_fail_head)
                 completeText.text   = activity.getString(R.string.quiz_fail_body)
-                btnOpenQuiz.text = activity.getString(R.string.reopen_button_fail)
+                btnOpenQuiz.text    = activity.getString(R.string.reopen_button_fail)
+                rewardText.visibility = GONE
             }
 
             // Set buttons

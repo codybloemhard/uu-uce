@@ -109,15 +109,16 @@ class PinContent(contentString: String) {
 }
 
 interface ContentBlockInterface{
-    fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, parent : Pin?)
+    fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?)
     fun getFilePath() : List<String>
 }
 
 class TextContentBlock(private val textContent : String) : ContentBlockInterface{
-    override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, parent : Pin?){
+    override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
         val content = TextView(activity)
         content.text = textContent
         content.setPadding(12,12,12,20)
+        content.gravity = Gravity.CENTER_HORIZONTAL
         layout.addView(content)
     }
 
@@ -131,9 +132,14 @@ class TextContentBlock(private val textContent : String) : ContentBlockInterface
 }
 
 class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
-    override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, parent : Pin?){
+    override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
         val content = ImageView(activity)
         content.setImageURI(imageURI)
+        val imageLayoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        content.layoutParams = imageLayoutParams
 
         layout.addView(content)
     }
@@ -148,7 +154,7 @@ class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
 }
 
 class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : Uri, private val title : String) : ContentBlockInterface{
-    override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, parent : Pin?){
+    override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
         val frameLayout = FrameLayout(activity)
 
         // Create thumbnail image
@@ -168,13 +174,13 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         val playButton = ImageView(activity)
         playButton.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.ic_sprite_play, null) ?: error ("Image not found"))
         playButton.scaleType = ImageView.ScaleType.CENTER_INSIDE
-        val buttonLayout = FrameLayout.LayoutParams(500, 500) // TODO: convert dp to pixels
+        val buttonLayout = FrameLayout.LayoutParams(view.width / 3, view.width / 3)
         buttonLayout.gravity = Gravity.CENTER
         playButton.layoutParams = buttonLayout
-        playButton.setOnClickListener{openVideoView(videoURI, title, activity)}
 
         // Add thumbnail and button
         frameLayout.addView(playButton)
+        frameLayout.setOnClickListener{openVideoView(videoURI, title, activity)}
         layout.addView(frameLayout)
     }
 
@@ -200,13 +206,14 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
     private var selectedAnswer : Int = -1
     private lateinit var selectedBackground : CardView
 
-    override fun generateContent(blockId : Int, layout: LinearLayout, activity: Activity, parent : Pin?) {
+    override fun generateContent(blockId : Int, layout: LinearLayout, activity: Activity, view : View, parent : Pin?) {
         if(parent == null) error("Mutliple choice quizzes can't be generated without a parent pin")
 
         val unselectedColor = Color.parseColor("#2d98da")
         val selectedColor   = Color.parseColor("#FD9644")
         val correctColor    = Color.parseColor("#26DE81")
         val incorrectColor  = Color.parseColor("#FC5C65")
+
         selectedBackground = CardView(activity)
         parent.addQuestion(blockId, reward)
 
@@ -228,14 +235,14 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.MATCH_PARENT
             )
-            frameParams.setMargins(10, 13, 10, 13)
+            frameParams.setMargins(view.width / 36, view.width / 50, view.width / 36, view.width / 50)
 
             currentFrame.layoutParams = frameParams
 
             val background = CardView(activity)
             val backgroundParams = TableRow.LayoutParams(
-                330,
-                330
+                view.width * 8 / 20,
+                view.width * 8 / 20
             )
             background.layoutParams = backgroundParams
             background.radius = 15f

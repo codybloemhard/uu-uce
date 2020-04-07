@@ -1,4 +1,4 @@
-package com.uu_uce.pinDatabase
+package com.uu_uce.databases
 
 import android.content.Context
 import androidx.room.Database
@@ -23,7 +23,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
             super.onOpen(db)
             INSTANCE?.let { database ->
                 scope.launch(Dispatchers.IO) {
-                    populatePinTable(database.pinDao())
+                    populatePinTable(database.pinDao()) // TODO: remove when database is fully implemented
                     //populateFieldbook(database.fieldbookDao())
                 }
             }

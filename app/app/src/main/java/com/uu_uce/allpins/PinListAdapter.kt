@@ -11,9 +11,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
-import com.uu_uce.pinDatabase.PinConversion
-import com.uu_uce.pinDatabase.PinData
-import com.uu_uce.pinDatabase.PinViewModel
+import com.uu_uce.databases.PinConversion
+import com.uu_uce.databases.PinData
+import com.uu_uce.databases.PinViewModel
 
 class PinListAdapter internal constructor(
     private val activity: Activity

@@ -1,6 +1,7 @@
 package com.uu_uce
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Point
@@ -12,7 +13,7 @@ import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import com.uu_uce.pinDatabase.PinViewModel
+import com.uu_uce.databases.PinViewModel
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.services.*
@@ -49,6 +50,13 @@ class GeoMap : AppCompatActivity() {
 
     private fun start(){
         setContentView(R.layout.activity_geo_map)
+
+        // TODO: Remove when database is fully implemented
+        val sharedPref = getPreferences(Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putInt("com.uu_uce.USER_POINTS", 0)
+            apply()
+        }
 
         // Start database and get pins from database
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)

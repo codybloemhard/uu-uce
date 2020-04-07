@@ -99,7 +99,7 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
                     // Fill layout of popup
                     for(i in 0 until content.contentBlocks.count()) {
-                        content.contentBlocks[i].generateContent(i, layout, activity, null)
+                        content.contentBlocks[i].generateContent(i, layout, activity, customView, null)
                     }
 
                     // Open popup

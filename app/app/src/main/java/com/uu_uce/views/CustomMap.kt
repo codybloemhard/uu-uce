@@ -18,9 +18,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.uu_uce.AllPins
 import com.uu_uce.R
-import com.uu_uce.pinDatabase.PinConversion
-import com.uu_uce.pinDatabase.PinData
-import com.uu_uce.pinDatabase.PinViewModel
+import com.uu_uce.databases.PinConversion
+import com.uu_uce.databases.PinData
+import com.uu_uce.databases.PinViewModel
 import com.uu_uce.FieldBook
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation

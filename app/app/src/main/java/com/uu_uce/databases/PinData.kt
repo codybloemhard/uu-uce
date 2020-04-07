@@ -1,4 +1,4 @@
-package com.uu_uce.pinDatabase
+package com.uu_uce.databases
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

@@ -1,4 +1,4 @@
-package com.uu_uce.pinDatabase
+package com.uu_uce.databases
 
 import android.content.Context
 import android.graphics.drawable.Drawable
