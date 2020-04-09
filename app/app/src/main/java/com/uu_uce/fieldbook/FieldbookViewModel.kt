@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
-import com.uu_uce.database.UceRoomDatabase
+import com.uu_uce.databases.UceRoomDatabase
 import kotlinx.coroutines.launch
 
 class FieldbookViewModel(application: Application): AndroidViewModel(application) {

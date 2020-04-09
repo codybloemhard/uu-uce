@@ -17,15 +17,14 @@ import com.uu_uce.pins.*
 class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookViewModel) : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>() {
 
     private var fieldbook: MutableList<FieldbookEntry> = mutableListOf()
-    var activePopup: PopupWindow? = null
 
     class FieldbookViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val parentView = itemView
-        val numberFb: TextView? = parentView.findViewById<TextView>(R.id.no)
-        val locationFb: TextView? = parentView.findViewById<TextView>(R.id.pin_coordinates)
-        val datetimeFb: TextView? = parentView.findViewById<TextView>(R.id.datetime)
-        val textFb: TextView? = parentView.findViewById<TextView>(R.id.text_preview)
-        val imageFb: ImageView? = parentView.findViewById<ImageView>(R.id.image_preview)
+        val numberFb: TextView? = parentView.findViewById(R.id.no)
+        val locationFb: TextView? = parentView.findViewById(R.id.pin_coordinates)
+        val datetimeFb: TextView? = parentView.findViewById(R.id.datetime)
+        val textFb: TextView? = parentView.findViewById(R.id.text_preview)
+        val imageFb: ImageView? = parentView.findViewById(R.id.image_preview)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FieldbookViewHolder {
@@ -58,16 +57,16 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
             if (cB is TextContentBlock && !displayingText) {
                 displayingText = true
-                holder.textFb?.text = cB.textContent
+                holder.textFb?.text = cB.getTextContent()
             } else if (!displayingImage) {
                 displayingImage = true
 
                 if (cB is ImageContentBlock) {
-                    uri = cB.imageURI
+                    uri = cB.getImageURI()
                     holder.imageFb?.setImageURI(uri)
                 }
                 if (cB is VideoContentBlock) {
-                    uri = cB.thumbnailURI
+                    uri = cB.getThumbnailURI()
                     holder.imageFb?.setImageURI(uri)
                 }
             }
@@ -99,8 +98,8 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
                     val layout: LinearLayout = customView.findViewById(R.id.scrollLayout)
 
                     // Fill layout of popup
-                    contentBlocks.forEach { cb ->
-                        cb.generateContent(layout, activity)
+                    for(i in 0 until contentBlocks.count()) {
+                        contentBlocks[i].generateContent(i, layout, activity, customView, null)
                     }
 
                     // Open popup

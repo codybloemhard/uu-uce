@@ -1,4 +1,4 @@
-package com.uu_uce.database
+package com.uu_uce.databases
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
@@ -9,7 +9,7 @@ import androidx.room.Transaction
 @Dao
 interface PinDao {
 
-    @Query("SELECT * from pins")
+    @Query("SELECT * from pins ORDER BY location DESC")
     fun getAllPins() : LiveData<List<PinData>>
 
     @Query("SELECT status from pins where pinId = :pid")

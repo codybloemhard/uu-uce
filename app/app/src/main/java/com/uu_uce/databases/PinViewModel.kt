@@ -1,4 +1,4 @@
-package com.uu_uce.database
+package com.uu_uce.databases
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel

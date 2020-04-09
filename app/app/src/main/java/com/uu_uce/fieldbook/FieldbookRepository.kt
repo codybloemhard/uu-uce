@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 
 class FieldbookRepository(private val fieldbookDao: FieldbookDao) {
 
-    val allFielbookEntries: LiveData<MutableList<FieldbookEntry>> = fieldbookDao.getAllFieldbookEntries()
+    val allFielbookEntries: LiveData<MutableList<FieldbookEntry>> = fieldbookDao.getAll()
 
     suspend fun insert(fieldbookEntry: FieldbookEntry) {
         fieldbookDao.insert(fieldbookEntry)

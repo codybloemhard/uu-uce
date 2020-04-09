@@ -14,12 +14,13 @@ import android.widget.PopupWindow
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.uu_uce.AllPins
 import com.uu_uce.R
-import com.uu_uce.database.PinConversion
-import com.uu_uce.database.PinData
-import com.uu_uce.database.PinViewModel
+import com.uu_uce.databases.PinConversion
+import com.uu_uce.databases.PinData
+import com.uu_uce.databases.PinViewModel
 import com.uu_uce.FieldBook
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawDeviceLocation
@@ -31,7 +32,6 @@ import com.uu_uce.pins.Pin
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
 import com.uu_uce.gestureDetection.*
-import com.uu_uce.ui.*
 import java.io.File
 import kotlin.system.measureTimeMillis
 
@@ -78,7 +78,11 @@ class CustomMap : ViewTouchParent {
         addChild(Scroller(context, ::moveMap))
         addChild(DoubleTapper(context, ::zoomOutMax))
         addChild(SingleTapper(context as AppCompatActivity, ::tapPin))
-        addChild(Releaser {smap.onTouchRelease(camera.getViewport())})
+        addChild(Releaser {
+            smap.onTouchRelease(
+                camera.getViewport()
+            )
+        })
 
 
 
@@ -182,11 +186,10 @@ class CustomMap : ViewTouchParent {
         Logger.log(LogType.Event,"CustomMap", "${loc.east}, ${loc.north}")
     }
 
-    fun setPins(){
+    fun setPins(table : LiveData<List<PinData>>){
         // Set observer on pin database
-        viewModel.allPinData.observe(lfOwner, Observer { pins ->
+        table.observe(lfOwner, Observer { pins ->
             // Update the cached copy of the words in the adapter.
-            viewModel.allPinData
             pins?.let { newData ->
                 updatePinStatuses(newData)
             }
@@ -269,9 +272,9 @@ class CustomMap : ViewTouchParent {
     }
 
     private fun tapPin(tapLocation : p2, activity : Activity){
-        for(entry in pins){
-            val pin = entry.value
-            if(!pin.inScreen) continue
+        for(entry in pins.toList().asReversed()){
+            val pin = entry.second
+            if(!pin.inScreen || pin.getStatus() < 1) continue
             if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, pinTapBufferSize)){
                 pin.openPinPopupWindow(this, activity) {activePopup = null}
                 activePopup = pin.popupWindow

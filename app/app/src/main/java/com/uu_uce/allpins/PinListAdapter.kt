@@ -11,9 +11,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
-import com.uu_uce.database.PinConversion
-import com.uu_uce.database.PinData
-import com.uu_uce.database.PinViewModel
+import com.uu_uce.databases.PinConversion
+import com.uu_uce.databases.PinData
+import com.uu_uce.databases.PinViewModel
 
 class PinListAdapter internal constructor(
     private val activity: Activity
@@ -80,6 +80,8 @@ class PinListAdapter internal constructor(
             ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image_black, null) ?: error ("Image not found"))
             "VIDEO" -> holder.pinType.setImageDrawable(
             ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video_black, null) ?: error ("Image not found"))
+            "MCQUIZ" -> holder.pinType.setImageDrawable(
+                ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest_black, null) ?: error ("Image not found"))
         }
     }
 

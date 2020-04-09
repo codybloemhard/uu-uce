@@ -1,14 +1,18 @@
 package com.uu_uce.pins
 
 import android.app.Activity
+import android.content.Context
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.view.Gravity
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
-import com.uu_uce.database.PinViewModel
+import com.uu_uce.databases.PinViewModel
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
@@ -16,12 +20,6 @@ import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.shapefiles.p2
 import com.uu_uce.shapefiles.p2Zero
 import kotlin.math.roundToInt
-
-enum class PinType {
-    TEXT,
-    VIDEO,
-    IMAGE,
-}
 
 class Pin(
     val id : Int,
@@ -53,6 +51,10 @@ class Pin(
 
     var popupWindow: PopupWindow? = null
 
+    // Quiz
+    private lateinit var answered : Array<Boolean>
+    private lateinit var questionRewards : Array<Int>
+    private var totalReward = 0
 
     fun draw(viewport: Pair<p2, p2>, width : Int, height : Int, view: View, canvas: Canvas) {
         val screenLocation: Pair<Float, Float> =
@@ -67,6 +69,7 @@ class Pin(
         val maxX = (screenLocation.first + pinWidth / 2).roundToInt()
         val maxY = (screenLocation.second).roundToInt()
 
+        // Check whether pin is unlocked
         if (status == 0) return
 
         // Check whether pin is out of screen
@@ -82,7 +85,7 @@ class Pin(
         }
         inScreen = true
 
-        // Check whether pin is unlocked
+        // Set boundingbox for pin tapping
         boundingBox =
             Pair(p2(minX.toDouble(), minY.toDouble()), p2(maxX.toDouble(), maxY.toDouble()))
 
@@ -114,9 +117,9 @@ class Pin(
 
         popupWindow?.setOnDismissListener {
             popupWindow = null
+
             onDissmissAction()
         }
-
 
         // Add the title for the popup window
         val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
@@ -126,9 +129,35 @@ class Pin(
         val layout: LinearLayout = customView.findViewById(R.id.scrollLayout)
 
         // Fill layout of popup
+
         val contentBlocks : List<ContentBlockInterface> = content.getContent()
-        contentBlocks.forEach { cb ->
-            cb.generateContent(layout, activity)
+
+        // Set up quiz
+        val containsQuiz = contentBlocks.any{cB -> cB is MCContentBlock}
+        if(containsQuiz) {
+            answered = Array(contentBlocks.count()) { true }
+            questionRewards = Array(contentBlocks.count()) { 0 }
+            resetQuestions()
+        }
+
+        for(i in 0 until contentBlocks.count()){
+            contentBlocks[i].generateContent(i, layout, activity, parentView, this)
+        }
+
+        if(containsQuiz && status < 2){
+            val finishButton = Button(activity)
+            finishButton.text = activity.getString(R.string.finish_text)
+            finishButton.background.setTint(ResourcesCompat.getColor(activity.resources, R.color.colorUU, null))
+            val buttonLayout = LinearLayout.LayoutParams(
+                TableRow.LayoutParams.MATCH_PARENT,
+                TableRow.LayoutParams.WRAP_CONTENT
+            )
+            buttonLayout.setMargins(parentView.width / 7, 0, parentView.width / 7, 0)
+            finishButton.layoutParams = buttonLayout
+            finishButton.setOnClickListener{
+                finishQuiz(activity, parentView)
+            }
+            layout.addView(finishButton)
         }
 
         // Open popup
@@ -139,22 +168,118 @@ class Pin(
         val checkBoxCompletePin = customView.findViewById<CheckBox>(R.id.complete_box)
 
         // Set checkbox to correct state
-        checkBoxCompletePin.isChecked = (getStatus() == 2)
+        if(containsQuiz){
+            checkBoxCompletePin.isChecked = (getStatus() == 2)
+        }
+        else{
+            checkBoxCompletePin.visibility = View.INVISIBLE
+        }
 
         // Set onClickListeners
         btnClosePopupWindow.setOnClickListener {
             popupWindow?.dismiss()
-        }
-        checkBoxCompletePin.setOnClickListener {
-            if (checkBoxCompletePin.isChecked) {
-                complete()
-            }
         }
     }
 
     private fun complete() {
         if (status < 2)
             viewModel.completePin(id, followIds)
+    }
+
+    fun addQuestion(questionId : Int, reward: Int){
+        answered[questionId] = false
+        totalReward += reward
+    }
+
+    fun answerQuestion(questionId : Int, reward : Int){
+        questionRewards[questionId] = reward
+        answered[questionId] = true
+    }
+
+    private fun resetQuestions(){
+        questionRewards.map{0}
+        totalReward = 0
+        answered.map{true}
+    }
+
+    private fun finishQuiz(activity : Activity, parentView: View){
+        if(answered.all{b -> b}){
+            // All questions answered
+            val reward = questionRewards.sum()
+            popupWindow?.dismiss()
+
+            var sufficient = false
+            if(reward >= 0.55 * totalReward){
+                sufficient = true
+                complete()
+
+                val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
+                val prevPoints = sharedPref.getInt("com.uu_uce.USER_POINTS", 0)
+                with(sharedPref.edit()) {
+                    putInt("com.uu_uce.USER_POINTS", prevPoints + reward)
+                    apply()
+                }
+            }
+
+            //Open popup
+            val layoutInflater = activity.layoutInflater
+
+            // Build an custom view (to be inflated on top of our current view & build it's popup window)
+            val customView = layoutInflater.inflate(R.layout.quiz_complete_popup, null, false)
+
+            popupWindow = PopupWindow(
+                customView,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+
+            popupWindow?.setOnDismissListener {
+                popupWindow = null
+            }
+
+            // Open popup
+            popupWindow?.showAtLocation(parentView, Gravity.CENTER, 0, 0)
+
+            // Get elements
+            val georgeReaction      = customView.findViewById<ImageView>(R.id.george_reaction)
+            val quizResultText      = customView.findViewById<TextView>(R.id.quiz_result_text)
+            val completeText        = customView.findViewById<TextView>(R.id.complete_text)
+            val btnClosePopupWindow = customView.findViewById<Button>(R.id.close_button)
+            val btnOpenQuiz         = customView.findViewById<Button>(R.id.reopen_button)
+            val rewardText          = customView.findViewById<TextView>(R.id.reward_text)
+            val rewardLayout        = customView.findViewById<LinearLayout>(R.id.reward_layout)
+
+            // Set content based on result
+            if(sufficient){
+                georgeReaction.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.happy_george, null))
+                quizResultText.text = activity.getString(R.string.quiz_success_head)
+                completeText.text   = activity.getString(R.string.quiz_success_body, title, reward, totalReward)
+                btnOpenQuiz.text    = activity.getString(R.string.reopen_button_success)
+                rewardLayout.visibility = VISIBLE
+                rewardText.text = activity.getString(R.string.reward_string, reward)
+            }
+            else{
+                georgeReaction.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.crying_george, null))
+                quizResultText.text = activity.getString(R.string.quiz_fail_head)
+                completeText.text   = activity.getString(R.string.quiz_fail_body)
+                btnOpenQuiz.text    = activity.getString(R.string.reopen_button_fail)
+                rewardLayout.visibility = GONE
+            }
+
+            // Set buttons
+            btnClosePopupWindow.setOnClickListener {
+                popupWindow?.dismiss()
+            }
+
+            btnOpenQuiz.setOnClickListener {
+                popupWindow?.dismiss()
+                openPinPopupWindow(parentView, activity){}
+            }
+        }
+        else{
+            // Questions left unanswered
+            Toast.makeText(activity, "Some questions still lack answers", Toast.LENGTH_SHORT).show()
+        }
     }
 
     fun getTitle(): String {
@@ -169,7 +294,7 @@ class Pin(
         status = newStatus
     }
 
-    private fun getStatus(): Int {
+    fun getStatus(): Int {
         return status
     }
 }
