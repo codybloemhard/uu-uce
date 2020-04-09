@@ -21,13 +21,6 @@ import com.uu_uce.shapefiles.p2
 import com.uu_uce.shapefiles.p2Zero
 import kotlin.math.roundToInt
 
-enum class PinType {
-    TEXT,
-    VIDEO,
-    IMAGE,
-    MCQUIZ
-}
-
 class Pin(
     val id : Int,
     private var coordinate      : UTMCoordinate,

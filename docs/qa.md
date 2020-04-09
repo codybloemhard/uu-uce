@@ -85,9 +85,13 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Quality Checks Matrix
 | Since Version | ID    | What to check     |
 |---------------|-------|-------------------|
-| 0.4.1         | IC11  | Open fieldbook item, ui scaling
-| 0.4.1         | IC10  | Add fieldbook item
-| 0.4.1         | IC9   | Open fieldbook
+| 0.4.2         | IC15  | Complete multiple choice quiz
+| 0.4.2         | IC14  | Fail multiple choice quiz
+| 0.4.2         | IC13  | Open multiple choice quiz
+| 0.4.1         | IC12  | Open fieldbook item, ui scaling
+| 0.4.1         | IC11  | Add fieldbook item
+| 0.4.1         | IC10  | Open fieldbook
+| 0.3.2         | IC9   | Open video via video pin 
 | 0.3.2         | IC8   | Open pin via menu
 | 0.3.1         | IC7   | Pins drawn, click on pin to open popup
 | 0.x.x         | IC6   | Pin list menu, UI scaling
@@ -101,6 +105,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Detailed Linting Status
 | Version   | Linting Details Kotlin: (Nr, Worst) Android: (Nr, Worst)  |
 |-----------|-----------------------------------------------------------|
+| 0.4.2     | Small decrease in issues, Kotlin: (7, mild) Android (61: Medium)
 | 0.4.1     | Issues expand again, Kotlin: (12, mild) Android (80: Major)
 | 0.4.0     | Mostly unused ... errors, Kotlin: (7, mild) Android: (58: Medium)
 | 0.3.1     | Many Issues, Kotlin: (8, Mild) Android: (69, Major)

@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">UCE</string>
     <string name="title_activity_geo_map">geo_map</string>
     <string name="show_pin">Pin</string>
@@ -27,10 +27,20 @@
     <string name="type_image_descripition">Image showing the type of the pin</string>
     <string name="finish_text">Finish</string>
     <string name="quiz_success_head">Quiz completed</string>
-    <string name="quiz_success_body">Congratulations! You completed the "%1$s" quiz with %2$d out of %3$d points.</string>
+    <string name="quiz_success_body" tools:ignore="PluralsCandidate">Congratulations! You completed the "%1$s" quiz with %2$d out of %3$d points.</string>
     <string name="quiz_fail_head">Quiz failed!</string>
     <string name="quiz_fail_body">Oh no… You did not get enough points to complete this quiz. Don\'t worry though, you can try again at any time.</string>
     <string name="reward_text_placeholder">REWARD</string>
     <string name="reward_string">+%1$d</string>
     <string name="points_logo_description">Logo for points</string>
+    <string name="text_field_description">Insert text:</string>
+    <string name="image_field_description">Upload your image here, by clicking on the area below:</string>
+    <string name="uploaded_image_field_description">Image field for displaying uploaded image</string>
+    <string name="add_button_text">add to my fieldbook</string>
+    <string name="date_time_text"><![CDATA[Date & Time]]></string>
+    <string name="fieldbook_coordinates_text">Pin coordinates</string>
+    <string name="fieldbook_pin_title_placeholder">#000</string>
+    <string name="fieldbook_image_preview">Picture Preview</string>
+    <string name="menu_bar_backbutton_description">Back Button</string>
+    <string name="menubar_placeholder_text">Menu Item</string>
 </resources>

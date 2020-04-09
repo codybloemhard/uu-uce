@@ -24,28 +24,9 @@ abstract class UceRoomDatabase : RoomDatabase() {
             INSTANCE?.let { database ->
                 scope.launch(Dispatchers.IO) {
                     populatePinTable(database.pinDao()) // TODO: remove when database is fully implemented
-                    //populateFieldbook(database.fieldbookDao())
                 }
             }
         }
-
-        /*suspend fun populateFieldbook(fieldbookDao: FieldbookDao) {
-            val fieldbookEntries: MutableList<FieldbookEntry> = mutableListOf(
-                FieldbookEntry(
-                    "31N3149680N46777336E",
-                    "04-05-1945 07:54",
-                    "[{\"tag\":\"TEXT\",\"text\":\"Dit is een faketekst. Alles wat hier staat is slechts om een indruk te geven van het grafische effect van tekst op deze plek. Wat u hier leest is een voorbeeldtekst. Deze wordt later vervangen door de uiteindelijke tekst, die nu nog niet bekend is. De faketekst is dus een tekst die eigenlijk nergens over gaat. Het grappige is, dat mensen deze toch vaak lezen. Zelfs als men weet dat het om een faketekst gaat, lezen ze toch door.\"},{\"tag\":\"IMAGE\",\"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/images/test.png\"}]"
-                ),
-                FieldbookEntry(
-                    "31N3133680N46718336E",
-                    "01-01-1970 00:00",
-                    "[{\"tag\":\"TEXT\",\"text\":\"Dit is een faketekst. Alles wat hier staat is slechts om een indruk te geven van het grafische effect van tekst op deze plek. Wat u hier leest is een voorbeeldtekst. Deze wordt later vervangen door de uiteindelijke tekst, die nu nog niet bekend is. De faketekst is dus een tekst die eigenlijk nergens over gaat. Het grappige is, dat mensen deze toch vaak lezen. Zelfs als men weet dat het om een faketekst gaat, lezen ze toch door.\"},{\"tag\":\"VIDEO\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/videos/zoo.mp4\", \"thumbnail\":\"file:///data/data/com.uu_uce/files/pin_content/videos/thumbnails/zoothumbnail.png\", \"title\":\"zoo video\"}]"
-                )
-            )
-
-            fieldbookDao.insertAll(fieldbookEntries)
-        }*/
-
 
         suspend fun populatePinTable(pinDao: PinDao) {
             val pinList: MutableList<PinData> = mutableListOf()
