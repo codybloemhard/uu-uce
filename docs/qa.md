@@ -67,7 +67,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Test Issues Matrix
 | Version   | Pixel 2 Emulator API 29   | Nokia 2 API 24            | One Plus 5 API 28 | Moto g5s+         | Pixel 3 Emulator API 29 | Pixel C API 27 |
 |-----------|---------------------------|---------------------------|-------------------|-------------------|-------------------------|----------------|
-| 0.4.2     | IK6                       | IK7                       | IK8               |                   | IK8                     | IK8            |
+| 0.4.2     | IK6, IK8                  | IK7, IK8                  | IK8               |                   | IK8                     | IK8            |
 | 0.4.1     | IK6                       | IK7                       | None              |                   | None                    | IK6            |
 | 0.4.0     | None                      |                           | None              |                   | None                    | IK6            |
 | 0.3.1     | IK2                       | None                      | None              | IK1, IK2          | None                    | IK6            |
