@@ -11,7 +11,7 @@ abstract class ShapeZ(var bmin: p3, var bmax: p3){
     abstract fun draw(canvas: Canvas, paint: Paint, viewport: Pair<p2,p2>, width: Int, height: Int)
 }
 
-class HeightShapeZ(private var type: ShapeType, private var points: List<p2>, bmi: p3, bma: p3): ShapeZ(bmi,bma) {
+class HeightShapeZ(private var points: List<p2>, bmi: p3, bma: p3): ShapeZ(bmi,bma) {
 
     override fun draw(
         canvas: Canvas,
@@ -49,7 +49,7 @@ class PolyPoint(val point: p3, var reflex: Boolean, var ear: Boolean, val index:
         set(value) {reflex = !value}
 }
 
-class PolygonZ(private var outerRings: List<List<p3>>, private var innerRings: List<List<p3>>, bmi: p3, bma:p3): ShapeZ(bmi,bma){
+class PolygonZ(outerRings: List<List<p3>>, private var innerRings: List<List<p3>>, bmi: p3, bma:p3): ShapeZ(bmi,bma){
     private lateinit var triangles: MutableList<Int>
     private var vertices: List<p3>
 
@@ -92,8 +92,6 @@ class PolygonZ(private var outerRings: List<List<p3>>, private var innerRings: L
             }
             rightmost
         }
-
-        innerRings = innerRings.slice(listOf(3,4))
 
         //merge rings one by one
         for(innerRing in innerRings){
@@ -286,10 +284,10 @@ class PolygonZ(private var outerRings: List<List<p3>>, private var innerRings: L
         val x3 = p2.first
         val y3 = p2.second
 
-        val denominator = ((y2 - y3)*(x1 - x3) + (x3 - x2)*(y1 - y3));
-        val a = ((y2 - y3)*(x - x3) + (x3 - x2)*(y - y3)) / denominator;
-        val b = ((y3 - y1)*(x - x3) + (x1 - x3)*(y - y3)) / denominator;
-        val c = 1 - a - b;
+        val denominator = ((y2 - y3)*(x1 - x3) + (x3 - x2)*(y1 - y3))
+        val a = ((y2 - y3)*(x - x3) + (x3 - x2)*(y - y3)) / denominator
+        val b = ((y3 - y1)*(x - x3) + (x1 - x3)*(y - y3)) / denominator
+        val c = 1 - a - b
 
         //epsilon is needed because of how inner and outer polygons are merged because
         //there will be two exactly equal lines in the polygon, only in reversed order

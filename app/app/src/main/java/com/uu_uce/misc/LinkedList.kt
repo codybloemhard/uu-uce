@@ -1,8 +1,8 @@
 package com.uu_uce.misc
 
-class LinkedListIterator<T>(var cur: Node<T>?): Iterator<Node<T>>{
+class LinkedListIterator<T>(private var cur: Node<T>?): Iterator<Node<T>>{
     val first = cur
-    var firstTime = true
+    private var firstTime = true
     override fun hasNext(): Boolean {
         if(cur == first){
             if(firstTime) firstTime = false

@@ -4,7 +4,6 @@ import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import java.io.File
 import kotlin.math.log
-import kotlin.math.max
 import kotlin.math.pow
 
 abstract class ChunkGetter(
@@ -88,7 +87,7 @@ class HeightLineReader(
                 p2(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff)
             }
 
-            HeightShapeZ(ShapeType.Polygon, points, bb1, bb2)
+            HeightShapeZ(points, bb1, bb2)
         }
 
         val time1 = System.currentTimeMillis() - time
@@ -181,8 +180,7 @@ class PolygonReader(
         val bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
 
         val nrShapes = reader.readULong()
-        //todo remove 1 and put back nrshapes
-        val shapes: List<PolygonZ> = List(1.toInt()) {
+        val shapes: List<PolygonZ> = List(nrShapes.toInt()) {
             val bbmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult + zoff)
             val bbmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult + zoff)
 

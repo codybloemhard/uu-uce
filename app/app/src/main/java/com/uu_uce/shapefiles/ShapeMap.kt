@@ -73,7 +73,7 @@ class ShapeMap(private val nrOfLODs: Int,
 
     fun addLayer(type: LayerType, path: File, chunkGetter: ChunkGetter){
         val timeSave = measureTimeMillis {
-            layers.add(Pair(type,ShapeLayer(path, chunkGetter)))
+            layers.add(Pair(type,ShapeLayer(path, chunkGetter, this, {})))
         }
 
         Logger.log(LogType.Info,"ShapeMap", "Save: $timeSave")
@@ -107,7 +107,7 @@ class ShapeMap(private val nrOfLODs: Int,
 
     fun onTouchRelease(viewport: Pair<p2,p2>){
         for((_,layer) in layers){
-            layer.onTouchRelease(viewport, zoomLevel, this)
+            layer.onTouchRelease(viewport, zoomLevel)
         }
     }
 
@@ -122,7 +122,6 @@ class ShapeMap(private val nrOfLODs: Int,
                 l.draw(
                     canvas,
                     layerPaints[t.value],
-                    this,
                     viewport,
                     width,
                     height,
@@ -131,10 +130,6 @@ class ShapeMap(private val nrOfLODs: Int,
             }
         }
     }
-}
-
-enum class ShapeType{
-    Polygon, Line, Point
 }
 
 enum class LayerType(val value: Int){

@@ -16,8 +16,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.uu_uce.databases.PinViewModel
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.services.LocationServices.Companion.permissionsNeeded
-import com.uu_uce.services.checkPermissions
 import com.uu_uce.services.getPermissions
 import com.uu_uce.shapefiles.HeightLineReader
 import com.uu_uce.services.*
