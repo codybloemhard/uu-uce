@@ -12,15 +12,15 @@ import com.uu_uce.R
 import com.uu_uce.VideoViewer
 import java.io.StringReader
 
-class PinContent(contentString: String) {
-    val contentBlocks : List<ContentBlockInterface>
+class PinContent(private val contentString: String) {
+    //val contentBlocks : List<ContentBlockInterface>
     lateinit var parent : Pin
-    init{
+    /*init{
         contentBlocks = getContent(contentString)
-    }
+    }*/
 
 
-    private fun getContent(contentString: String) : List<ContentBlockInterface>{
+    fun getContent() : List<ContentBlockInterface>{
             val reader = JsonReader(StringReader(contentString))
 
             return readContentBlocks(reader)

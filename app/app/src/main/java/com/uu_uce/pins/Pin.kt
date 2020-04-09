@@ -26,8 +26,6 @@ enum class PinType {
 class Pin(
     val id : Int,
     private var coordinate      : UTMCoordinate,
-    /*private var difficulty      : Int,
-    private var type            : PinType,*/
     private var title           : String,
     private var content         : PinContent,
     private var image           : Drawable,
@@ -128,7 +126,8 @@ class Pin(
         val layout: LinearLayout = customView.findViewById(R.id.scrollLayout)
 
         // Fill layout of popup
-        content.contentBlocks.forEach { cb ->
+        val contentBlocks : List<ContentBlockInterface> = content.getContent()
+        contentBlocks.forEach { cb ->
             cb.generateContent(layout, activity)
         }
 

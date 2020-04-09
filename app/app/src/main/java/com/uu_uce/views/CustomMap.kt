@@ -155,7 +155,6 @@ class CustomMap : ViewTouchParent {
 
             // Draw pins
             pins.forEach{ entry ->
-
                 entry.value.draw(viewport, width, height,this, canvas)
             }
         }
