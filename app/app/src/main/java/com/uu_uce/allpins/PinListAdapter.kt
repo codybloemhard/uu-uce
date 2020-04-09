@@ -21,7 +21,7 @@ class PinListAdapter internal constructor(
 
     private val resource = activity.resources
     private val inflater: LayoutInflater = LayoutInflater.from(activity)
-    private var pins = emptyList<PinData>()
+    private var pinDataList = emptyList<PinData>()
     private val pinViewModel: PinViewModel = ViewModelProvider(activity as ViewModelStoreOwner).get(PinViewModel::class.java)
     var activePopup: PopupWindow? = null
 
@@ -42,10 +42,19 @@ class PinListAdapter internal constructor(
     }
 
     override fun onBindViewHolder(holder: PinViewHolder, position: Int) {
-        val current = pins[position]
+        val current = pinDataList[position]
         holder.pinTitle.text = current.title
         holder.pinCoord.text = current.location
-        holder.pinStatus.isChecked = (current.status == 2)
+
+        // Set completed marker
+        if(current.followIds != "-1"){
+            holder.pinStatus.visibility = View.VISIBLE
+            holder.pinStatus.isChecked = (current.status == 2)
+        }
+        else{
+            holder.pinStatus.visibility = View.GONE
+        }
+
         holder.pinButton.setOnClickListener{
             val pinConverter = PinConversion(activity)
             val pin = pinConverter.pinDataToPin(current, pinViewModel)
@@ -101,11 +110,11 @@ class PinListAdapter internal constructor(
                 }
             }
         }
-        pins = tempPins
+        pinDataList = tempPins
         notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int {
-        return pins.size
+        return pinDataList.size
     }
 }

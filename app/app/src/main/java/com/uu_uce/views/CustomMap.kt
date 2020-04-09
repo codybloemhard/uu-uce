@@ -23,7 +23,7 @@ import com.uu_uce.databases.PinData
 import com.uu_uce.databases.PinViewModel
 import com.uu_uce.FieldBook
 import com.uu_uce.mapOverlay.coordToScreen
-import com.uu_uce.mapOverlay.drawDeviceLocation
+import com.uu_uce.mapOverlay.drawLocation
 import com.uu_uce.mapOverlay.pointDistance
 import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.misc.LogType
@@ -147,7 +147,7 @@ class CustomMap : ViewTouchParent {
                 deviceScreenLoc.first > 0 && deviceScreenLoc.first < width &&
                 deviceScreenLoc.second > 0 && deviceScreenLoc.second < height
             if(locationAvailable && locInScreen){
-                drawDeviceLocation(
+                drawLocation(
                     deviceScreenLoc,
                     canvas,
                     deviceLocPaint,

@@ -52,9 +52,9 @@ class Pin(
     var popupWindow: PopupWindow? = null
 
     // Quiz
-    private lateinit var answered : Array<Boolean>
-    private lateinit var questionRewards : Array<Int>
-    private var totalReward = 0
+    private var answered : Array<Boolean>       = Array(content.contentBlocks.count()) { true }
+    private var questionRewards : Array<Int>    = Array(content.contentBlocks.count()) { 0 }
+    private var totalReward                     = 0
 
     fun draw(viewport: Pair<p2, p2>, width : Int, height : Int, view: View, canvas: Canvas) {
         val screenLocation: Pair<Float, Float> =
@@ -128,22 +128,16 @@ class Pin(
         // Add content to popup window
         val layout: LinearLayout = customView.findViewById(R.id.scrollLayout)
 
-        // Fill layout of popup
-
-        val contentBlocks : List<ContentBlockInterface> = content.getContent()
-
         // Set up quiz
-        val containsQuiz = contentBlocks.any{cB -> cB is MCContentBlock}
-        if(containsQuiz) {
-            answered = Array(contentBlocks.count()) { true }
-            questionRewards = Array(contentBlocks.count()) { 0 }
-            resetQuestions()
+        resetQuestions()
+        var containsQuiz = false
+        for(i in 0 until content.contentBlocks.count()){
+            val current = content.contentBlocks[i]
+            current.generateContent(i, layout, activity, parentView, this)
+            if(current is MCContentBlock) containsQuiz = true
         }
 
-        for(i in 0 until contentBlocks.count()){
-            contentBlocks[i].generateContent(i, layout, activity, parentView, this)
-        }
-
+        // Fill layout of popup
         if(containsQuiz && status < 2){
             val finishButton = Button(activity)
             finishButton.text = activity.getString(R.string.finish_text)
@@ -182,7 +176,7 @@ class Pin(
     }
 
     private fun complete() {
-        if (status < 2)
+        if (followIds[0] != -1)
             viewModel.completePin(id, followIds)
     }
 

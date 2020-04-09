@@ -49,8 +49,7 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
         var displayingText = false
         var displayingImage = false
 
-        val contentBlocks = content.getContent()
-        for (cB in contentBlocks)
+        for (cB in content.contentBlocks)
         {
             if (displayingText && displayingImage)
                 break
@@ -98,8 +97,8 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
                     val layout: LinearLayout = customView.findViewById(R.id.scrollLayout)
 
                     // Fill layout of popup
-                    for(i in 0 until contentBlocks.count()) {
-                        contentBlocks[i].generateContent(i, layout, activity, customView, null)
+                    for(i in 0 until content.contentBlocks.count()) {
+                        content.contentBlocks[i].generateContent(i, layout, activity, customView, null)
                     }
 
                     // Open popup
