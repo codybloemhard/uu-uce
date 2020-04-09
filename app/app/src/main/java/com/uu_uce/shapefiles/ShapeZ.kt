@@ -54,6 +54,8 @@ class PolygonZ(private var outerRings: List<List<p3>>, private var innerRings: L
     private var vertices: List<p3>
 
     init{
+        //todo in proprocessing: make sure there is only 1 outer ring, with matching inner rings
+        //using isInsidePolygon
         vertices = outerRings[0]
         mergeInner()
         removeDoubles()
@@ -82,6 +84,18 @@ class PolygonZ(private var outerRings: List<List<p3>>, private var innerRings: L
     }
 
     private fun mergeInner(){
+        //merge inner ring with highest x coordinate first (this one can defneitely to see the outer ring)
+        innerRings = innerRings.sortedByDescending{ring ->
+            var rightmost = Double.MIN_VALUE
+            for(point in ring){
+                rightmost = maxOf(rightmost, point.first)
+            }
+            rightmost
+        }
+
+        innerRings = innerRings.slice(listOf(3,4))
+
+        //merge rings one by one
         for(innerRing in innerRings){
             //get rightmost point in inner ring
             var rightmost = p3Min
@@ -95,11 +109,12 @@ class PolygonZ(private var outerRings: List<List<p3>>, private var innerRings: L
             }
 
             //calculate closest intersection with outer ring when going to the right
-            var p = p3NaN //second point on line of intersection
+            var intersectIndex = -1 //second point on line of intersection
             var intersect = p3NaN //actual intersection point
             var bestDis = Double.MAX_VALUE
             val x3 = rightmost.first
             val y3 = rightmost.second
+            //intersect with every line of the outer ring
             for(i in vertices.indices) {
                 val x1 = vertices[i].first
                 val y1 = vertices[i].second
@@ -111,19 +126,25 @@ class PolygonZ(private var outerRings: List<List<p3>>, private var innerRings: L
 
                 val x = x1 + t * (x2 - x1)
                 val curDis = x - x3
-                if(curDis<0 || curDis > bestDis) continue
+                if(curDis<0 || curDis >= bestDis) continue
 
                 bestDis = curDis
                 val z1 = vertices[i].third
                 val z2 = vertices[(i + 1) % vertices.size].third
                 val z = z1 + t * (z2 - z1)
-                p = vertices[(i + 1) % vertices.size]
+                intersectIndex = (i + 1) % vertices.size
                 intersect = p3(x,y3,z)
             }
 
+            //rm1:(310127.85714285716, 4671878.142857143, 0.0)
+            //is1:(310138.63081861957, 4671878.142857143, 0.0)
+
+            //intersection point is known: now add the original outer ring up to that point,
+            //then the inner ring, then continue with the outer ring
             val newVertices: MutableList<p3> = mutableListOf()
-            for(point in vertices){
-                if(point == p){
+            for(i in vertices.indices){
+                val point = vertices[i]
+                if(i == intersectIndex){
                     newVertices.add(intersect)
 
                     var k = rightmostIndex
@@ -144,6 +165,8 @@ class PolygonZ(private var outerRings: List<List<p3>>, private var innerRings: L
     }
 
     private fun removeDoubles(){
+        //shapefile specification allows duplicate points to occur right after each other..
+        //useless information, we throw it away
         vertices = vertices.filterIndexed{i, p -> vertices[(i+1)%vertices.size] != p}
     }
 
@@ -169,9 +192,16 @@ class PolygonZ(private var outerRings: List<List<p3>>, private var innerRings: L
         var cur = remainingPolygon.first!!
         while(remainingPolygon.size > 3){
             step++
-            if(step > 100000){
-                throw Exception("weird")
-            }
+            /*if(step>100001){
+                var hasEar = false
+                for(point in remainingPolygon){
+                    if(point.value.ear != isEar(remainingPolygon,point))
+                        throw Exception("weird0")
+                    if(point.value.ear) hasEar = true
+                }
+                if(!hasEar) throw Exception("weird1")
+            }*/
+
             if(!cur.value.ear) {
                 cur = cur.next!!
                 continue
@@ -187,6 +217,19 @@ class PolygonZ(private var outerRings: List<List<p3>>, private var innerRings: L
 
             update(remainingPolygon, prev)
             update(remainingPolygon, prev.next!!)
+
+            if(step>3300) {
+                for(point in remainingPolygon){
+                    if(point.value.reflex != isReflex(point)) {
+                        throw Exception("weird3")
+                    }
+                }
+                for (point in remainingPolygon) {
+                    if (point.value.ear != isEar(remainingPolygon, point)) {
+                        throw Exception("weird4")
+                    }
+                }
+            }
 
             cur = prev
         }
@@ -225,14 +268,14 @@ class PolygonZ(private var outerRings: List<List<p3>>, private var innerRings: L
         if(p.value.reflex) return false
         for(node in polygon){
             if(node == p.prev || node == p || node == p.next) continue
-            if(isInside(node.value.point, p.prev!!.value.point,p.value.point,p.next!!.value.point)) {
+            if(isInsideTriangle(node.value.point, p.prev!!.value.point,p.value.point,p.next!!.value.point)) {
                 return false
             }
         }
         return true
     }
 
-    fun isInside(p:p3, p0:p3, p1:p3, p2:p3):Boolean
+    private fun isInsideTriangle(p:p3, p0:p3, p1:p3, p2:p3):Boolean
     {
         val x = p.first
         val y = p.second
@@ -248,7 +291,30 @@ class PolygonZ(private var outerRings: List<List<p3>>, private var innerRings: L
         val b = ((y3 - y1)*(x - x3) + (x1 - x3)*(y - y3)) / denominator;
         val c = 1 - a - b;
 
+        //epsilon is needed because of how inner and outer polygons are merged because
+        //there will be two exactly equal lines in the polygon, only in reversed order
         val e = 0.0001
         return (a in 0.0+e..1.0-e) && (b in 0.0+e..1.0-e) && (c in 0.0+e..1.0-e)
+    }
+
+    private fun isInsidePolygon(p:p3, polygon: List<p3>): Boolean{
+        //shoot a ray to the right and count how many times it intersects the polygon
+        //even means outside, odd means inside
+        var intersects = 0
+        for(i in polygon.indices){
+            val x1 = polygon[i].first
+            val y1 = polygon[i].second
+            val x2 = polygon[(i + 1) % polygon.size].first
+            val y2 = polygon[(i + 1) % polygon.size].second
+
+            val t = (p.second - y1) / (y2 - y1)
+            if (t < 0 || t > 1) continue
+            val x = x1 + t * (x2 - x1)
+            if(x<p.first) continue
+
+            //there was an intersection
+            intersects++
+        }
+        return intersects % 2 == 1
     }
 }
