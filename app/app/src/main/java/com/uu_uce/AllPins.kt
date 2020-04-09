@@ -1,12 +1,9 @@
 package com.uu_uce
 
-import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageButton
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -15,8 +12,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.allpins.PinListAdapter
-import com.uu_uce.database.PinData
-import com.uu_uce.database.PinViewModel
+import com.uu_uce.databases.PinData
+import com.uu_uce.databases.PinViewModel
+import com.uu_uce.ui.createTopbar
 
 class AllPins : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
@@ -29,25 +27,26 @@ class AllPins : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_all_pins)
+
+        createTopbar(this, "all pins")
+
         viewManager = LinearLayoutManager(this)
 
         viewAdapter = PinListAdapter(this)
 
-        recyclerView = findViewById<RecyclerView>(R.id.recyclerview).apply {
+        recyclerView = findViewById<RecyclerView>(R.id.allpins_recyclerview).apply {
             layoutManager = viewManager
             adapter = viewAdapter
         }
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
-        pinViewModel.allUnlockedPinData.observe(this, Observer { pins ->
-            pins?.let { viewAdapter.setPins(sortList(it, sharedPref.getInt("selectedOption", 0))) }
+        pinViewModel.allPinData.observe(this, Observer { pins ->
+            pins?.let { viewAdapter.setPins(sortList(pins, sharedPref.getInt("selectedOption", 0)), pinViewModel) }
         })
 
         val filterButton : FloatingActionButton = findViewById(R.id.fab)
         registerForContextMenu(filterButton)
 
         sharedPref = this.getPreferences(Context.MODE_PRIVATE)
-
-        onCreateToolbar(this, "all pins")
     }
 
     override fun onBackPressed() {
@@ -58,7 +57,7 @@ class AllPins : AppCompatActivity() {
         super.onBackPressed()
     }
 
-    fun openDialog(view: View) {
+    fun openDialog(view : View) {
         val builder : AlertDialog.Builder = AlertDialog.Builder(this)
         val filterOptions : Array<String> = arrayOf("Title a-z", "Title z-a", "Difficulty easy-hard", "Difficulty hard-easy", "Type a-z", "Type z-a")
         builder
@@ -72,7 +71,6 @@ class AllPins : AppCompatActivity() {
                     apply()
                 }
             }
-
         builder.show()
     }
 
@@ -81,8 +79,7 @@ class AllPins : AppCompatActivity() {
         recyclerView.adapter = viewAdapter
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         pinViewModel.allPinData.observe(this, Observer { pins ->
-            pins?.let {
-                viewAdapter.setPins(sortList(it, category)) }
+            pins?.let { viewAdapter.setPins(sortList(it, category), pinViewModel) }
         })
     }
 
@@ -97,14 +94,6 @@ class AllPins : AppCompatActivity() {
             else -> {
                 pins
             }
-        }
-    }
-
-    private fun onCreateToolbar(activity : Activity, title: String) {
-        activity.findViewById<TextView>(R.id.toolbar_title).text = title
-
-        activity.findViewById<ImageButton>(R.id.toolbar_back_button).setOnClickListener {
-            activity.finish()
         }
     }
 }

@@ -34,6 +34,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### QA Matrix
 | Version       | Date      | Unit tests    | Realworld tests       | Documentation | Lint Issues (Worst)   |
 |---------------|-----------|---------------|-----------------------|---------------|-----------------------|
+| 0.4.0         | 6-4-2020  | None          | Yes, in uu-uce        | Output,Usage  | 6 (Mild, wip)
 | 0.3.0         | 22-3-2020 | None          | Yes, in uu-uce        | Output        | 0
 | 0.2.2         | 18-3-2020 | None          | Yes, in uu-uce        | Output        | 9 (Severe)
 | 0.2.1         | 17-3-2020 | None          | Yes, in uu-uce        | Output        | NaN
@@ -50,26 +51,33 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### QA Matrix
 | Version   | Date      | Documentation     | Linting status            |
 |-----------|-----------|-------------------|---------------------------|
+| 0.4.1     | 6-4-2020  | Content format    | New Issues pile up        |
 | 0.4.0     | 31-3-2020 | Content format    | Many things are unused    |
 | 0.3.1     | 21-3-2020 | Content format    | Kotlin ok, Android issues |
 | 0.x.x     | ...       | None              | Only small issues         |
 | 0.0.1     | 8-2-2020  | None              | None                      |
 ### Test Coverage Matrix
-| Version   | Pixel 2 Emulator API 10 | Nokia 2 API 24  | One Plus 5 API 28 |
-|-----------|-------------------------|-----------------|-------------------|
-| 0.3.1     | 100% tested | 100% tested | 100% tested
-| 0.x.x     | 100% tested | 100% tested | Partial: GPS, Map
-| 0.0.1     | 100% tested | None | None
+| Version   | Pixel 2 Emulator API 29 | Nokia 2 API 24  | One Plus 5 API 28 | Pixel 3 Emulator API 29 | Pixel C API 27 |
+|-----------|-------------------------|-----------------|-------------------|-------------------------|----------------|
+| 0.4.2     | 100% tested             | 100% tested     | 100% tested       | 100% tested             | 100% tested    |
+| 0.4.1     | 100% tested             | 100% tested     | 100% tested       | 100% tested             | 100% tested    |
+| 0.3.1     | 100% tested             | 100% tested     | 100% tested       | 100% tested             | 100% tested    |
+| 0.x.x     | 100% tested             | 100% tested     | Partial: GPS, Map | 100% tested             | None           |
+| 0.0.1     | 100% tested             | None            | None              | None                    | None           |
 ### Test Issues Matrix
-| Version   | Pixel 2 Emulator API 29   | Nokia 2 API 24            | One Plus 5 API 28 | Moto g5s+         |
-|-----------|---------------------------|---------------------------|-------------------|-------------------|
-| 0.4.0     | None                      |
-| 0.3.1     | IK2                       | None                      | None              | IK1, IK2          |
-| 0.x.x     | None                      | Popup UI scaling (IC3)    | Partialy Tested   | Partially tested  |
-| 0.0.1     | None                      | Not Tested                | Not Tested        | Not tested        |
+| Version   | Pixel 2 Emulator API 29   | Nokia 2 API 24            | One Plus 5 API 28 | Moto g5s+         | Pixel 3 Emulator API 29 | Pixel C API 27 |
+|-----------|---------------------------|---------------------------|-------------------|-------------------|-------------------------|----------------|
+| 0.4.2     | IK6                       | IK7                       | None              |                   | None                    | IK6            |
+| 0.4.1     | IK6                       | IK7                       | None              |                   | None                    | IK6            |
+| 0.4.0     | None                      |                           | None              |                   | None                    | IK6            |
+| 0.3.1     | IK2                       | None                      | None              | IK1, IK2          | None                    | IK6            |
+| 0.x.x     | None                      | Popup UI scaling (IC3)    | Partialy Tested   | Partially tested  | Not tested              | Not tested     |
+| 0.0.1     | None                      | Not Tested                | Not Tested        | Not tested        | Not tested              | Not tested     |
 ### Know Issues Matrix
 | Version       | ID    | What              |
 |---------------|-------|-------------------|
+| 0.4.1         | IK7   | Crash on load: `Only the original thread that created a view hierarchy can touch its views`
+| 0.4.1         | IK6   | Image in fieldbook shows very small
 | 0.3.3         | IK4   | Empty screen comes up when you return from pin screen
 | 0.3.2         | IK3   | App crashes when opening pin from menu
 | 0.3.1         | IK2   | Text in pins partially overlaps
@@ -78,6 +86,13 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Quality Checks Matrix
 | Since Version | ID    | What to check     |
 |---------------|-------|-------------------|
+| 0.4.2         | IC15  | Complete multiple choice quiz
+| 0.4.2         | IC14  | Fail multiple choice quiz
+| 0.4.2         | IC13  | Open multiple choice quiz
+| 0.4.1         | IC12  | Open fieldbook item, ui scaling
+| 0.4.1         | IC11  | Add fieldbook item
+| 0.4.1         | IC10  | Open fieldbook
+| 0.3.2         | IC9   | Open video via video pin 
 | 0.3.2         | IC8   | Open pin via menu
 | 0.3.1         | IC7   | Pins drawn, click on pin to open popup
 | 0.x.x         | IC6   | Pin list menu, UI scaling
@@ -91,6 +106,8 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Detailed Linting Status
 | Version   | Linting Details Kotlin: (Nr, Worst) Android: (Nr, Worst)  |
 |-----------|-----------------------------------------------------------|
+| 0.4.2     | Small decrease in issues, Kotlin: (7, mild) Android (61: Medium)
+| 0.4.1     | Issues expand again, Kotlin: (12, mild) Android (80: Major)
 | 0.4.0     | Mostly unused ... errors, Kotlin: (7, mild) Android: (58: Medium)
 | 0.3.1     | Many Issues, Kotlin: (8, Mild) Android: (69, Major)
 | 0.x.x     | Kotlin minimal issues, Android increasing issues
