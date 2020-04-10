@@ -87,6 +87,9 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Quality Checks Matrix
 | Since Version | ID    | What to check     |
 |---------------|-------|-------------------|
+| 0.4.2         | IC17  | Cancel pin closing when progress is about to be lost
+| 0.4.2         | IC17  | Close pin when no progress is made in quiz
+| 0.4.2         | IC17  | Close pin when progress is made in quiz
 | 0.4.2         | IC17  | Complete multiple choice quiz
 | 0.4.2         | IC16  | Fail multiple choice quiz
 | 0.4.2         | IC15  | Open multiple choice quiz
