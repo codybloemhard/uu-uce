@@ -96,8 +96,16 @@ class GeoMap : AppCompatActivity() {
         dragButton.dragEndAction    = {dx, dy -> menu.snap(dx, dy)}
 
         val dir = File(filesDir, "mydir")
-        customMap.addLayer(LayerType.Water, dir, HeightLineReader(dir), toggle_layer_layout, size)
-        customMap.addLayer(LayerType.Water, dir, PolygonReader(dir),  toggle_layer_layout, size)
+        try {
+            customMap.addLayer(LayerType.Water, dir, HeightLineReader(dir), toggle_layer_layout, size)
+        }catch(e: Exception){
+            Logger.log(LogType.Info, "GeoMap", "Could not load layer at $dir.\nError: " + e.localizedMessage)
+        }
+        try {
+            customMap.addLayer(LayerType.Water, dir, PolygonReader(dir),  toggle_layer_layout, size)
+        }catch(e: Exception){
+            Logger.log(LogType.Info, "GeoMap", "Could not load layer at $dir.\nError: " + e.localizedMessage)
+        }
         customMap.initializeCamera()
 
         customMap.tryStartLocServices(this)

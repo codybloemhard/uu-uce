@@ -58,7 +58,7 @@ class HeightLineReader(
     override fun getChunk(cIndex: ChunkIndex): Chunk {
         //find the correct file and read all information inside
         val time = System.currentTimeMillis()
-        val file = File(dir, "height")
+        val file = File(dir, "hi")
         val reader = FileReader(file)
 
         val xoff = reader.readULong().toDouble()
