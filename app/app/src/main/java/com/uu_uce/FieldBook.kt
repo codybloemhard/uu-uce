@@ -4,10 +4,12 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.location.Location
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.Gravity
@@ -28,24 +30,21 @@ import com.uu_uce.fieldbook.FieldbookAdapter
 import com.uu_uce.fieldbook.FieldbookEntry
 import com.uu_uce.fieldbook.FieldbookViewModel
 import com.uu_uce.pins.BlockTag
-import com.uu_uce.services.LocationServices
-import com.uu_uce.services.checkPermissions
-import com.uu_uce.services.degreeToUTM
-import com.uu_uce.services.getPermissions
+import com.uu_uce.services.*
 import com.uu_uce.ui.createTopbar
 import java.io.File
 import java.io.FileOutputStream
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
 class FieldBook : AppCompatActivity() {
-
     private var permissionsNeeded = listOf(
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        Manifest.permission.CAMERA
+        Manifest.permission.CAMERA,
+        Manifest.permission.READ_EXTERNAL_STORAGE
     )
+
+    private var cameraAccess = false
+    private var filesAccess = false
 
     private lateinit var imageView: ImageView
     lateinit var text: EditText
@@ -65,7 +64,7 @@ class FieldBook : AppCompatActivity() {
 
         fieldbookViewModel = ViewModelProvider(this).get(FieldbookViewModel::class.java)
 
-        val fieldbookAdapter = FieldbookAdapter(this,fieldbookViewModel)
+        val fieldbookAdapter = FieldbookAdapter(this, fieldbookViewModel)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = fieldbookAdapter
 
@@ -74,14 +73,18 @@ class FieldBook : AppCompatActivity() {
             fieldbookAdapter.setFieldbook(it)
         })
 
-        addButton.setOnClickListener{
+        addButton.setOnClickListener {
             openFieldbookAdderPopup(parent)
         }
     }
 
     private fun openFieldbookAdderPopup(parent: View) {
         val customView = layoutInflater.inflate(R.layout.add_fieldbook_popup, null, false)
-        val popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        val popupWindow = PopupWindow(
+            customView,
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
 
         popupWindow.showAtLocation(parent, Gravity.CENTER, 0, 0)
 
@@ -89,17 +92,7 @@ class FieldBook : AppCompatActivity() {
         popupWindow.isFocusable = true
         popupWindow.update()
 
-        checkPermissions(this,permissionsNeeded).let {
-            for (item in it)
-                when(item) {
-                    Manifest.permission.READ_EXTERNAL_STORAGE ->
-                        getPermissions(this,permissionsNeeded,1)
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE ->
-                        getPermissions(this,permissionsNeeded,1)
-                    Manifest.permission.CAMERA ->
-                        getPermissions(this,permissionsNeeded,3)
-                }
-        }
+        getPermissions(this, permissionsNeeded, CAMERA_REQUEST)
 
         text = customView.findViewById(R.id.addText)
 
@@ -109,30 +102,50 @@ class FieldBook : AppCompatActivity() {
             selectImage(this)
         }
 
-        val closePopup = customView.findViewById<Button>(R.id.close_fieldbook_popup)
-        closePopup.setOnClickListener{
-            val sdf = DateFormat.getDateTimeInstance()
+        val savePinButton = customView.findViewById<Button>(R.id.close_fieldbook_popup)
+        savePinButton.setOnClickListener {
+            //val sdf = DateFormat.getDateTimeInstance()
 
             saveFieldbookEntry(
                 text.text.toString(),
                 imageUri,
                 getCurrentDateTime(DateTimeFormat.FIELDBOOK_ENTRY),
-                LocationServices.lastKnownLocation)
+                LocationServices.lastKnownLocation
+            )
             popupWindow.dismiss()
         }
     }
 
     private fun selectImage(context: Context) {
-        val options = arrayOf("Take Photo", "Choose from gallery", " Cancel")
+        // Check how an image may be selected
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            filesAccess = checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+            cameraAccess = checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+        }
+
+        val options = mutableListOf<String>()
+        if (cameraAccess) options.add("Take Photo")
+        if (filesAccess) options.add("Choose from gallery")
+        options.add("Cancel")
+        val optionsArray = options.toTypedArray()
+
         val dialog = AlertDialog.Builder(context)
         dialog.setTitle("Upload an image")
 
-        dialog.setItems(options) { dialogInterface, which ->
+        dialog.setItems(optionsArray) { dialogInterface, which ->
+            var index = which
+            if (!cameraAccess && !filesAccess) index += 2
+            else if (!cameraAccess) index += 1
+            else if (!filesAccess) index *= 2
 
-            when (which) {
+            when (index) {
                 0 -> startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), 0)
-                1 -> startActivityForResult(Intent(Intent.ACTION_PICK,
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI), 1)
+                1 -> startActivityForResult(
+                    Intent(
+                        Intent.ACTION_PICK,
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    ), 1
+                )
                 2 -> dialogInterface.dismiss()
             }
         }
@@ -180,19 +193,19 @@ class FieldBook : AppCompatActivity() {
         )
 
         FieldbookEntry(
-            degreeToUTM(Pair(location.latitude,location.longitude)).toString(),
+            degreeToUTM(Pair(location.latitude, location.longitude)).toString(),
             currentDate,
-            buildJSONContent(content).also{ jsonString ->
+            buildJSONContent(content).also { jsonString ->
                 // added for debugging purposes
                 val root = "data/data/com.uu_uce/files/fieldbook"
-                val myDir: File = File("$root/Content").also{
+                val myDir: File = File("$root/Content").also {
                     it.mkdirs()
                 }
                 val fileName = "TestContent.txt"
-                val file = File(myDir,fileName)
+                val file = File(myDir, fileName)
                 file.writeText(jsonString)
             }
-        ).also{
+        ).also {
             fieldbookViewModel.insert(it)
         }
     }
@@ -200,9 +213,9 @@ class FieldBook : AppCompatActivity() {
     private fun saveBitmapToLocation(image: Bitmap): String {
         val file = imageLocation()
 
-        FileOutputStream(imageLocation()).also{
-            image.compress(Bitmap.CompressFormat.PNG,100,it)
-        }.apply{
+        FileOutputStream(imageLocation()).also {
+            image.compress(Bitmap.CompressFormat.PNG, 100, it)
+        }.apply {
             flush()
             close()
         }
@@ -222,40 +235,42 @@ class FieldBook : AppCompatActivity() {
 
     private fun imageLocation(): File {
         val root = "data/data/com.uu_uce/files/fieldbook"
-        val myDir: File = File("$root/Pictures").also{
+        val myDir: File = File("$root/Pictures").also {
             it.mkdirs()
         }
         val fileName = "IMG_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}.png"
-        return File(myDir,fileName)
+        return File(myDir, fileName)
     }
 
-    private fun buildJSONContent(contentList: List<Pair<BlockTag,String>>): String {
-        return  "[" +
-                    "{" +
-                        "\"tag\":\"${contentList.first().first}\"," +
-                        "\"text\":\"${contentList.first().second}\"" +
-                    "}," +
-                    "{" +
-                        "\"tag\":\"${contentList.last().first}\"," +
-                        "\"file_path\":\"${contentList.last().second}\"" +
-                    "}" +
+    private fun buildJSONContent(contentList: List<Pair<BlockTag, String>>): String {
+        return "[" +
+                "{" +
+                "\"tag\":\"${contentList.first().first}\"," +
+                "\"text\":\"${contentList.first().second}\"" +
+                "}," +
+                "{" +
+                "\"tag\":\"${contentList.last().first}\"," +
+                "\"file_path\":\"${contentList.last().second}\"" +
+                "}" +
                 "]"
     }
 
-    enum class DateTimeFormat{
+    enum class DateTimeFormat {
         FILE_PATH,
         FIELDBOOK_ENTRY
     }
 
     private fun getCurrentDateTime(dtf: DateTimeFormat): String {
-        val pattern: String = when(dtf) {
+        val pattern: String = when (dtf) {
             DateTimeFormat.FILE_PATH -> "yyyMMdd_HHmmss"
             DateTimeFormat.FIELDBOOK_ENTRY -> "dd-MM-yyyy HH:mm"
         }
 
         return SimpleDateFormat(
             pattern,
-            Locale("nl_NL")).format(Date()
+            Locale("nl_NL")
+        ).format(
+            Date()
         )
     }
 }
