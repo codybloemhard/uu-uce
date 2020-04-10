@@ -124,7 +124,7 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
                         .setMessage("Are you sure you want to delete this entry?")
                         .setPositiveButton("YES") { _: DialogInterface, _: Int ->
                             viewModel.delete(entry)
-                            uri.toFile().delete()
+                            if(uri != Uri.EMPTY) uri.toFile().delete()
                         }
                         .setNegativeButton("NO") { _: DialogInterface, _: Int ->
 
