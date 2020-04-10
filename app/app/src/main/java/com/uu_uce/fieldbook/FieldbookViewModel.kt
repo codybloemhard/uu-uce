@@ -11,7 +11,7 @@ class FieldbookViewModel(application: Application): AndroidViewModel(application
 
     private val fieldbookRepository: FieldbookRepository
 
-    val allFieldbookEntries: LiveData<MutableList<FieldbookEntry>>
+    val allFieldbookEntries: LiveData<List<FieldbookEntry>>
 
     init {
         val fieldbookDao = UceRoomDatabase.getDatabase(application, viewModelScope).fieldbookDao()

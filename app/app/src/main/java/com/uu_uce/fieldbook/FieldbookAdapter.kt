@@ -16,8 +16,7 @@ import com.uu_uce.pins.*
 
 class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookViewModel) : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>() {
 
-    private var fieldbook: MutableList<FieldbookEntry> = mutableListOf()
-    var activePopup: PopupWindow? = null
+    private var fieldbook: List<FieldbookEntry> = emptyList()
 
     class FieldbookViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val parentView = itemView
@@ -139,7 +138,7 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
         )
     }
 
-    fun setFieldbook(fieldbook: MutableList<FieldbookEntry>) {
+    fun setFieldbook(fieldbook: List<FieldbookEntry>) {
         this.fieldbook = fieldbook
         notifyDataSetChanged()
     }

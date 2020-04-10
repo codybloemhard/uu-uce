@@ -48,7 +48,7 @@ class FieldBook : AppCompatActivity() {
                             return true
                         }
                         R.id.fieldbook_navigation_pinmap -> {
-                            openFragment(FieldbookPinmapFragment.newInstance("",""))
+                            openFragment(FieldbookPinmapFragment.newInstance())
                             return true
                         }
                         R.id.fieldbook_navigation_route -> {

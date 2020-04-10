@@ -11,9 +11,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
-import com.uu_uce.database.PinConversion
-import com.uu_uce.database.PinData
-import com.uu_uce.database.PinViewModel
 
 class PinListAdapter internal constructor(
     private val activity: Activity
@@ -22,7 +19,8 @@ class PinListAdapter internal constructor(
     private val resource = activity.resources
     private val inflater: LayoutInflater = LayoutInflater.from(activity)
     private var pins = emptyList<PinData>()
-    private val pinViewModel: PinViewModel = ViewModelProvider(activity as ViewModelStoreOwner).get(PinViewModel::class.java)
+    private val pinViewModel: PinViewModel = ViewModelProvider(activity as ViewModelStoreOwner).get(
+        PinViewModel::class.java)
     var activePopup: PopupWindow? = null
 
     inner class PinViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){

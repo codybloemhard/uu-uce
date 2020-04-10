@@ -1,6 +1,7 @@
-package com.uu_uce.database
+package com.uu_uce.allpins
 
 import androidx.lifecycle.LiveData
+import com.uu_uce.database.PinDao
 
 class PinRepository(private val pinDao : PinDao){
 

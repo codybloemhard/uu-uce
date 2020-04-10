@@ -1,12 +1,9 @@
 package com.uu_uce
 
-import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageButton
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -15,8 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.allpins.PinListAdapter
-import com.uu_uce.database.PinData
-import com.uu_uce.database.PinViewModel
+import com.uu_uce.allpins.PinData
+import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.ui.createTopbar
 
 class AllPins : AppCompatActivity() {

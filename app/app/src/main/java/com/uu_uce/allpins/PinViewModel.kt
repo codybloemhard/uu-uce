@@ -1,9 +1,10 @@
-package com.uu_uce.database
+package com.uu_uce.allpins
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
+import com.uu_uce.database.UceRoomDatabase
 import kotlinx.coroutines.launch
 
 class PinViewModel(application: Application) : AndroidViewModel(application) {
@@ -13,7 +14,10 @@ class PinViewModel(application: Application) : AndroidViewModel(application) {
     val allPinData: LiveData<List<PinData>>
 
     init {
-        val pinDao = UceRoomDatabase.getDatabase(application, viewModelScope).pinDao()
+        val pinDao = UceRoomDatabase.getDatabase(
+            application,
+            viewModelScope
+        ).pinDao()
         pinRepository = PinRepository(pinDao)
         allPinData = pinRepository.allPins
     }

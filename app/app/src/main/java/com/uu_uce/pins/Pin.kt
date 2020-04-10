@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.uu_uce.R
-import com.uu_uce.database.PinViewModel
+import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
@@ -24,7 +24,7 @@ enum class PinType {
 }
 
 class Pin(
-    val id : Int,
+    var id : Int = 0,
     private var coordinate      : UTMCoordinate,
     /*private var difficulty      : Int,
     private var type            : PinType,*/

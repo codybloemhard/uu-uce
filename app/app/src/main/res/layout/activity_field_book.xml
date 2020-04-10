@@ -36,6 +36,7 @@
         android:id="@+id/fieldbook_bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingTop="5dp"
         android:background="@color/colorUU"
         app:itemIconTint="#000"
         app:itemTextColor="#000"

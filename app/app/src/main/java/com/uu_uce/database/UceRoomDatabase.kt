@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.uu_uce.fieldbook.FieldbookDao
+import com.uu_uce.allpins.PinData
 import com.uu_uce.fieldbook.FieldbookEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
