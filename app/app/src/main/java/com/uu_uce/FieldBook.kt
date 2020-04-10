@@ -19,6 +19,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.PopupWindow
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
@@ -38,14 +39,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class FieldBook : AppCompatActivity() {
-    private var permissionsNeeded = listOf(
-        Manifest.permission.CAMERA,
-        Manifest.permission.READ_EXTERNAL_STORAGE
-    )
-
-    private var cameraAccess = false
-    private var filesAccess = false
-
     private lateinit var imageView: ImageView
     lateinit var text: EditText
 
@@ -92,8 +85,6 @@ class FieldBook : AppCompatActivity() {
         popupWindow.isFocusable = true
         popupWindow.update()
 
-        getPermissions(this, permissionsNeeded, CAMERA_REQUEST)
-
         text = customView.findViewById(R.id.addText)
 
         imageView = customView.findViewById(R.id.addImage)
@@ -117,35 +108,31 @@ class FieldBook : AppCompatActivity() {
     }
 
     private fun selectImage(context: Context) {
-        // Check how an image may be selected
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            filesAccess = checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-            cameraAccess = checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-        }
 
-        val options = mutableListOf<String>()
-        if (cameraAccess) options.add("Take Photo")
-        if (filesAccess) options.add("Choose from gallery")
-        options.add("Cancel")
-        val optionsArray = options.toTypedArray()
+        val options = arrayOf("Take Photo", "Choose from gallery", "Cancel")
 
         val dialog = AlertDialog.Builder(context)
         dialog.setTitle("Upload an image")
 
-        dialog.setItems(optionsArray) { dialogInterface, which ->
-            var index = which
-            if (!cameraAccess && !filesAccess) index += 2
-            else if (!cameraAccess) index += 1
-            else if (!filesAccess) index *= 2
-
-            when (index) {
-                0 -> startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), 0)
-                1 -> startActivityForResult(
-                    Intent(
-                        Intent.ACTION_PICK,
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                    ), 1
-                )
+        dialog.setItems(options) { dialogInterface, which ->
+            when (which) {
+                0 -> {
+                    getPermissions(this, listOf(Manifest.permission.CAMERA), CAMERA_REQUEST)
+                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED){
+                        startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), 0)
+                    }
+                }
+                1 -> {
+                    getPermissions(this, listOf(Manifest.permission.READ_EXTERNAL_STORAGE), CAMERA_REQUEST)
+                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
+                        startActivityForResult(
+                            Intent(
+                                Intent.ACTION_PICK,
+                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                            ), 1
+                        )
+                    }
+                }
                 2 -> dialogInterface.dismiss()
             }
         }
@@ -272,5 +259,30 @@ class FieldBook : AppCompatActivity() {
         ).format(
             Date()
         )
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        when (requestCode) {
+            CAMERA_REQUEST -> {
+                if(grantResults[0] == 0) {
+                    startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), 0)
+                }
+            }
+            EXTERNAL_FILES_REQUEST -> {
+                if(grantResults[0] == 0){
+                    startActivityForResult(
+                        Intent(
+                            Intent.ACTION_PICK,
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                        ), 1
+                    )
+                }
+
+            }
+        }
     }
 }
