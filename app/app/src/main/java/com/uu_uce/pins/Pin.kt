@@ -1,7 +1,9 @@
 package com.uu_uce.pins
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.view.Gravity
@@ -21,6 +23,7 @@ import com.uu_uce.shapefiles.p2
 import com.uu_uce.shapefiles.p2Zero
 import kotlin.math.roundToInt
 
+
 class Pin(
     val id : Int,
     private var coordinate      : UTMCoordinate,
@@ -37,6 +40,9 @@ class Pin(
             if (I == id) error("Pin can not be own predecessor")
         }
     }
+
+    // Used to determine if warning should show when closing pin
+    var madeProgress = false
 
     private val pinWidth = 60 // TODO: set this in settings somewhere
 
@@ -86,8 +92,7 @@ class Pin(
         inScreen = true
 
         // Set boundingbox for pin tapping
-        boundingBox =
-            Pair(p2(minX.toDouble(), minY.toDouble()), p2(maxX.toDouble(), maxY.toDouble()))
+        boundingBox = Pair(p2(minX.toDouble(), minY.toDouble()), p2(maxX.toDouble(), maxY.toDouble()))
 
         image.setBounds(minX, minY, maxX, maxY)
         image.draw(canvas)
@@ -162,7 +167,7 @@ class Pin(
         val checkBoxCompletePin = customView.findViewById<CheckBox>(R.id.complete_box)
 
         // Set checkbox to correct state
-        if(containsQuiz){
+        if(content.canCompletePin){
             checkBoxCompletePin.isChecked = (getStatus() == 2)
         }
         else{
@@ -171,11 +176,24 @@ class Pin(
 
         // Set onClickListeners
         btnClosePopupWindow.setOnClickListener {
-            popupWindow?.dismiss()
+            if(madeProgress){
+                AlertDialog.Builder(activity)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle("Closing Pin")
+                    .setMessage("Are you sure you want to close pin? All progress will be lost.")
+                    .setPositiveButton("Yes",
+                        DialogInterface.OnClickListener { _, _ -> popupWindow?.dismiss() })
+                    .setNegativeButton("No", null)
+                    .show()
+            }
+            else{
+                popupWindow?.dismiss()
+            }
         }
     }
 
     private fun complete() {
+        status = 2
         if (followIds[0] != -1)
             viewModel.completePin(id, followIds)
     }
@@ -188,11 +206,13 @@ class Pin(
     fun answerQuestion(questionId : Int, reward : Int){
         questionRewards[questionId] = reward
         answered[questionId] = true
+        madeProgress = true
     }
 
     private fun resetQuestions(){
         questionRewards.map{0}
         totalReward = 0
+        madeProgress = false
         answered.map{true}
     }
 
@@ -267,6 +287,7 @@ class Pin(
 
             btnOpenQuiz.setOnClickListener {
                 popupWindow?.dismiss()
+
                 openPinPopupWindow(parentView, activity){}
             }
         }
