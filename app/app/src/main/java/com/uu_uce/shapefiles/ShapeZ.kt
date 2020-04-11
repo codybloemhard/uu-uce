@@ -170,7 +170,11 @@ class PolygonZ(outerRings: List<List<p3>>, private var innerRings: List<List<p3>
 
     private fun triangulate(originalPolygon: List<p3>){
         if(originalPolygon.size < 3) throw Exception("Polygons can't have less than three sides")
-        val l = List(originalPolygon.size){i -> PolyPoint(originalPolygon[i],false,false,i)}
+        val l = List(originalPolygon.size){i -> PolyPoint(originalPolygon[i],
+            reflex = false,
+            ear = false,
+            index = i
+        )}
         val remainingPolygon = LinkedList(l,true)
 
         for(node in remainingPolygon){

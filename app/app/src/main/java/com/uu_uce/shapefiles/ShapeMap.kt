@@ -73,7 +73,7 @@ class ShapeMap(private val nrOfLODs: Int,
 
     fun addLayer(type: LayerType, path: File, chunkGetter: ChunkGetter){
         val timeSave = measureTimeMillis {
-            layers.add(Pair(type,ShapeLayer(path, chunkGetter, this, {})))
+            layers.add(Pair(type,ShapeLayer(path, chunkGetter, this) {}))
         }
 
         Logger.log(LogType.Info,"ShapeMap", "Save: $timeSave")
