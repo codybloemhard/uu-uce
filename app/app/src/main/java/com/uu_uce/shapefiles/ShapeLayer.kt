@@ -6,11 +6,10 @@ import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import java.io.File
 
-class ShapeLayer(path: File, nrOfLODs: Int){
+class ShapeLayer(path: File, chunkGetter: ChunkGetter, map: ShapeMap, onLoadedAction: (sl: ShapeLayer) -> Unit){
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk> = mutableMapOf()
 
-    private val chunkGetter= BinShapeReader(path, nrOfLODs)
-    private val chunkManager: ChunkManager = ScrollingLoader(chunks, chunkGetter)
+    private val chunkManager: ChunkManager = StopLoader(chunks, chunkGetter, map)
 
     var bmin: p3
         private set
@@ -26,12 +25,12 @@ class ShapeLayer(path: File, nrOfLODs: Int){
         bmax = chunk.bmax
     }
 
-    fun onTouchRelease(viewport: Pair<p2, p2>, zoom: Int, map: ShapeMap){
-        chunkManager.updateOnStop(viewport, zoom, map)
+    fun onTouchRelease(viewport: Pair<p2, p2>, zoom: Int){
+        chunkManager.updateOnStop(viewport, zoom)
     }
 
-    fun draw(canvas: Canvas, paint: Paint, map: ShapeMap, viewport : Pair<p2,p2>, width: Int, height: Int, zoomLevel: Int){
-        chunkManager.updateOnMove(viewport, zoomLevel, map)
+    fun draw(canvas: Canvas, paint: Paint, viewport : Pair<p2,p2>, width: Int, height: Int, zoomLevel: Int){
+        chunkManager.updateOnMove(viewport, zoomLevel)
 
         Logger.log(LogType.Continuous, "zoom", zoomLevel.toString())
 

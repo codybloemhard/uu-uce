@@ -68,6 +68,10 @@ class CustomMap : ViewTouchParent {
     private lateinit var camera : Camera
 
     init{
+        //disable hardware acceleration for canvas.drawVertices
+        setLayerType(LAYER_TYPE_SOFTWARE, null)
+
+        smap = ShapeMap(5, this)
 
         // Logger mask settings
         Logger.setTagEnabled("CustomMap", false)
@@ -100,8 +104,8 @@ class CustomMap : ViewTouchParent {
         camera = smap.initialize()
     }
 
-    fun addLayer(lt: LayerType, path: File, scrollLayout: LinearLayout, buttonSize: Int){
-        smap.addLayer(lt, path)
+    fun addLayer(lt: LayerType, path: File, chunkGetter: ChunkGetter, scrollLayout: LinearLayout, buttonSize: Int){
+        smap.addLayer(lt, path, chunkGetter)
 
         val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle)
         btn.setImageResource(R.drawable.logotp)
