@@ -16,8 +16,11 @@ import androidx.lifecycle.ViewModelProvider
 import com.uu_uce.databases.PinViewModel
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
+import com.uu_uce.services.getPermissions
+import com.uu_uce.shapefiles.HeightLineReader
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.LayerType
+import com.uu_uce.shapefiles.PolygonReader
 import com.uu_uce.views.DragStatus
 import kotlinx.android.synthetic.main.activity_geo_map.*
 import java.io.File
@@ -92,16 +95,24 @@ class GeoMap : AppCompatActivity() {
         dragButton.dragAction       = {dx, dy -> menu.drag(dx,dy)}
         dragButton.dragEndAction    = {dx, dy -> menu.snap(dx, dy)}
 
-        menu.post {
-            initMenu()
-        }
-
-        // Read map
         val dir = File(filesDir, "mydir")
-        customMap.addLayer(LayerType.Water, dir, toggle_layer_layout, size)
+        try {
+            customMap.addLayer(LayerType.Water, dir, HeightLineReader(dir), toggle_layer_layout, size)
+        }catch(e: Exception){
+            Logger.log(LogType.Info, "GeoMap", "Could not load layer at $dir.\nError: " + e.localizedMessage)
+        }
+        try {
+            customMap.addLayer(LayerType.Water, dir, PolygonReader(dir),  toggle_layer_layout, size)
+        }catch(e: Exception){
+            Logger.log(LogType.Info, "GeoMap", "Could not load layer at $dir.\nError: " + e.localizedMessage)
+        }
         customMap.initializeCamera()
 
         customMap.tryStartLocServices(this)
+
+        menu.post{
+            initMenu()
+        }
 
         // Set center on location button functionality
         center_button.setOnClickListener{

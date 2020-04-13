@@ -67,7 +67,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Test Issues Matrix
 | Version   | Pixel 2 Emulator API 29   | Nokia 2 API 24            | One Plus 5 API 28 | Moto g5s+         | Pixel 3 Emulator API 29 | Pixel C API 27 |
 |-----------|---------------------------|---------------------------|-------------------|-------------------|-------------------------|----------------|
-| 0.4.2     | IK6                       | IK7                       | None              |                   | None                    | IK6            |
+| 0.4.2     | IK6, IK8                  | IK7, IK8                  | IK8               |                   | IK8                     | IK8            |
 | 0.4.1     | IK6                       | IK7                       | None              |                   | None                    | IK6            |
 | 0.4.0     | None                      |                           | None              |                   | None                    | IK6            |
 | 0.3.1     | IK2                       | None                      | None              | IK1, IK2          | None                    | IK6            |
@@ -76,6 +76,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Know Issues Matrix
 | Version       | ID    | What              |
 |---------------|-------|-------------------|
+| 0.4.1         | IK8   | Crash on remove pin without image from fieldbook `java.lang.IllegalArgumentException: Uri lacks 'file' scheme`
 | 0.4.1         | IK7   | Crash on load: `Only the original thread that created a view hierarchy can touch its views`
 | 0.4.1         | IK6   | Image in fieldbook shows very small
 | 0.3.3         | IK4   | Empty screen comes up when you return from pin screen
@@ -86,9 +87,14 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Quality Checks Matrix
 | Since Version | ID    | What to check     |
 |---------------|-------|-------------------|
-| 0.4.2         | IC15  | Complete multiple choice quiz
-| 0.4.2         | IC14  | Fail multiple choice quiz
-| 0.4.2         | IC13  | Open multiple choice quiz
+| 0.4.2         | IC17  | Cancel pin closing when progress is about to be lost
+| 0.4.2         | IC17  | Close pin when no progress is made in quiz
+| 0.4.2         | IC17  | Close pin when progress is made in quiz
+| 0.4.2         | IC17  | Complete multiple choice quiz
+| 0.4.2         | IC16  | Fail multiple choice quiz
+| 0.4.2         | IC15  | Open multiple choice quiz
+| 0.4.1         | IC14  | Delete fieldbook pin without image
+| 0.4.1         | IC13  | Delete fieldbook pin with image
 | 0.4.1         | IC12  | Open fieldbook item, ui scaling
 | 0.4.1         | IC11  | Add fieldbook item
 | 0.4.1         | IC10  | Open fieldbook

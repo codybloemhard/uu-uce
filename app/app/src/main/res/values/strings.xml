@@ -4,7 +4,7 @@
     <string name="show_pin">Pin</string>
     <string name="close">Close</string>
     <string name="this_is_a_popup_window">This is a popup window..</string>
-    <string name="close_popup">OK</string>
+    <string name="close_popup">CLOSE</string>
     <string name="sample_text">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui.</string>
     <string name="imageContentDescription">plaatje van een aardbol</string>
     <string name="open">Open</string>
@@ -43,4 +43,5 @@
     <string name="fieldbook_image_preview">Picture Preview</string>
     <string name="menu_bar_backbutton_description">Back Button</string>
     <string name="menubar_placeholder_text">Menu Item</string>
+    <string name="fieldbook_textfield_hint">Enter your text here</string>
 </resources>

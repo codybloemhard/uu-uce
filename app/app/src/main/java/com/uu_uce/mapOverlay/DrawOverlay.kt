@@ -104,7 +104,7 @@ screenLoc: the coordinate on the screen where the device location should be draw
 canvas: the canvas that the location should be drawn on.
 It will draw a circle on the screen at the desired location.
 */
-fun drawDeviceLocation(screenLoc : Pair<Float, Float>, canvas : Canvas, paint : Paint, edgePaint : Paint, size : Float, edgeSize : Float){
+fun drawLocation(screenLoc : Pair<Float, Float>, canvas : Canvas, paint : Paint, edgePaint : Paint, size : Float, edgeSize : Float){
     Logger.log(LogType.Event, "DrawOverlay", "x: ${screenLoc.first}, y: ${screenLoc.second}")
     canvas.drawCircle(screenLoc.first, screenLoc.second, size + edgeSize, edgePaint)
     canvas.drawCircle(screenLoc.first, screenLoc.second, size, paint)

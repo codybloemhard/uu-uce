@@ -14,16 +14,17 @@ import com.uu_uce.R
 import com.uu_uce.VideoViewer
 import java.io.StringReader
 
-
-class PinContent(contentString: String) {
+class PinContent(private val contentString: String) {
     val contentBlocks : List<ContentBlockInterface>
+    var canCompletePin = false
+
     lateinit var parent : Pin
     init{
-        contentBlocks = getContent(contentString)
+        contentBlocks = getContent()
     }
 
 
-    private fun getContent(contentString: String) : List<ContentBlockInterface>{
+    private fun getContent() : List<ContentBlockInterface>{
             val reader = JsonReader(StringReader(contentString))
 
             return readContentBlocks(reader)
@@ -34,7 +35,9 @@ class PinContent(contentString: String) {
 
         reader.beginArray()
         while (reader.hasNext()) {
-            contentBlocks.add(readBlock(reader))
+            val curBlock = readBlock(reader)
+            if(curBlock.canCompleteBlock) canCompletePin = true
+            contentBlocks.add(curBlock)
         }
         reader.endArray()
         return contentBlocks
@@ -109,11 +112,13 @@ class PinContent(contentString: String) {
 }
 
 interface ContentBlockInterface{
+    val canCompleteBlock : Boolean
     fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?)
     fun getFilePath() : List<String>
 }
 
 class TextContentBlock(private val textContent : String) : ContentBlockInterface{
+    override val canCompleteBlock = false
     override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
         val content = TextView(activity)
         content.text = textContent
@@ -132,6 +137,7 @@ class TextContentBlock(private val textContent : String) : ContentBlockInterface
 }
 
 class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
+    override val canCompleteBlock = false
     override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
         val content = ImageView(activity)
         content.setImageURI(imageURI)
@@ -154,6 +160,7 @@ class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
 }
 
 class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : Uri, private val title : String) : ContentBlockInterface{
+    override val canCompleteBlock = false
     override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
         val frameLayout = FrameLayout(activity)
 
@@ -203,6 +210,7 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
 }
 
 class MCContentBlock(private val correctAnswers : List<String>, private val incorrectAnswers : List<String>, private val reward : Int) : ContentBlockInterface{
+    override val canCompleteBlock = true
     private var selectedAnswer : Int = -1
     private lateinit var selectedBackground : CardView
 

@@ -59,8 +59,6 @@ class PinConversion(context: Context){
         val pin = Pin(
             pinData.pinId                           ,
             stringToUtm(pinData.location)           , //location
-            /*pinData.difficulty                      ,
-            stringToPinType(pinData.type)           ,*/
             pinData.title                           ,
             stringToPinContent(pinData.content)     ,
             stringToDrawable(pinData.type, pinData.difficulty),
