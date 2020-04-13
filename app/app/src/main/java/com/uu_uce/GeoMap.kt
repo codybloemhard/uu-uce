@@ -77,19 +77,11 @@ class GeoMap : AppCompatActivity() {
         val size = (longest*menu.buttonPercent).toInt()
 
         // Initialize menu
-        val btn1 = ImageButton(this, null, android.R.attr.buttonBarButtonStyle)
-        btn1.setImageResource(R.drawable.logotp)
-        btn1.setBackgroundColor(Color.BLUE)
+        val btn1 = allpins_button
         btn1.setOnClickListener{customMap.startAllPins()}
-        btn1.layoutParams = ViewGroup.LayoutParams(size, size)
-        lower_menu_layout.addView(btn1)
 
-        val btn2 = ImageButton(this, null, android.R.attr.buttonBarButtonStyle)
-        btn2.setImageResource(R.drawable.logotp)
-        btn2.setBackgroundColor(Color.GREEN)
+        val btn2 = fieldbook_button
         btn2.setOnClickListener{customMap.startFieldBook()}
-        btn2.layoutParams = ViewGroup.LayoutParams(size, size)
-        lower_menu_layout.addView(btn2)
 
         dragButton.clickAction      = {menu.dragButtonTap()}
         dragButton.dragAction       = {dx, dy -> menu.drag(dx,dy)}
