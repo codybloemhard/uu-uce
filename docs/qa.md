@@ -98,8 +98,8 @@ Used by shapefile-linter to save it's custom files for geological data.
 | 0.4.1         | IC12  | Open fieldbook item, ui scaling                       | No
 | 0.4.1         | IC11  | Add fieldbook item                                    | No
 | 0.4.1         | IC10  | Open fieldbook                                        | Yes
-| 0.3.2         | IC9   | Open video via video pin                              | No
-| 0.3.2         | IC8   | Open pin via menu                                     | No
+| 0.3.2         | IC9   | Open video via video pin                              | Yes
+| 0.3.2         | IC8   | Open pin via menu                                     | Yes
 | 0.3.1         | IC7   | Pins drawn, click on pin to open popup                | No
 | 0.x.x         | IC6   | Pin list menu, UI scaling                             | Yes
 | 0.x.x         | IC5   | Enable, disable map layers                            | No

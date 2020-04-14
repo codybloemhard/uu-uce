@@ -79,7 +79,7 @@ class MenuTests {
     }
 
     @Test
-    fun fieldbookButtonTest(){
+    fun fieldbookButton(){
         // First click should open the layer toggle buttons
         onView(withId(R.id.dragButton))
             .perform(ViewActions.click(), ViewActions.click())

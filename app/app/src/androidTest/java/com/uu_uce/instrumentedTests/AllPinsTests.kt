@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
+import androidx.test.espresso.action.ViewActions.pressBack
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
@@ -28,7 +28,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class AllPinsTests(){
+class AllPinsTests {
     private lateinit var pinViewModel: PinViewModel
     private lateinit var sharedPref : SharedPreferences
 
@@ -76,8 +76,8 @@ class AllPinsTests(){
                 "VIDEO",
                 "Test video",
                 "[{\"tag\":\"VIDEO\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/videos/zoo.mp4\", \"thumbnail\":\"file:///data/data/com.uu_uce/files/pin_content/videos/thumbnails/zoothumbnail.png\", \"title\":\"zoo video\"}]",
-                0,
-                "3",
+                1,
+                "-1",
                 "-1"
             )
         )
@@ -91,7 +91,7 @@ class AllPinsTests(){
                 "[{\"tag\":\"TEXT\", \"text\":\"Press right or also right\"}, {\"tag\":\"MCQUIZ\", \"mc_correct_option\" : \"Right\", \"mc_incorrect_option\" : \"Wrong\" , \"mc_correct_option\" : \"Also right\", \"mc_incorrect_option\" : \"Also wrong\", \"reward\" : 50}, {\"tag\":\"TEXT\", \"text\":\"Press right again\"}, {\"tag\":\"MCQUIZ\", \"mc_correct_option\" : \"Right\", \"mc_incorrect_option\" : \"Wrong\", \"reward\" : 25}]",
                 1,
                 "-1",
-                "2"
+                "-1"
             )
         )
 
@@ -113,8 +113,8 @@ class AllPinsTests(){
     }
 
     @Test
-    fun openAndClosePin(){
-        // Check if allpins successfully loaded
+    fun openAndClosePinClose(){
+        // Open first pin
         onView(withId(R.id.allpins_recyclerview)).perform(
                 actionOnItemAtPosition<RecyclerView.ViewHolder>(
                     0, clickChildViewWithId(R.id.open_button)
@@ -126,14 +126,112 @@ class AllPinsTests(){
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
 
-        // Close pin content
+        onView(withId(R.id.allpins_recyclerview))
+            .check(matches(not(hasFocus())))
+
+        // Close pin content with close button
         onView(withId(R.id.popup_window_close_button))
             .inRoot(isPlatformPopup())
             .perform(click())
 
         // Check if pin closed successfully
+        onView(withId(R.id.allpins_recyclerview))
+            .check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun openAndClosePinBack(){
+        // Open first pin
+        onView(withId(R.id.allpins_recyclerview)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                0, clickChildViewWithId(R.id.open_button)
+            )
+        )
+
+        // Check if pin successfully opened
         onView(withId(R.id.scrollLayout))
             .inRoot(isPlatformPopup())
-            .check(matches(not(isDisplayed())))
+            .check(matches(isDisplayed()))
+
+        onView(withId(R.id.allpins_recyclerview))
+            .check(matches(not(hasFocus())))
+
+        // Close pin content with back button
+        pressBack()
+
+        // Check if pin closed successfully
+        onView(withId(R.id.allpins_recyclerview))
+            .check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun openAndCloseVideoCross(){
+        // Open video pin
+        onView(withId(R.id.allpins_recyclerview)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                3, clickChildViewWithId(R.id.open_button)
+            )
+        )
+
+        // Check if pin successfully opened
+        onView(withId(R.id.start_video_button))
+            .inRoot(isPlatformPopup())
+            .check(matches(isDisplayed()))
+
+        onView(withId(R.id.allpins_recyclerview))
+            .check(matches(not(hasFocus())))
+
+        // Open video player
+        onView(withId(R.id.start_video_button))
+            .inRoot(isPlatformPopup())
+            .perform(click())
+
+        // Check if video player opened successfully
+        onView(withId(R.id.video_player))
+            .check(matches(isDisplayed()))
+
+        // Close video player using close button
+        onView(withId(R.id.close_video_player))
+            .perform(click())
+
+        // Check if the player was closed successfully
+        onView(withId(R.id.start_video_button))
+            .inRoot(isPlatformPopup())
+            .check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun openAndCloseVideoBack(){
+        // Open video pin
+        onView(withId(R.id.allpins_recyclerview)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                3, clickChildViewWithId(R.id.open_button)
+            )
+        )
+
+        // Check if pin successfully opened
+        onView(withId(R.id.start_video_button))
+            .inRoot(isPlatformPopup())
+            .check(matches(isDisplayed()))
+
+        onView(withId(R.id.allpins_recyclerview))
+            .check(matches(not(hasFocus())))
+
+        // Open video player
+        onView(withId(R.id.start_video_button))
+            .inRoot(isPlatformPopup())
+            .perform(click())
+
+        // Check if video player opened successfully
+        onView(withId(R.id.video_player))
+            .check(matches(isDisplayed()))
+
+        // Close video player using back button
+        pressBack()
+
+        // Check if the player was closed successfully
+        onView(withId(R.id.start_video_button))
+            .inRoot(isPlatformPopup())
+            .check(matches(isDisplayed()))
     }
 }

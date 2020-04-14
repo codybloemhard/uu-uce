@@ -188,6 +188,7 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         // Add thumbnail and button
         frameLayout.addView(playButton)
         frameLayout.setOnClickListener{openVideoView(videoURI, title, activity)}
+        frameLayout.id = R.id.start_video_button
         layout.addView(frameLayout)
     }
 

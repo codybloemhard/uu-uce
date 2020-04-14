@@ -42,7 +42,7 @@ class Pin(
     }
 
     // Used to determine if warning should show when closing pin
-    var madeProgress = false
+    private var madeProgress = false
 
     private val pinWidth = 60 // TODO: set this in settings somewhere
 
@@ -182,7 +182,7 @@ class Pin(
                     .setTitle("Closing Pin")
                     .setMessage("Are you sure you want to close pin? All progress will be lost.")
                     .setPositiveButton("Yes",
-                        DialogInterface.OnClickListener { _, _ -> popupWindow?.dismiss() })
+                        { _, _ -> popupWindow?.dismiss() })
                     .setNegativeButton("No", null)
                     .show()
             }
