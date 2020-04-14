@@ -31,4 +31,9 @@ class PinViewModel(application: Application) : AndroidViewModel(application) {
         if(followPids[0] != -1)
             pinRepository.setStatuses(followPids, -1)
     }
+
+    // Used for testing
+    fun setPins(newData : List<PinData>) = viewModelScope.launch {
+        pinRepository.setPins(newData)
+    }
 }

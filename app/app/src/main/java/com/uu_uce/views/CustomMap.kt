@@ -280,7 +280,7 @@ class CustomMap : ViewTouchParent {
             val pin = entry.second
             if(!pin.inScreen || pin.getStatus() < 1) continue
             if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, pinTapBufferSize)){
-                pin.openPinPopupWindow(this, activity) {activePopup = null}
+                pin.openContent(this, activity) {activePopup = null}
                 activePopup = pin.popupWindow
                 Logger.log(LogType.Info, "CustomMap", "${pin.getTitle()}: I have been tapped.")
                 return

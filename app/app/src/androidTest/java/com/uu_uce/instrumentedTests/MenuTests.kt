@@ -1,4 +1,4 @@
-package com.uu_uce.uiTests
+package com.uu_uce.instrumentedTests
 
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions

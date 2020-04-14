@@ -108,7 +108,7 @@ class Pin(
         }
     }
 
-    fun openPinPopupWindow(parentView: View, activity : Activity, onDissmissAction: () -> Unit) {
+    fun openContent(parentView: View, activity : Activity, onDissmissAction: () -> Unit) {
         val layoutInflater = activity.layoutInflater
 
         // Build an custom view (to be inflated on top of our current view & build it's popup window)
@@ -288,7 +288,7 @@ class Pin(
             btnOpenQuiz.setOnClickListener {
                 popupWindow?.dismiss()
 
-                openPinPopupWindow(parentView, activity){}
+                openContent(parentView, activity){}
             }
         }
         else{

@@ -35,4 +35,9 @@ class PinRepository(private val pinDao : PinDao){
     suspend fun setStatuses(pids : List<Int>, value : Int){
         pinDao.setStatuses(pids, value)
     }
+
+    // Used for testing
+    suspend fun setPins(newData : List<PinData>) {
+        pinDao.updateData(newData)
+    }
 }

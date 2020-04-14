@@ -61,7 +61,7 @@ class PinListAdapter internal constructor(
             val pinConverter = PinConversion(activity)
             val pin = pinConverter.pinDataToPin(current, pinViewModel)
             pin.getContent().parent = pin
-            pin.openPinPopupWindow(holder.parentView, activity) {activePopup = null}
+            pin.openContent(holder.parentView, activity) {activePopup = null}
             activePopup = pin.popupWindow
         }
 
