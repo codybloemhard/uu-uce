@@ -41,14 +41,14 @@ class GeoMap : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        start()
-        /* This may be needed if the maps are read out of external memory
+        //start()
+        // This is needed on older phones, even though maps are in internal memory
         if(checkPermissions(this, permissionsNeeded).count() > 0){
             getPermissions(this, permissionsNeeded, EXTERNAL_FILES_REQUEST)
         }
         else{
             start()
-        }*/
+        }
     }
 
     private fun start(){
@@ -95,17 +95,20 @@ class GeoMap : AppCompatActivity() {
         dragButton.dragAction       = {dx, dy -> menu.drag(dx,dy)}
         dragButton.dragEndAction    = {dx, dy -> menu.snap(dx, dy)}
 
-        val dir = File(filesDir, "mydir")
+        val dir = File(filesDir,"mydir")
         try {
             customMap.addLayer(LayerType.Water, dir, HeightLineReader(dir), toggle_layer_layout, size)
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $dir")
         }catch(e: Exception){
-            Logger.log(LogType.Info, "GeoMap", "Could not load layer at $dir.\nError: " + e.localizedMessage)
+            Logger.error("GeoMap", "Could not load layer at $dir.\nError: " + e.message)
         }
-        try {
+        /*try {
             customMap.addLayer(LayerType.Water, dir, PolygonReader(dir),  toggle_layer_layout, size)
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $dir")
         }catch(e: Exception){
-            Logger.log(LogType.Info, "GeoMap", "Could not load layer at $dir.\nError: " + e.localizedMessage)
-        }
+            Logger.error("GeoMap", "Could not load layer at $dir.\nError: " + e.message)
+        }*/
+
         customMap.initializeCamera()
 
         customMap.tryStartLocServices(this)

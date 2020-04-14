@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
@@ -41,7 +42,6 @@ class CustomMap : ViewTouchParent {
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private var smap : ShapeMap = ShapeMap(5, this)
-    private var firstDraw = true
 
     // Location
     private val locationServices                            = LocationServices()
@@ -82,11 +82,6 @@ class CustomMap : ViewTouchParent {
         addChild(Scroller(context, ::moveMap))
         addChild(DoubleTapper(context, ::zoomOutMax))
         addChild(SingleTapper(context as AppCompatActivity, ::tapPin))
-        addChild(Releaser {
-            smap.onTouchRelease(
-                camera.getViewport()
-            )
-        })
 
 
 
@@ -96,6 +91,10 @@ class CustomMap : ViewTouchParent {
 
         post{
             camera.wAspect = width.toDouble()/height
+
+            val z = 1.0 / (camera.wAspect)
+            camera.maxZoom = maxOf(1.0,z)
+            camera.setZoom(z)
         }
     }
 
@@ -120,20 +119,13 @@ class CustomMap : ViewTouchParent {
     }
 
     override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-
-        val waspect = width.toDouble() / height
-
-        if(firstDraw){
-            val z = 1.0 / (waspect)
-            camera.maxZoom = maxOf(1.0,z)
-            camera.setZoom(z)
-            firstDraw = false
-        }
         val res = camera.update()
+        val chunkRes = smap.updateChunks()
         if(res == UpdateResult.NOOP){
-            return
+            if(chunkRes == ChunkUpdateResult.NOTHING)
+                return
         }
+
 
         val viewport = camera.getViewport()
         val timeDraw = measureTimeMillis {
@@ -167,7 +159,7 @@ class CustomMap : ViewTouchParent {
             }
         }
         Logger.log(LogType.Continuous, "CustomMap", "Draw MS: $timeDraw")
-        if(res == UpdateResult.ANIM)
+        if(res == UpdateResult.ANIM || chunkRes == ChunkUpdateResult.LOADING)
             invalidate()
     }
 
