@@ -121,8 +121,7 @@ class CustomMap : ViewTouchParent {
     override fun onDraw(canvas: Canvas) {
         val res = camera.update()
         val chunkRes = smap.updateChunks()
-        if(res == UpdateResult.NOOP){
-            if(chunkRes == ChunkUpdateResult.NOTHING)
+        if(res == UpdateResult.NOOP && chunkRes == ChunkUpdateResult.NOTHING){
                 return
         }
 

@@ -19,92 +19,12 @@ abstract class ChunkManager(
 
     abstract fun update(viewport: Pair<p2,p2>, zoom: Int): ChunkUpdateResult
 
-    open fun updateOnMove(viewport: Pair<p2,p2>, zoom: Int){}
-    open fun updateOnStop(viewport: Pair<p2,p2>, zoom: Int){}
-
     protected fun shouldGetLoaded(chunkIndex: ChunkIndex, viewport: Pair<p2,p2>, zoom: Int): Boolean{
         return chunkIndex.third == zoom
     }
 
     protected fun chunksChanged(viewport: Pair<p2,p2>, zoom: Int): Boolean{
         return zoom != lastZoom
-    }
-}
-
-class ScrollingLoader(chunks: MutableMap<Triple<Int, Int, Int>, Chunk>, chunkGetter: ChunkGetter, map: ShapeMap): ChunkManager(chunks, chunkGetter, map){
-    private val toRemove: HashSet<ChunkIndex> = hashSetOf()
-    private val chunkLoaders: MutableList<Pair<ChunkIndex,Job>> = mutableListOf()
-
-    private fun addChunks(chunkIndices: List<ChunkIndex>){
-        val routines: MutableList<Job> = mutableListOf()
-        for (chunkIndex in chunkIndices) {
-            val routine = GlobalScope.launch {
-                val time = System.currentTimeMillis()
-                val c: Chunk = chunkGetter.getChunk(chunkIndex)
-                synchronized(chunks) {
-                    chunks[chunkIndex] = c
-                }
-                map.invalidate()
-                Logger.log(
-                    LogType.Event,
-                    "ChunkManager",
-                    "loaded chunk $chunkIndex in time: ${System.currentTimeMillis() - time}"
-                )
-            }
-            chunkLoaders.add(Pair(chunkIndex, routine))
-            routines.add(routine)
-        }
-
-        GlobalScope.launch {
-            var ok = routines.isNotEmpty()
-            for(routine in routines){
-                routine.join()
-                if(routine.isCancelled) {
-                    ok = false
-                    break
-                }
-            }
-            if(ok) {
-                synchronized(chunks) {
-                    chunks.keys.removeAll(toRemove)
-                }
-                synchronized(toRemove) {
-                    toRemove.clear()
-                }
-            }
-        }
-    }
-
-    private fun getNewOldChunks(viewport: Pair<p2,p2>, zoomLevel: Int) : Pair<List<ChunkIndex>,List<ChunkIndex>>{
-        val new: MutableList<ChunkIndex> = mutableListOf()
-        if(zoomLevel != lastZoom) new.add(Triple(0,0,zoomLevel))
-
-        val old: MutableList<Triple<Int,Int,Int>> = mutableListOf()
-        if(zoomLevel!= lastZoom)old.add(Triple(0,0,lastZoom))
-
-        return Pair(new.toList(),old.toList())
-    }
-
-    override fun update(viewport: Pair<p2, p2>, zoom: Int): ChunkUpdateResult {
-        TODO("Not yet implemented")
-    }
-
-    override fun updateOnMove(viewport: Pair<p2,p2>, zoom: Int){
-        if(!chunksChanged(viewport,zoom)) return
-        chunkLoaders.filter{(index,routine) ->
-            if(!shouldGetLoaded(index, viewport, zoom))
-                routine.cancel()
-            (routine.isCancelled || routine.isCompleted)
-        }
-
-        val (newChunks,oldChunks) = getNewOldChunks(viewport, zoom)
-
-        synchronized(toRemove) {
-            toRemove.addAll(oldChunks)
-            toRemove.removeAll(newChunks)
-        }
-
-        addChunks(newChunks)
     }
 }
 
@@ -129,15 +49,16 @@ class StopLoader(chunks: MutableMap<Triple<Int, Int, Int>, Chunk>, chunkGetter: 
     }
 
     override fun update(viewport: Pair<p2, p2>, zoom: Int): ChunkUpdateResult {
-        if(viewport != lastViewport || zoom != lastZoom) {
+        if(chunksChanged(viewport,zoom)) {
             Logger.log(LogType.Event, "ChunkManager", "camera moved, not updating chunks")
             cancelCurrentLoading()
-            upToDate = !chunksChanged(viewport,zoom) && upToDate
+            upToDate = false
             lastViewport = viewport
             lastZoom = zoom
-            return  if(upToDate) ChunkUpdateResult.NOTHING
-                    else ChunkUpdateResult.LOADING
+            return ChunkUpdateResult.LOADING
         }
+        lastViewport = viewport
+        lastZoom = zoom
 
         if(loading){
             return ChunkUpdateResult.LOADING
