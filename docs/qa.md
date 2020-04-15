@@ -51,6 +51,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### QA Matrix
 | Version   | Date      | Documentation     | Linting status            |
 |-----------|-----------|-------------------|---------------------------|
+| 0.5.0     | 15-4-2020 | Content format    | Not much changed          |
 | 0.4.1     | 6-4-2020  | Content format    | New Issues pile up        |
 | 0.4.0     | 31-3-2020 | Content format    | Many things are unused    |
 | 0.3.1     | 21-3-2020 | Content format    | Kotlin ok, Android issues |
@@ -59,6 +60,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Test Coverage Matrix
 | Version   | Pixel 2 Emulator API 29 | Nokia 2 API 24  | One Plus 5 API 28 | Pixel 3 Emulator API 29 | Pixel C API 27 |
 |-----------|-------------------------|-----------------|-------------------|-------------------------|----------------|
+| 0.5.0     | 100% tested             | 100% tested     |
 | 0.4.2     | 100% tested             | 100% tested     | 100% tested       | 100% tested             | 100% tested    |
 | 0.4.1     | 100% tested             | 100% tested     | 100% tested       | 100% tested             | 100% tested    |
 | 0.3.1     | 100% tested             | 100% tested     | 100% tested       | 100% tested             | 100% tested    |
@@ -67,6 +69,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Test Issues Matrix
 | Version   | Pixel 2 Emulator API 29   | Nokia 2 API 24            | One Plus 5 API 28 | Moto g5s+         | Pixel 3 Emulator API 29 | Pixel C API 27 |
 |-----------|---------------------------|---------------------------|-------------------|-------------------|-------------------------|----------------|
+| 0.5.0     | IK6                       | Ik9
 | 0.4.2     | IK6, IK8                  | IK7, IK8                  | IK8               |                   | IK8                     | IK8            |
 | 0.4.1     | IK6                       | IK7                       | None              |                   | None                    | IK6            |
 | 0.4.0     | None                      |                           | None              |                   | None                    | IK6            |
@@ -76,6 +79,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Know Issues Matrix
 | Version       | ID    | What              |
 |---------------|-------|-------------------|
+| 0.5.0         | IK9   | Crash on add pin.
 | 0.4.1         | IK8   | Crash on remove pin without image from fieldbook `java.lang.IllegalArgumentException: Uri lacks 'file' scheme`
 | 0.4.1         | IK7   | Crash on load: `Only the original thread that created a view hierarchy can touch its views`
 | 0.4.1         | IK6   | Image in fieldbook shows very small
@@ -112,6 +116,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Detailed Linting Status
 | Version   | Linting Details Kotlin: (Nr, Worst) Android: (Nr, Worst)  |
 |-----------|-----------------------------------------------------------|
+| 0.5.0     | Kotlin: (14, mild), Android: (57: Medium)
 | 0.4.2     | Small decrease in issues, Kotlin: (7, mild) Android (61: Medium)
 | 0.4.1     | Issues expand again, Kotlin: (12, mild) Android (80: Major)
 | 0.4.0     | Mostly unused ... errors, Kotlin: (7, mild) Android: (58: Medium)
