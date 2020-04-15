@@ -25,13 +25,11 @@ class ShapeLayer(path: File, chunkGetter: ChunkGetter, map: ShapeMap, onLoadedAc
         bmax = chunk.bmax
     }
 
-    fun onTouchRelease(viewport: Pair<p2, p2>, zoom: Int){
-        chunkManager.updateOnStop(viewport, zoom)
+    fun updateChunks(viewport: Pair<p2,p2>, zoom: Int): ChunkUpdateResult{
+        return chunkManager.update(viewport, zoom)
     }
 
     fun draw(canvas: Canvas, paint: Paint, viewport : Pair<p2,p2>, width: Int, height: Int, zoomLevel: Int){
-        chunkManager.updateOnMove(viewport, zoomLevel)
-
         Logger.log(LogType.Continuous, "zoom", zoomLevel.toString())
 
         synchronized(chunks) {

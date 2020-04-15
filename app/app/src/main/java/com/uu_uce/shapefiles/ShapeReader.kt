@@ -3,6 +3,7 @@ package com.uu_uce.shapefiles
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import java.io.File
+import java.io.FileInputStream
 import kotlin.math.log
 import kotlin.math.pow
 
@@ -18,7 +19,7 @@ class FileReader{
     private var ubytes: UByteArray
 
     constructor(file: File){
-        val inputStream = file.inputStream()
+        val inputStream = FileInputStream(file)
         ubytes = inputStream.readBytes().toUByteArray()
         inputStream.close()
     }
