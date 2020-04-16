@@ -163,9 +163,9 @@ class CustomMap : ViewTouchParent {
                 entry.value.draw(viewport, width, height,this, canvas)
             }
 
-            // Draw route
-            val route = setRoute()
-            route.draw(viewport,this,canvas)
+            // TODO: drawing route
+            //val route = setRoute()
+            //route.draw(viewport,this,canvas)
         }
         Logger.log(LogType.Continuous, "CustomMap", "Draw MS: $timeDraw")
         if(res == UpdateResult.ANIM)
