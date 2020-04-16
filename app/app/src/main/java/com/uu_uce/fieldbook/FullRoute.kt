@@ -17,33 +17,41 @@ class FullRoute (routeString: String) {
 
     init {
         routeList = getRoute(routeString)
-        linesList = FloatArray(routeList.size * 4)
+        linesList = FloatArray(routeList.size * 4 - 4)
     }
 
     fun drawLines(viewPort: Pair<p2,p2>,view: View): FloatArray {
-        //TODO: calculate center/zoom/boundaries/relative distance on init & use those on drawing
+        //TODO: calculate center/zoom/boundaries/relative distance on init (route is fixed) & use those on drawing
         val length = routeList.size
+        var counter = 0
 
-        if (linesList.isEmpty())
-            coordToScreen(routeList[0].first,viewPort,view.width,view.height).also {
-                linesList.plus(listOf(it.first,it.second))
+        if (linesList.first() == 0f) {
+            coordToScreen(routeList[0].first, viewPort, view.width, view.height).also {
+                //TODO: ugly
+                linesList[counter++] = it.first
+                linesList[counter++] = it.second
             }
+        }
 
         var i = 1
 
         while (i < length-1) {
             coordToScreen(routeList[i++].first,viewPort,view.width,view.height).also{c ->
-                val toAdd = listOf(c.first,c.second)
                 repeat(2) {
-                    linesList.plus(toAdd)
+                    linesList[counter++] = c.first
+                    linesList[counter++] = c.second
                 }
             }
         }
 
         if(i==routeList.lastIndex)
-            coordToScreen(routeList[0].first,viewPort,view.width,view.height).also {
-                linesList.plus(listOf(it.first, it.second))
+            coordToScreen(routeList[i].first,viewPort,view.width,view.height).also {
+                linesList[counter++] = it.first
+                linesList[counter++] = it.second
             }
+
+        for(fl in linesList)
+            println(fl)
 
         return linesList
     }

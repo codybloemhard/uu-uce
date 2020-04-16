@@ -164,30 +164,7 @@ class CustomMap : ViewTouchParent {
             }
 
             // Draw route
-            val route = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Route(
-                    0,
-                    FullRoute(
-                        "[\n" +
-                                "    {\n" +
-                                "        \"coordinate\": \"31N3149680N46777336E\",\n" +
-                                "        \"localtime\": \"10:19:16\"\n" +
-                                "    },\n" +
-                                "    {\n" +
-                                "        \"coordinate\": \"31N3133680N46718336E\",\n" +
-                                "        \"localtime\": \"15:13:42\"\n" +
-                                "    },\n" +
-                                "    {\n" +
-                                "        \"coordinate\": \"31N3130000N46710000E\",\n" +
-                                "        \"localtime\": \"18:00:57\"\n" +
-                                "    }\n" +
-                                "]"
-                    ),
-                    LocalDate.now()
-                )
-            } else {
-                TODO("VERSION.SDK_INT < O")
-            }
+            val route = setRoute()
             route.draw(viewport,this,canvas)
         }
         Logger.log(LogType.Continuous, "CustomMap", "Draw MS: $timeDraw")
@@ -331,6 +308,33 @@ class CustomMap : ViewTouchParent {
                 Logger.log(LogType.Info, "CustomMap", "${pin.getTitle()}: I have been tapped.")
                 return
             }
+        }
+    }
+
+    fun setRoute() : Route {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Route(
+                0,
+                FullRoute(
+                    "[\n" +
+                            "    {\n" +
+                            "        \"coordinate\": \"31N3149680N46777336E\",\n" +
+                            "        \"localtime\": \"10:19:16\"\n" +
+                            "    },\n" +
+                            "    {\n" +
+                            "        \"coordinate\": \"31N3133680N46718336E\",\n" +
+                            "        \"localtime\": \"15:13:42\"\n" +
+                            "    },\n" +
+                            "    {\n" +
+                            "        \"coordinate\": \"31N3130000N46710000E\",\n" +
+                            "        \"localtime\": \"18:00:57\"\n" +
+                            "    }\n" +
+                            "]"
+                ),
+                LocalDate.now()
+            )
+        } else {
+            TODO("VERSION.SDK_INT < O")
         }
     }
 
