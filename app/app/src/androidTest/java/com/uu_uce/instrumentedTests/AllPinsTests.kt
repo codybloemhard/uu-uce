@@ -54,7 +54,7 @@ class AllPinsTests {
                 "31N46777336N3149680E",
                 1,
                 "TEXT",
-                "Test text",
+                "A",
                 "[{\"tag\":\"TEXT\", \"text\":\"test\"}]",
                 1,
                 "-1",
@@ -67,7 +67,7 @@ class AllPinsTests {
                 "31N46718336N3133680E",
                 2,
                 "IMAGE",
-                "Test image",
+                "B",
                 "[{\"tag\":\"IMAGE\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/images/test.png\"}]",
                 1,
                 "-1",
@@ -80,7 +80,7 @@ class AllPinsTests {
                 "31N46710000N3130000E",
                 3,
                 "VIDEO",
-                "Test video",
+                "C",
                 "[{\"tag\":\"VIDEO\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/videos/zoo.mp4\", \"thumbnail\":\"file:///data/data/com.uu_uce/files/pin_content/videos/thumbnails/zoothumbnail.png\", \"title\":\"zoo video\"}]",
                 1,
                 "-1",
@@ -93,7 +93,7 @@ class AllPinsTests {
                 "31N46715335N3134680E",
                 3,
                 "MCQUIZ",
-                "Test quiz",
+                "D",
                 "[{\"tag\":\"TEXT\", \"text\":\"Press right or also right\"}, {\"tag\":\"MCQUIZ\", \"mc_correct_option\" : \"Right\", \"mc_incorrect_option\" : \"Wrong\" , \"mc_correct_option\" : \"Also right\", \"mc_incorrect_option\" : \"Also wrong\", \"reward\" : 50}]",
                 1,
                 "-1",
@@ -444,6 +444,36 @@ class AllPinsTests {
 
         // Check if sorting was successful
         onView(withId(R.id.allpins_recyclerview))
-            .perform()
+            .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                0, clickChildViewWithId(R.id.open_button)))
+
+        onView(withId(R.id.popup_window_title))
+            .inRoot(isPlatformPopup())
+            .check(matches(withText("A")))
+
+        onView(withId(R.id.popup_window_close_button))
+            .inRoot(isPlatformPopup())
+            .perform(click())
+
+        // Open sorting popup
+        onView(withId(R.id.fab))
+            .perform(click())
+
+        // Sort by title reversed
+        onView(withText("Title z-a"))
+            .perform(click())
+
+        // Check if sorting was successful
+        onView(withId(R.id.allpins_recyclerview))
+            .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                0, clickChildViewWithId(R.id.open_button)))
+
+        onView(withId(R.id.popup_window_title))
+            .inRoot(isPlatformPopup())
+            .check(matches(withText("D")))
+
+        onView(withId(R.id.popup_window_close_button))
+            .inRoot(isPlatformPopup())
+            .perform(click())
     }
 }
