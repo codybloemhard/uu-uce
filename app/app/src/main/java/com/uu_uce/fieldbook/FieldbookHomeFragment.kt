@@ -131,11 +131,11 @@ class FieldbookHomeFragment : Fragment() {
             for (item in it)
                 when(item) {
                     Manifest.permission.READ_EXTERNAL_STORAGE ->
-                        getPermissions(activity!!.parent,FieldBook.permissionsNeeded,1)
+                        getPermissions(requireActivity(),FieldBook.permissionsNeeded,1)
                     Manifest.permission.WRITE_EXTERNAL_STORAGE ->
-                        getPermissions(activity!!.parent,FieldBook.permissionsNeeded,1)
+                        getPermissions(requireActivity(),FieldBook.permissionsNeeded,1)
                     Manifest.permission.CAMERA ->
-                        getPermissions(activity!!.parent,FieldBook.permissionsNeeded,3)
+                        getPermissions(requireActivity(),FieldBook.permissionsNeeded,3)
                 }
         }
 
