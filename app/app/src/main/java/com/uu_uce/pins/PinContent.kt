@@ -234,6 +234,7 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
 
         // Create tableLayout with first row
         val table = TableLayout(activity)
+        table.id = R.id.multiple_choice_table
         var currentRow = TableRow(activity)
         currentRow.gravity = Gravity.CENTER_HORIZONTAL
 

@@ -1,6 +1,7 @@
 package com.uu_uce
 
 import android.app.Activity
+import android.media.MediaPlayer.OnPreparedListener
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -49,15 +50,17 @@ class VideoViewer : Activity() {
             }
         }
 
-        videoPlayer.setMediaController(mediaController)
-        mediaController.setAnchorView(findViewById(R.id.video_player_layout))
-
-        videoPlayer.setOnPreparedListener {
+        videoPlayer.setOnPreparedListener { mp ->
+            mp.setOnVideoSizeChangedListener { _, _, _ ->
+                videoPlayer.setMediaController(mediaController)
+                mediaController.setAnchorView(videoPlayer)
+            }
             if(savedInstanceState != null){
                 val videoPos = savedInstanceState.getInt("prevVideoPos")
                 videoPlayer.seekTo(videoPos)
             }
             videoPlayer.start()
+            mediaController.show()
         }
 
         val closeVideoButton = findViewById<Button>(R.id.close_video_player)
