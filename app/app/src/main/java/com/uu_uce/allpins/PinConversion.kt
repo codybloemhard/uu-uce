@@ -6,7 +6,6 @@ import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.pins.Pin
 import com.uu_uce.pins.PinContent
-import com.uu_uce.pins.PinType
 import com.uu_uce.services.UTMCoordinate
 
 class PinConversion(context: Context){
@@ -25,15 +24,6 @@ class PinConversion(context: Context){
 
     private val resource = context.resources
 
-    private fun stringToPinType(type: String): PinType {
-        return when(type){
-            "TEXT" -> PinType.TEXT
-            "IMAGE" -> PinType.IMAGE
-            "VIDEO" -> PinType.VIDEO
-            else    -> error("unknown pin type")
-        }
-    }
-
     private fun stringToPinContent(content: String): PinContent {
         return PinContent(content)
     }
@@ -41,10 +31,11 @@ class PinConversion(context: Context){
     private fun stringToDrawable(type: String, difficulty: Int): Drawable {
         var s  = "ic_pin"
         s += when (type) {
-            "TEXT"  -> "_text"
-            "VIDEO" -> "_video"
-            "IMAGE" -> "_picture"
-            else -> {
+            "TEXT"      -> "_text"
+            "VIDEO"     -> "_video"
+            "IMAGE"     -> "_picture"
+            "MCQUIZ"    -> "_quest" // TODO: replace with mc sprite
+            else        -> {
                 "_link"
             }
         }
@@ -71,8 +62,6 @@ class PinConversion(context: Context){
         val pin = Pin(
             pinData.pinId                           ,
             stringToUtm(pinData.location)           , //location
-            /*pinData.difficulty                      ,
-            stringToPinType(pinData.type)           ,*/
             pinData.title                           ,
             stringToPinContent(pinData.content)     ,
             stringToDrawable(pinData.type, pinData.difficulty),

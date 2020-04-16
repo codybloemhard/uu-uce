@@ -8,12 +8,14 @@ class Logger{
     companion object {
         private var typeMask = hashMapOf<LogType, Boolean>()
         private val tagMask = hashMapOf<String, Boolean>()
+        var defaultTagMask = true
 
         init{
-            typeMask[LogType.Continuous] = true
-            typeMask[LogType.Event] = true
-            typeMask[LogType.Info] = true
-            typeMask[LogType.NotImplemented] = true
+            typeMask=hashMapOf(
+                LogType.Continuous      to true,
+                LogType.Event           to true,
+                LogType.Info            to true,
+                LogType.NotImplemented  to true)
         }
 
         fun setTagEnabled(tag: String, enabled: Boolean){
@@ -26,7 +28,7 @@ class Logger{
 
         private fun log(tag: String, msg: String){
             if(!tagMask.containsKey(tag))
-                tagMask[tag] = true
+                tagMask[tag] = defaultTagMask
             if(tagMask[tag] == true)
                 Log.d(tag, msg)
         }
@@ -36,6 +38,10 @@ class Logger{
                 return
             if(typeMask[type] == true)
                 log(tag, msg)
+        }
+
+        fun error(tag: String, msg: String){
+            Log.e(tag,msg)
         }
     }
 }

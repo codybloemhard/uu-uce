@@ -1,6 +1,7 @@
 package com.uu_uce
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Point
@@ -15,8 +16,11 @@ import androidx.lifecycle.ViewModelProvider
 import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
+import com.uu_uce.services.getPermissions
+import com.uu_uce.shapefiles.HeightLineReader
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.LayerType
+import com.uu_uce.shapefiles.PolygonReader
 import com.uu_uce.views.DragStatus
 import kotlinx.android.synthetic.main.activity_geo_map.*
 import java.io.File
@@ -37,24 +41,31 @@ class GeoMap : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        start()
-        /* This may be needed if the maps are read out of external memory
+        //start()
+        // This is needed on older phones, even though maps are in internal memory
         if(checkPermissions(this, permissionsNeeded).count() > 0){
             getPermissions(this, permissionsNeeded, EXTERNAL_FILES_REQUEST)
         }
         else{
             start()
-        }*/
+        }
     }
 
     private fun start(){
         setContentView(R.layout.activity_geo_map)
 
+        // TODO: Remove when database is fully implemented
+        val sharedPref = getPreferences(Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putInt("com.uu_uce.USER_POINTS", 0)
+            apply()
+        }
+
         // Start database and get pins from database
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         this.customMap.setPinViewModel(pinViewModel)
         this.customMap.setLifeCycleOwner(this)
-        this.customMap.setPins()
+        this.customMap.setPins(pinViewModel.allPinData)
 
         resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
         if (resourceId > 0) {
@@ -84,16 +95,27 @@ class GeoMap : AppCompatActivity() {
         dragButton.dragAction       = {dx, dy -> menu.drag(dx,dy)}
         dragButton.dragEndAction    = {dx, dy -> menu.snap(dx, dy)}
 
-        menu.post {
-            initMenu()
+        val dir = File(filesDir,"mydir")
+        try {
+            customMap.addLayer(LayerType.Water, dir, HeightLineReader(dir), toggle_layer_layout, size)
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $dir")
+        }catch(e: Exception){
+            Logger.error("GeoMap", "Could not load layer at $dir.\nError: " + e.message)
+        }
+        try {
+            customMap.addLayer(LayerType.Water, dir, PolygonReader(dir),  toggle_layer_layout, size)
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $dir")
+        }catch(e: Exception){
+            Logger.error("GeoMap", "Could not load layer at $dir.\nError: " + e.message)
         }
 
-        // Read map
-        val dir = File(filesDir, "mydir")
-        customMap.addLayer(LayerType.Water, dir, toggle_layer_layout, size)
         customMap.initializeCamera()
 
         customMap.tryStartLocServices(this)
+
+        menu.post{
+            initMenu()
+        }
 
         // Set center on location button functionality
         center_button.setOnClickListener{
@@ -132,7 +154,7 @@ class GeoMap : AppCompatActivity() {
     override fun onResume() {
         if(started){
             super.onResume()
-            customMap.setPins()
+            customMap.setPins(pinViewModel.allPinData)
             customMap.redrawMap()
         }
         super.onResume()

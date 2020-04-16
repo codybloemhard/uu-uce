@@ -12,7 +12,10 @@ class PinRepository(private val pinDao : PinDao){
     }
 
     suspend fun tryUnlock(pid : Int, predPids : List<Int>, action : (() -> Unit)){
-        if(pinDao.getStatus(pid) > 0) return
+        if(pinDao.getStatus(pid) > 0) {
+            action()
+            return
+        }
         val statuses = pinDao.getStatuses(predPids)
 
         if(statuses.all{ i -> i == 2}){

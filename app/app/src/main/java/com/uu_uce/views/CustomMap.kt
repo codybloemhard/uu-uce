@@ -15,6 +15,7 @@ import android.widget.PopupWindow
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.uu_uce.AllPins
 import com.uu_uce.R
@@ -25,7 +26,7 @@ import com.uu_uce.FieldBook
 import com.uu_uce.fieldbook.FullRoute
 import com.uu_uce.fieldbook.Route
 import com.uu_uce.mapOverlay.coordToScreen
-import com.uu_uce.mapOverlay.drawDeviceLocation
+import com.uu_uce.mapOverlay.drawLocation
 import com.uu_uce.mapOverlay.pointDistance
 import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.misc.LogType
@@ -34,7 +35,6 @@ import com.uu_uce.pins.Pin
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
 import com.uu_uce.gestureDetection.*
-import com.uu_uce.ui.*
 import java.io.File
 import java.time.LocalDate
 import kotlin.system.measureTimeMillis
@@ -46,7 +46,6 @@ class CustomMap : ViewTouchParent {
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private var smap : ShapeMap = ShapeMap(5, this)
-    private var firstDraw = true
 
     // Location
     private val locationServices                            = LocationServices()
@@ -73,6 +72,10 @@ class CustomMap : ViewTouchParent {
     private lateinit var camera : Camera
 
     init{
+        //disable hardware acceleration for canvas.drawVertices
+        setLayerType(LAYER_TYPE_SOFTWARE, null)
+
+        smap = ShapeMap(5, this)
 
         // Logger mask settings
         Logger.setTagEnabled("CustomMap", false)
@@ -83,7 +86,6 @@ class CustomMap : ViewTouchParent {
         addChild(Scroller(context, ::moveMap))
         addChild(DoubleTapper(context, ::zoomOutMax))
         addChild(SingleTapper(context as AppCompatActivity, ::tapPin))
-        addChild(Releaser {smap.onTouchRelease(camera.getViewport())})
 
 
 
@@ -93,6 +95,10 @@ class CustomMap : ViewTouchParent {
 
         post{
             camera.wAspect = width.toDouble()/height
+
+            val z = 1.0 / (camera.wAspect)
+            camera.maxZoom = maxOf(1.0,z)
+            camera.setZoom(z)
         }
     }
 
@@ -101,8 +107,8 @@ class CustomMap : ViewTouchParent {
         camera = smap.initialize()
     }
 
-    fun addLayer(lt: LayerType, path: File, scrollLayout: LinearLayout, buttonSize: Int){
-        smap.addLayer(lt, path)
+    fun addLayer(lt: LayerType, path: File, chunkGetter: ChunkGetter, scrollLayout: LinearLayout, buttonSize: Int){
+        smap.addLayer(lt, path, chunkGetter)
 
         val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle)
         btn.setImageResource(R.drawable.logotp)
@@ -117,20 +123,12 @@ class CustomMap : ViewTouchParent {
     }
 
     override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-
-        val waspect = width.toDouble() / height
-
-        if(firstDraw){
-            val z = 1.0 / (waspect)
-            camera.maxZoom = maxOf(1.0,z)
-            camera.setZoom(z)
-            firstDraw = false
-        }
         val res = camera.update()
-        if(res == UpdateResult.NOOP){
-            return
+        val chunkRes = smap.updateChunks()
+        if(res == UpdateResult.NOOP && chunkRes == ChunkUpdateResult.NOTHING){
+                return
         }
+
 
         val viewport = camera.getViewport()
         val timeDraw = measureTimeMillis {
@@ -148,7 +146,7 @@ class CustomMap : ViewTouchParent {
                 deviceScreenLoc.first > 0 && deviceScreenLoc.first < width &&
                 deviceScreenLoc.second > 0 && deviceScreenLoc.second < height
             if(locationAvailable && locInScreen){
-                drawDeviceLocation(
+                drawLocation(
                     deviceScreenLoc,
                     canvas,
                     deviceLocPaint,
@@ -168,7 +166,7 @@ class CustomMap : ViewTouchParent {
             //route.draw(viewport,this,canvas)
         }
         Logger.log(LogType.Continuous, "CustomMap", "Draw MS: $timeDraw")
-        if(res == UpdateResult.ANIM)
+        if(res == UpdateResult.ANIM || chunkRes == ChunkUpdateResult.LOADING)
             invalidate()
     }
 
@@ -241,11 +239,10 @@ class CustomMap : ViewTouchParent {
         invalidate()
     }
 
-    fun setPins(){
+    fun setPins(table: LiveData<List<PinData>>){
         // Set observer on pin database
-        pinViewModel.allPinData.observe(lfOwner, Observer { pins ->
+        table.observe(lfOwner, Observer { pins ->
             // Update the cached copy of the words in the adapter.
-            pinViewModel.allPinData
             pins?.let { newData ->
                 updatePinStatuses(newData)
             }
@@ -299,9 +296,9 @@ class CustomMap : ViewTouchParent {
     }
 
     private fun tapPin(tapLocation : p2, activity : Activity){
-        for(entry in pins){
-            val pin = entry.value
-            if(!pin.inScreen) continue
+        for(entry in pins.toList().asReversed()){
+            val pin = entry.second
+            if(!pin.inScreen || pin.getStatus() < 1) continue
             if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, pinTapBufferSize)){
                 pin.openPinPopupWindow(this, activity) {activePopup = null}
                 activePopup = pin.popupWindow

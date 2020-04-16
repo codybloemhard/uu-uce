@@ -5,7 +5,7 @@ import com.uu_uce.database.FieldbookDao
 
 class FieldbookRepository(private val fieldbookDao: FieldbookDao) {
 
-    val allFielbookEntries: LiveData<List<FieldbookEntry>> = fieldbookDao.getAllFieldbookEntries()
+    val allFieldbookEntries: LiveData<List<FieldbookEntry>> = fieldbookDao.getAll()
 
     suspend fun insert(fieldbookEntry: FieldbookEntry) {
         fieldbookDao.insert(fieldbookEntry)

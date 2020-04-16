@@ -3,11 +3,13 @@ package com.uu_uce.shapefiles
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import java.io.File
+import java.io.FileInputStream
 import kotlin.math.log
 import kotlin.math.pow
 
-interface ChunkGetter{
-    fun getChunk(cIndex: ChunkIndex):Chunk
+abstract class ChunkGetter(
+    protected var dir: File){
+    abstract fun getChunk(cIndex: ChunkIndex):Chunk
 }
 
 //simple reader that can read basic types from a binary file
@@ -17,7 +19,7 @@ class FileReader{
     private var ubytes: UByteArray
 
     constructor(file: File){
-        val inputStream = file.inputStream()
+        val inputStream = FileInputStream(file)
         ubytes = inputStream.readBytes().toUByteArray()
         inputStream.close()
     }
@@ -50,21 +52,22 @@ class FileReader{
 }
 
 @ExperimentalUnsignedTypes
-class BinShapeReader(
-    private var dir: File,
-    private var nrOfLODs: Int
-): ChunkGetter {
+class HeightLineReader(
+    dir: File
+): ChunkGetter(dir) {
+    private val nrOfLODs = 5
     override fun getChunk(cIndex: ChunkIndex): Chunk {
         //find the correct file and read all information inside
         val time = System.currentTimeMillis()
-        val file = File(dir, "testmap.obj")
+        val file = File(dir, "height.dms")
         val reader = FileReader(file)
 
         val xoff = reader.readULong().toDouble()
         val yoff = reader.readULong().toDouble()
+        val zoff = reader.readULong().toDouble() //not used
         val mult = reader.readULong().toDouble()
-        val bmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
-        val bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
+        val bmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult)
+        val bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult)
 
         val nrShapes = reader.readULong()
         var chunkShapes = List(nrShapes.toInt()) {
@@ -85,7 +88,7 @@ class BinShapeReader(
                 p2(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff)
             }
 
-            ShapeZ(ShapeType.Polygon, points, bb1, bb2)
+            HeightShapeZ(points, bb1, bb2)
         }
 
         val time1 = System.currentTimeMillis() - time
@@ -130,7 +133,7 @@ class BinShapeReader(
             curStep += 2
         }
 
-        val shapes: MutableList<ShapeZ> = mutableListOf()
+        val shapes: MutableList<HeightShapeZ> = mutableListOf()
         indices.sort()
         if (indices.isNotEmpty()) {
             var a = 0
@@ -156,6 +159,52 @@ class BinShapeReader(
         Logger.log(LogType.Continuous, "BinShapeReader", "first part: $time1")
         Logger.log(LogType.Continuous, "BinShapeReader", "second part: $time2")
 
+        return Chunk(shapes, bmin, bmax)
+    }
+
+
+}
+
+@ExperimentalUnsignedTypes
+class PolygonReader(
+    dir: File
+): ChunkGetter(dir) {
+    override fun getChunk(cIndex: ChunkIndex): Chunk {
+        val file = File(dir, "river.dms")
+        val reader = FileReader(file)
+
+        val xoff = reader.readULong().toDouble()
+        val yoff = reader.readULong().toDouble()
+        val zoff = reader.readULong().toDouble()
+        val mult = reader.readULong().toDouble()
+        val bmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
+        val bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
+
+        val nrShapes = reader.readULong()
+        val shapes: List<PolygonZ> = List(nrShapes.toInt()) {
+            val bbmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult + zoff)
+            val bbmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult + zoff)
+
+            val nrOuter = reader.readULong()
+            val outerRings: List<List<p3>> = List(nrOuter.toInt()) {
+                val nrPoints = reader.readULong()
+                List(nrPoints.toInt()) {
+                    p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult + zoff)
+                }
+            }
+
+            val nrInner = reader.readULong()
+            val innerRings: List<List<p3>> = List(nrInner.toInt()) {
+                val nrPoints = reader.readULong()
+                List(nrPoints.toInt()) {
+                    p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult + zoff)
+                }
+            }
+
+            PolygonZ(outerRings, innerRings, bbmin, bbmax)
+        }
+
+        //todo: remove temporary boundingbox calculation
         return Chunk(shapes, bmin, bmax)
     }
 }

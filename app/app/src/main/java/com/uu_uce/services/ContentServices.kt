@@ -1,5 +1,5 @@
 package com.uu_uce.services
-
+/*
 import android.Manifest
 import android.app.Activity
 import android.app.DownloadManager
@@ -87,4 +87,4 @@ fun getFiles(requiredFilePaths : List<String>, activity: Activity, onCompleteAct
         }
     }
     activity.registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
-}
+}*/

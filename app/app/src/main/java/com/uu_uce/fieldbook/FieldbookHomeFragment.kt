@@ -4,10 +4,12 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.location.Location
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.Gravity
@@ -21,20 +23,16 @@ import android.widget.ImageView
 import android.widget.PopupWindow
 import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toUri
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.uu_uce.FieldBook
 import com.uu_uce.R
 import com.uu_uce.pins.BlockTag
-import com.uu_uce.services.LocationServices
-import com.uu_uce.services.checkPermissions
-import com.uu_uce.services.degreeToUTM
-import com.uu_uce.services.getPermissions
+import com.uu_uce.services.*
 import java.io.File
 import java.io.FileOutputStream
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -56,21 +54,16 @@ class FieldbookHomeFragment : Fragment() {
 
     private var imageUri = ""
 
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private lateinit var fragmentActivity: FragmentActivity
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel = activity?.run {
+        fragmentActivity = requireActivity()
+
+        viewModel = fragmentActivity.run {
             ViewModelProvider(this)[FieldbookViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
-
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
     }
 
     override fun onCreateView(
@@ -81,13 +74,13 @@ class FieldbookHomeFragment : Fragment() {
             val recyclerView = view.findViewById<RecyclerView>(R.id.fieldbook_recyclerview)
             val addButton = view.findViewById<FloatingActionButton>(R.id.fieldbook_fab)
 
-            val fieldbookAdapter = FieldbookAdapter(requireActivity(), viewModel)
+            val fieldbookAdapter = FieldbookAdapter(fragmentActivity, viewModel)
 
             viewModel.allFieldbookEntries.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
                 fieldbookAdapter.setFieldbook(it)
             })
 
-            recyclerView.layoutManager = LinearLayoutManager(activity)
+            recyclerView.layoutManager = LinearLayoutManager(fragmentActivity)
             recyclerView.adapter = fieldbookAdapter
 
             addButton.setOnClickListener {
@@ -100,19 +93,9 @@ class FieldbookHomeFragment : Fragment() {
         /**
          * Use this factory method to create a new instance of
          * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment FieldbookHomeFragment.
          */
-        // TODO: Rename and change types and number of parameters
-        fun newInstance(param1: String, param2: String) =
-            FieldbookHomeFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+        fun newInstance() =
+            FieldbookHomeFragment()
     }
 
     private fun openFieldbookAdderPopup() {
@@ -121,58 +104,59 @@ class FieldbookHomeFragment : Fragment() {
         val customView = layoutInflater.inflate(R.layout.add_fieldbook_popup, null, false)
         val popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
-        popupWindow.showAtLocation(activity!!.findViewById(R.id.fieldbook_layout), Gravity.CENTER, 0, 0)
+        popupWindow.showAtLocation(fragmentActivity.findViewById(R.id.fieldbook_layout), Gravity.CENTER, 0, 0)
 
         // makes sure the keyboard appears whenever we want to add text
         popupWindow.isFocusable = true
         popupWindow.update()
-
-        checkPermissions(this.requireContext(), FieldBook.permissionsNeeded).let {
-            for (item in it)
-                when(item) {
-                    Manifest.permission.READ_EXTERNAL_STORAGE ->
-                        getPermissions(requireActivity(),FieldBook.permissionsNeeded,1)
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE ->
-                        getPermissions(requireActivity(),FieldBook.permissionsNeeded,1)
-                    Manifest.permission.CAMERA ->
-                        getPermissions(requireActivity(),FieldBook.permissionsNeeded,3)
-                }
-        }
 
         text = customView.findViewById(R.id.addText)
 
         imageView = customView.findViewById(R.id.addImage)
 
         imageView.setOnClickListener {
-            selectImage(activity!!)
+            selectImage(fragmentActivity)
         }
 
-        val closePopup = customView.findViewById<Button>(R.id.close_fieldbook_popup)
-        closePopup.setOnClickListener{
-            val sdf = DateFormat.getDateTimeInstance()
-
+        val savePinButton = customView.findViewById<Button>(R.id.close_fieldbook_popup)
+        savePinButton.setOnClickListener{
             saveFieldbookEntry(
                 text.text.toString(),
                 imageUri,
                 getCurrentDateTime(DateTimeFormat.FIELDBOOK_ENTRY),
-                LocationServices.lastKnownLocation)
+                LocationServices.lastKnownLocation
+            )
             popupWindow.dismiss()
         }
     }
 
     private fun selectImage(context: Context) {
+
         val options = arrayOf("Take Photo", "Choose from gallery", " Cancel")
+
         val dialog = AlertDialog.Builder(context)
         dialog.setTitle("Upload an image")
 
         dialog.setItems(options) { dialogInterface, which ->
 
             when (which) {
-                0 -> startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), 0)
-                1 -> startActivityForResult(
-                    Intent(
-                        Intent.ACTION_PICK,
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI), 1)
+                0 -> {
+                    getPermissions(fragmentActivity, listOf(Manifest.permission.CAMERA), CAMERA_REQUEST)
+                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || fragmentActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                        startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), 0)
+                    }
+                }
+                1 -> {
+                    getPermissions(fragmentActivity, listOf(Manifest.permission.READ_EXTERNAL_STORAGE), CAMERA_REQUEST)
+                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || fragmentActivity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
+                        startActivityForResult(
+                            Intent(
+                                Intent.ACTION_PICK,
+                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                            ), 1
+                        )
+                    }
+                }
                 2 -> dialogInterface.dismiss()
             }
         }
@@ -224,8 +208,7 @@ class FieldbookHomeFragment : Fragment() {
             currentDate,
             buildJSONContent(content).also{ jsonString ->
                 // added for debugging purposes
-                val root = "data/data/com.uu_uce/files/fieldbook"
-                val myDir: File = File("$root/Content").also{
+                val myDir: File = File(requireContext().filesDir,"Content").also{
                     it.mkdirs()
                 }
                 val fileName = "TestContent.txt"
@@ -253,7 +236,7 @@ class FieldbookHomeFragment : Fragment() {
     private fun moveImageFromGallery(currentLocation: Uri): String {
         return saveBitmapToLocation(
             BitmapFactory.decodeStream(
-                activity!!.contentResolver.openInputStream(
+                fragmentActivity.contentResolver.openInputStream(
                     currentLocation
                 )
             )
@@ -299,5 +282,30 @@ class FieldbookHomeFragment : Fragment() {
         ).format(
             Date()
         )
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        when (requestCode) {
+            CAMERA_REQUEST -> {
+                if(grantResults[0] == 0) {
+                    startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), 0)
+                }
+            }
+            EXTERNAL_FILES_REQUEST -> {
+                if(grantResults[0] == 0){
+                    startActivityForResult(
+                        Intent(
+                            Intent.ACTION_PICK,
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                        ), 1
+                    )
+                }
+
+            }
+        }
     }
 }

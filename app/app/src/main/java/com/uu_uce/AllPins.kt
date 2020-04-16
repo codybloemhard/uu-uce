@@ -14,6 +14,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.allpins.PinListAdapter
 import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinViewModel
+
 import com.uu_uce.ui.createTopbar
 
 class AllPins : AppCompatActivity() {
@@ -71,7 +72,6 @@ class AllPins : AppCompatActivity() {
                     apply()
                 }
             }
-
         builder.show()
     }
 
@@ -80,8 +80,7 @@ class AllPins : AppCompatActivity() {
         recyclerView.adapter = viewAdapter
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         pinViewModel.allPinData.observe(this, Observer { pins ->
-            pins?.let {
-                viewAdapter.setPins(sortList(it, category), pinViewModel) }
+            pins?.let { viewAdapter.setPins(sortList(it, category), pinViewModel) }
         })
     }
 

@@ -16,7 +16,7 @@ class FieldbookViewModel(application: Application): AndroidViewModel(application
     init {
         val fieldbookDao = UceRoomDatabase.getDatabase(application, viewModelScope).fieldbookDao()
         fieldbookRepository = FieldbookRepository(fieldbookDao)
-        allFieldbookEntries = fieldbookRepository.allFielbookEntries
+        allFieldbookEntries = fieldbookRepository.allFieldbookEntries
     }
 
     fun insert (fieldbookEntry: FieldbookEntry) = viewModelScope.launch {

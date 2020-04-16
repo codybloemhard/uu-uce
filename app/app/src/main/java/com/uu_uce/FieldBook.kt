@@ -27,9 +27,7 @@ class FieldBook : AppCompatActivity() {
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.fieldbook_bottom_navigation)
         createTopbar(this, "my fieldbook")
 
-        // What are we doing? TODO
-
-        openFragment(FieldbookHomeFragment.newInstance("",""))
+        openFragment(FieldbookHomeFragment.newInstance())
 
         val fieldbookViewModel = ViewModelProvider(this).get(FieldbookViewModel::class.java)
 
@@ -40,7 +38,7 @@ class FieldBook : AppCompatActivity() {
                 fun(m): Boolean {
                     when(m.itemId) {
                         R.id.fieldbook_navigation_home -> {
-                            openFragment(FieldbookHomeFragment.newInstance("",""))
+                            openFragment(FieldbookHomeFragment.newInstance())
                             return true
                         }
                         R.id.fieldbook_navigation_pinmap -> {

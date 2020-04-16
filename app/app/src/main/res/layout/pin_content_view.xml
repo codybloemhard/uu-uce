@@ -50,9 +50,7 @@
                     android:id="@+id/scrollLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                </LinearLayout>
+                    android:orientation="vertical"/>
             </ScrollView>
 
             <Button
@@ -77,6 +75,7 @@
                 android:id="@+id/complete_box"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:clickable="false"
                 android:text="@string/completed_text"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
