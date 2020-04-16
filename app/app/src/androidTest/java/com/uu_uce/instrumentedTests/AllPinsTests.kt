@@ -3,16 +3,16 @@ package com.uu_uce.instrumentedTests
 import android.content.Context
 import android.content.SharedPreferences
 import android.view.View
-import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
-import androidx.test.espresso.Espresso.onData
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.pressBack
+import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
-import androidx.test.espresso.matcher.RootMatchers.*
+import androidx.test.espresso.matcher.BoundedMatcher
+import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -24,8 +24,8 @@ import com.uu_uce.databases.PinData
 import com.uu_uce.databases.PinViewModel
 import org.hamcrest.Description
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers.*
-import org.hamcrest.TypeSafeMatcher
+import org.hamcrest.Matchers.allOf
+import org.hamcrest.Matchers.not
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -267,32 +267,183 @@ class AllPinsTests {
                 isDescendantOfA(withId(R.id.multiple_choice_table)),
                 withText("Right")
             )
-        ).perform(click())
+        )
+            .inRoot(isPlatformPopup())
+            .perform(click())
 
         // Click finish button
+        onView(withId(R.id.finish_quiz_button))
+            .inRoot(isPlatformPopup())
+            .perform(click())
 
         // Check to see if popup was correct
+        onView(withId(R.id.quiz_result_text))
+            .inRoot(isPlatformPopup())
+            .check(matches(withText(R.string.quiz_success_head)))
 
         // Reopen popup
+        onView(withId(R.id.reopen_button))
+            .inRoot(isPlatformPopup())
+            .perform(click())
 
         // Check if pin is completed
+        onView(withId(R.id.complete_box))
+            .inRoot(isPlatformPopup())
+            .check(matches(isChecked()))
     }
 
-    private fun childAtPosition(
-        parentMatcher: Matcher<View>, position: Int
-    ): Matcher<View> {
+    @Test
+    fun multipleChoiceFail(){
+        // Open multiple choice pin
+        onView(withId(R.id.allpins_recyclerview)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                1, clickChildViewWithId(R.id.open_button)
+            )
+        )
 
-        return object : TypeSafeMatcher<View>() {
-            override fun describeTo(description: Description) {
-                description.appendText("Child at position $position in parent ")
-                parentMatcher.describeTo(description)
-            }
+        // Check if pin successfully opened
+        onView(withId(R.id.multiple_choice_table))
+            .inRoot(isPlatformPopup())
+            .check(matches(isDisplayed()))
 
-            public override fun matchesSafely(view: View): Boolean {
-                val parent = view.parent
-                return parent is ViewGroup && parentMatcher.matches(parent)
-                        && view == parent.getChildAt(position)
-            }
-        }
+        onView(withId(R.id.allpins_recyclerview))
+            .check(matches(not(hasFocus())))
+
+        // Select wrong answer
+        onView(
+            allOf(
+                isDescendantOfA(withId(R.id.multiple_choice_table)),
+                withText("Wrong")
+            )
+        )
+            .inRoot(isPlatformPopup())
+            .perform(click())
+
+        // Click finish button
+        onView(withId(R.id.finish_quiz_button))
+            .inRoot(isPlatformPopup())
+            .perform(click())
+
+        // Check to see if popup was correct
+        onView(withId(R.id.quiz_result_text))
+            .inRoot(isPlatformPopup())
+            .check(matches(withText(R.string.quiz_fail_head)))
+
+        // Reopen popup
+        onView(withId(R.id.reopen_button))
+            .inRoot(isPlatformPopup())
+            .perform(click())
+
+        // Check if pin is completed
+        onView(withId(R.id.complete_box))
+            .inRoot(isPlatformPopup())
+            .check(matches(not(isChecked())))
+    }
+
+    @Test
+    fun multipleChoiceCloseWarning(){
+        // Open multiple choice pin
+        onView(withId(R.id.allpins_recyclerview)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                1, clickChildViewWithId(R.id.open_button)
+            )
+        )
+
+        // Check if pin successfully opened
+        onView(withId(R.id.multiple_choice_table))
+            .inRoot(isPlatformPopup())
+            .check(matches(isDisplayed()))
+
+        onView(withId(R.id.allpins_recyclerview))
+            .check(matches(not(hasFocus())))
+
+        // Select an answer
+        onView(
+            allOf(
+                isDescendantOfA(withId(R.id.multiple_choice_table)),
+                withText("Also right")
+            ))
+            .inRoot(isPlatformPopup())
+            .perform(click())
+
+        // Attempt to close pin
+        onView(withId(R.id.popup_window_close_button))
+            .inRoot(isPlatformPopup())
+            .perform(click())
+
+        // Check to see that warning pops up when progress is made
+        onView(withText("Closing Pin"))
+            .check(matches(isDisplayed()))
+
+        // Stay in pin
+        onView(withText("No"))
+            .perform(click())
+
+        //Check to see that pin didn't close
+        onView(withId(R.id.multiple_choice_table))
+            .inRoot(isPlatformPopup())
+            .check(matches(isDisplayed()))
+
+        onView(withId(R.id.allpins_recyclerview))
+            .check(matches(not(hasFocus())))
+
+        // Attempt to close pin
+        onView(withId(R.id.popup_window_close_button))
+            .inRoot(isPlatformPopup())
+            .perform(click())
+
+        // Close pin
+        onView(withText("Yes"))
+            .perform(click())
+
+        // Check if pin closed
+        onView(withId(R.id.allpins_recyclerview))
+            .check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun multipleChoiceCloseNoWarning(){
+        // Open multiple choice pin
+        onView(withId(R.id.allpins_recyclerview)).perform(
+            actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                1, clickChildViewWithId(R.id.open_button)
+            )
+        )
+
+        // Check if pin successfully opened
+        onView(withId(R.id.multiple_choice_table))
+            .inRoot(isPlatformPopup())
+            .check(matches(isDisplayed()))
+
+        onView(withId(R.id.allpins_recyclerview))
+            .check(matches(not(hasFocus())))
+
+        // Attempt to close pin
+        onView(withId(R.id.popup_window_close_button))
+            .inRoot(isPlatformPopup())
+            .perform(click())
+
+        // Check to see that warning doesn't pops up when no progress is made
+        onView(withText("Closing Pin"))
+            .check(doesNotExist())
+
+        // Check if pin closed
+        onView(withId(R.id.allpins_recyclerview))
+            .check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun pinSorting(){
+        // Open sorting popup
+        onView(withId(R.id.fab))
+            .perform(click())
+
+        // Sort by title
+        onView(withText("Title a-z"))
+            .perform(click())
+
+        // Check if sorting was successful
+        onView(withId(R.id.allpins_recyclerview))
+            .perform()
     }
 }

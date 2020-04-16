@@ -87,12 +87,12 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Quality Checks Matrix
 | Since Version | ID    | What to check                                         | Automated |
 |---------------|-------|-------------------------------------------------------|-----------|
-| 0.4.2         | IC17  | Cancel pin closing when progress is about to be lost  | No
-| 0.4.2         | IC17  | Close pin when no progress is made in quiz            | No
-| 0.4.2         | IC17  | Close pin when progress is made in quiz               | No
-| 0.4.2         | IC17  | Complete multiple choice quiz                         | No
-| 0.4.2         | IC16  | Fail multiple choice quiz                             | No
-| 0.4.2         | IC15  | Open multiple choice quiz                             | No
+| 0.4.2         | IC20  | Cancel pin closing when progress is about to be lost  | Yes
+| 0.4.2         | IC19  | Close pin when no progress is made in quiz            | Yes
+| 0.4.2         | IC18  | Close pin when progress is made in quiz               | Yes
+| 0.4.2         | IC17  | Complete multiple choice quiz                         | Yes
+| 0.4.2         | IC16  | Fail multiple choice quiz                             | Yes
+| 0.4.2         | IC15  | Open multiple choice quiz                             | Yes
 | 0.4.1         | IC14  | Delete fieldbook pin without image                    | No
 | 0.4.1         | IC13  | Delete fieldbook pin with image                       | No
 | 0.4.1         | IC12  | Open fieldbook item, ui scaling                       | No
