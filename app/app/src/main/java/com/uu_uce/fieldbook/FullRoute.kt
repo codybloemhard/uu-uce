@@ -1,6 +1,5 @@
 package com.uu_uce.fieldbook
 
-import android.graphics.Path
 import android.os.Build
 import android.util.JsonReader
 import android.view.View

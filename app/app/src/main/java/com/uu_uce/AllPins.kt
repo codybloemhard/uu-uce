@@ -43,7 +43,7 @@ class AllPins : AppCompatActivity() {
             pins?.let { viewAdapter.setPins(sortList(pins, sharedPref.getInt("selectedOption", 0)), pinViewModel) }
         })
 
-        val filterButton : FloatingActionButton = findViewById<FloatingActionButton>(R.id.fab)
+        val filterButton : FloatingActionButton = findViewById(R.id.fab)
         registerForContextMenu(filterButton)
 
         sharedPref = this.getPreferences(Context.MODE_PRIVATE)

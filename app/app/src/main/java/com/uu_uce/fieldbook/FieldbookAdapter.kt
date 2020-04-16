@@ -20,11 +20,11 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
     class FieldbookViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val parentView = itemView
-        val numberFb = parentView.findViewById<TextView>(R.id.no)
-        val locationFb = parentView.findViewById<TextView>(R.id.pin_coordinates)
-        val datetimeFb = parentView.findViewById<TextView>(R.id.datetime)
-        val textFb = parentView.findViewById<TextView>(R.id.text_preview)
-        val imageFb = parentView.findViewById<ImageView>(R.id.image_preview)
+        val numberFb: TextView = parentView.findViewById(R.id.no)
+        val locationFb: TextView = parentView.findViewById(R.id.pin_coordinates)
+        val datetimeFb: TextView = parentView.findViewById(R.id.datetime)
+        val textFb: TextView = parentView.findViewById(R.id.text_preview)
+        val imageFb: ImageView = parentView.findViewById(R.id.image_preview)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FieldbookViewHolder {
