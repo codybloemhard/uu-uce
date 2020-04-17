@@ -17,9 +17,7 @@ import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.rule.ActivityTestRule
-import com.uu_uce.AllPins
-import com.uu_uce.R
-import com.uu_uce.clickChildViewWithId
+import com.uu_uce.*
 import com.uu_uce.databases.PinData
 import com.uu_uce.databases.PinViewModel
 import org.hamcrest.Description
@@ -443,17 +441,12 @@ class AllPinsTests {
             .perform(click())
 
         // Check if sorting was successful
-        onView(withId(R.id.allpins_recyclerview))
-            .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                0, clickChildViewWithId(R.id.open_button)))
-
-        onView(withId(R.id.popup_window_title))
-            .inRoot(isPlatformPopup())
-            .check(matches(withText("A")))
-
-        onView(withId(R.id.popup_window_close_button))
-            .inRoot(isPlatformPopup())
-            .perform(click())
+        onView(
+            allOf(
+                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
+                withId(R.id.allpins_recyclerview_item_title)
+            )
+        ).check(matches(withText("A")))
 
         // Open sorting popup
         onView(withId(R.id.fab))
@@ -464,16 +457,75 @@ class AllPinsTests {
             .perform(click())
 
         // Check if sorting was successful
-        onView(withId(R.id.allpins_recyclerview))
-            .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                0, clickChildViewWithId(R.id.open_button)))
+        onView(
+            allOf(
+                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
+                withId(R.id.allpins_recyclerview_item_title)
+            )
+        ).check(matches(withText("D")))
 
-        onView(withId(R.id.popup_window_title))
-            .inRoot(isPlatformPopup())
-            .check(matches(withText("D")))
-
-        onView(withId(R.id.popup_window_close_button))
-            .inRoot(isPlatformPopup())
+        // Open sorting popup
+        onView(withId(R.id.fab))
             .perform(click())
+
+        // Sort by type
+        onView(withText("Type a-z"))
+            .perform(click())
+
+        // Check if sorting was successful
+        onView(
+            allOf(
+                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
+                withId(R.id.allpins_recyclerview_item_title)
+            )
+        ).check(matches(withText("B")))
+
+        // Open sorting popup
+        onView(withId(R.id.fab))
+            .perform(click())
+
+        // Sort by type reversed
+        onView(withText("Type z-a"))
+            .perform(click())
+
+        // Check if sorting was successful
+        onView(
+            allOf(
+                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
+                withId(R.id.allpins_recyclerview_item_title)
+            )
+        ).check(matches(withText("C")))
+
+        // Open sorting popup
+        onView(withId(R.id.fab))
+            .perform(click())
+
+        // Sort by difficulty
+        onView(withText("Difficulty easy-hard"))
+            .perform(click())
+
+        // Check if sorting was successful
+        onView(
+            allOf(
+                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
+                withId(R.id.allpins_recyclerview_item_title)
+            )
+        ).check(matches(withText("A")))
+
+        // Open sorting popup
+        onView(withId(R.id.fab))
+            .perform(click())
+
+        // Sort by difficulty reversed
+        onView(withText("Difficulty hard-easy"))
+            .perform(click())
+
+        // Check if sorting was successful
+        onView(
+            allOf(
+                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
+                withId(R.id.allpins_recyclerview_item_title)
+            )
+        ).check(matches(withText("D")))
     }
 }
