@@ -329,4 +329,9 @@ class CustomMap : ViewTouchParent {
         camera.forceChanged()
         invalidate()
     }
+
+    // Functions used for testing
+    fun getPinLocation() : Pair<Float, Float>{
+        return pins[0]!!.getScreenLocation(camera.getViewport(), width, height)
+    }
 }

@@ -312,5 +312,10 @@ class Pin(
     fun getStatus(): Int {
         return status
     }
+
+    // Functions used for testing
+    fun getScreenLocation(viewport: Pair<p2, p2>, width : Int, height : Int) : Pair<Float, Float>{
+        return coordToScreen(coordinate, viewport, width, height)
+    }
 }
 

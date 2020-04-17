@@ -10,6 +10,7 @@ import android.view.MotionEvent
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.uu_uce.databases.PinData
 import com.uu_uce.databases.PinViewModel
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
@@ -181,5 +182,14 @@ class GeoMap : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    // Functions used for testing
+    fun setPinData(newPinData : List<PinData>){
+        pinViewModel.setPins(newPinData)
+    }
+
+    fun getPinLocation() : Pair<Float, Float>{
+        return customMap.getPinLocation()
     }
 }

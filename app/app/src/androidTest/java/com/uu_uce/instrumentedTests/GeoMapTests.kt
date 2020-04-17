@@ -2,7 +2,10 @@ package com.uu_uce.instrumentedTests
 
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -10,17 +13,82 @@ import androidx.test.filters.LargeTest
 import androidx.test.rule.ActivityTestRule
 import com.uu_uce.GeoMap
 import com.uu_uce.R
+import com.uu_uce.databases.PinData
+import com.uu_uce.tap
 import org.hamcrest.Matchers.not
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.lang.Thread.sleep
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class MenuTests {
+class GeoMapTests {
+    private lateinit var pinLocation : Pair<Float, Float>
     @get:Rule
     var activityRule: ActivityTestRule<GeoMap>
             = ActivityTestRule(GeoMap::class.java)
+
+    @Before
+    fun init(){
+        val pinList: MutableList<PinData> = mutableListOf()
+        pinList.add(
+            PinData(
+                0,
+                "31N46777336N3149680E",
+                1,
+                "TEXT",
+                "A",
+                "[{\"tag\":\"TEXT\", \"text\":\"test\"}]",
+                1,
+                "-1",
+                "-1"
+            )
+        )
+        pinList.add(
+            PinData(
+                1,
+                "31N46718336N3133680E",
+                2,
+                "IMAGE",
+                "B",
+                "[{\"tag\":\"IMAGE\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/images/test.png\"}]",
+                1,
+                "-1",
+                "-1"
+            )
+        )
+        pinList.add(
+            PinData(
+                2,
+                "31N46710000N3130000E",
+                3,
+                "VIDEO",
+                "C",
+                "[{\"tag\":\"VIDEO\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/videos/zoo.mp4\", \"thumbnail\":\"file:///data/data/com.uu_uce/files/pin_content/videos/thumbnails/zoothumbnail.png\", \"title\":\"zoo video\"}]",
+                1,
+                "-1",
+                "-1"
+            )
+        )
+        pinList.add(
+            PinData(
+                3,
+                "31N46715335N3134680E",
+                3,
+                "MCQUIZ",
+                "D",
+                "[{\"tag\":\"TEXT\", \"text\":\"Press right or also right\"}, {\"tag\":\"MCQUIZ\", \"mc_correct_option\" : \"Right\", \"mc_incorrect_option\" : \"Wrong\" , \"mc_correct_option\" : \"Also right\", \"mc_incorrect_option\" : \"Also wrong\", \"reward\" : 50}]",
+                1,
+                "-1",
+                "-1"
+            )
+        )
+        activityRule.activity.setPinData(pinList)
+
+        pinLocation = activityRule.activity.getPinLocation()
+    }
 
     @Test
     fun dragButtonClicks() {
@@ -99,5 +167,26 @@ class MenuTests {
         // Check if geomap successfully loaded
         onView(withId(R.id.lower_menu_layout))
             .check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun openPin(){
+        // Tap pin on the map
+        onView(withId(R.id.customMap))
+            .perform(tap(pinLocation.first, pinLocation.second))
+
+        // Check if popup opened successfully
+        onView(withId(R.id.popup_window_view))
+            .inRoot(isPlatformPopup())
+            .check(matches(isDisplayed()))
+
+        // Close pin popup
+        onView(withId(R.id.popup_window_close_button))
+            .inRoot(isPlatformPopup())
+            .perform(click())
+
+        // Check if popup closed
+        onView(withId(R.id.popup_window_view))
+            .check(doesNotExist())
     }
 }

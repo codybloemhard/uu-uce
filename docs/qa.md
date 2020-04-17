@@ -94,13 +94,13 @@ Used by shapefile-linter to save it's custom files for geological data.
 | 0.4.2         | IC16  | Fail multiple choice quiz                             | Yes
 | 0.4.2         | IC15  | Open multiple choice quiz                             | Yes
 | 0.4.1         | IC14  | Delete fieldbook pin without image                    | Yes
-| 0.4.1         | IC13  | Delete fieldbook pin with image                       | No
+| 0.4.1         | IC13  | Delete fieldbook pin with image                       | Yes
 | 0.4.1         | IC12  | Open fieldbook item, ui scaling                       | Yes
-| 0.4.1         | IC11  | Add fieldbook item                                    | No
+| 0.4.1         | IC11  | Add fieldbook item                                    | Yes
 | 0.4.1         | IC10  | Open fieldbook                                        | Yes
 | 0.3.2         | IC9   | Open video via video pin                              | Yes
 | 0.3.2         | IC8   | Open pin via menu                                     | Yes
-| 0.3.1         | IC7   | Pins drawn, click on pin to open popup                | No
+| 0.3.1         | IC7   | Pins drawn, click on pin to open popup                | Yes
 | 0.x.x         | IC6   | Pin list menu, UI scaling                             | Yes
 | 0.x.x         | IC5   | Enable, disable map layers                            | No
 | 0.x.x         | IC4   | Swipe up menu                                         | Yes
