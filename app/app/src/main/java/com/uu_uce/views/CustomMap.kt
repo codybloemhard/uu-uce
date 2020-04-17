@@ -21,7 +21,7 @@ import com.uu_uce.R
 import com.uu_uce.databases.PinConversion
 import com.uu_uce.databases.PinData
 import com.uu_uce.databases.PinViewModel
-import com.uu_uce.FieldBook
+import com.uu_uce.Fieldbook
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawLocation
 import com.uu_uce.mapOverlay.pointDistance
@@ -306,7 +306,7 @@ class CustomMap : ViewTouchParent {
     }
 
     fun startFieldBook() {
-        val i = Intent(context, FieldBook::class.java)
+        val i = Intent(context, Fieldbook::class.java)
         startActivity(context,i,null)
     }
 

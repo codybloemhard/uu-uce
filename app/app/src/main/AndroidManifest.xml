@@ -32,7 +32,7 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity android:name=".FieldBook"/>
+        <activity android:name=".Fieldbook"/>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

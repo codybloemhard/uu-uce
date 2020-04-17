@@ -93,9 +93,9 @@ Used by shapefile-linter to save it's custom files for geological data.
 | 0.4.2         | IC17  | Complete multiple choice quiz                         | Yes
 | 0.4.2         | IC16  | Fail multiple choice quiz                             | Yes
 | 0.4.2         | IC15  | Open multiple choice quiz                             | Yes
-| 0.4.1         | IC14  | Delete fieldbook pin without image                    | No
+| 0.4.1         | IC14  | Delete fieldbook pin without image                    | Yes
 | 0.4.1         | IC13  | Delete fieldbook pin with image                       | No
-| 0.4.1         | IC12  | Open fieldbook item, ui scaling                       | No
+| 0.4.1         | IC12  | Open fieldbook item, ui scaling                       | Yes
 | 0.4.1         | IC11  | Add fieldbook item                                    | No
 | 0.4.1         | IC10  | Open fieldbook                                        | Yes
 | 0.3.2         | IC9   | Open video via video pin                              | Yes

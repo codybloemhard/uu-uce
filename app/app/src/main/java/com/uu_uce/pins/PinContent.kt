@@ -146,6 +146,7 @@ class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
         content.layoutParams = imageLayoutParams
+        content.id = R.id.image_block
 
         layout.addView(content)
     }
