@@ -3,7 +3,6 @@ package com.uu_uce.pins
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.view.Gravity
