@@ -9,10 +9,12 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toFile
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
-import com.uu_uce.pins.*
+import com.uu_uce.pins.ImageContentBlock
+import com.uu_uce.pins.PinContent
+import com.uu_uce.pins.TextContentBlock
+import com.uu_uce.pins.VideoContentBlock
 
 class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookViewModel) : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>() {
 

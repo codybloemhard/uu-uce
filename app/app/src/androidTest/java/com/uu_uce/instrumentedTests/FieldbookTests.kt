@@ -54,7 +54,7 @@ class FieldbookTests {
     fun loadFieldbook(){
         // Check if fieldbook successfully loaded
         onView(withId(R.id.fieldbook_recyclerview))
-            .check(matches(ViewMatchers.isDisplayed()))
+            .check(matches(isDisplayed()))
     }
 
     @Test
