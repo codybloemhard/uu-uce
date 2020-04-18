@@ -32,7 +32,7 @@ class Camera(
     private val maxDistXy = distXy(viewMin, viewMax)
 
     var maxZoom = 1.0
-    private var minZoom = 0.0000000001
+    var minZoom = 0.0000000001
 
     private var lastWoff = 0.0
     private var lastHoff = 0.0

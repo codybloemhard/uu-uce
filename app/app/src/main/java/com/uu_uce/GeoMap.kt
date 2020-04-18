@@ -23,6 +23,7 @@ import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.PolygonReader
 import com.uu_uce.views.DragStatus
 import kotlinx.android.synthetic.main.activity_geo_map.*
+import org.jetbrains.annotations.TestOnly
 import java.io.File
 
 class GeoMap : AppCompatActivity() {
@@ -184,11 +185,12 @@ class GeoMap : AppCompatActivity() {
         }
     }
 
-    // Functions used for testing
+    @TestOnly
     fun setPinData(newPinData : List<PinData>){
         pinViewModel.setPins(newPinData)
     }
 
+    @TestOnly
     fun getPinLocation() : Pair<Float, Float>{
         return customMap.getPinLocation()
     }

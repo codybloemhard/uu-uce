@@ -1,8 +1,8 @@
 package com.uu_uce.instrumentedTests
 
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.doubleClick
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
@@ -11,10 +11,8 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.rule.ActivityTestRule
-import com.uu_uce.GeoMap
-import com.uu_uce.R
+import com.uu_uce.*
 import com.uu_uce.databases.PinData
-import com.uu_uce.tap
 import org.hamcrest.Matchers.not
 import org.junit.Before
 import org.junit.Rule
@@ -94,7 +92,7 @@ class GeoMapTests {
     fun dragButtonClicks() {
         // First click should open the layer toggle buttons
         onView(withId(R.id.dragButton))
-            .perform(ViewActions.click())
+            .perform(click())
 
         onView(withId(R.id.toggle_layer_layout))
             .check(matches(isDisplayed()))
@@ -104,7 +102,7 @@ class GeoMapTests {
 
         // The second click should open the full menu
         onView(withId(R.id.dragButton))
-            .perform(ViewActions.click())
+            .perform(click())
 
         onView(withId(R.id.toggle_layer_layout))
             .check(matches(isDisplayed()))
@@ -114,7 +112,7 @@ class GeoMapTests {
 
         // The final click should close the menu
         onView(withId(R.id.dragButton))
-            .perform(ViewActions.click())
+            .perform(click())
 
         onView(withId(R.id.toggle_layer_layout))
             .check(matches(not(isDisplayed())))
@@ -127,11 +125,11 @@ class GeoMapTests {
     fun allPinsButton(){
         // First click should open the layer toggle buttons
         onView(withId(R.id.dragButton))
-            .perform(ViewActions.click(), ViewActions.click())
+            .perform(click(), click())
 
         // Test switching to all pins
         onView(withId(R.id.allpins_button))
-            .perform(ViewActions.click())
+            .perform(click())
 
         // Check if allpins successfully loaded
         onView(withId(R.id.allpins_recyclerview))
@@ -139,7 +137,7 @@ class GeoMapTests {
 
         // Switch back to geomap
         onView(withId(R.id.toolbar_back_button))
-            .perform(ViewActions.click())
+            .perform(click())
 
         // Check if geomap successfully loaded
         onView(withId(R.id.lower_menu_layout))
@@ -150,11 +148,11 @@ class GeoMapTests {
     fun fieldbookButton(){
         // First click should open the layer toggle buttons
         onView(withId(R.id.dragButton))
-            .perform(ViewActions.click(), ViewActions.click())
+            .perform(click(), click())
 
         // Test switching to all pins
         onView(withId(R.id.fieldbook_button))
-            .perform(ViewActions.click())
+            .perform(click())
 
         // Check if allpins successfully loaded
         onView(withId(R.id.fieldbook_recyclerview))
@@ -162,7 +160,7 @@ class GeoMapTests {
 
         // Switch back to geomap
         onView(withId(R.id.toolbar_back_button))
-            .perform(ViewActions.click())
+            .perform(click())
 
         // Check if geomap successfully loaded
         onView(withId(R.id.lower_menu_layout))
@@ -188,5 +186,68 @@ class GeoMapTests {
         // Check if popup closed
         onView(withId(R.id.popup_window_view))
             .check(doesNotExist())
+    }
+
+    @Test
+    fun toggleLayer(){
+        // First click should open the layer toggle buttons
+        onView(withId(R.id.dragButton))
+            .perform(click())
+
+        onView(withId(R.id.toggle_layer_layout))
+            .check(matches(isDisplayed()))
+
+        // Check whether layer is showing initially
+        onView(withId(R.id.customMap))
+            .check(matches(layerShowing(0)))
+
+        // Toggle layer off
+        onView(childAtPosition(withId(R.id.toggle_layer_scroll), 0))
+            .perform(click())
+
+        // Check to see if layer was disabled
+        onView(withId(R.id.customMap))
+            .check(matches(not(layerShowing(0))))
+
+        // Toggle layer back on
+        onView(childAtPosition(withId(R.id.toggle_layer_scroll), 0))
+            .perform(click())
+
+        // Check whether layer is showing again
+        onView(withId(R.id.customMap))
+            .check(matches(layerShowing(0)))
+    }
+
+    @Test
+    fun centerCamera(){
+        // Wait for location to adjust
+        sleep(500)
+
+        // Click button to center location
+        onView(withId(R.id.center_button))
+            .perform(click())
+
+        // Check if camera is centered
+        onView(withId(R.id.customMap))
+            .check(matches(cameraCentered()))
+    }
+
+    @Test
+    fun zoomOutCamera(){
+        // Zoom in the camera
+        onView(withId(R.id.customMap))
+            .perform(zoomIn())
+
+        // Check if camera is zoomed in
+        onView(withId(R.id.customMap))
+            .check(matches(not(cameraZoomedOut())))
+
+        // Double tap the screen to zoom out
+        onView(withId(R.id.customMap))
+            .perform(doubleClick())
+
+        // Check if camera is zoomed out
+        onView(withId(R.id.customMap))
+            .check(matches(cameraZoomedOut()))
     }
 }

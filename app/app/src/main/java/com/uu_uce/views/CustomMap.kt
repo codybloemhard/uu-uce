@@ -32,6 +32,7 @@ import com.uu_uce.pins.Pin
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
 import com.uu_uce.gestureDetection.*
+import org.jetbrains.annotations.TestOnly
 import java.io.File
 import kotlin.system.measureTimeMillis
 
@@ -330,8 +331,29 @@ class CustomMap : ViewTouchParent {
         invalidate()
     }
 
-    // Functions used for testing
+    @TestOnly
     fun getPinLocation() : Pair<Float, Float>{
         return pins[0]!!.getScreenLocation(camera.getViewport(), width, height)
+    }
+
+    @TestOnly
+    fun checkLayerVisibility(layer : Int) : Boolean {
+        return smap.checkLayerVisibility(layer)
+    }
+
+    @TestOnly
+    fun userLocCentral() : Boolean {
+        val screenLoc = coordToScreen(loc, camera.getViewport(), width, height)
+        return (screenLoc.first.toInt() == width / 2 && screenLoc.second.toInt() == height / 2)
+    }
+
+    @TestOnly
+    fun cameraZoomedOut() : Boolean {
+        return camera.getZoom() == camera.maxZoom
+    }
+
+    @TestOnly
+    fun zoomIn(){
+        camera.setZoom(camera.minZoom)
     }
 }

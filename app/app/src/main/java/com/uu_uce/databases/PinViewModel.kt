@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import org.jetbrains.annotations.TestOnly
 
 class PinViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -32,7 +33,7 @@ class PinViewModel(application: Application) : AndroidViewModel(application) {
             pinRepository.setStatuses(followPids, -1)
     }
 
-    // Used for testing
+    @TestOnly
     fun setPins(newData : List<PinData>) = viewModelScope.launch {
         pinRepository.setPins(newData)
     }

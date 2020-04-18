@@ -21,6 +21,7 @@ import com.uu_uce.misc.Logger
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.shapefiles.p2
 import com.uu_uce.shapefiles.p2Zero
+import org.jetbrains.annotations.TestOnly
 import kotlin.math.roundToInt
 
 
@@ -313,7 +314,7 @@ class Pin(
         return status
     }
 
-    // Functions used for testing
+    @TestOnly
     fun getScreenLocation(viewport: Pair<p2, p2>, width : Int, height : Int) : Pair<Float, Float>{
         return coordToScreen(coordinate, viewport, width, height)
     }

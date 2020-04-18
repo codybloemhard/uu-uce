@@ -102,11 +102,11 @@ Used by shapefile-linter to save it's custom files for geological data.
 | 0.3.2         | IC8   | Open pin via menu                                     | Yes
 | 0.3.1         | IC7   | Pins drawn, click on pin to open popup                | Yes
 | 0.x.x         | IC6   | Pin list menu, UI scaling                             | Yes
-| 0.x.x         | IC5   | Enable, disable map layers                            | No
+| 0.x.x         | IC5   | Enable, disable map layers                            | Yes
 | 0.x.x         | IC4   | Swipe up menu                                         | Yes
 | 0.x.x         | IC3   | Popup window UI scaling, UI scaling in general        | No
-| 0.x.x         | IC2   | Map double tap to zoom out, go to position            | No
-| 0.x.x         | IC1   | Map zooming, scrolling                                | No
+| 0.x.x         | IC2   | Map double tap to zoom out, go to position            | Yes
+| 0.x.x         | IC1   | Map zooming, scrolling                                | Yes
 | 0.x.x         | IC0   | Map LOD                                               | No
 | 0.0.1         |       | None                                                  | -
 ### Detailed Linting Status

@@ -1,6 +1,7 @@
 package com.uu_uce.databases
 
 import androidx.lifecycle.LiveData
+import org.jetbrains.annotations.TestOnly
 
 class PinRepository(private val pinDao : PinDao){
 
@@ -36,7 +37,7 @@ class PinRepository(private val pinDao : PinDao){
         pinDao.setStatuses(pids, value)
     }
 
-    // Used for testing
+    @TestOnly
     suspend fun setPins(newData : List<PinData>) {
         pinDao.updateData(newData)
     }

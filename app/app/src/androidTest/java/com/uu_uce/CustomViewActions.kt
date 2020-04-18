@@ -5,6 +5,7 @@ import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.MotionEvents
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import com.uu_uce.views.CustomMap
 import org.hamcrest.Matcher
 
 
@@ -52,6 +53,26 @@ fun tap(x: Float, y: Float): ViewAction? {
             val down = MotionEvents.sendDown(uiController, coordinates, precision).down
             uiController.loopMainThreadForAtLeast(200)
             MotionEvents.sendUp(uiController, down, coordinates)
+        }
+    }
+}
+
+fun zoomIn() : ViewAction? {
+    return object : ViewAction {
+        override fun getConstraints(): Matcher<View> {
+            return isDisplayed()
+        }
+
+        override fun getDescription(): String {
+            return "Send touch events."
+        }
+
+        override fun perform(
+            uiController: UiController,
+            view: View
+        ) {
+            val customMap = view as CustomMap
+            customMap.zoomIn()
         }
     }
 }
