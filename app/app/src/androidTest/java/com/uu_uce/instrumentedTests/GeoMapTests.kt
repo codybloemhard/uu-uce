@@ -221,7 +221,7 @@ class GeoMapTests {
     @Test
     fun centerCamera(){
         // Wait for location to adjust
-        sleep(500)
+        sleep(1000)
 
         // Click button to center location
         onView(withId(R.id.center_button))
