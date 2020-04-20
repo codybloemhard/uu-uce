@@ -1,10 +1,11 @@
-package com.uu_uce.databases
+package com.uu_uce.database
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
+import com.uu_uce.allpins.PinData
 
 @Dao
 interface PinDao {

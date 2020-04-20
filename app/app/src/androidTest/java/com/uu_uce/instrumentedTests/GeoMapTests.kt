@@ -12,7 +12,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.rule.ActivityTestRule
 import com.uu_uce.*
-import com.uu_uce.databases.PinData
+import com.uu_uce.allpins.PinData
 import org.hamcrest.Matchers.not
 import org.junit.Before
 import org.junit.Rule

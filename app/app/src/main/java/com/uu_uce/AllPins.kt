@@ -12,8 +12,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.allpins.PinListAdapter
-import com.uu_uce.databases.PinData
-import com.uu_uce.databases.PinViewModel
+import com.uu_uce.allpins.PinData
+import com.uu_uce.allpins.PinViewModel
+
 import com.uu_uce.ui.createTopbar
 
 class AllPins : AppCompatActivity() {
