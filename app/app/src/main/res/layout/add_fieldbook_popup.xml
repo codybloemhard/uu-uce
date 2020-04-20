@@ -9,7 +9,8 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/add_fieldbook_pin_popup"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:maxHeight="600dp"
         app:cardBackgroundColor="@color/colorUU"
         app:cardCornerRadius="8dp"
         app:cardElevation="10dp"
@@ -18,9 +19,9 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_margin="5dp"
             android:background="#FFFFFF"
             android:orientation="vertical"
@@ -28,22 +29,31 @@
 
             <EditText
                 android:id="@+id/add_title"
-                android:inputType="text"
-                android:maxLines="1"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginBottom="10dp"
-                android:ems="16"
-                android:gravity="start|top"
-                android:hint="@string/fieldbook_textfield_hint"
-                android:importantForAutofill="no" />
-
-            <ScrollView
-                android:id="@+id/fieldbook_content_blocks"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:maxHeight="400dp"
-                android:orientation="vertical">
+                android:ems="16"
+                android:hint="@string/fieldbook_textfield_hint"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:maxLines="1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toTopOf="@id/button_container"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/add_title">
+
+                <LinearLayout
+                    android:id="@+id/fieldbook_content_blocks"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
 
                 <!--
                 <ImageView
@@ -59,9 +69,13 @@
             </ScrollView>
 
             <LinearLayout
+                android:id="@+id/button_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal" >
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toTopOf="@id/add_fieldbook_pin"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
 
                 <ImageButton
                     android:id="@+id/add_text_block"
@@ -94,7 +108,8 @@
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="end"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 android:minWidth="64dp"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
@@ -105,7 +120,7 @@
                 android:textStyle="bold" />
 
 
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

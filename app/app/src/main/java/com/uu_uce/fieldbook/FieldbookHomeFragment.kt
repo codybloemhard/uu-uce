@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.location.Location
-import android.media.Image
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -30,6 +29,7 @@ import com.uu_uce.R
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.pins.BlockTag
+import com.uu_uce.pins.ContentBlockInterface
 import com.uu_uce.services.*
 import java.io.File
 import java.io.FileOutputStream
@@ -47,14 +47,29 @@ private const val ARG_PARAM2 = "param2"
  */
 class FieldbookHomeFragment : Fragment() {
 
-    private lateinit var viewModel: FieldbookViewModel
+    companion object {
+        /**
+         * Use this factory method to create a new instance of
+         * this fragment using the provided parameters.
+         */
+        fun newInstance() =
+            FieldbookHomeFragment()
 
-    private lateinit var imageView: ImageView
+        val layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+    }
+
+    private lateinit var viewModel: FieldbookViewModel
+    private lateinit var fragmentActivity: FragmentActivity
+
+    private lateinit var layout: LinearLayout
     private lateinit var title: EditText
 
     private var imageUri = ""
 
-    private lateinit var fragmentActivity: FragmentActivity
+    private var content: MutableList<ContentBlockInterface> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,15 +104,6 @@ class FieldbookHomeFragment : Fragment() {
         }
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         */
-        fun newInstance() =
-            FieldbookHomeFragment()
-    }
-
     private fun openFieldbookAdderPopup() {
         imageUri = ""
 
@@ -112,13 +118,24 @@ class FieldbookHomeFragment : Fragment() {
 
         title = customView.findViewById(R.id.add_title)
 
-        val textButton = customView.findViewById<ImageButton>(R.id.add_text_block)
-        val imageButton = customView.findViewById<ImageButton>(R.id.add_image_block)
-        val videoButton = customView.findViewById<ImageButton>(R.id.add_video_block)
+        layout = customView.findViewById(R.id.fieldbook_content_blocks)
 
-        imageButton.setOnClickListener {
-            addImage(customView)
-            selectImage(fragmentActivity)
+        customView.findViewById<ImageButton>(R.id.add_text_block).also{
+            it.setOnClickListener {
+                addText()
+            }
+        }
+
+        customView.findViewById<ImageButton>(R.id.add_image_block).also{
+            it.setOnClickListener {
+                selectImage()
+            }
+        }
+
+        customView.findViewById<ImageButton>(R.id.add_video_block).also{
+            it.setOnClickListener {
+                addVideo()
+            }
         }
 
         var location : Location? = null
@@ -142,42 +159,44 @@ class FieldbookHomeFragment : Fragment() {
         }
     }
 
-    private fun addImage(v: View) {
-        val scrollView = v.findViewById<ScrollView>(R.id.fieldbook_content_blocks)
-        imageView = ImageView(requireContext())
-        val layoutParams = RelativeLayout.LayoutParams(
-            RelativeLayout.LayoutParams.MATCH_PARENT,
-            RelativeLayout.LayoutParams.WRAP_CONTENT
-        )
-        scrollView.addView(imageView,layoutParams)
-        selectImage(requireContext())
+    private fun addText() {
+        //TODO
+        val text = EditText(requireContext())
+        layout.addView(text, layoutParams)
     }
 
-    private fun selectImage(context: Context) {
+    private fun addImage(uri: Uri) {
+        val imageView = ImageView(requireContext())
+        layout.addView(imageView,layoutParams)
+        imageView.setImageURI(uri)
+        //TODO: BUILD CONTENTBLOCK AND ADD TO CONTENT
+    }
 
-        val options = arrayOf("Take Photo", "Choose from gallery", " Cancel")
+    private fun selectImage() {
 
-        val dialog = AlertDialog.Builder(context)
+        val options = arrayOf("Choose from gallery", "Take Photo", " Cancel")
+
+        val dialog = AlertDialog.Builder(requireContext())
         dialog.setTitle("Upload an image")
 
         dialog.setItems(options) { dialogInterface, which ->
 
             when (which) {
                 0 -> {
-                    getPermissions(fragmentActivity, listOf(Manifest.permission.CAMERA), CAMERA_REQUEST)
-                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || fragmentActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                        startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), 0)
-                    }
-                }
-                1 -> {
                     getPermissions(fragmentActivity, listOf(Manifest.permission.READ_EXTERNAL_STORAGE), CAMERA_REQUEST)
                     if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || fragmentActivity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
                         startActivityForResult(
                             Intent(
                                 Intent.ACTION_PICK,
                                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                            ), 1
+                            ), 0
                         )
+                    }
+                }
+                1 -> {
+                    getPermissions(fragmentActivity, listOf(Manifest.permission.CAMERA), CAMERA_REQUEST)
+                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || fragmentActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                        startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), 1)
                     }
                 }
                 2 -> dialogInterface.dismiss()
@@ -193,20 +212,34 @@ class FieldbookHomeFragment : Fragment() {
     ) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && data != null) {
-            when (requestCode) {
-                0 -> {
-                    val bitmap = data.extras?.get("data") as Bitmap
-                    imageView.setImageBitmap(bitmap)
-                    imageUri = saveBitmapToLocation(bitmap)
+
+            saveBitmapToLocation(
+                when (requestCode) {
+                    0 -> { // Choose from gallery
+                        val uri = data.data
+                        uri?.let { getImageFromGallery(it) }!!
+
+                    }
+                    else -> { // Take photo
+                        //TODO: this is just a thumbnail... get full size picture
+                        data.extras?.get("data") as Bitmap
+                    }
                 }
-                1 -> { //TODO: this is just a thumbnail... get full size picture
-                    val uri = data.data
-                    imageView.setImageURI(uri)
-                    if (uri != null)
-                        imageUri = moveImageFromGallery(uri)
-                }
+            ).also {
+                addImage(it)
             }
+
+        } else if (resultCode == Activity.RESULT_CANCELED) {
+            TODO()
         }
+    }
+
+    private fun addVideo() {
+        //TODO
+    }
+
+    fun createContentBlock() {
+
     }
 
     private fun saveFieldbookEntry(
@@ -250,7 +283,7 @@ class FieldbookHomeFragment : Fragment() {
         }
     }
 
-    private fun saveBitmapToLocation(image: Bitmap): String {
+    private fun saveBitmapToLocation(image: Bitmap): Uri {
         val file = imageLocation()
 
         FileOutputStream(imageLocation()).also{
@@ -260,15 +293,13 @@ class FieldbookHomeFragment : Fragment() {
             close()
         }
 
-        return file.toUri().toString()
+        return file.toUri()
     }
 
-    private fun moveImageFromGallery(currentLocation: Uri): String {
-        return saveBitmapToLocation(
-            BitmapFactory.decodeStream(
-                fragmentActivity.contentResolver.openInputStream(
-                    currentLocation
-                )
+    private fun getImageFromGallery(currentLocation: Uri): Bitmap {
+        return BitmapFactory.decodeStream(
+            fragmentActivity.contentResolver.openInputStream(
+                currentLocation
             )
         )
     }
