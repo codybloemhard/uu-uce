@@ -13,7 +13,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
-import com.uu_uce.databases.PinViewModel
+import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
@@ -25,7 +25,7 @@ import kotlin.math.roundToInt
 
 
 class Pin(
-    val id : Int,
+    var id : Int = 0,
     private var coordinate      : UTMCoordinate,
     private var title           : String,
     private var content         : PinContent,

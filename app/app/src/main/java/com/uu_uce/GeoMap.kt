@@ -10,8 +10,8 @@ import android.view.MotionEvent
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import com.uu_uce.databases.PinData
-import com.uu_uce.databases.PinViewModel
+import com.uu_uce.allpins.PinData
+import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.services.*
@@ -61,7 +61,7 @@ class GeoMap : AppCompatActivity() {
 
         // Start database and get pins from database
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
-        this.customMap.setViewModel(pinViewModel)
+        this.customMap.setPinViewModel(pinViewModel)
         this.customMap.setLifeCycleOwner(this)
         this.customMap.setPins(pinViewModel.allPinData)
 

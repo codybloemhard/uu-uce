@@ -18,15 +18,15 @@ import com.uu_uce.pins.VideoContentBlock
 
 class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookViewModel) : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>() {
 
-    private var fieldbook: MutableList<FieldbookEntry> = mutableListOf()
+    private var fieldbook: List<FieldbookEntry> = emptyList()
 
     class FieldbookViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val parentView = itemView
-        val numberFb: TextView? = parentView.findViewById(R.id.no)
-        val locationFb: TextView? = parentView.findViewById(R.id.pin_coordinates)
-        val datetimeFb: TextView? = parentView.findViewById(R.id.datetime)
-        val textFb: TextView? = parentView.findViewById(R.id.text_preview)
-        val imageFb: ImageView? = parentView.findViewById(R.id.image_preview)
+        val numberFb: TextView = parentView.findViewById(R.id.no)
+        val locationFb: TextView = parentView.findViewById(R.id.pin_coordinates)
+        val datetimeFb: TextView = parentView.findViewById(R.id.datetime)
+        val textFb: TextView = parentView.findViewById(R.id.text_preview)
+        val imageFb: ImageView = parentView.findViewById(R.id.image_preview)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FieldbookViewHolder {
@@ -40,9 +40,9 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
     override fun onBindViewHolder(holder: FieldbookViewHolder, position: Int) {
         val entry : FieldbookEntry = fieldbook[position]
-        holder.numberFb?.text = addLeadingZeros(entry.id)
-        holder.locationFb?.text = entry.location
-        holder.datetimeFb?.text = entry.dateTime
+        holder.numberFb.text = addLeadingZeros(entry.id)
+        holder.locationFb.text = entry.location
+        holder.datetimeFb.text = entry.dateTime
 
         val content = PinContent(entry.content)
 
@@ -58,17 +58,17 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
             if (cB is TextContentBlock && !displayingText) {
                 displayingText = true
-                holder.textFb?.text = cB.getTextContent()
+                holder.textFb.text = cB.getTextContent()
             } else if (!displayingImage) {
                 displayingImage = true
 
                 if (cB is ImageContentBlock) {
                     uri = cB.getImageURI()
-                    holder.imageFb?.setImageURI(uri)
+                    holder.imageFb.setImageURI(uri)
                 }
                 if (cB is VideoContentBlock) {
                     uri = cB.getThumbnailURI()
-                    holder.imageFb?.setImageURI(uri)
+                    holder.imageFb.setImageURI(uri)
                 }
             }
         }
@@ -117,6 +117,7 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
         holder.parentView.setOnLongClickListener(
             View.OnLongClickListener(
                 fun (_): Boolean {
+                    println(uri)
                     AlertDialog.Builder(activity)
                         .setTitle("Delete")
                         .setMessage("Are you sure you want to delete this entry?")
@@ -134,7 +135,7 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
         )
     }
 
-    fun setFieldbook(fieldbook: MutableList<FieldbookEntry>) {
+    fun setFieldbook(fieldbook: List<FieldbookEntry>) {
         this.fieldbook = fieldbook
         notifyDataSetChanged()
     }

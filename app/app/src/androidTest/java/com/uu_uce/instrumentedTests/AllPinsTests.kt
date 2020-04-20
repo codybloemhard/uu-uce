@@ -17,10 +17,10 @@ import androidx.test.filters.LargeTest
 import androidx.test.rule.ActivityTestRule
 import com.uu_uce.AllPins
 import com.uu_uce.R
+import com.uu_uce.allpins.PinData
+import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.childAtPosition
 import com.uu_uce.clickChildViewWithId
-import com.uu_uce.databases.PinData
-import com.uu_uce.databases.PinViewModel
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.not
 import org.junit.Before
