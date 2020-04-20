@@ -2,21 +2,24 @@ package com.uu_uce
 
 import android.Manifest
 import android.os.Bundle
+import android.widget.EditText
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.uu_uce.fieldbook.*
+import com.uu_uce.fieldbook.FieldbookHomeFragment
+import com.uu_uce.fieldbook.FieldbookPinmapFragment
+import com.uu_uce.fieldbook.FieldbookRouteFragment
+import com.uu_uce.fieldbook.FieldbookViewModel
 import com.uu_uce.ui.createTopbar
 
-class FieldBook : AppCompatActivity() {
+
+class Fieldbook : AppCompatActivity() {
+
+    lateinit var text: EditText
 
     companion object {
-        var permissionsNeeded = listOf(
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.CAMERA
-        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,14 +32,11 @@ class FieldBook : AppCompatActivity() {
 
         openFragment(FieldbookHomeFragment.newInstance())
 
-        val fieldbookViewModel = ViewModelProvider(this).get(FieldbookViewModel::class.java)
-
         // set listeners
-
         bottomNavigation.setOnNavigationItemSelectedListener(
             BottomNavigationView.OnNavigationItemSelectedListener(
                 fun(m): Boolean {
-                    when(m.itemId) {
+                    when (m.itemId) {
                         R.id.fieldbook_navigation_home -> {
                             openFragment(FieldbookHomeFragment.newInstance())
                             return true
@@ -46,7 +46,7 @@ class FieldBook : AppCompatActivity() {
                             return true
                         }
                         R.id.fieldbook_navigation_route -> {
-                            openFragment(FieldbookRouteFragment.newInstance("",""))
+                            openFragment(FieldbookRouteFragment.newInstance("", ""))
                             return true
                         }
                     }

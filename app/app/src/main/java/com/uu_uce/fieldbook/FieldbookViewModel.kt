@@ -26,4 +26,8 @@ class FieldbookViewModel(application: Application): AndroidViewModel(application
     fun delete (fieldbookEntry: FieldbookEntry) = viewModelScope.launch {
         fieldbookRepository.delete(fieldbookEntry)
     }
+
+    fun deleteAll() = viewModelScope.launch {
+        fieldbookRepository.deleteAll()
+    }
 }

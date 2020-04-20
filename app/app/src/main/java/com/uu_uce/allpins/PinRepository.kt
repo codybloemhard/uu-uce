@@ -2,6 +2,7 @@ package com.uu_uce.allpins
 
 import androidx.lifecycle.LiveData
 import com.uu_uce.database.PinDao
+import org.jetbrains.annotations.TestOnly
 
 class PinRepository(private val pinDao : PinDao){
 
@@ -35,5 +36,10 @@ class PinRepository(private val pinDao : PinDao){
 
     suspend fun setStatuses(pids : List<Int>, value : Int){
         pinDao.setStatuses(pids, value)
+    }
+
+    @TestOnly
+    suspend fun setPins(newData : List<PinData>) {
+        pinDao.updateData(newData)
     }
 }

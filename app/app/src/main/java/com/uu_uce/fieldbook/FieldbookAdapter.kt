@@ -9,10 +9,12 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toFile
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
-import com.uu_uce.pins.*
+import com.uu_uce.pins.ImageContentBlock
+import com.uu_uce.pins.PinContent
+import com.uu_uce.pins.TextContentBlock
+import com.uu_uce.pins.VideoContentBlock
 
 class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookViewModel) : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>() {
 
@@ -85,10 +87,6 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
                         ViewGroup.LayoutParams.MATCH_PARENT
                     )
 
-                    customView.findViewById<CheckBox>(R.id.complete_box).isEnabled = false
-                    customView.findViewById<CheckBox>(R.id.complete_box).isVisible = false
-                    customView.findViewById<CheckBox>(R.id.complete_box).isClickable = false
-
                     // Add the title for the popup window
                     val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
                     windowTitle.text = entry.location
@@ -125,8 +123,7 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
                         .setMessage("Are you sure you want to delete this entry?")
                         .setPositiveButton("YES") { _: DialogInterface, _: Int ->
                             viewModel.delete(entry)
-                            if (uri != Uri.EMPTY)
-                                uri.toFile().delete()
+                            if (uri != Uri.EMPTY) uri.toFile().delete()
                         }
                         .setNegativeButton("NO") { _: DialogInterface, _: Int ->
 

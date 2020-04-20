@@ -29,6 +29,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.R
+import com.uu_uce.misc.LogType
+import com.uu_uce.misc.Logger
 import com.uu_uce.pins.BlockTag
 import com.uu_uce.services.*
 import java.io.File
@@ -118,13 +120,22 @@ class FieldbookHomeFragment : Fragment() {
             selectImage(fragmentActivity)
         }
 
-        val savePinButton = customView.findViewById<Button>(R.id.close_fieldbook_popup)
+        var location : Location? = null
+
+        try{
+            location = LocationServices.lastKnownLocation
+        }
+        catch(e : Exception){
+            Logger.log(LogType.Event, "Fielbook", "No last known location")
+        }
+
+        val savePinButton = customView.findViewById<Button>(R.id.add_fieldbook_pin)
         savePinButton.setOnClickListener{
             saveFieldbookEntry(
                 text.text.toString(),
                 imageUri,
                 getCurrentDateTime(DateTimeFormat.FIELDBOOK_ENTRY),
-                LocationServices.lastKnownLocation
+                location
             )
             popupWindow.dismiss()
         }
@@ -190,7 +201,7 @@ class FieldbookHomeFragment : Fragment() {
         text: String,
         image: String,
         currentDate: String,
-        location: Location
+        location: Location?
     ) {
         val content = listOf(
             Pair(
@@ -203,8 +214,15 @@ class FieldbookHomeFragment : Fragment() {
             )
         )
 
+        val utm = if(location == null){
+            UTMCoordinate(0, 'N', 0.0, 0.0).toString()
+        }
+        else{
+            degreeToUTM(Pair(location.latitude,location.longitude)).toString()
+        }
+
         FieldbookEntry(
-            degreeToUTM(Pair(location.latitude,location.longitude)).toString(),
+            utm,
             currentDate,
             buildJSONContent(content).also{ jsonString ->
                 // added for debugging purposes

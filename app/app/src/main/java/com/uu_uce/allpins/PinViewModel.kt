@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.uu_uce.database.UceRoomDatabase
 import kotlinx.coroutines.launch
+import org.jetbrains.annotations.TestOnly
 
 class PinViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -34,5 +35,10 @@ class PinViewModel(application: Application) : AndroidViewModel(application) {
         pinRepository.setStatus(pid, 2)
         if(followPids[0] != -1)
             pinRepository.setStatuses(followPids, -1)
+    }
+
+    @TestOnly
+    fun setPins(newData : List<PinData>) = viewModelScope.launch {
+        pinRepository.setPins(newData)
     }
 }

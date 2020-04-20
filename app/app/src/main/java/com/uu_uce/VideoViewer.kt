@@ -49,16 +49,17 @@ class VideoViewer : Activity() {
             }
         }
 
-        videoPlayer.setMediaController(mediaController)
-        mediaController.setAnchorView(findViewById(R.id.video_player))
-
-        videoPlayer.setOnPreparedListener {
+        videoPlayer.setOnPreparedListener { mp ->
+            mp.setOnVideoSizeChangedListener { _, _, _ ->
+                videoPlayer.setMediaController(mediaController)
+                mediaController.setAnchorView(videoPlayer)
+            }
             if(savedInstanceState != null){
                 val videoPos = savedInstanceState.getInt("prevVideoPos")
                 videoPlayer.seekTo(videoPos)
             }
             videoPlayer.start()
-            mediaController.show(0)
+            mediaController.show()
         }
 
         val closeVideoButton = findViewById<Button>(R.id.close_video_player)

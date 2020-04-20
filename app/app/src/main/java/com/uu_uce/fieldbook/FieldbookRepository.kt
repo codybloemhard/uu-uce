@@ -14,4 +14,8 @@ class FieldbookRepository(private val fieldbookDao: FieldbookDao) {
     suspend fun delete(fieldbookEntry: FieldbookEntry) {
         fieldbookDao.delete(fieldbookEntry)
     }
+
+    suspend fun deleteAll(){
+        fieldbookDao.deleteAll()
+    }
 }
