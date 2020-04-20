@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.location.Location
+import android.media.Image
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -17,10 +18,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.PopupWindow
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
@@ -52,7 +50,7 @@ class FieldbookHomeFragment : Fragment() {
     private lateinit var viewModel: FieldbookViewModel
 
     private lateinit var imageView: ImageView
-    private lateinit var text: EditText
+    private lateinit var title: EditText
 
     private var imageUri = ""
 
@@ -112,11 +110,14 @@ class FieldbookHomeFragment : Fragment() {
         popupWindow.isFocusable = true
         popupWindow.update()
 
-        text = customView.findViewById(R.id.addText)
+        title = customView.findViewById(R.id.add_title)
 
-        imageView = customView.findViewById(R.id.addImage)
+        val textButton = customView.findViewById<ImageButton>(R.id.add_text_block)
+        val imageButton = customView.findViewById<ImageButton>(R.id.add_image_block)
+        val videoButton = customView.findViewById<ImageButton>(R.id.add_video_block)
 
-        imageView.setOnClickListener {
+        imageButton.setOnClickListener {
+            addImage(customView)
             selectImage(fragmentActivity)
         }
 
@@ -125,20 +126,31 @@ class FieldbookHomeFragment : Fragment() {
         try{
             location = LocationServices.lastKnownLocation
         }
-        catch(e : Exception){
+        catch(e : Exception) {
             Logger.log(LogType.Event, "Fielbook", "No last known location")
         }
 
         val savePinButton = customView.findViewById<Button>(R.id.add_fieldbook_pin)
         savePinButton.setOnClickListener{
             saveFieldbookEntry(
-                text.text.toString(),
+                title.text.toString(),
                 imageUri,
                 getCurrentDateTime(DateTimeFormat.FIELDBOOK_ENTRY),
                 location
             )
             popupWindow.dismiss()
         }
+    }
+
+    private fun addImage(v: View) {
+        val scrollView = v.findViewById<ScrollView>(R.id.fieldbook_content_blocks)
+        imageView = ImageView(requireContext())
+        val layoutParams = RelativeLayout.LayoutParams(
+            RelativeLayout.LayoutParams.MATCH_PARENT,
+            RelativeLayout.LayoutParams.WRAP_CONTENT
+        )
+        scrollView.addView(imageView,layoutParams)
+        selectImage(requireContext())
     }
 
     private fun selectImage(context: Context) {
@@ -198,7 +210,7 @@ class FieldbookHomeFragment : Fragment() {
     }
 
     private fun saveFieldbookEntry(
-        text: String,
+        title: String,
         image: String,
         currentDate: String,
         location: Location?
@@ -206,7 +218,7 @@ class FieldbookHomeFragment : Fragment() {
         val content = listOf(
             Pair(
                 BlockTag.TEXT,
-                text
+                title
             ),
             Pair(
                 BlockTag.IMAGE,
@@ -322,7 +334,6 @@ class FieldbookHomeFragment : Fragment() {
                         ), 1
                     )
                 }
-
             }
         }
     }

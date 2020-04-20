@@ -44,7 +44,7 @@
     <string name="fieldbook_image_preview">Picture Preview</string>
     <string name="menu_bar_backbutton_description">Back Button</string>
     <string name="menubar_placeholder_text">Menu Item</string>
-    <string name="fieldbook_textfield_hint">Enter your text here</string>
+    <string name="fieldbook_textfield_hint">Enter your title here</string>
     <string name="menu_allpins_button_text">Pins</string>
     <string name="menu_fieldbook_button_text">My fieldbook</string>
 </resources>
