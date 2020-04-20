@@ -65,7 +65,7 @@ class FieldbookHomeFragment : Fragment() {
 
         viewModel = fragmentActivity.run {
             ViewModelProvider(this)[FieldbookViewModel::class.java]
-        } ?: throw Exception("Invalid Activity")
+        }
     }
 
     override fun onCreateView(

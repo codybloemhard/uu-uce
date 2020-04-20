@@ -1,17 +1,13 @@
 package com.uu_uce
 
-import android.Manifest
 import android.os.Bundle
 import android.widget.EditText
-import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.uu_uce.fieldbook.FieldbookHomeFragment
 import com.uu_uce.fieldbook.FieldbookPinmapFragment
 import com.uu_uce.fieldbook.FieldbookRouteFragment
-import com.uu_uce.fieldbook.FieldbookViewModel
 import com.uu_uce.ui.createTopbar
 
 
@@ -19,8 +15,7 @@ class Fieldbook : AppCompatActivity() {
 
     lateinit var text: EditText
 
-    companion object {
-    }
+    companion object;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
