@@ -29,27 +29,40 @@ class Pin(
     private var coordinate      : UTMCoordinate,
     private var title           : String,
     private var content         : PinContent,
-    private var image           : Drawable,
+    private var background      : Drawable,
+    private var icon            : Drawable,
     private var status          : Int,              //-1 : recalculating, 0 : locked, 1 : unlocked, 2 : completed
     private var predecessorIds  : List<Int>,
     private var followIds       : List<Int>,
     private val viewModel       : PinViewModel
 ) {
-    init {
-        predecessorIds.map { I ->
-            if (I == id) error("Pin can not be own predecessor")
-        }
-    }
-
     // Used to determine if warning should show when closing pin
     private var madeProgress = false
 
-    private val pinWidth = 60 // TODO: set this in settings somewhere
+    private val pinWidth = 70 // TODO: set this in settings somewhere
 
     // Calculate pin height to maintain aspect ratio
     private val pinHeight =
-        pinWidth * (image.intrinsicHeight.toFloat() / image.intrinsicWidth.toFloat())
+        pinWidth * (background.intrinsicHeight.toFloat() / background.intrinsicWidth.toFloat())
 
+    private var iconWidth  : Double = 0.0
+    private var iconHeight : Double = 0.0
+
+    init {
+        predecessorIds.forEach { I ->
+            if (I == id) error("Pin can not be own predecessor")
+        }
+
+        // Calculate icon measurements
+        if(icon.intrinsicHeight > icon.intrinsicWidth){
+            iconHeight = pinHeight * 0.5
+            iconWidth = iconHeight * (icon.intrinsicWidth.toFloat() / icon.intrinsicHeight.toFloat())
+        }
+        else{
+            iconWidth = pinWidth * 0.55
+            iconHeight = iconWidth * (icon.intrinsicHeight.toFloat() / icon.intrinsicWidth.toFloat())
+        }
+    }
 
     // Initialize variables used in checking for clicks
     var inScreen: Boolean = true
@@ -94,8 +107,13 @@ class Pin(
         // Set boundingbox for pin tapping
         boundingBox = Pair(p2(minX.toDouble(), minY.toDouble()), p2(maxX.toDouble(), maxY.toDouble()))
 
-        image.setBounds(minX, minY, maxX, maxY)
-        image.draw(canvas)
+        background.setBounds(minX, minY, maxX, maxY)
+        background.draw(canvas)
+
+        val iconX = minX + pinWidth  * 0.5
+        val iconY = minY + pinHeight * 0.4
+        icon.setBounds((iconX - iconWidth / 2).toInt(), (iconY - iconHeight / 2).toInt(), (iconX + iconWidth / 2).toInt(), (iconY + iconHeight / 2).toInt())
+        icon.draw(canvas)
     }
 
     // Check if pin should be unlocked
@@ -179,7 +197,7 @@ class Pin(
         btnClosePopupWindow.setOnClickListener {
             if(madeProgress){
                 AlertDialog.Builder(activity)
-                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setIcon(R.drawable.ic_sprite_warning)
                     .setTitle("Closing Pin")
                     .setMessage("Are you sure you want to close pin? All progress will be lost.")
                     .setPositiveButton("Yes") { _, _ -> popupWindow?.dismiss() }
