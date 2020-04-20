@@ -111,6 +111,7 @@ class GeoMap : AppCompatActivity() {
         center_button.setOnClickListener{
             if(customMap.locationAvailable){
                 customMap.zoomToDevice()
+                customMap.setCenterPos()
             }
             else{
                 Toast.makeText(this, "Location not avaiable", Toast.LENGTH_LONG).show()
