@@ -82,7 +82,6 @@ abstract class UceRoomDatabase : RoomDatabase() {
                     "2"
                 )
             )
-
             pinDao.updateData(pinList)
         }
     }

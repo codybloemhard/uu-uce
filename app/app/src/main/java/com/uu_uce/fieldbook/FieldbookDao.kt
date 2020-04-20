@@ -14,4 +14,7 @@ interface FieldbookDao {
 
     @Delete
     suspend fun delete(entry: FieldbookEntry)
+
+    @Query("DELETE from fieldbook")
+    suspend fun deleteAll()
 }

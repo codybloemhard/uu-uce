@@ -22,7 +22,7 @@ import com.uu_uce.R
 import com.uu_uce.databases.PinConversion
 import com.uu_uce.databases.PinData
 import com.uu_uce.databases.PinViewModel
-import com.uu_uce.FieldBook
+import com.uu_uce.Fieldbook
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawLocation
 import com.uu_uce.mapOverlay.pointDistance
@@ -33,6 +33,7 @@ import com.uu_uce.pins.Pin
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
 import com.uu_uce.gestureDetection.*
+import org.jetbrains.annotations.TestOnly
 import java.io.File
 import kotlin.system.measureTimeMillis
 
@@ -271,7 +272,7 @@ class CustomMap : ViewTouchParent {
             val pin = entry.second
             if(!pin.inScreen || pin.getStatus() < 1) continue
             if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, pinTapBufferSize)){
-                pin.openPinPopupWindow(this, activity) {activePopup = null}
+                pin.openContent(this, activity) {activePopup = null}
                 activePopup = pin.popupWindow
                 Logger.log(LogType.Info, "CustomMap", "${pin.getTitle()}: I have been tapped.")
                 return
@@ -297,7 +298,7 @@ class CustomMap : ViewTouchParent {
     }
 
     fun startFieldBook() {
-        val i = Intent(context, FieldBook::class.java)
+        val i = Intent(context, Fieldbook::class.java)
         startActivity(context,i,null)
     }
 
@@ -319,5 +320,31 @@ class CustomMap : ViewTouchParent {
     fun redrawMap(){
         camera.forceChanged()
         invalidate()
+    }
+
+    @TestOnly
+    fun getPinLocation() : Pair<Float, Float>{
+        return pins[0]!!.getScreenLocation(camera.getViewport(), width, height)
+    }
+
+    @TestOnly
+    fun checkLayerVisibility(layer : Int) : Boolean {
+        return smap.checkLayerVisibility(layer)
+    }
+
+    @TestOnly
+    fun userLocCentral() : Boolean {
+        val screenLoc = coordToScreen(loc, camera.getViewport(), width, height)
+        return (screenLoc.first.toInt() == width / 2 && screenLoc.second.toInt() == height / 2)
+    }
+
+    @TestOnly
+    fun cameraZoomedOut() : Boolean {
+        return camera.getZoom() == camera.maxZoom
+    }
+
+    @TestOnly
+    fun zoomIn(){
+        camera.setZoom(camera.minZoom)
     }
 }

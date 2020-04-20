@@ -30,6 +30,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.fieldbook.FieldbookAdapter
 import com.uu_uce.fieldbook.FieldbookEntry
 import com.uu_uce.fieldbook.FieldbookViewModel
+import com.uu_uce.misc.LogType
+import com.uu_uce.misc.Logger
 import com.uu_uce.pins.BlockTag
 import com.uu_uce.services.*
 import com.uu_uce.ui.createTopbar
@@ -38,7 +40,14 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
-class FieldBook : AppCompatActivity() {
+class Fieldbook : AppCompatActivity() {
+
+    private var permissionsNeeded = listOf(
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        Manifest.permission.CAMERA
+    )
+
     private lateinit var imageView: ImageView
     lateinit var text: EditText
 
@@ -93,16 +102,24 @@ class FieldBook : AppCompatActivity() {
             selectImage(this)
         }
 
-        val savePinButton = customView.findViewById<Button>(R.id.close_fieldbook_popup)
-        savePinButton.setOnClickListener {
+        val closePopup = customView.findViewById<Button>(R.id.add_fieldbook_pin)
+        closePopup.setOnClickListener{
             //val sdf = DateFormat.getDateTimeInstance()
+
+            var location : Location? = null
+
+            try{
+                location = LocationServices.lastKnownLocation
+            }
+            catch(e : Exception){
+                Logger.log(LogType.Event, "Fielbook", "No last known location")
+            }
 
             saveFieldbookEntry(
                 text.text.toString(),
                 imageUri,
                 getCurrentDateTime(DateTimeFormat.FIELDBOOK_ENTRY),
-                LocationServices.lastKnownLocation
-            )
+                location)
             popupWindow.dismiss()
         }
     }
@@ -147,12 +164,12 @@ class FieldBook : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && data != null) {
             when (requestCode) {
-                0 -> {
+                0 -> {//TODO: this is just a thumbnail... get full size picture
                     val bitmap = data.extras?.get("data") as Bitmap
                     imageView.setImageBitmap(bitmap)
                     imageUri = saveBitmapToLocation(bitmap)
                 }
-                1 -> { //TODO: this is just a thumbnail... get full size picture
+                1 -> {
                     val uri = data.data
                     imageView.setImageURI(uri)
                     if (uri != null)
@@ -166,7 +183,7 @@ class FieldBook : AppCompatActivity() {
         text: String,
         image: String,
         currentDate: String,
-        location: Location
+        location: Location?
     ) {
         val content = listOf(
             Pair(
@@ -179,8 +196,15 @@ class FieldBook : AppCompatActivity() {
             )
         )
 
+        val utm = if(location == null){
+            UTMCoordinate(0, 'N', 0.0, 0.0).toString()
+        }
+        else{
+            degreeToUTM(Pair(location.latitude,location.longitude)).toString()
+        }
+
         FieldbookEntry(
-            degreeToUTM(Pair(location.latitude, location.longitude)).toString(),
+            utm,
             currentDate,
             buildJSONContent(content).also { jsonString ->
                 // added for debugging purposes
