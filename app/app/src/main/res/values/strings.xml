@@ -46,4 +46,7 @@
     <string name="fieldbook_textfield_hint">Enter your text here</string>
     <string name="menu_allpins_button_text">Pins</string>
     <string name="menu_fieldbook_button_text">My fieldbook</string>
+    <string name="menubutton_description">Image showing what clicking the menu will do</string>
+    <string name="menu_allpins_button_image">menu_allpins_button_image</string>
+    <string name="menu_fieldbook_image_description">menu fieldbook image</string>
 </resources>

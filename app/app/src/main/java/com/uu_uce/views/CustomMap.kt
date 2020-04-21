@@ -14,6 +14,7 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -111,9 +112,8 @@ class CustomMap : ViewTouchParent {
 
     fun addLayer(lt: LayerType, path: File, chunkGetter: ChunkGetter, scrollLayout: LinearLayout, buttonSize: Int){
         smap.addLayer(lt, path, chunkGetter)
-
         val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle)
-        btn.setImageResource(R.drawable.logotp)
+        btn.setImageResource(R.drawable.ic_sprite_toggle_layer)
         val curLayers = nrLayers
         btn.setOnClickListener{
             toggleLayer(curLayers)

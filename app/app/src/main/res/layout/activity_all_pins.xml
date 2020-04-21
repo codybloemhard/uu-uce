@@ -34,7 +34,7 @@
             android:layout_gravity="end|bottom"
             android:layout_margin="16dp"
             android:onClick="openDialog"
-            android:src="@drawable/ic_sort_white"
+            android:src="@drawable/ic_sprite_sort_white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>

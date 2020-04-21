@@ -2,14 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/fieldbook_navigation_home"
-        android:icon="@drawable/ic_fieldbook"
+        android:icon="@drawable/ic_sprite_fieldbook_main"
         android:title="Fieldbook" />
     <item
         android:id="@+id/fieldbook_navigation_pinmap"
-        android:icon="@drawable/ic_pins"
+        android:icon="@drawable/ic_sprite_fieldbook_pins"
         android:title="Pinmap" />
     <item
         android:id="@+id/fieldbook_navigation_route"
-        android:icon="@drawable/ic_route"
+        android:icon="@drawable/ic_sprite_fieldbook_routes"
         android:title="Route" />
 </menu>

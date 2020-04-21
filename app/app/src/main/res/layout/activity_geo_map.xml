@@ -20,19 +20,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:src="@drawable/ic_sprite_center"
-        app:backgroundTint="#FFFFFF"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-
-        />
-
     <com.uu_uce.views.Menu
         android:id="@+id/menu"
         android:layout_width="match_parent"
@@ -43,24 +30,40 @@
         android:elevation="6dp">
 
         <com.uu_uce.views.DragButton
-            android:id="@+id/dragButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/dragBar"
+            android:textAllCaps="false"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
             android:layout_centerHorizontal="true"
-            android:background="@drawable/ic_menu_drag_up"
-            android:contentDescription="@string/open"/>
+            android:background="@color/colorUU"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="@string/open">
+
+            <ImageView
+                android:id="@+id/dragButton"
+                android:textAllCaps="false"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:clickable="false"
+                android:contentDescription="@string/menubutton_description"
+                android:foregroundGravity="center"
+                app:srcCompat="@drawable/ic_sprite_arrowup" />
+        </com.uu_uce.views.DragButton>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/dragButton"
-            android:background="@color/colorUU"/>
+            android:layout_below="@id/dragBar"
+            android:layout_marginTop="0dp"
+            android:background="#F3F3F3" />
 
         <HorizontalScrollView
             android:id="@+id/toggle_layer_scroll"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/dragButton">
+            android:layout_below="@id/dragBar">
 
             <LinearLayout
                 android:id="@+id/toggle_layer_layout"
@@ -71,27 +74,94 @@
 
         </HorizontalScrollView>
 
+        <View
+            android:id="@+id/sepparator"
+            android:layout_width="wrap_content"
+            android:layout_height="3dp"
+            android:layout_below="@+id/toggle_layer_scroll"
+            android:layout_marginTop="0dp"
+            android:background="@color/colorUU" />
+
         <LinearLayout
             android:id="@+id/lower_menu_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/toggle_layer_scroll"
-            android:layout_centerHorizontal="true"
+            android:layout_below="@id/sepparator"
             android:orientation="vertical">
 
-            <Button
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/allpins_button"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/menu_allpins_button_text" />
+                android:layout_height="match_parent"
+                android:layout_margin="5dp">
 
-            <Button
+                <ImageView
+                    android:id="@+id/allpins_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="false"
+                    android:contentDescription="@string/menu_allpins_button_image"
+                    android:cropToPadding="false"
+                    android:scaleType="fitEnd"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/allpins_button_text"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_menu_symbol_allpins" />
+
+                <TextView
+                    android:id="@+id/allpins_button_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:background="#F3F3F3"
+                    android:fontFamily="@font/roboto_bold"
+                    android:text="@string/menu_allpins_button_text"
+                    android:textAllCaps="false"
+                    android:textColor="#767676"
+                    android:textSize="20sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/allpins_image"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/fieldbook_button"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/menu_fieldbook_button_text" />
+                android:layout_height="match_parent"
+                android:layout_margin="5dp">
+
+                <ImageView
+                    android:id="@+id/fieldbook_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:adjustViewBounds="false"
+                    android:contentDescription="@string/menu_fieldbook_image_description"
+                    android:cropToPadding="false"
+                    android:scaleType="fitEnd"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/fieldbook_button_text"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_menu_symbol_fieldbook" />
+
+                <TextView
+                    android:id="@+id/fieldbook_button_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:background="#F3F3F3"
+                    android:fontFamily="@font/roboto_bold"
+                    android:text="@string/menu_fieldbook_button_text"
+                    android:textAllCaps="false"
+                    android:textColor="#767676"
+                    android:textSize="20sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/fieldbook_image"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
     </com.uu_uce.views.Menu>
 
@@ -100,10 +170,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="38dp"
         android:src="@drawable/ic_sprite_center"
         app:backgroundTint="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:elevation="5dp"
+        android:elevation="5dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -19,7 +19,7 @@
         android:tint="#000000"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_finish_activity" />
+        app:srcCompat="@drawable/ic_sprite_finish_activity" />
 
     <TextView
         android:id="@+id/toolbar_title"
