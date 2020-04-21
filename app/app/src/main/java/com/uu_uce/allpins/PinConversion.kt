@@ -51,13 +51,24 @@ class PinConversion(context: Context){
     }
 
     private fun typeToIcon(type: String): Drawable {
-        return when (type) {
-            "TEXT"      -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_text_white, null)     ?: error("image not found")
-            "IMAGE"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image_white, null)    ?: error("image not found")
-            "VIDEO"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video_white, null)    ?: error("image not found")
-            "MCQUIZ"    -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz_white, null)    ?: error("image not found")
-            else        -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest_white, null)     ?: error("image not found")
+        val image = when (type) {
+            "TEXT"      -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_text, null)     ?: error("image not found")
+            "IMAGE"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image, null)    ?: error("image not found")
+            "VIDEO"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video, null)    ?: error("image not found")
+            "MCQUIZ"    -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz, null)    ?: error("image not found")
+            else        -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null)     ?: error("image not found")
         }
+
+        val color = Color.WHITE
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            image.colorFilter = BlendModeColorFilter(color, BlendMode.SRC_ATOP)
+        }
+        else{
+            // Older versions will use depricated function
+            image.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
+        }
+        return image
     }
 
     private fun stringToIds(ids : String) : List<Int>{

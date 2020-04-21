@@ -48,7 +48,7 @@
                 android:layout_gravity="bottom|end"
                 android:layout_margin="2dp"
                 android:layout_weight="5"
-                app:srcCompat="@drawable/ic_symbol_text_black"
+                app:srcCompat="@drawable/ic_symbol_text"
                 android:contentDescription="@string/type_image_descripition" />
         </LinearLayout>
 
