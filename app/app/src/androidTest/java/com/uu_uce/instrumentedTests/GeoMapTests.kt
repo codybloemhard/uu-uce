@@ -18,7 +18,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.lang.Thread.sleep
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
@@ -220,9 +219,6 @@ class GeoMapTests {
 
     @Test
     fun centerCamera(){
-        // Wait for location to adjust
-        sleep(1000)
-
         // Click button to center location
         onView(withId(R.id.center_button))
             .perform(click())
