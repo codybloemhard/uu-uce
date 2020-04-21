@@ -5,8 +5,7 @@ import android.content.SharedPreferences
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.pressBack
+import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
@@ -27,6 +26,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.lang.Thread.sleep
 
 
 @RunWith(AndroidJUnit4::class)
@@ -266,12 +266,12 @@ class AllPinsTests {
             )
         )
             .inRoot(isPlatformPopup())
-            .perform(click())
+            .perform(scrollTo(), click())
 
         // Click finish button
         onView(withId(R.id.finish_quiz_button))
             .inRoot(isPlatformPopup())
-            .perform(click())
+            .perform(scrollTo(), click())
 
         // Check to see if popup was correct
         onView(withId(R.id.quiz_result_text))
@@ -314,12 +314,12 @@ class AllPinsTests {
             )
         )
             .inRoot(isPlatformPopup())
-            .perform(click())
+            .perform(scrollTo(), click())
 
         // Click finish button
         onView(withId(R.id.finish_quiz_button))
             .inRoot(isPlatformPopup())
-            .perform(click())
+            .perform(scrollTo(), click())
 
         // Check to see if popup was correct
         onView(withId(R.id.quiz_result_text))
@@ -424,6 +424,8 @@ class AllPinsTests {
         onView(withText("Closing Pin"))
             .check(doesNotExist())
 
+        sleep(100)
+
         // Check if pin closed
         onView(withId(R.id.allpins_recyclerview))
             .check(matches(isDisplayed()))
@@ -467,38 +469,6 @@ class AllPinsTests {
         onView(withId(R.id.fab))
             .perform(click())
 
-        // Sort by type
-        onView(withText("Type a-z"))
-            .perform(click())
-
-        // Check if sorting was successful
-        onView(
-            allOf(
-                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
-                withId(R.id.allpins_recyclerview_item_title)
-            )
-        ).check(matches(withText("B")))
-
-        // Open sorting popup
-        onView(withId(R.id.fab))
-            .perform(click())
-
-        // Sort by type reversed
-        onView(withText("Type z-a"))
-            .perform(click())
-
-        // Check if sorting was successful
-        onView(
-            allOf(
-                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
-                withId(R.id.allpins_recyclerview_item_title)
-            )
-        ).check(matches(withText("C")))
-
-        // Open sorting popup
-        onView(withId(R.id.fab))
-            .perform(click())
-
         // Sort by difficulty
         onView(withText("Difficulty easy-hard"))
             .perform(click())
@@ -526,5 +496,37 @@ class AllPinsTests {
                 withId(R.id.allpins_recyclerview_item_title)
             )
         ).check(matches(withText("D")))
+
+        // Open sorting popup
+        onView(withId(R.id.fab))
+            .perform(click())
+
+        // Sort by type
+        onView(withText("Type a-z"))
+            .perform(click())
+
+        // Check if sorting was successful
+        onView(
+            allOf(
+                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
+                withId(R.id.allpins_recyclerview_item_title)
+            )
+        ).check(matches(withText("B")))
+
+        // Open sorting popup
+        onView(withId(R.id.fab))
+            .perform(click())
+
+        // Sort by type reversed
+        onView(withText("Type z-a"))
+            .perform(click())
+
+        // Check if sorting was successful
+        onView(
+            allOf(
+                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
+                withId(R.id.allpins_recyclerview_item_title)
+            )
+        ).check(matches(withText("C")))
     }
 }

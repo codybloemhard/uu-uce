@@ -55,6 +55,7 @@ class CustomMap : ViewTouchParent {
     private var loc                 : UTMCoordinate         = UTMCoordinate(31, 'N', 0.0, 0.0)
     private var lastDrawnLoc        : Pair<Float, Float>    = Pair(0f, 0f)
     var locationAvailable           : Boolean               = false
+    private var locAtCenterPress    : UTMCoordinate         = UTMCoordinate(31, 'N', 0.0, 0.0)
 
     // Paints
     private val deviceLocPaint      : Paint = Paint()
@@ -370,7 +371,7 @@ class CustomMap : ViewTouchParent {
 
     @TestOnly
     fun userLocCentral() : Boolean {
-        val screenLoc = coordToScreen(loc, camera.getViewport(), width, height)
+        val screenLoc = coordToScreen(locAtCenterPress, camera.getViewport(), width, height)
         return (screenLoc.first.toInt() == width / 2 && screenLoc.second.toInt() == height / 2)
     }
 
@@ -382,5 +383,10 @@ class CustomMap : ViewTouchParent {
     @TestOnly
     fun zoomIn(){
         camera.setZoom(camera.minZoom)
+    }
+
+    @TestOnly
+    fun setCenterPos(){
+        locAtCenterPress = loc
     }
 }
