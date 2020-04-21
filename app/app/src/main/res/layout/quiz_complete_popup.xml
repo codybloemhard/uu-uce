@@ -82,7 +82,7 @@
                     android:layout_height="20dp"
                     android:layout_marginStart="5dp"
                     android:contentDescription="@string/points_logo_description"
-                    app:srcCompat="@drawable/ic_symbol_points" />
+                    app:srcCompat="@drawable/ic_sprite_points" />
 
             </LinearLayout>
 

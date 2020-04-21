@@ -1,17 +1,11 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">UCE</string>
     <string name="title_activity_geo_map">geo_map</string>
-    <string name="show_pin">Pin</string>
-    <string name="close">Close</string>
-    <string name="this_is_a_popup_window">This is a popup window..</string>
     <string name="close_popup">CLOSE</string>
-    <string name="sample_text">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui.</string>
     <string name="open">Open</string>
     <string name="pin_title">Pin Title</string>
     <string name="pin_coordinates">Pin coordinates</string>
     <string name="pin_difficulty">Pin difficulty</string>
-    <string name="pin_type">Pin type</string>
-    <string name="center_button">Center</string>
     <string name="video_title_placeholder">Video title</string>
     <string name="easy">Easy</string>
     <string name="medium">Medium</string>
@@ -49,4 +43,7 @@
     <string name="menubutton_description">Image showing what clicking the menu will do</string>
     <string name="menu_allpins_button_image">menu_allpins_button_image</string>
     <string name="menu_fieldbook_image_description">menu fieldbook image</string>
+    <string name="fieldbook_main_title">Fieldbook</string>
+    <string name="fieldbook_map_title">Pinmap</string>
+    <string name="fieldbook_route_title">Route</string>
 </resources>

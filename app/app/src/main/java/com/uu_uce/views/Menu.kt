@@ -2,12 +2,10 @@ package com.uu_uce.views
 
 import android.content.Context
 import android.util.AttributeSet
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import androidx.core.view.updateLayoutParams
 import com.uu_uce.R
-import kotlinx.android.synthetic.main.activity_geo_map.view.*
 
 class Menu : RelativeLayout {
     constructor(context: Context): super(context)

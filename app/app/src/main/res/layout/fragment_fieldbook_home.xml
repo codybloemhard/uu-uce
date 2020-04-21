@@ -19,6 +19,6 @@
         android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
         android:backgroundTint="@color/colorUU2"
-        android:src="@drawable/ic_sprite_add_white" />
+        android:src="@drawable/ic_sprite_add" />
 
 </FrameLayout>
