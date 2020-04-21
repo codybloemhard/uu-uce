@@ -95,18 +95,19 @@ class GeoMap : AppCompatActivity() {
         dragButton.dragAction       = {dx, dy -> menu.drag(dx,dy)}
         dragButton.dragEndAction    = {dx, dy -> menu.snap(dx, dy)}
 
-        val dir = File(filesDir,"mydir")
+        val mydir = File(filesDir,"mydir")
         try {
-            customMap.addLayer(LayerType.Water, dir, HeightLineReader(dir), toggle_layer_layout, size)
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $dir")
+            val heightlines = File(mydir, "heightlines")
+            customMap.addLayer(LayerType.Water, HeightLineReader(mydir), toggle_layer_layout, size)
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
         }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $dir.\nError: " + e.message)
+            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
         try {
-            customMap.addLayer(LayerType.Water, dir, PolygonReader(dir),  toggle_layer_layout, size)
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $dir")
+            customMap.addLayer(LayerType.Water, PolygonReader(mydir),  toggle_layer_layout, size)
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
         }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $dir.\nError: " + e.message)
+            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
 
         customMap.initializeCamera()
