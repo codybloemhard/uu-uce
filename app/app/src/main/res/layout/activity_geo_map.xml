@@ -38,7 +38,7 @@
             android:background="@color/colorUU"
             android:clickable="true"
             android:focusable="true"
-            android:contentDescription="@string/open">
+            android:contentDescription="@string/allpins_open">
 
             <ImageView
                 android:id="@+id/dragButton"
@@ -47,7 +47,7 @@
                 android:layout_height="20dp"
                 android:layout_gravity="center"
                 android:clickable="false"
-                android:contentDescription="@string/menubutton_description"
+                android:contentDescription="@string/menu_button_description"
                 android:foregroundGravity="center"
                 app:srcCompat="@drawable/ic_sprite_arrowup" />
         </com.uu_uce.views.DragButton>

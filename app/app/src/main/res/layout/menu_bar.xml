@@ -32,7 +32,7 @@
         android:textStyle="bold"
         android:textAllCaps="true"
         android:gravity="center_vertical"
-        android:text="@string/menubar_placeholder_text"
+        android:text="@string/menu_bar_placeholder_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/toolbar_back_button"
