@@ -4,19 +4,19 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
-import com.uu_uce.databases.UceRoomDatabase
+import com.uu_uce.database.UceRoomDatabase
 import kotlinx.coroutines.launch
 
 class FieldbookViewModel(application: Application): AndroidViewModel(application) {
 
     private val fieldbookRepository: FieldbookRepository
 
-    val allFieldbookEntries: LiveData<MutableList<FieldbookEntry>>
+    val allFieldbookEntries: LiveData<List<FieldbookEntry>>
 
     init {
         val fieldbookDao = UceRoomDatabase.getDatabase(application, viewModelScope).fieldbookDao()
         fieldbookRepository = FieldbookRepository(fieldbookDao)
-        allFieldbookEntries = fieldbookRepository.allFielbookEntries
+        allFieldbookEntries = fieldbookRepository.allFieldbookEntries
     }
 
     fun insert (fieldbookEntry: FieldbookEntry) = viewModelScope.launch {
@@ -25,5 +25,9 @@ class FieldbookViewModel(application: Application): AndroidViewModel(application
 
     fun delete (fieldbookEntry: FieldbookEntry) = viewModelScope.launch {
         fieldbookRepository.delete(fieldbookEntry)
+    }
+
+    fun deleteAll() = viewModelScope.launch {
+        fieldbookRepository.deleteAll()
     }
 }

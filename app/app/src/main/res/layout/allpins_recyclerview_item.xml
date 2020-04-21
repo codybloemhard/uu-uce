@@ -8,7 +8,7 @@
     android:layout_marginBottom="5dp">
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/allpins_recyclerview_item_title"
         style="@style/pin_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

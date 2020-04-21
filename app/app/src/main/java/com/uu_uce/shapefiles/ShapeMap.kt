@@ -6,6 +6,7 @@ import android.graphics.Paint
 import android.view.View
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
+import org.jetbrains.annotations.TestOnly
 import java.io.File
 import kotlin.system.measureTimeMillis
 
@@ -134,8 +135,14 @@ class ShapeMap(private val nrOfLODs: Int,
             }
         }
     }
+
+    @TestOnly
+    fun checkLayerVisibility(layer : Int) : Boolean{
+        return layerMask[layer]
+    }
 }
 
 enum class LayerType(val value: Int){
     Vegetation(0), Height(1), Water(2)
 }
+

@@ -3,26 +3,24 @@ package com.uu_uce
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.graphics.Point
 import android.os.Bundle
 import android.view.Display
 import android.view.MotionEvent
-import android.view.ViewGroup
-import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import com.uu_uce.databases.PinViewModel
+import com.uu_uce.allpins.PinData
+import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.services.getPermissions
-import com.uu_uce.shapefiles.HeightLineReader
 import com.uu_uce.services.*
+import com.uu_uce.shapefiles.HeightLineReader
 import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.PolygonReader
 import com.uu_uce.views.DragStatus
 import kotlinx.android.synthetic.main.activity_geo_map.*
+import org.jetbrains.annotations.TestOnly
 import java.io.File
 
 class GeoMap : AppCompatActivity() {
@@ -63,7 +61,7 @@ class GeoMap : AppCompatActivity() {
 
         // Start database and get pins from database
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
-        this.customMap.setViewModel(pinViewModel)
+        this.customMap.setPinViewModel(pinViewModel)
         this.customMap.setLifeCycleOwner(this)
         this.customMap.setPins(pinViewModel.allPinData)
 
@@ -77,19 +75,11 @@ class GeoMap : AppCompatActivity() {
         val size = (longest*menu.buttonPercent).toInt()
 
         // Initialize menu
-        val btn1 = ImageButton(this, null, android.R.attr.buttonBarButtonStyle)
-        btn1.setImageResource(R.drawable.logotp)
-        btn1.setBackgroundColor(Color.BLUE)
+        val btn1 = allpins_button
         btn1.setOnClickListener{customMap.startAllPins()}
-        btn1.layoutParams = ViewGroup.LayoutParams(size, size)
-        lower_menu_layout.addView(btn1)
 
-        val btn2 = ImageButton(this, null, android.R.attr.buttonBarButtonStyle)
-        btn2.setImageResource(R.drawable.logotp)
-        btn2.setBackgroundColor(Color.GREEN)
+        val btn2 = fieldbook_button
         btn2.setOnClickListener{customMap.startFieldBook()}
-        btn2.layoutParams = ViewGroup.LayoutParams(size, size)
-        lower_menu_layout.addView(btn2)
 
         dragButton.clickAction      = {menu.dragButtonTap()}
         dragButton.dragAction       = {dx, dy -> menu.drag(dx,dy)}
@@ -194,5 +184,15 @@ class GeoMap : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    @TestOnly
+    fun setPinData(newPinData : List<PinData>){
+        pinViewModel.setPins(newPinData)
+    }
+
+    @TestOnly
+    fun getPinLocation() : Pair<Float, Float>{
+        return customMap.getPinLocation()
     }
 }

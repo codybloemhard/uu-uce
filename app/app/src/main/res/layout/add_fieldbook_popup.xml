@@ -7,6 +7,7 @@
     android:padding="20dp">
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/add_fieldbook_pin_popup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardBackgroundColor="@color/colorUU"
@@ -35,15 +36,15 @@
 
             <EditText
                 android:id="@+id/addText"
-                android:background="@drawable/border"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginBottom="10dp"
+                android:background="@drawable/border"
                 android:ems="10"
                 android:gravity="start|top"
-                android:inputType="textMultiLine"
                 android:hint="@string/fieldbook_textfield_hint"
-                android:importantForAutofill="no" />
+                android:importantForAutofill="no"
+                android:inputType="textMultiLine" />
 
             <TextView
                 android:id="@+id/textView6"
@@ -54,28 +55,28 @@
 
             <ImageView
                 android:id="@+id/addImage"
-                android:background="@drawable/border"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
                 android:layout_marginBottom="10dp"
-                android:scaleType="centerCrop"
-                android:contentDescription="@string/uploaded_image_field_description" />
+                android:background="@drawable/border"
+                android:contentDescription="@string/uploaded_image_field_description"
+                android:scaleType="centerCrop" />
 
-             <Button
-                 android:id="@+id/close_fieldbook_popup"
-                 style="@style/Widget.AppCompat.Button.Borderless"
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:minWidth="64dp"
-                 android:paddingStart="8dp"
-                 android:paddingEnd="8dp"
-                 android:text="@string/add_button_text"
-                 android:textAllCaps="true"
-                 android:textColor="@color/colorUU2"
-                 android:textSize="14sp"
-                 android:layout_gravity="end"
-                 android:textStyle="bold" />
-                 
+            <Button
+                android:id="@+id/add_fieldbook_pin"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:minWidth="64dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:text="@string/add_button_text"
+                android:textAllCaps="true"
+                android:textColor="@color/colorUU2"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>

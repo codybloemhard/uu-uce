@@ -146,6 +146,7 @@ class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
         content.layoutParams = imageLayoutParams
+        content.id = R.id.image_block
 
         layout.addView(content)
     }
@@ -188,6 +189,7 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         // Add thumbnail and button
         frameLayout.addView(playButton)
         frameLayout.setOnClickListener{openVideoView(videoURI, title, activity)}
+        frameLayout.id = R.id.start_video_button
         layout.addView(frameLayout)
     }
 
@@ -233,6 +235,7 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
 
         // Create tableLayout with first row
         val table = TableLayout(activity)
+        table.id = R.id.multiple_choice_table
         var currentRow = TableRow(activity)
         currentRow.gravity = Gravity.CENTER_HORIZONTAL
 

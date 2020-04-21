@@ -1,4 +1,4 @@
-package com.uu_uce.databases
+package com.uu_uce.allpins
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

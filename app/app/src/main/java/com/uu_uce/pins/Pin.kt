@@ -3,7 +3,6 @@ package com.uu_uce.pins
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.view.Gravity
@@ -14,18 +13,19 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
-import com.uu_uce.databases.PinViewModel
+import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.shapefiles.p2
 import com.uu_uce.shapefiles.p2Zero
+import org.jetbrains.annotations.TestOnly
 import kotlin.math.roundToInt
 
 
 class Pin(
-    val id : Int,
+    var id : Int = 0,
     private var coordinate      : UTMCoordinate,
     private var title           : String,
     private var content         : PinContent,
@@ -42,7 +42,7 @@ class Pin(
     }
 
     // Used to determine if warning should show when closing pin
-    var madeProgress = false
+    private var madeProgress = false
 
     private val pinWidth = 60 // TODO: set this in settings somewhere
 
@@ -108,7 +108,7 @@ class Pin(
         }
     }
 
-    fun openPinPopupWindow(parentView: View, activity : Activity, onDissmissAction: () -> Unit) {
+    fun openContent(parentView: View, activity : Activity, onDissmissAction: () -> Unit) {
         val layoutInflater = activity.layoutInflater
 
         // Build an custom view (to be inflated on top of our current view & build it's popup window)
@@ -145,6 +145,7 @@ class Pin(
         // Fill layout of popup
         if(containsQuiz && status < 2){
             val finishButton = Button(activity)
+            finishButton.id = R.id.finish_quiz_button
             finishButton.text = activity.getString(R.string.finish_text)
             finishButton.background.setTint(ResourcesCompat.getColor(activity.resources, R.color.colorUU, null))
             val buttonLayout = LinearLayout.LayoutParams(
@@ -181,8 +182,7 @@ class Pin(
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setTitle("Closing Pin")
                     .setMessage("Are you sure you want to close pin? All progress will be lost.")
-                    .setPositiveButton("Yes",
-                        DialogInterface.OnClickListener { _, _ -> popupWindow?.dismiss() })
+                    .setPositiveButton("Yes") { _, _ -> popupWindow?.dismiss() }
                     .setNegativeButton("No", null)
                     .show()
             }
@@ -266,17 +266,17 @@ class Pin(
             // Set content based on result
             if(sufficient){
                 georgeReaction.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.happy_george, null))
-                quizResultText.text = activity.getString(R.string.quiz_success_head)
-                completeText.text   = activity.getString(R.string.quiz_success_body, title, reward, totalReward)
-                btnOpenQuiz.text    = activity.getString(R.string.reopen_button_success)
+                quizResultText.text     = activity.getString(R.string.quiz_success_head)
+                completeText.text       = activity.getString(R.string.quiz_success_body, title, reward, totalReward)
+                btnOpenQuiz.text        = activity.getString(R.string.reopen_button_success)
                 rewardLayout.visibility = VISIBLE
-                rewardText.text = activity.getString(R.string.reward_string, reward)
+                rewardText.text         = activity.getString(R.string.reward_string, reward)
             }
             else{
                 georgeReaction.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.crying_george, null))
-                quizResultText.text = activity.getString(R.string.quiz_fail_head)
-                completeText.text   = activity.getString(R.string.quiz_fail_body)
-                btnOpenQuiz.text    = activity.getString(R.string.reopen_button_fail)
+                quizResultText.text     = activity.getString(R.string.quiz_fail_head)
+                completeText.text       = activity.getString(R.string.quiz_fail_body)
+                btnOpenQuiz.text        = activity.getString(R.string.reopen_button_fail)
                 rewardLayout.visibility = GONE
             }
 
@@ -288,7 +288,7 @@ class Pin(
             btnOpenQuiz.setOnClickListener {
                 popupWindow?.dismiss()
 
-                openPinPopupWindow(parentView, activity){}
+                openContent(parentView, activity){}
             }
         }
         else{
@@ -311,6 +311,11 @@ class Pin(
 
     fun getStatus(): Int {
         return status
+    }
+
+    @TestOnly
+    fun getScreenLocation(viewport: Pair<p2, p2>, width : Int, height : Int) : Pair<Float, Float>{
+        return coordToScreen(coordinate, viewport, width, height)
     }
 }
 

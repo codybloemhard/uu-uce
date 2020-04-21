@@ -11,9 +11,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
-import com.uu_uce.databases.PinConversion
-import com.uu_uce.databases.PinData
-import com.uu_uce.databases.PinViewModel
 import com.uu_uce.pins.PinContent
 
 class PinListAdapter internal constructor(
@@ -29,7 +26,7 @@ class PinListAdapter internal constructor(
 
     inner class PinViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         val parentView : View = itemView
-        val pinTitle: TextView = itemView.findViewById(R.id.textView)
+        val pinTitle: TextView = itemView.findViewById(R.id.allpins_recyclerview_item_title)
         val pinCoord: TextView = itemView.findViewById(R.id.textView2)
         val pinType: ImageView = itemView.findViewById(R.id.type_image)
         val pinDiff: TextView = itemView.findViewById(R.id.textView4)
@@ -61,7 +58,7 @@ class PinListAdapter internal constructor(
             val pinConverter = PinConversion(activity)
             val pin = pinConverter.pinDataToPin(current, pinViewModel)
             pin.getContent().parent = pin
-            pin.openPinPopupWindow(holder.parentView, activity) {activePopup = null}
+            pin.openContent(holder.parentView, activity) {activePopup = null}
             activePopup = pin.popupWindow
         }
 

@@ -1,4 +1,4 @@
-package com.uu_uce.databases
+package com.uu_uce.allpins
 
 import android.content.Context
 import android.graphics.drawable.Drawable
@@ -10,16 +10,19 @@ import com.uu_uce.services.UTMCoordinate
 
 class PinConversion(context: Context){
 
-    private val resource = context.resources
-    private fun stringToUtm(coord: String): UTMCoordinate {
-        val regex = "(\\d+|[a-zA-Z])".toRegex()
-        val s = regex.findAll(coord)
-        return UTMCoordinate(
-            s.elementAt(0).value.toInt(),
-            s.elementAt(1).value.first(),
-            s.elementAt(4).value.toDouble()/10,
-            s.elementAt(2).value.toDouble()/10)
+    companion object {
+        fun stringToUtm(coord: String): UTMCoordinate {
+            val regex = "(\\d+|[a-zA-Z])".toRegex()
+            val s = regex.findAll(coord)
+            return UTMCoordinate(s.elementAt(0).value.toInt()       ,
+                s.elementAt(1).value.first()       ,
+                s.elementAt(2).value.toDouble()/10    ,
+                s.elementAt(4).value.toDouble()/10)
+
+        }
     }
+
+    private val resource = context.resources
 
     private fun stringToPinContent(content: String): PinContent {
         return PinContent(content)
