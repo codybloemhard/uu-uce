@@ -1,4 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">UCE</string>
     <string name="allpins_open">Open</string>
     <string name="pin_close">Close</string>
     <string name="pin_difficulty_easy">Easy</string>
