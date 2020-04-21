@@ -25,14 +25,14 @@
             <ImageView
                 android:id="@+id/george_reaction"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="200dp"
                 android:layout_marginTop="30dp"
                 android:contentDescription="@string/quiz_result_image_description"
                 app:layout_constraintBottom_toTopOf="@+id/quiz_result_text"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:srcCompat="@drawable/happy_george" />
+                tools:srcCompat="@drawable/ic_george_celebrating" />
 
             <TextView
                 android:id="@+id/quiz_result_text"
@@ -82,7 +82,7 @@
                     android:layout_height="20dp"
                     android:layout_marginStart="5dp"
                     android:contentDescription="@string/points_logo_description"
-                    app:srcCompat="@drawable/points_icon" />
+                    app:srcCompat="@drawable/ic_symbol_points" />
 
             </LinearLayout>
 
