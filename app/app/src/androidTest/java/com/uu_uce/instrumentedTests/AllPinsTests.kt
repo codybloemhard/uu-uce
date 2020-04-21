@@ -361,7 +361,7 @@ class AllPinsTests {
                 withText("Also right")
             ))
             .inRoot(isPlatformPopup())
-            .perform(click())
+            .perform(scrollTo(), click())
 
         // Attempt to close pin
         onView(withId(R.id.popup_window_close_button))
