@@ -11,6 +11,7 @@ import android.location.Location
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.view.Gravity
 import androidx.fragment.app.Fragment
@@ -30,6 +31,7 @@ import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.pins.BlockTag
 import com.uu_uce.pins.ContentBlockInterface
+import com.uu_uce.pins.ImageContentBlock
 import com.uu_uce.services.*
 import java.io.File
 import java.io.FileOutputStream
@@ -59,6 +61,14 @@ class FieldbookHomeFragment : Fragment() {
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
+
+        lateinit var fieldbookDir : File
+    }
+
+    enum class RequestCode(val num: Int) {
+        REQUEST_IMAGE_UPLOAD    (0),
+        REQUEST_IMAGE_CAPTURE   (1),
+        REQUEST_VIDEO_CAPTURE   (2)
     }
 
     private lateinit var viewModel: FieldbookViewModel
@@ -73,6 +83,10 @@ class FieldbookHomeFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        fieldbookDir = File(requireContext().filesDir,"fieldbook").also {
+            it.mkdirs()
+        }
 
         fragmentActivity = requireActivity()
 
@@ -104,6 +118,9 @@ class FieldbookHomeFragment : Fragment() {
         }
     }
 
+    /**
+     * Opens a popup, in which we can make new entries to the fieldbook
+     */
     private fun openFieldbookAdderPopup() {
         imageUri = ""
 
@@ -134,7 +151,7 @@ class FieldbookHomeFragment : Fragment() {
 
         customView.findViewById<ImageButton>(R.id.add_video_block).also{
             it.setOnClickListener {
-                addVideo()
+                selectVideo()
             }
         }
 
@@ -147,6 +164,7 @@ class FieldbookHomeFragment : Fragment() {
             Logger.log(LogType.Event, "Fielbook", "No last known location")
         }
 
+        //TODO
         val savePinButton = customView.findViewById<Button>(R.id.add_fieldbook_pin)
         savePinButton.setOnClickListener{
             saveFieldbookEntry(
@@ -156,6 +174,100 @@ class FieldbookHomeFragment : Fragment() {
                 location
             )
             popupWindow.dismiss()
+        }
+    }
+
+    private fun selectImage() {
+
+        val options = arrayOf("Choose from gallery", "Take Photo", " Cancel")
+
+        val dialog = AlertDialog.Builder(requireContext())
+        dialog.setTitle("Upload an image")
+
+        dialog.setItems(options) { dialogInterface, which ->
+
+            when (which) {
+                0 -> { // Choose from gallery
+                    getPermissions(fragmentActivity, listOf(Manifest.permission.READ_EXTERNAL_STORAGE), CAMERA_REQUEST)
+                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || fragmentActivity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
+                        startActivityForResult(
+                            Intent(
+                                Intent.ACTION_PICK,
+                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                            ),
+                            RequestCode.REQUEST_IMAGE_UPLOAD.num
+                        )
+                    }
+                }
+                1 -> { // Take photo
+                    getPermissions(fragmentActivity, listOf(Manifest.permission.CAMERA), CAMERA_REQUEST)
+                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || fragmentActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                        startActivityForResult(
+                            Intent(
+                                MediaStore.ACTION_IMAGE_CAPTURE
+                            ),
+                            RequestCode.REQUEST_IMAGE_CAPTURE.num
+                        )
+                    }
+                }
+                2 -> dialogInterface.dismiss()
+            }
+        }
+        dialog.show()
+    }
+
+    private fun selectVideo() {
+        val options = arrayOf("Record Video", " Cancel")
+
+        val dialog = AlertDialog.Builder(requireContext())
+        dialog.setTitle("Upload a video")
+
+        dialog.setItems(options) { dialogInterface, which ->
+
+            when (which) { //TODO: add check for permissions
+                0 -> {
+                    startActivityForResult(
+                        Intent(
+                            MediaStore.ACTION_VIDEO_CAPTURE).also {
+                            it.resolveActivity(fragmentActivity.packageManager)
+                        },
+                        RequestCode.REQUEST_VIDEO_CAPTURE.num
+                    )
+                }
+                else -> dialogInterface.dismiss()
+            }
+        }
+        dialog.show()
+    }
+
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK && data != null) {
+            if (requestCode == 0 || requestCode == 1) {
+                saveBitmapToLocation(
+                    when (requestCode) {
+                        0 -> { // Choose from gallery
+                            val uri = data.data
+                            uri?.let { getImageFromGallery(it) }!!
+                        }
+                        else -> {// Take photo
+                            //TODO: this is just a thumbnail... get full size picture
+                            data.extras?.get("data") as Bitmap
+                        }
+                    }
+                ).also {
+                    addImage(it)
+                }
+            } else { // Captured video; requestCode = 2
+                val uri = data.data
+                println(uri!!.path)
+            }
+        } else if (resultCode == Activity.RESULT_CANCELED) {
+            TODO()
         }
     }
 
@@ -169,78 +281,13 @@ class FieldbookHomeFragment : Fragment() {
         val imageView = ImageView(requireContext())
         layout.addView(imageView,layoutParams)
         imageView.setImageURI(uri)
-        //TODO: BUILD CONTENTBLOCK AND ADD TO CONTENT
-    }
-
-    private fun selectImage() {
-
-        val options = arrayOf("Choose from gallery", "Take Photo", " Cancel")
-
-        val dialog = AlertDialog.Builder(requireContext())
-        dialog.setTitle("Upload an image")
-
-        dialog.setItems(options) { dialogInterface, which ->
-
-            when (which) {
-                0 -> {
-                    getPermissions(fragmentActivity, listOf(Manifest.permission.READ_EXTERNAL_STORAGE), CAMERA_REQUEST)
-                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || fragmentActivity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
-                        startActivityForResult(
-                            Intent(
-                                Intent.ACTION_PICK,
-                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                            ), 0
-                        )
-                    }
-                }
-                1 -> {
-                    getPermissions(fragmentActivity, listOf(Manifest.permission.CAMERA), CAMERA_REQUEST)
-                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || fragmentActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                        startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), 1)
-                    }
-                }
-                2 -> dialogInterface.dismiss()
-            }
-        }
-        dialog.show()
-    }
-
-    override fun onActivityResult(
-        requestCode: Int,
-        resultCode: Int,
-        data: Intent?
-    ) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK && data != null) {
-
-            saveBitmapToLocation(
-                when (requestCode) {
-                    0 -> { // Choose from gallery
-                        val uri = data.data
-                        uri?.let { getImageFromGallery(it) }!!
-
-                    }
-                    else -> { // Take photo
-                        //TODO: this is just a thumbnail... get full size picture
-                        data.extras?.get("data") as Bitmap
-                    }
-                }
-            ).also {
-                addImage(it)
-            }
-
-        } else if (resultCode == Activity.RESULT_CANCELED) {
-            TODO()
-        }
+        content.add(ImageContentBlock(uri))
     }
 
     private fun addVideo() {
         //TODO
     }
 
-    fun createContentBlock() {
-
-    }
 
     private fun saveFieldbookEntry(
         title: String,
@@ -305,11 +352,22 @@ class FieldbookHomeFragment : Fragment() {
     }
 
     private fun imageLocation(): File {
-        val root = "data/data/com.uu_uce/files/fieldbook"
-        val myDir: File = File("$root/Pictures").also{
+        val myDir: File = File(fieldbookDir,"Pictures").also{
             it.mkdirs()
         }
         val fileName = "IMG_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}.png"
+        return File(myDir,fileName)
+    }
+
+    private fun saveVideoToLocation(uri: Uri) {
+
+    }
+
+    private fun videoLocation() : File {
+        val myDir: File = File(fieldbookDir,"Videos").also{
+            it.mkdirs()
+        }
+        val fileName = "VID_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}.mp4"
         return File(myDir,fileName)
     }
 
