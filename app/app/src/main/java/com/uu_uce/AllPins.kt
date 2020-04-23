@@ -3,6 +3,8 @@ package com.uu_uce
 import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
@@ -56,12 +58,6 @@ class AllPins : AppCompatActivity() {
         sharedPref = this.getPreferences(Context.MODE_PRIVATE)
 
         val searchBar = findViewById<EditText>(R.id.searchbar)
-        val searchButton = findViewById<ImageView>(R.id.search_icon)
-
-        searchButton.setOnClickListener{
-            val search = searchBar.text.toString()
-            searchPins(search)
-        }
 
         searchBar.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
@@ -72,6 +68,14 @@ class AllPins : AppCompatActivity() {
             }
             false
         })
+
+        // Set statusbar text color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
+        }
+        else{
+            window.statusBarColor = Color.BLACK// set status background white
+        }
     }
 
     override fun onBackPressed() {

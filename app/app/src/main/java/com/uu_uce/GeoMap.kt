@@ -3,10 +3,13 @@ package com.uu_uce
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.graphics.Point
+import android.os.Build
 import android.os.Bundle
 import android.view.Display
 import android.view.MotionEvent
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -36,6 +39,14 @@ class GeoMap : AppCompatActivity() {
         Logger.setTagEnabled("LocationServices", false)
         Logger.setTagEnabled("Pin", false)
         Logger.setTagEnabled("DrawOverlay", false)
+
+        // Set statusbar text color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
+        }
+        else{
+            window.statusBarColor = Color.BLACK// set status background white
+        }
 
         super.onCreate(savedInstanceState)
 

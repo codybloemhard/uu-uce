@@ -1,6 +1,9 @@
 package com.uu_uce
 
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -49,6 +52,14 @@ class Fieldbook : AppCompatActivity() {
                 }
             )
         )
+
+        // Set statusbar text color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
+        }
+        else{
+            window.statusBarColor = Color.BLACK// set status background white
+        }
     }
 
     private fun openFragment(fragment: Fragment) {
