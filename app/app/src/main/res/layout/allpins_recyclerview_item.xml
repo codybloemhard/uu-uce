@@ -53,11 +53,11 @@
             android:layout_gravity="center_vertical"
             android:layout_margin="2dp"
             android:layout_weight="5"
-            android:contentDescription="@string/type_image_descripition"
+            android:contentDescription="@string/pin_type_image_descripition"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_symbol_text_black" />
+            app:srcCompat="@drawable/ic_symbol_text" />
 
         <com.mikhaellopez.circleview.CircleView
             android:id="@+id/diff"
@@ -81,7 +81,7 @@
             android:clickable="false"
             android:drawableEnd="?android:attr/listChoiceIndicatorMultiple"
             android:gravity="center|end"
-            android:text="@string/completed_text"
+            android:text="@string/pin_completed"
             android:textColor="#8B8B8B"
             android:textSize="14sp"
             app:layout_constraintBottom_toBottomOf="parent"

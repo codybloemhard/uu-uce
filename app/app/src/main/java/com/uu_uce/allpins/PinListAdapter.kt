@@ -48,7 +48,6 @@ class PinListAdapter internal constructor(
         if(pinCanComplete[position]){
             holder.pinStatus.visibility = View.VISIBLE
             holder.pinStatus.isChecked = (current.status == 2)
-            holder.pinStatus.setOnClickListener{}
         }
         else{
             holder.pinStatus.visibility = View.GONE
