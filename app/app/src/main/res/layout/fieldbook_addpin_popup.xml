@@ -10,7 +10,7 @@
         android:id="@+id/add_fieldbook_pin_popup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="@color/colorUU"
+        app:cardBackgroundColor="@color/Flirtatious"
         app:cardCornerRadius="8dp"
         app:cardElevation="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -73,7 +73,7 @@
                 android:paddingEnd="8dp"
                 android:text="@string/fieldbook_add_button_text"
                 android:textAllCaps="true"
-                android:textColor="@color/colorUU2"
+                android:textColor="@color/Desire"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 

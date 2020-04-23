@@ -9,6 +9,7 @@ import android.view.Gravity
 import android.view.View
 import android.widget.*
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.VideoViewer
@@ -242,11 +243,6 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
             return
         }
 
-        val unselectedColor = Color.parseColor("#2d98da")
-        val selectedColor   = Color.parseColor("#FD9644")
-        val correctColor    = Color.parseColor("#26DE81")
-        val incorrectColor  = Color.parseColor("#FC5C65")
-
         selectedBackground = CardView(activity)
         parent.addQuestion(blockId, reward)
 
@@ -285,6 +281,7 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
             val answer = TextView(activity)
             answer.text = shuffledAnswers[i].first
             answer.gravity = Gravity.CENTER
+            answer.setTextColor(ContextCompat.getColor(activity, R.color.BestWhite))
             val textParams = TableLayout.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.MATCH_PARENT
@@ -295,12 +292,12 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
             currentRow.addView(currentFrame)
 
             if(parent.getStatus() < 2){
-                background.setCardBackgroundColor(unselectedColor)
+                background.setCardBackgroundColor(ContextCompat.getColor(activity, R.color.Boyzone))
                 currentFrame.setOnClickListener {
-                    selectedBackground.setCardBackgroundColor(unselectedColor)
+                    selectedBackground.setCardBackgroundColor(ContextCompat.getColor(activity, R.color.Boyzone))
                     selectedAnswer = i
                     selectedBackground = background
-                    background.setCardBackgroundColor(selectedColor)
+                    background.setCardBackgroundColor(ContextCompat.getColor(activity, R.color.OrangeHibiscus))
                     if(shuffledAnswers[i].second){
                         parent.answerQuestion(blockId, reward)
                     }
@@ -311,10 +308,10 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
             }
             else{
                 if(shuffledAnswers[i].second){
-                    background.setCardBackgroundColor(correctColor)
+                    background.setCardBackgroundColor(ContextCompat.getColor(activity, R.color.ReptileGreen))
                 }
                 else{
-                    background.setCardBackgroundColor(incorrectColor)
+                    background.setCardBackgroundColor(ContextCompat.getColor(activity, R.color.FusionRed))
                 }
             }
 

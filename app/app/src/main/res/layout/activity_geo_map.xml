@@ -35,7 +35,7 @@
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:layout_centerHorizontal="true"
-            android:background="@color/colorUU"
+            android:background="@color/Flirtatious"
             android:clickable="true"
             android:focusable="true"
             android:contentDescription="@string/allpins_open">
@@ -80,7 +80,7 @@
             android:layout_height="3dp"
             android:layout_below="@+id/toggle_layer_scroll"
             android:layout_marginTop="0dp"
-            android:background="@color/colorUU" />
+            android:background="@color/Flirtatious" />
 
         <LinearLayout
             android:id="@+id/lower_menu_layout"

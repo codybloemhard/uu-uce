@@ -165,12 +165,13 @@ class Pin(
             val finishButton = Button(activity)
             finishButton.id = R.id.finish_quiz_button
             finishButton.text = activity.getString(R.string.pin_finish)
-            finishButton.background.setTint(ResourcesCompat.getColor(activity.resources, R.color.colorUU, null))
+            finishButton.isAllCaps = false
+            finishButton.setBackgroundResource(R.drawable.custom_border_button)
             val buttonLayout = LinearLayout.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.WRAP_CONTENT
             )
-            buttonLayout.setMargins(parentView.width / 7, 0, parentView.width / 7, 0)
+            buttonLayout.setMargins(parentView.width / 7, parentView.height / 100, parentView.width / 7, parentView.height / 100)
             finishButton.layoutParams = buttonLayout
             finishButton.setOnClickListener{
                 finishQuiz(activity, parentView)
@@ -183,7 +184,7 @@ class Pin(
 
         // Get elements
         val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
-        val checkBoxCompletePin = customView.findViewById<CheckBox>(R.id.complete_box)
+        /*val checkBoxCompletePin = customView.findViewById<CheckBox>(R.id.complete_box)
 
         // Set checkbox to correct state
         if(content.canCompletePin){
@@ -191,7 +192,7 @@ class Pin(
         }
         else{
             checkBoxCompletePin.visibility = View.INVISIBLE
-        }
+        }*/
 
         // Set onClickListeners
         btnClosePopupWindow.setOnClickListener {

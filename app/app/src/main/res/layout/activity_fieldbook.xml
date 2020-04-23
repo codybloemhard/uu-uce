@@ -5,7 +5,7 @@
     android:id="@+id/fieldbook_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground"
+    android:background="@color/BestWhite"
     android:orientation="vertical">
 
     <include
@@ -36,7 +36,7 @@
         android:id="@+id/fieldbook_bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorBackground"
+        android:background="@color/BestWhite"
         android:paddingTop="5dp"
         app:itemIconTint="#000"
         app:itemTextColor="#000"

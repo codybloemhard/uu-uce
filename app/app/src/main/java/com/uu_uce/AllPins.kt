@@ -10,7 +10,6 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
-import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -26,18 +25,18 @@ import kotlinx.android.synthetic.main.activity_all_pins.*
 
 
 class AllPins : AppCompatActivity() {
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var viewManager: RecyclerView.LayoutManager
-    private lateinit var pinViewModel: PinViewModel
-    private var selectedOption: Int = 0
-    private lateinit var sharedPref : SharedPreferences
-    private lateinit var viewAdapter: PinListAdapter
+    private lateinit var recyclerView   : RecyclerView
+    private lateinit var viewManager    : RecyclerView.LayoutManager
+    private lateinit var pinViewModel   : PinViewModel
+    private lateinit var sharedPref     : SharedPreferences
+    private lateinit var viewAdapter    : PinListAdapter
+    private var selectedOption          : Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_all_pins)
 
-        createTopbar(this, "all pins")
+        createTopbar(this, "Pins")
 
         viewManager = LinearLayoutManager(this)
 

@@ -4,7 +4,7 @@
     android:id="@+id/general_menu_layout"
     android:layout_width="match_parent"
     android:layout_height="50dp"
-    android:background="@color/colorBackground"
+    android:background="@color/BestWhite"
     android:orientation="vertical">
 
     <ImageButton
@@ -14,7 +14,7 @@
         android:layout_weight="1"
         android:background="#00FFFFFF"
         android:contentDescription="@string/menu_bar_backbutton_description"
-        android:tint="#000000"
+        android:tint="@color/TextGrey"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_sprite_finish_activity" />
@@ -23,12 +23,11 @@
         android:id="@+id/toolbar_title"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_marginStart="10dp"
         android:layout_weight="1"
         android:gravity="center_vertical"
         android:text="@string/menu_bar_placeholder_text"
         android:textAllCaps="false"
-        android:textColor="#000000"
+        android:textColor="@color/TextGrey"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -40,7 +39,7 @@
         android:id="@+id/view"
         android:layout_width="0dp"
         android:layout_height="3dp"
-        android:background="@color/colorUU"
+        android:background="@color/Flirtatious"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/toolbar_title"
         app:layout_constraintStart_toStartOf="parent" />

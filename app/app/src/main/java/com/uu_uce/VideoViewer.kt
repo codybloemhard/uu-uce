@@ -1,6 +1,8 @@
 package com.uu_uce
 
 import android.app.Activity
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -22,6 +24,14 @@ class VideoViewer : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.video_viewer)
+
+        // Set statusbar text color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
+        }
+        else{
+            window.statusBarColor = Color.BLACK// set status background white
+        }
 
         // Set title in bar
         val videoTitleText = findViewById<TextView>(R.id.video_title_text)
@@ -59,7 +69,6 @@ class VideoViewer : Activity() {
                 videoPlayer.seekTo(videoPos)
             }
             videoPlayer.start()
-            mediaController.show()
         }
 
         val closeVideoButton = findViewById<Button>(R.id.close_video_player)
