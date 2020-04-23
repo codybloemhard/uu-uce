@@ -88,17 +88,17 @@ class GeoMap : AppCompatActivity() {
         val mydir = File(filesDir,"mydir")
         try {
             val heightlines = File(mydir, "heightlines")
-            customMap.addLayer(LayerType.Water, HeightLineReader(mydir), toggle_layer_layout, size)
+            customMap.addLayer(LayerType.Water, HeightLineReader(heightlines), toggle_layer_layout, size, true)
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
         }catch(e: Exception){
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
-        try {
-            customMap.addLayer(LayerType.Water, PolygonReader(mydir),  toggle_layer_layout, size)
+        /*try {
+            customMap.addLayer(LayerType.Water, PolygonReader(mydir),  toggle_layer_layout, size, false)
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
         }catch(e: Exception){
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
-        }
+        }*/
 
         customMap.initializeCamera()
 

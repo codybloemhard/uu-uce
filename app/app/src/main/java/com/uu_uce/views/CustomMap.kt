@@ -101,6 +101,7 @@ class CustomMap : ViewTouchParent {
             val z = 1.0 / (camera.wAspect)
             camera.maxZoom = maxOf(1.0,z)
             camera.setZoom(z)
+            smap.setzooms(camera.minZoom, camera.maxZoom)
         }
     }
 
@@ -109,8 +110,8 @@ class CustomMap : ViewTouchParent {
         camera = smap.initialize()
     }
 
-    fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout, buttonSize: Int){
-        smap.addLayer(lt, chunkGetter)
+    fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout, buttonSize: Int, hasInfo: Boolean){
+        smap.addLayer(lt, chunkGetter, hasInfo)
 
         val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle)
         btn.setImageResource(R.drawable.logotp)

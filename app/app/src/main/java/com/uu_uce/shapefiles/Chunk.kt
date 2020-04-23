@@ -5,6 +5,9 @@ import android.graphics.Paint
 import com.uu_uce.mapOverlay.aaBoundingBoxIntersect
 
 typealias ChunkIndex = Triple<Int,Int,Int>
+fun chunkName(c: ChunkIndex): String{
+    return "${c.third}-${c.first}-${c.second}.chunk"
+}
 
 class Chunk(
     private var shapes: List<ShapeZ>,
