@@ -37,6 +37,10 @@ class PinViewModel(application: Application) : AndroidViewModel(application) {
             pinRepository.setStatuses(followPids, -1)
     }
 
+    fun searchPins(searchText : String, action : ((List<PinData>?) -> Unit)) = viewModelScope.launch {
+        pinRepository.searchPins(searchText, action)
+    }
+
     @TestOnly
     fun setPins(newData : List<PinData>) = viewModelScope.launch {
         pinRepository.setPins(newData)

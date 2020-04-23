@@ -47,4 +47,5 @@
     <string name="fieldbook_textfield_hint">Enter your text here</string>
     <string name="menu_allpins_button_text">Pins</string>
     <string name="menu_fieldbook_button_text">My fieldbook</string>
+    <string name="allpins_search_icon_description">Search icon</string>
 </resources>

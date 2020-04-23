@@ -19,6 +19,9 @@ interface PinDao {
     @Query("SELECT status from pins where pinId in (:pids)")
     suspend fun getStatuses(pids: List<Int>) : List<Int>
 
+    @Query("SELECT * from pins where LOWER(title) LIKE LOWER(:search)")
+    suspend fun searchPins(search : String) : List<PinData>
+
     @Query("UPDATE pins SET status = :newStatus where pinId = :pid")
     suspend fun setStatus(pid : Int, newStatus : Int)
 
