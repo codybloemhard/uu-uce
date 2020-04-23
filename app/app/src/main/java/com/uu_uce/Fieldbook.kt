@@ -19,7 +19,7 @@ class Fieldbook : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_field_book)
+        setContentView(R.layout.activity_fieldbook)
 
         // initiate views and layout
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.fieldbook_bottom_navigation)

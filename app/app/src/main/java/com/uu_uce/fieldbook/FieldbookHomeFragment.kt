@@ -73,7 +73,7 @@ class FieldbookHomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_fieldbook_home, container, false).also {view ->
+        return inflater.inflate(R.layout.fieldbook_fragment_home, container, false).also { view ->
             val recyclerView = view.findViewById<RecyclerView>(R.id.fieldbook_recyclerview)
             val addButton = view.findViewById<FloatingActionButton>(R.id.fieldbook_fab)
 
@@ -104,7 +104,7 @@ class FieldbookHomeFragment : Fragment() {
     private fun openFieldbookAdderPopup() {
         imageUri = ""
 
-        val customView = layoutInflater.inflate(R.layout.add_fieldbook_popup, null, false)
+        val customView = layoutInflater.inflate(R.layout.fieldbook_addpin_popup, null, false)
         val popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
         popupWindow.showAtLocation(fragmentActivity.findViewById(R.id.fieldbook_layout), Gravity.CENTER, 0, 0)
