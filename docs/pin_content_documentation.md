@@ -31,6 +31,7 @@ A content block is started by an opening bracket `{`.
 
 A parameter for a content block is given in quotation marks `"param"`.
 A parameter should always be assigned a value by adding a colon `:`.
+The first parameter of a pin should always be `tag`.
 
 To finish assigning a value to a parameter enter a value in quotation marks `"Value"`.
 If you want to assign a value to another parameter an assignment should be followed by a comma `,`.

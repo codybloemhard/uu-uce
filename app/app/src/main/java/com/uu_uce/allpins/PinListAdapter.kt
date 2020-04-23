@@ -71,13 +71,13 @@ class PinListAdapter internal constructor(
 
         when(current.type){
             "TEXT" -> holder.pinType.setImageDrawable(
-                ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_text_black, null) ?: error ("Image not found"))
+                ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_text, null) ?: error ("Image not found"))
             "IMAGE" -> holder.pinType.setImageDrawable(
-            ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image_black, null) ?: error ("Image not found"))
+            ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image, null) ?: error ("Image not found"))
             "VIDEO" -> holder.pinType.setImageDrawable(
-            ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video_black, null) ?: error ("Image not found"))
+            ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video, null) ?: error ("Image not found"))
             "MCQUIZ" -> holder.pinType.setImageDrawable(
-                ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz_black, null) ?: error ("Image not found"))
+                ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz, null) ?: error ("Image not found"))
         }
     }
 

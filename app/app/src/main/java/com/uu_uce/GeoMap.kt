@@ -81,9 +81,9 @@ class GeoMap : AppCompatActivity() {
         val btn2 = fieldbook_button
         btn2.setOnClickListener{customMap.startFieldBook()}
 
-        dragButton.clickAction      = {menu.dragButtonTap()}
-        dragButton.dragAction       = {dx, dy -> menu.drag(dx,dy)}
-        dragButton.dragEndAction    = {dx, dy -> menu.snap(dx, dy)}
+        dragBar.clickAction      = {menu.dragButtonTap()}
+        dragBar.dragAction       = { dx, dy -> menu.drag(dx,dy)}
+        dragBar.dragEndAction    = { dx, dy -> menu.snap(dx, dy)}
 
         val dir = File(filesDir,"mydir")
         try {
@@ -152,7 +152,7 @@ class GeoMap : AppCompatActivity() {
     }
 
     private fun initMenu(){
-        menu.setScreenHeight(screenDim.y - statusBarHeight, dragButton.height, toggle_layer_scroll.height, lower_menu_layout.height)
+        menu.setScreenHeight(screenDim.y - statusBarHeight, dragBar.height, toggle_layer_scroll.height, lower_menu_layout.height)
     }
 
     // Respond to permission request result

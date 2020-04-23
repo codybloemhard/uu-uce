@@ -12,6 +12,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
 import android.view.Gravity
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -113,6 +114,7 @@ class FieldbookHomeFragment : Fragment() {
         popupWindow.update()
 
         text = customView.findViewById(R.id.addText)
+        text.inputType = TYPE_TEXT_FLAG_NO_SUGGESTIONS
 
         imageView = customView.findViewById(R.id.addImage)
 

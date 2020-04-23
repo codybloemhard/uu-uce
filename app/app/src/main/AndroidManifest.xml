@@ -2,11 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.uu_uce">
 
-    <!--
-         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
-         Google Maps Android API v2, but you must specify either coarse or fine
-         location permissions for the 'MyLocation' functionality.
-    -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -51,14 +46,12 @@
         <activity android:name=".gestureDetection.TouchParent" />
         <activity
             android:name=".GeoMap"
-            android:label="@string/title_activity_geo_map"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".AllPins"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".VideoViewer"
-            android:label="@string/title_activity_geo_map"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <meta-data
