@@ -120,7 +120,7 @@ class AllPinsTests {
         // Open first pin
         onView(withId(R.id.allpins_recyclerview)).perform(
                 actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                    0, clickChildViewWithId(R.id.open_button)
+                    0, click()
                 )
             )
 
@@ -147,7 +147,7 @@ class AllPinsTests {
         // Open first pin
         onView(withId(R.id.allpins_recyclerview)).perform(
             actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                0, clickChildViewWithId(R.id.open_button)
+                0, click()
             )
         )
 
@@ -172,7 +172,7 @@ class AllPinsTests {
         // Open video pin
         onView(withId(R.id.allpins_recyclerview)).perform(
             actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                3, clickChildViewWithId(R.id.open_button)
+                3, click()
             )
         )
 
@@ -210,7 +210,7 @@ class AllPinsTests {
         // Open video pin
         onView(withId(R.id.allpins_recyclerview)).perform(
             actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                3, clickChildViewWithId(R.id.open_button)
+                3, click()
             )
         )
 
@@ -246,7 +246,7 @@ class AllPinsTests {
         // Open multiple choice pin
         onView(withId(R.id.allpins_recyclerview)).perform(
             actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                1, clickChildViewWithId(R.id.open_button)
+                1, click()
             )
         )
 
@@ -294,7 +294,7 @@ class AllPinsTests {
         // Open multiple choice pin
         onView(withId(R.id.allpins_recyclerview)).perform(
             actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                1, clickChildViewWithId(R.id.open_button)
+                1, click()
             )
         )
 
@@ -342,7 +342,7 @@ class AllPinsTests {
         // Open multiple choice pin
         onView(withId(R.id.allpins_recyclerview)).perform(
             actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                1, clickChildViewWithId(R.id.open_button)
+                1, click()
             )
         )
 
@@ -403,7 +403,7 @@ class AllPinsTests {
         // Open multiple choice pin
         onView(withId(R.id.allpins_recyclerview)).perform(
             actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                1, clickChildViewWithId(R.id.open_button)
+                1, click()
             )
         )
 

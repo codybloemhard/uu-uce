@@ -3,6 +3,9 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#fed402</color>
     <color name="colorAccent">#D81B60</color>
-    <color name="colorUU">#fed402</color>
+    <color name="colorUU">#FED330</color>
     <color name="colorUU2">#ec1a3d</color>
+    <color name="colorBackground">#F3F3F3</color>
+    <color name="HighBlue">#45AAF2</color>
+    <color name="TwinkleBlue">#D1D8E0</color>
 </resources>

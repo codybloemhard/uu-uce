@@ -1,28 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fieldbook_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorUU"
-    android:padding="5dp"
-    android:orientation="vertical" >
+    android:background="@color/colorBackground"
+    android:orientation="vertical">
 
     <include
-        layout="@layout/menu_bar"
         android:id="@+id/fieldbook_top_bar"
+        layout="@layout/menu_bar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fieldbook_top_bar"
-        app:layout_constraintBottom_toTopOf="@id/fieldbook_bottom_navigation"
+        android:layout_margin="5dp"
         android:background="#FFFFFF"
-        app:cardCornerRadius="8dp" >
+        android:padding="5dp"
+        app:cardCornerRadius="8dp"
+        app:layout_constraintBottom_toTopOf="@id/fieldbook_bottom_navigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/fieldbook_top_bar">
 
         <FrameLayout
             android:id="@+id/fieldbook_container"
@@ -35,14 +36,15 @@
         android:id="@+id/fieldbook_bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/colorBackground"
         android:paddingTop="5dp"
-        android:background="@color/colorUU"
         app:itemIconTint="#000"
         app:itemTextColor="#000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:menu="@menu/bottom_navigation_menu" />
+        app:menu="@menu/bottom_navigation_menu"
+        tools:layout_margin="5dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
