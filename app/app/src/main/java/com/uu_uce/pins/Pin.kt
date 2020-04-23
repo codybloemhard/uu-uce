@@ -164,7 +164,7 @@ class Pin(
         if(containsQuiz && status < 2){
             val finishButton = Button(activity)
             finishButton.id = R.id.finish_quiz_button
-            finishButton.text = activity.getString(R.string.finish_text)
+            finishButton.text = activity.getString(R.string.pin_finish)
             finishButton.background.setTint(ResourcesCompat.getColor(activity.resources, R.color.colorUU, null))
             val buttonLayout = LinearLayout.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
@@ -283,18 +283,18 @@ class Pin(
 
             // Set content based on result
             if(sufficient){
-                georgeReaction.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.happy_george, null))
-                quizResultText.text     = activity.getString(R.string.quiz_success_head)
-                completeText.text       = activity.getString(R.string.quiz_success_body, title, reward, totalReward)
-                btnOpenQuiz.text        = activity.getString(R.string.reopen_button_success)
+                georgeReaction.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.ic_george_celebrating, null))
+                quizResultText.text     = activity.getString(R.string.pin_quiz_success_head)
+                completeText.text       = activity.getString(R.string.pin_quiz_success_body, title, reward, totalReward)
+                btnOpenQuiz.text        = activity.getString(R.string.pin_quiz_reopen_button_success)
                 rewardLayout.visibility = VISIBLE
-                rewardText.text         = activity.getString(R.string.reward_string, reward)
+                rewardText.text         = activity.getString(R.string.pin_reward_string, reward)
             }
             else{
-                georgeReaction.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.crying_george, null))
-                quizResultText.text     = activity.getString(R.string.quiz_fail_head)
-                completeText.text       = activity.getString(R.string.quiz_fail_body)
-                btnOpenQuiz.text        = activity.getString(R.string.reopen_button_fail)
+                georgeReaction.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.ic_george_sad, null))
+                quizResultText.text     = activity.getString(R.string.pin_quiz_fail_head)
+                completeText.text       = activity.getString(R.string.pin_quiz_fail_body)
+                btnOpenQuiz.text        = activity.getString(R.string.pin_quiz_reopen_button_fail)
                 rewardLayout.visibility = GONE
             }
 

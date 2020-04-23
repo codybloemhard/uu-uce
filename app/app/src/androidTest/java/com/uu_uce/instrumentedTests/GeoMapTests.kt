@@ -90,7 +90,7 @@ class GeoMapTests {
     @Test
     fun dragButtonClicks() {
         // First click should open the layer toggle buttons
-        onView(withId(R.id.dragButton))
+        onView(withId(R.id.dragBar))
             .perform(click())
 
         onView(withId(R.id.toggle_layer_layout))
@@ -100,7 +100,7 @@ class GeoMapTests {
             .check(matches(not(isDisplayed())))
 
         // The second click should open the full menu
-        onView(withId(R.id.dragButton))
+        onView(withId(R.id.dragBar))
             .perform(click())
 
         onView(withId(R.id.toggle_layer_layout))
@@ -110,7 +110,7 @@ class GeoMapTests {
             .check(matches(isDisplayed()))
 
         // The final click should close the menu
-        onView(withId(R.id.dragButton))
+        onView(withId(R.id.dragBar))
             .perform(click())
 
         onView(withId(R.id.toggle_layer_layout))
@@ -123,7 +123,7 @@ class GeoMapTests {
     @Test
     fun allPinsButton(){
         // First click should open the layer toggle buttons
-        onView(withId(R.id.dragButton))
+        onView(withId(R.id.dragBar))
             .perform(click(), click())
 
         // Test switching to all pins
@@ -146,7 +146,7 @@ class GeoMapTests {
     @Test
     fun fieldbookButton(){
         // First click should open the layer toggle buttons
-        onView(withId(R.id.dragButton))
+        onView(withId(R.id.dragBar))
             .perform(click(), click())
 
         // Test switching to all pins
@@ -190,7 +190,7 @@ class GeoMapTests {
     @Test
     fun toggleLayer(){
         // First click should open the layer toggle buttons
-        onView(withId(R.id.dragButton))
+        onView(withId(R.id.dragBar))
             .perform(click())
 
         onView(withId(R.id.toggle_layer_layout))

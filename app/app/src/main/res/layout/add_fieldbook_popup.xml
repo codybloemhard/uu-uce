@@ -32,7 +32,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:text="@string/text_field_description" />
+                android:text="@string/fieldbook_edit_text_hint" />
 
             <EditText
                 android:id="@+id/addText"
@@ -51,7 +51,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:text="@string/image_field_description" />
+                android:text="@string/fieldbook_image_field_hint" />
 
             <ImageView
                 android:id="@+id/addImage"
@@ -59,7 +59,7 @@
                 android:layout_height="200dp"
                 android:layout_marginBottom="10dp"
                 android:background="@drawable/border"
-                android:contentDescription="@string/uploaded_image_field_description"
+                android:contentDescription="@string/fieldbook_uploaded_image_field_description"
                 android:scaleType="centerCrop" />
 
             <Button
@@ -71,7 +71,7 @@
                 android:minWidth="64dp"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
-                android:text="@string/add_button_text"
+                android:text="@string/fieldbook_add_button_text"
                 android:textAllCaps="true"
                 android:textColor="@color/colorUU2"
                 android:textSize="14sp"

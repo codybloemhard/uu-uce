@@ -63,7 +63,7 @@
                 android:minWidth="64dp"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
-                android:text="@string/close_popup"
+                android:text="@string/pin_close"
                 android:textAllCaps="true"
                 android:textColor="#710ACA"
                 android:textSize="14sp"
@@ -76,7 +76,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:clickable="false"
-                android:text="@string/completed_text"
+                android:text="@string/pin_completed"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 

@@ -64,32 +64,32 @@ class PinListAdapter internal constructor(
 
         when(current.difficulty){
             1 -> {
-                holder.pinDiff.text = activity.getString(R.string.easy)
+                holder.pinDiff.text = activity.getString(R.string.pin_difficulty_easy)
                 holder.pinDiffC.setBackgroundColor(Color.parseColor("#00B222"))
             }
             2 -> {
-                holder.pinDiff.text = activity.getString(R.string.medium)
+                holder.pinDiff.text = activity.getString(R.string.pin_difficulty_medium)
                 holder.pinDiffC.setBackgroundColor(Color.parseColor("#FF862F"))
             }
             3 -> {
-                holder.pinDiff.text = activity.getString(R.string.hard)
+                holder.pinDiff.text = activity.getString(R.string.pin_difficulty_hard)
                 holder.pinDiffC.setBackgroundColor(Color.parseColor("#EC1A3D"))
             }
             else -> {
-                holder.pinDiff.text = activity.getString(R.string.unknown)
+                holder.pinDiff.text = activity.getString(R.string.pin_difficulty_unknown)
                 holder.pinDiffC.setBackgroundColor(Color.parseColor("#686868"))
             }
         }
 
         when(current.type){
             "TEXT" -> holder.pinType.setImageDrawable(
-                ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_text_black, null) ?: error ("Image not found"))
+                ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_text, null) ?: error ("Image not found"))
             "IMAGE" -> holder.pinType.setImageDrawable(
-            ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image_black, null) ?: error ("Image not found"))
+            ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image, null) ?: error ("Image not found"))
             "VIDEO" -> holder.pinType.setImageDrawable(
-            ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video_black, null) ?: error ("Image not found"))
+            ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video, null) ?: error ("Image not found"))
             "MCQUIZ" -> holder.pinType.setImageDrawable(
-                ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz_black, null) ?: error ("Image not found"))
+                ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz, null) ?: error ("Image not found"))
         }
     }
 
