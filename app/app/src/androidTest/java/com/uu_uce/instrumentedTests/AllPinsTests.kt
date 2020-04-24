@@ -2,6 +2,7 @@ package com.uu_uce.instrumentedTests
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.view.KeyEvent
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
@@ -284,9 +285,9 @@ class AllPinsTests {
             .perform(click())
 
         // Check if pin is completed
-        /*onView(withId(R.id.complete_box))
+        onView(withId(R.id.completed_marker))
             .inRoot(isPlatformPopup())
-            .check(matches(isChecked()))*/
+            .check(matches(isDisplayed()))
     }
 
     @Test
@@ -332,9 +333,9 @@ class AllPinsTests {
             .perform(click())
 
         // Check if pin is completed
-        /*onView(withId(R.id.complete_box))
+        onView(withId(R.id.completed_marker))
             .inRoot(isPlatformPopup())
-            .check(matches(not(isChecked())))*/
+            .check(matches(not(isDisplayed())))
     }
 
     @Test
@@ -522,6 +523,51 @@ class AllPinsTests {
             .perform(click())
 
         // Check if sorting was successful
+        onView(
+            allOf(
+                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
+                withId(R.id.allpins_recyclerview_item_title)
+            )
+        ).check(matches(withText("C")))
+    }
+
+    @Test
+    fun pinSearching(){
+        // Search for D
+        onView(withId(R.id.searchbar))
+            .perform(typeText("D"), pressKey(KeyEvent.KEYCODE_ENTER))
+
+        sleep(100)
+
+        // Check if D was found
+        onView(
+            allOf(
+                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
+                withId(R.id.allpins_recyclerview_item_title)
+            )
+        ).check(matches(withText("D")))
+
+        // Press clear search to stop searching
+        onView(withId(R.id.searchbar))
+            .perform(clearText(), pressKey(KeyEvent.KEYCODE_ENTER))
+
+        sleep(100)
+
+        // Check if sorting was stopped
+        onView(
+            allOf(
+                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
+                withId(R.id.allpins_recyclerview_item_title)
+            )
+        ).check(matches(withText("B")))
+
+        // Search for C
+        onView(withId(R.id.searchbar))
+            .perform(typeText("C"), pressKey(KeyEvent.KEYCODE_ENTER))
+
+        sleep(100)
+
+        // Check if C was found
         onView(
             allOf(
                 isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
