@@ -148,6 +148,15 @@ class Pin(
         val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
         windowTitle.text = title
 
+        // Set completed visibility
+        val checkMark = customView.findViewById<ImageView>(R.id.completed_marker)
+        if(status == 2){
+            checkMark.visibility = VISIBLE
+        }
+        else{
+            checkMark.visibility = GONE
+        }
+
         // Add content to popup window
         val layout: LinearLayout = customView.findViewById(R.id.scrollLayout)
 

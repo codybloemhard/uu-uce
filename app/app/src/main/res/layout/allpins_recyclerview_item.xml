@@ -70,23 +70,18 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-      
-        <CheckBox
+
+        <ImageView
             android:id="@+id/checkBox"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:button="@null"
-            android:checked="false"
+            android:layout_marginEnd="5dp"
             android:clickable="false"
-            android:drawableEnd="?android:attr/listChoiceIndicatorMultiple"
-            android:gravity="center|end"
-            android:text="@string/pin_completed"
-            android:textColor="#8B8B8B"
-            android:textSize="14sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/type_image"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_sprite_complete"
+            android:contentDescription="@string/allpins_checkmark_description" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
   

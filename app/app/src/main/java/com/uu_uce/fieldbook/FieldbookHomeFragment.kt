@@ -13,11 +13,9 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
-import android.view.Gravity
+import android.view.*
+import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -130,6 +128,16 @@ class FieldbookHomeFragment : Fragment() {
         catch(e : Exception){
             Logger.log(LogType.Event, "Fielbook", "No last known location")
         }
+
+        val textField = customView.findViewById<EditText>(R.id.addText)
+        textField.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+                //Perform Code
+                hideKeyboard(fragmentActivity, customView)
+                return@OnKeyListener true
+            }
+            false
+        })
 
         val savePinButton = customView.findViewById<Button>(R.id.add_fieldbook_pin)
         savePinButton.setOnClickListener{
@@ -327,5 +335,22 @@ class FieldbookHomeFragment : Fragment() {
 
             }
         }
+    }
+
+    private fun hideKeyboard(activity: Activity, currentView : View? = null) {
+        val imm: InputMethodManager =
+            activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+
+        var view = currentView
+        if(view == null){
+            //Find the currently focused view, so we can grab the correct window token from it.
+            view = activity.currentFocus
+            //If no view currently has focus, create a new one, just so we can grab a window token from it
+            if (view == null) {
+                view = View(activity)
+            }
+        }
+
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 }

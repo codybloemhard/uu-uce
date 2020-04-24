@@ -1,6 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">UCE</string>
     <string name="allpins_open">Open</string>
+    <string name="allpins_checkmark_description">Checkmark displaying if a pin is done</string>
     <string name="allpins_search_icon_description">Search icon</string>
     <string name="pin_close">Close</string>
     <string name="pin_difficulty_easy">Easy</string>

@@ -8,9 +8,20 @@
     android:background="@color/BestWhite"
     android:gravity="center">
 
+    <ImageView
+        android:id="@+id/completed_marker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        app:layout_constraintBottom_toTopOf="@+id/sepparator"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_sprite_complete"
+        android:contentDescription="@string/allpins_checkmark_description" />
+
     <TextView
         android:id="@+id/popup_window_title"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif"
         android:gravity="bottom|start"
@@ -22,7 +33,7 @@
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/completed_marker"
         app:layout_constraintTop_toTopOf="parent" />
 
     <View

@@ -31,7 +31,7 @@ class PinListAdapter internal constructor(
         val pinCoord: TextView = itemView.findViewById(R.id.pin_coordinates)
         val pinType: ImageView = itemView.findViewById(R.id.type_image)
         val pinDiffC: CircleView = itemView.findViewById(R.id.diff)
-        val pinStatus: CheckBox = itemView.findViewById(R.id.checkBox)
+        val pinStatus: ImageView = itemView.findViewById(R.id.checkBox)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PinViewHolder {
@@ -45,9 +45,8 @@ class PinListAdapter internal constructor(
         holder.pinCoord.text = current.location
 
         // Set completed marker
-        if(pinCanComplete[position]){
+        if(pinCanComplete[position] && current.status == 2){
             holder.pinStatus.visibility = View.VISIBLE
-            holder.pinStatus.isChecked = (current.status == 2)
         }
         else{
             holder.pinStatus.visibility = View.GONE
