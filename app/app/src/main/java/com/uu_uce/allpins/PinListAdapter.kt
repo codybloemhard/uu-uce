@@ -27,6 +27,7 @@ class PinListAdapter internal constructor(
 
     inner class PinViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         val parentView : View = itemView
+        val fullView : LinearLayout = itemView.findViewById(R.id.recyclerview_item)
         val pinTitle: TextView = itemView.findViewById(R.id.allpins_recyclerview_item_title)
         val pinCoord: TextView = itemView.findViewById(R.id.pin_coordinates)
         val pinType: ImageView = itemView.findViewById(R.id.type_image)
@@ -52,7 +53,7 @@ class PinListAdapter internal constructor(
             holder.pinStatus.visibility = View.GONE
         }
 
-        holder.parentView.setOnClickListener{
+        holder.fullView.setOnClickListener{
             val pinConverter = PinConversion(activity)
             val pin = pinConverter.pinDataToPin(current, pinViewModel)
             pin.getContent().parent = pin

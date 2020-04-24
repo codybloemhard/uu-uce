@@ -180,7 +180,7 @@ class Pin(
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.WRAP_CONTENT
             )
-            buttonLayout.setMargins(parentView.width / 7, parentView.height / 100, parentView.width / 7, parentView.height / 100)
+            buttonLayout.setMargins(parentView.width / 7, parentView.height / 50, parentView.width / 7, parentView.height / 50)
             finishButton.layoutParams = buttonLayout
             finishButton.setOnClickListener{
                 finishQuiz(activity, parentView)
