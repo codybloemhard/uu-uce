@@ -23,6 +23,7 @@ import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.PolygonReader
 import com.uu_uce.views.DragStatus
 import kotlinx.android.synthetic.main.activity_geo_map.*
+import kotlinx.android.synthetic.main.settings_activity.*
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 
@@ -91,6 +92,9 @@ class GeoMap : AppCompatActivity() {
 
         val btn2 = fieldbook_button
         btn2.setOnClickListener{customMap.startFieldBook()}
+
+        val btn3 = settings_button
+        btn3.setOnClickListener{customMap.startSettings()}
 
         dragBar.clickAction      = {menu.dragButtonTap()}
         dragBar.dragAction       = { dx, dy -> menu.drag(dx,dy)}
