@@ -1,13 +1,15 @@
 package com.uu_uce
 
-import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.view.KeyEvent
+import android.view.View
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import com.uu_uce.ui.createTopbar
-import kotlinx.android.synthetic.main.settings_activity.*
+import kotlinx.android.synthetic.main.activity_settings.*
 
 class Settings : AppCompatActivity() {
     // private variables
@@ -18,19 +20,19 @@ class Settings : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.settings_activity)
+        setContentView(R.layout.activity_settings)
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this)//this.getPreferences(Context.MODE_PRIVATE)
 
         createTopbar(this, "Settings")
 
+        // PinSize
         val curSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", 60)
         pinsize_seekbar.max = maxPinSize - minPinSize
         pinsize_seekbar.progress = curSize - minPinSize
-        pinsize_numberview.text = (curSize + minPinSize).toString()
+        pinsize_numberview.text = curSize.toString()
 
         pinsize_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
                 // Display the pinSize
                 pinsize_numberview.text = (seekBar.progress + minPinSize).toString()

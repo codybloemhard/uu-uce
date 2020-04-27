@@ -23,7 +23,7 @@ import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.PolygonReader
 import com.uu_uce.views.DragStatus
 import kotlinx.android.synthetic.main.activity_geo_map.*
-import kotlinx.android.synthetic.main.settings_activity.*
+import kotlinx.android.synthetic.main.activity_settings.*
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 

@@ -40,9 +40,12 @@
             <TextView
                 android:id="@+id/pinsize_numberview"
                 android:layout_width="50dp"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
+                android:importantForAutofill="no"
                 android:inputType="number"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 
