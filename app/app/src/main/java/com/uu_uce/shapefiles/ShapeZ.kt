@@ -4,11 +4,43 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import com.uu_uce.misc.LinkedList
+import com.uu_uce.misc.Logger
 import com.uu_uce.misc.Node
 
+abstract class DrawInfo{
+    abstract fun draw(canvas: Canvas, paint: Paint)
+}
+
+class LineDrawInfo(nrPoints: Int): DrawInfo(){
+    private var lines: FloatArray = FloatArray(nrPoints*4)
+    var i = 0
+    fun addLine(item: Float){lines[i++] = item}
+    override fun draw(canvas: Canvas, paint: Paint) {
+        canvas.drawLines(lines, paint)
+    }
+}
+
+class PolygonDrawInfo(nrVertices: Int, nrIndices: Int): DrawInfo(){
+    private var vertices = FloatArray(nrVertices*4)
+    var v = 0
+    var indices = ShortArray(nrIndices)
+    var i = 0
+
+    fun addVertex(item: Float) {vertices[v++]=item}
+    private fun addIndex(item: Short) {indices[i++]=item}
+    fun addIndices(idcs: MutableList<Short>){
+        for(index in idcs) addIndex(index)
+    }
+
+    override fun draw(canvas: Canvas, paint: Paint) {
+        val colors = IntArray(vertices.size){ Color.CYAN}
+        canvas.drawVertices(Canvas.VertexMode.TRIANGLES, vertices.size, vertices, 0, null, 0, colors, 0, indices, 0,indices.size, paint)
+
+    }
+}
 
 abstract class ShapeZ(var bmin: p3, var bmax: p3){
-    abstract fun draw(canvas: Canvas, paint: Paint, viewport: Pair<p2,p2>, width: Int, height: Int)
+    abstract fun draw(drawInfo: DrawInfo, viewport: Pair<p2,p2>, width: Int, height: Int)
     abstract val nrPoints: Int
 }
 
@@ -16,28 +48,22 @@ class HeightShapeZ(private var points: List<p2>, bmi: p3, bma: p3): ShapeZ(bmi,b
     override val nrPoints = points.size
 
     override fun draw(
-        canvas: Canvas,
-        paint: Paint,
+        drawInfo: DrawInfo,
         viewport : Pair<p2, p2>,
         width: Int,
         height: Int
     ) {
         if (points.size < 2) return
-        val drawPoints = FloatArray(4 * (points.size - 1))
 
-        var lineIndex = 0
-        for (i in 0..points.size - 2) {
-            drawPoints[lineIndex++] =
-                ((points[i].first - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat()
-            drawPoints[lineIndex++] =
-                (height - (points[i].second - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat()
-            drawPoints[lineIndex++] =
-                ((points[i + 1].first - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat()
-            drawPoints[lineIndex++] =
-                (height - (points[i + 1].second - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat()
+        if(drawInfo is LineDrawInfo) {
+            for (i in 0..points.size - 2) {
+                drawInfo.addLine(((points[i].first - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat())
+                drawInfo.addLine((height - (points[i].second - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat())
+                drawInfo.addLine(((points[i + 1].first - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat())
+                drawInfo.addLine((height - (points[i + 1].second - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat())
+            }
         }
-
-        canvas.drawLines(drawPoints, paint)
+        else Logger.error("ShapeZ", "wrong draw information for heightshape")
     }
 
     fun meanZ(): Int{
@@ -52,13 +78,11 @@ class PolyPoint(val point: p3, var reflex: Boolean, var ear: Boolean, val index:
 }
 
 class PolygonZ(outerRings: List<List<p3>>, private var innerRings: List<List<p3>>, bmi: p3, bma:p3): ShapeZ(bmi,bma){
-    private lateinit var triangles: MutableList<Int>
+    lateinit var indices: MutableList<Short>
     private var vertices: List<p3>
     override val nrPoints: Int
 
     init{
-        //todo in proprocessing: make sure there is only 1 outer ring, with matching inner rings
-        //using isInsidePolygon
         vertices = outerRings[0]
         mergeInner()
         removeDoubles()
@@ -68,24 +92,24 @@ class PolygonZ(outerRings: List<List<p3>>, private var innerRings: List<List<p3>
     }
 
     override fun draw(
-        canvas: Canvas,
-        paint: Paint,
+        drawInfo: DrawInfo,
         viewport: Pair<p2, p2>,
         width: Int,
         height: Int
     ) {
-        val verts = FloatArray(vertices.size * 2){i ->
-            if(i%2 == 0)
-                ((vertices[i/2].first - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat()
-            else
-                (height - (vertices[i/2].second - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat()
+        if(drawInfo is PolygonDrawInfo) {
+            for (i in 0 until vertices.size * 2) {
+                drawInfo.addVertex(
+                    if (i % 2 == 0)
+                        ((vertices[i / 2].first - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat()
+                    else
+                        (height - (vertices[i / 2].second - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat()
+                )
+            }
+            drawInfo.addIndices(indices)
         }
-        val indices = triangles.map{i -> i.toShort()}.toShortArray()
+        else Logger.error("ShapeZ", "wrong draw information for polygon shape")
 
-        val colors = IntArray(verts.size){ Color.CYAN}
-        //val colors = null
-
-        canvas.drawVertices(Canvas.VertexMode.TRIANGLES, verts.size, verts, 0, null, 0, colors, 0, indices, 0, indices.size, paint)
     }
 
     private fun mergeInner(){
@@ -193,7 +217,7 @@ class PolygonZ(outerRings: List<List<p3>>, private var innerRings: List<List<p3>
 
         //indices into originalPolygon
         //three consecutive indices form a triangle
-        triangles = mutableListOf()
+        indices = mutableListOf()
 
         var step = 0
         var cur = remainingPolygon.first!!
@@ -215,9 +239,9 @@ class PolygonZ(outerRings: List<List<p3>>, private var innerRings: List<List<p3>
             }
 
             //add new ear to found triangles
-            triangles.add(cur.prev!!.value.index)
-            triangles.add(cur.value.index)
-            triangles.add(cur.next!!.value.index)
+            indices.add(cur.prev!!.value.index.toShort())
+            indices.add(cur.value.index.toShort())
+            indices.add(cur.next!!.value.index.toShort())
 
             val prev = cur.prev!!
             remainingPolygon.remove(cur)
@@ -241,7 +265,7 @@ class PolygonZ(outerRings: List<List<p3>>, private var innerRings: List<List<p3>
             cur = prev
         }
         for(point in remainingPolygon)
-            triangles.add(point.value.index)
+            indices.add(point.value.index.toShort())
     }
 
     private fun update(polygon: LinkedList<PolyPoint>, p: Node<PolyPoint>){
@@ -302,26 +326,5 @@ class PolygonZ(outerRings: List<List<p3>>, private var innerRings: List<List<p3>
         //there will be two exactly equal lines in the polygon, only in reversed order
         val e = 0.0001
         return (a in 0.0+e..1.0-e) && (b in 0.0+e..1.0-e) && (c in 0.0+e..1.0-e)
-    }
-
-    private fun isInsidePolygon(p:p3, polygon: List<p3>): Boolean{
-        //shoot a ray to the right and count how many times it intersects the polygon
-        //even means outside, odd means inside
-        var intersects = 0
-        for(i in polygon.indices){
-            val x1 = polygon[i].first
-            val y1 = polygon[i].second
-            val x2 = polygon[(i + 1) % polygon.size].first
-            val y2 = polygon[(i + 1) % polygon.size].second
-
-            val t = (p.second - y1) / (y2 - y1)
-            if (t < 0 || t > 1) continue
-            val x = x1 + t * (x2 - x1)
-            if(x<p.first) continue
-
-            //there was an intersection
-            intersects++
-        }
-        return intersects % 2 == 1
     }
 }

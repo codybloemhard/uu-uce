@@ -118,7 +118,7 @@ class HeightLineReader(
         val time1 = System.currentTimeMillis() - time
         Logger.log(LogType.Continuous, "BinShapeReader", "loadtime: $time1")
 
-        return Chunk(shapes, bmin, bmax)
+        return Chunk(shapes, bmin, bmax, LayerType.Height)
     }
 }
 
@@ -161,7 +161,6 @@ class PolygonReader(
             PolygonZ(outerRings, innerRings, bbmin, bbmax)
         }
 
-        //todo: remove temporary boundingbox calculation
-        return Chunk(shapes, bmin, bmax)
+        return Chunk(shapes, bmin, bmax, LayerType.Water)
     }
 }
