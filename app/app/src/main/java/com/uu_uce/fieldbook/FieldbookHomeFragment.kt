@@ -31,10 +31,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.R
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.pins.BlockTag
-import com.uu_uce.pins.ContentBlockInterface
-import com.uu_uce.pins.ImageContentBlock
-import com.uu_uce.pins.VideoContentBlock
+import com.uu_uce.pins.*
 import com.uu_uce.services.*
 import java.io.File
 import java.io.FileOutputStream
@@ -189,7 +186,7 @@ class FieldbookHomeFragment : Fragment() {
         savePinButton.setOnClickListener{
             saveFieldbookEntry(
                 title.text.toString(),
-                currentUri.toString(),
+                content,
                 getCurrentDateTime(DateTimeFormat.FIELDBOOK_ENTRY),
                 location
             )
@@ -341,6 +338,12 @@ class FieldbookHomeFragment : Fragment() {
         //TODO
         val text = EditText(requireContext())
         layout.addView(text, layoutParams)
+        TextContentBlock(
+            text.text.toString()
+        ).also{
+            it.generateContent(blockID++,layout,requireActivity(),customView,null)
+            content.add(it)
+        }
     }
 
     private fun addImage(image: Uri) {
@@ -436,6 +439,7 @@ class FieldbookHomeFragment : Fragment() {
 
     private fun makeVideoThumbnail(uri: Uri) : Uri {
         val retriever = MediaMetadataRetriever().apply {
+            //TODO: this failed
             setDataSource(requireContext(),uri)
         }
 
@@ -476,21 +480,10 @@ class FieldbookHomeFragment : Fragment() {
 
     private fun saveFieldbookEntry(
         title: String,
-        image: String,
+        content: List<ContentBlockInterface>,
         currentDate: String,
         location: Location?
     ) {
-        val content = listOf(
-            Pair(
-                BlockTag.TEXT,
-                title
-            ),
-            Pair(
-                BlockTag.IMAGE,
-                image
-            )
-        )
-
         val utm = if(location == null){
             UTMCoordinate(0, 'N', 0.0, 0.0).toString()
         }
@@ -515,17 +508,20 @@ class FieldbookHomeFragment : Fragment() {
         }
     }
 
-    private fun buildJSONContent(contentList: List<Pair<BlockTag,String>>): String {
-        return  "[" +
-                "{" +
-                "\"tag\":\"${contentList.first().first}\"," +
-                "\"text\":\"${contentList.first().second}\"" +
-                "}," +
-                "{" +
-                "\"tag\":\"${contentList.last().first}\"," +
-                "\"file_path\":\"${contentList.last().second}\"" +
-                "}" +
-                "]"
+    private fun buildJSONContent(content: List<ContentBlockInterface>): String {
+        return  content.joinToString(
+            prefix      = "[",
+            separator   = ",",
+            postfix     = "]"
+        ).also { jsonString ->
+            // added for debugging purposes
+            val myDir: File = File(requireContext().filesDir, "Content").also {
+                it.mkdirs()
+            }
+            val fileName = "TestContent.txt"
+            val file = File(myDir, fileName)
+            file.writeText(jsonString)
+        }
     }
 
     enum class DateTimeFormat{

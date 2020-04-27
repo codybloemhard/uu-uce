@@ -116,9 +116,11 @@ interface ContentBlockInterface{
     val canCompleteBlock : Boolean
     fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?)
     fun getFilePath() : List<String>
+    override fun toString() : String
 }
 
 class TextContentBlock(private val textContent : String) : ContentBlockInterface{
+    private val tag = BlockTag.TEXT
     override val canCompleteBlock = false
     override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
         val content = TextView(activity)
@@ -132,12 +134,18 @@ class TextContentBlock(private val textContent : String) : ContentBlockInterface
         return listOf()
     }
 
+    override fun toString() : String {
+        return "{${tagToJsonString(tag)}," +
+                "${textToJsonString(textContent)}}"
+    }
+
     fun getTextContent() : String{
         return textContent
     }
 }
 
 class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Uri) : ContentBlockInterface{
+    private val tag = BlockTag.IMAGE
     override val canCompleteBlock = false
     override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
         val content = ImageView(activity)
@@ -161,12 +169,19 @@ class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Ur
         return listOf(imageURI.toString())
     }
 
+    override fun toString() : String {
+        return "{${tagToJsonString(tag)}," +
+                "${fileToJsonString(imageURI)}," +
+                "${thumbnailToJsonString(thumbnailURI)}}"
+    }
+
     fun getImageURI() : Uri{
         return imageURI
     }
 }
 
 class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : Uri, private val title : String? = null) : ContentBlockInterface{
+    private val tag = BlockTag.VIDEO
     override val canCompleteBlock = false
     override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
         val frameLayout = FrameLayout(activity)
@@ -204,6 +219,12 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         return listOf(thumbnailURI.toString())
     }
 
+    override fun toString() : String {
+        return "{${tagToJsonString(tag)}," +
+                "${fileToJsonString(videoURI)}," +
+                "${thumbnailToJsonString(thumbnailURI)}}"
+    }
+
     private fun openVideoView(videoURI: Uri, videoTitle : String?, activity : Activity){
         val intent = Intent(activity, VideoViewer::class.java)
 
@@ -219,6 +240,7 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
 }
 
 class MCContentBlock(private val correctAnswers : List<String>, private val incorrectAnswers : List<String>, private val reward : Int) : ContentBlockInterface{
+    private val tag = BlockTag.MCQUIZ
     override val canCompleteBlock = true
     private var selectedAnswer : Int = -1
     private lateinit var selectedBackground : CardView
@@ -317,6 +339,10 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
     override fun getFilePath(): List<String> {
         return listOf()
     }
+
+    override fun toString(): String {
+        return ""
+    }
 }
 
 enum class BlockTag{
@@ -335,6 +361,22 @@ fun blockTagFromString(tagString : String) : BlockTag{
         "MCQUIZ"    -> BlockTag.MCQUIZ
         else        -> BlockTag.UNDEFINED
     }
+}
+
+fun tagToJsonString(tag: BlockTag) : String {
+    return "\"tag\":\"$tag\""
+}
+
+fun textToJsonString(text: String) : String {
+    return "\"text\":\"$text\""
+}
+
+fun fileToJsonString(filePath: Uri) : String {
+    return "\"file_path\":\"$filePath\""
+}
+
+fun thumbnailToJsonString(thumbnail: Uri) : String {
+    return "\"thumbnail\":\"$thumbnail\""
 }
 
 
