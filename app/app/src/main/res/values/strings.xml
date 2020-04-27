@@ -40,7 +40,7 @@
     <string name="add_button_text">add to my fieldbook</string>
     <string name="date_time_text"><![CDATA[Date & Time]]></string>
     <string name="fieldbook_coordinates_text">Pin coordinates</string>
-    <string name="fieldbook_pin_title_placeholder">#000</string>
+    <string name="fieldbook_pin_title_placeholder">Title</string>
     <string name="fieldbook_image_preview">Picture Preview</string>
     <string name="menu_bar_backbutton_description">Back Button</string>
     <string name="menubar_placeholder_text">Menu Item</string>

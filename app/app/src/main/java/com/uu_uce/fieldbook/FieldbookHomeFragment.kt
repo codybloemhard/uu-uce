@@ -492,6 +492,7 @@ class FieldbookHomeFragment : Fragment() {
         }
 
         FieldbookEntry(
+            title,
             utm,
             currentDate,
             buildJSONContent(content).also{ jsonString ->

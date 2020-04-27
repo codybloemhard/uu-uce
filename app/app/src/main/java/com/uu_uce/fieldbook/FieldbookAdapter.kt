@@ -2,6 +2,7 @@ package com.uu_uce.fieldbook
 
 import android.app.Activity
 import android.content.DialogInterface
+import android.graphics.Color.rgb
 import android.net.Uri
 import android.view.Gravity
 import android.view.View
@@ -22,11 +23,10 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
     class FieldbookViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val parentView = itemView
-        val numberFb: TextView = parentView.findViewById(R.id.no)
+        val numberFb: TextView = parentView.findViewById(R.id.title)
         val locationFb: TextView = parentView.findViewById(R.id.pin_coordinates)
         val datetimeFb: TextView = parentView.findViewById(R.id.datetime)
-        val textFb: TextView = parentView.findViewById(R.id.text_preview)
-        val imageFb: ImageView = parentView.findViewById(R.id.image_preview)
+        val frameFb: FrameLayout = parentView.findViewById(R.id.frame_layout)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FieldbookViewHolder {
@@ -40,35 +40,58 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
     override fun onBindViewHolder(holder: FieldbookViewHolder, position: Int) {
         val entry : FieldbookEntry = fieldbook[position]
-        holder.numberFb.text = addLeadingZeros(entry.id)
+        //holder.numberFb.text = addLeadingZeros(entry.id)
+        holder.numberFb.text = entry.title
         holder.locationFb.text = entry.location
         holder.datetimeFb.text = entry.dateTime
+
+        val params = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        )
 
         val content = PinContent(entry.content)
 
         var uri: Uri = Uri.EMPTY
 
-        var displayingText = false
-        var displayingImage = false
+        var isThumbnail = false
 
-        for (cB in content.contentBlocks)
-        {
-            if (displayingText && displayingImage)
-                break
+        //val textFb: TextView = parentView.findViewById(R.id.text_preview)
+        //val imageFb: ImageView = parentView.findViewById(R.id.image_preview)
 
-            if (cB is TextContentBlock && !displayingText) {
-                displayingText = true
-                holder.textFb.text = cB.getTextContent()
-            } else if (!displayingImage) {
-                displayingImage = true
+        //1x alles doorlopen, niet meer checken op dingen die we al gehad hebben...
+        //als er een textblock is, gebruiken we die...
+        //anders gebruiken we een afbeelding (sws thumbnail)
+        //anders gebruiken we een video thumbnail
 
-                if (cB is ImageContentBlock) {
-                    uri = cB.getImageURI()
-                    holder.imageFb.setImageURI(uri)
+        loop@ for (cB in content.contentBlocks) {
+            when (cB) {
+                is TextContentBlock -> {
+                    TextView(activity).apply {
+                        textSize = 12f
+                        setTextColor(rgb(100, 100, 100))
+                        text = cB.getTextContent()
+                        //Text direction?
+                        //What to do when text goes over the edge?
+                    }.also {
+                        holder.frameFb.addView(it, params)
+                    }
+                    break@loop
                 }
-                if (cB is VideoContentBlock) {
-                    uri = cB.getThumbnailURI()
-                    holder.imageFb.setImageURI(uri)
+                else -> {
+                    if (!isThumbnail) {
+                        if (cB is ImageContentBlock)
+                            uri = cB.getThumbnailURI()
+                        else if (cB is VideoContentBlock)
+                            uri = cB.getThumbnailURI()
+                        ImageView(activity).apply {
+                            scaleType = ImageView.ScaleType.CENTER_CROP
+                            setImageURI(uri)
+                        }.also {
+                            holder.frameFb.addView(it, params)
+                        }
+                        isThumbnail = true
+                    }
                 }
             }
         }
@@ -89,7 +112,7 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
                     // Add the title for the popup window
                     val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
-                    windowTitle.text = entry.location
+                    windowTitle.text = entry.title
 
                     // Add content to popup window
                     val layout: LinearLayout = customView.findViewById(R.id.scrollLayout)

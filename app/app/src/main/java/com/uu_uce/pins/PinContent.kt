@@ -175,8 +175,8 @@ class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Ur
                 "${thumbnailToJsonString(thumbnailURI)}}"
     }
 
-    fun getImageURI() : Uri{
-        return imageURI
+    fun getThumbnailURI() : Uri{
+        return thumbnailURI
     }
 }
 
