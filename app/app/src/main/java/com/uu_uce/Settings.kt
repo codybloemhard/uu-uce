@@ -5,21 +5,22 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.PreferenceManager
 import com.uu_uce.ui.createTopbar
 import kotlinx.android.synthetic.main.settings_activity.*
 
 class Settings : AppCompatActivity() {
     // private variables
-    private val minPinSize = 10
+    private val minPinSize = 50
     private val maxPinSize = 100
 
-    private lateinit var sharedPref     : SharedPreferences
+    private lateinit var sharedPref : SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings_activity)
 
-        sharedPref = this.getPreferences(Context.MODE_PRIVATE)
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)//this.getPreferences(Context.MODE_PRIVATE)
 
         createTopbar(this, "Settings")
 
@@ -39,8 +40,9 @@ class Settings : AppCompatActivity() {
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
+                val pinSize = seekBar.progress + minPinSize
                 with(sharedPref.edit()) {
-                    putInt("com.uu_uce.PIN_SIZE", seekBar.progress + minPinSize)
+                    putInt("com.uu_uce.PIN_SIZE", pinSize)
                     apply()
                 }
             }

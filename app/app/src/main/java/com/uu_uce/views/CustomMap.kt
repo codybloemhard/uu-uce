@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import androidx.preference.PreferenceManager
 import com.uu_uce.AllPins
 import com.uu_uce.Fieldbook
 import com.uu_uce.R
@@ -95,7 +96,7 @@ class CustomMap : ViewTouchParent {
         addChild(SingleTapper(context as AppCompatActivity, ::tapPin))
 
         // Get settings
-        sharedPref = (context as AppCompatActivity).getPreferences(Context.MODE_PRIVATE)
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(context as AppCompatActivity)
 
         // Init paints
         deviceLocPaint.color = Color.BLUE

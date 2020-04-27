@@ -193,15 +193,6 @@ class Pin(
 
         // Get elements
         val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
-        /*val checkBoxCompletePin = customView.findViewById<CheckBox>(R.id.complete_box)
-
-        // Set checkbox to correct state
-        if(content.canCompletePin){
-            checkBoxCompletePin.isChecked = (getStatus() == 2)
-        }
-        else{
-            checkBoxCompletePin.visibility = View.INVISIBLE
-        }*/
 
         // Set onClickListeners
         btnClosePopupWindow.setOnClickListener {
