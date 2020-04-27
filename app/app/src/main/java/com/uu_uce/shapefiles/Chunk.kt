@@ -10,7 +10,7 @@ fun chunkName(c: ChunkIndex): String{
 }
 
 class Chunk(
-    private var shapes: List<ShapeZ>,
+    var shapes: List<ShapeZ>,
     var bmin: p3,
     var bmax: p3
 ) {

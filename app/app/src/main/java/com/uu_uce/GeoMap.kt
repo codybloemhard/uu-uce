@@ -93,12 +93,12 @@ class GeoMap : AppCompatActivity() {
         }catch(e: Exception){
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
-        /*try {
+        try {
             customMap.addLayer(LayerType.Water, PolygonReader(mydir),  toggle_layer_layout, size, false)
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
         }catch(e: Exception){
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
-        }*/
+        }
 
         customMap.initializeCamera()
 

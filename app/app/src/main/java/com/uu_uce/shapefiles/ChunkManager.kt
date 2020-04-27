@@ -16,7 +16,7 @@ import kotlin.math.pow
 
 enum class ChunkUpdateResult{NOTHING, REDRAW, LOADING}
 
-class StopLoader(
+class ChunkManager(
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk>,
     private val chunkGetter: ChunkGetter,
     private val map: ShapeMap,

@@ -9,9 +9,11 @@ import com.uu_uce.misc.Node
 
 abstract class ShapeZ(var bmin: p3, var bmax: p3){
     abstract fun draw(canvas: Canvas, paint: Paint, viewport: Pair<p2,p2>, width: Int, height: Int)
+    abstract val nrPoints: Int
 }
 
 class HeightShapeZ(private var points: List<p2>, bmi: p3, bma: p3): ShapeZ(bmi,bma) {
+    override val nrPoints = points.size
 
     override fun draw(
         canvas: Canvas,
@@ -52,6 +54,7 @@ class PolyPoint(val point: p3, var reflex: Boolean, var ear: Boolean, val index:
 class PolygonZ(outerRings: List<List<p3>>, private var innerRings: List<List<p3>>, bmi: p3, bma:p3): ShapeZ(bmi,bma){
     private lateinit var triangles: MutableList<Int>
     private var vertices: List<p3>
+    override val nrPoints: Int
 
     init{
         //todo in proprocessing: make sure there is only 1 outer ring, with matching inner rings
@@ -60,6 +63,8 @@ class PolygonZ(outerRings: List<List<p3>>, private var innerRings: List<List<p3>
         mergeInner()
         removeDoubles()
         triangulate(vertices)
+
+        nrPoints = vertices.size
     }
 
     override fun draw(

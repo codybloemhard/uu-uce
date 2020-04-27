@@ -1,16 +1,13 @@
 package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import java.io.File
-import kotlin.math.pow
 
 class ShapeLayer(chunkGetter: ChunkGetter, map: ShapeMap, onLoadedAction: (sl: ShapeLayer) -> Unit, hasInfo: Boolean){
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk> = mutableMapOf()
-    private val chunkManager: StopLoader
+    private val chunkManager: ChunkManager
 
     var bmin: p3
         private set
@@ -30,9 +27,10 @@ class ShapeLayer(chunkGetter: ChunkGetter, map: ShapeMap, onLoadedAction: (sl: S
             chunks[index] = chunk
             bmin = chunk.bmin
             bmax = chunk.bmax
+            chunkGetter.nrCuts = listOf(1)
         }
 
-        chunkManager = StopLoader(chunks, chunkGetter, map, bmin, bmax, chunkGetter.nrCuts)
+        chunkManager = ChunkManager(chunks, chunkGetter, map, bmin, bmax, chunkGetter.nrCuts)
     }
 
     fun setzooms(minzoom: Double, maxzoom: Double){
@@ -47,9 +45,18 @@ class ShapeLayer(chunkGetter: ChunkGetter, map: ShapeMap, onLoadedAction: (sl: S
         chunkManager.debug(canvas,viewport, width,height)
 
         synchronized(chunks) {
+            var nrShapes = 0
+            var nrLines = 0
             for(chunk in chunks.values) {
                 chunk.draw(canvas, paint, viewport, width, height)
+
+                nrShapes += chunk.shapes.size
+                for(shape in chunk.shapes){
+                    nrLines+=shape.nrPoints-1
+                }
             }
+
+            Logger.log(LogType.Continuous, "ShapeLayer", "$nrShapes shapes with $nrLines lines, average ${if(nrShapes > 0) nrLines.toDouble()/nrShapes else 0} lines per shape")
         }
     }
 }
