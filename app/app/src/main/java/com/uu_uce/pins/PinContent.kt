@@ -12,6 +12,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.VideoViewer
+import com.uu_uce.misc.Logger
 import java.io.StringReader
 
 class PinContent(private val contentString: String) {
@@ -47,7 +48,7 @@ class PinContent(private val contentString: String) {
     private fun readBlock(reader: JsonReader): ContentBlockInterface {
         var blockTag                                    = BlockTag.UNDEFINED
         var textString                                  = ""
-        var fileName                                    = ""
+        var filePath                                    = ""
         var title                                       = ""
         var thumbnailURI                                = Uri.EMPTY
         val mcCorrectOptions : MutableList<String>      = mutableListOf()
@@ -65,7 +66,7 @@ class PinContent(private val contentString: String) {
                     textString = reader.nextString()
                 }
                 "file_path" -> {
-                    fileName = when(blockTag) {
+                    filePath = when(blockTag) {
                         BlockTag.UNDEFINED  -> error("Undefined block tag")
                         BlockTag.TEXT       -> error("Undefined function") //TODO: Add reading text from file?
                         BlockTag.IMAGE      -> reader.nextString()
@@ -99,8 +100,8 @@ class PinContent(private val contentString: String) {
         return when(blockTag){
             BlockTag.UNDEFINED  -> error("Undefined block tag")
             BlockTag.TEXT       -> TextContentBlock(textString)
-            BlockTag.IMAGE      -> ImageContentBlock(Uri.parse(fileName))
-            BlockTag.VIDEO      -> VideoContentBlock(Uri.parse(fileName), thumbnailURI, title)
+            BlockTag.IMAGE      -> ImageContentBlock(Uri.parse(filePath), thumbnailURI)
+            BlockTag.VIDEO      -> VideoContentBlock(Uri.parse(filePath), thumbnailURI, title)
             BlockTag.MCQUIZ     -> {
                 if(mcIncorrectOptions.count() < 1 && mcCorrectOptions.count() < 1) {
                     error("Mutliple choice questions require at least one correct and one incorrect answer")
@@ -136,11 +137,16 @@ class TextContentBlock(private val textContent : String) : ContentBlockInterface
     }
 }
 
-class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
+class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Uri) : ContentBlockInterface{
     override val canCompleteBlock = false
     override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
         val content = ImageView(activity)
-        content.setImageURI(imageURI)
+        try {
+            content.setImageURI(imageURI)
+        } catch (e: Exception) {
+            Logger.error("PinContent","Couldn't load $imageURI, so loaded the thumbnail $thumbnailURI instead")
+            content.setImageURI(thumbnailURI)
+        }
         val imageLayoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
@@ -160,7 +166,7 @@ class ImageContentBlock(private val imageURI : Uri) : ContentBlockInterface{
     }
 }
 
-class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : Uri, private val title : String) : ContentBlockInterface{
+class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : Uri, private val title : String? = null) : ContentBlockInterface{
     override val canCompleteBlock = false
     override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
         val frameLayout = FrameLayout(activity)
@@ -198,11 +204,12 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         return listOf(thumbnailURI.toString())
     }
 
-    private fun openVideoView(videoURI: Uri, videoTitle : String, activity : Activity){
+    private fun openVideoView(videoURI: Uri, videoTitle : String?, activity : Activity){
         val intent = Intent(activity, VideoViewer::class.java)
 
         intent.putExtra("uri", videoURI)
-        intent.putExtra("title", videoTitle)
+        if(videoTitle != null)
+            intent.putExtra("title", videoTitle)
         activity.startActivity(intent)
     }
 

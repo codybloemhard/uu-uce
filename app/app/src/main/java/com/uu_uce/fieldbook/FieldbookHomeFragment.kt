@@ -2,17 +2,17 @@ package com.uu_uce.fieldbook
 
 import android.Manifest
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.location.Location
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Size
 import android.view.Gravity
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -20,6 +20,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.FileProvider
+import androidx.core.database.getStringOrNull
 import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
@@ -32,6 +34,7 @@ import com.uu_uce.misc.Logger
 import com.uu_uce.pins.BlockTag
 import com.uu_uce.pins.ContentBlockInterface
 import com.uu_uce.pins.ImageContentBlock
+import com.uu_uce.pins.VideoContentBlock
 import com.uu_uce.services.*
 import java.io.File
 import java.io.FileOutputStream
@@ -62,37 +65,53 @@ class FieldbookHomeFragment : Fragment() {
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
 
+        //TODO: add checks on availability of storage et cetera
         lateinit var fieldbookDir : File
-    }
 
-    enum class RequestCode(val num: Int) {
-        REQUEST_IMAGE_UPLOAD    (0),
-        REQUEST_IMAGE_CAPTURE   (1),
-        REQUEST_VIDEO_CAPTURE   (2)
+        const val REQUEST_IMAGE_UPLOAD  = 0
+        const val REQUEST_IMAGE_CAPTURE = 1
+        const val REQUEST_VIDEO_UPLOAD  = 2
+        const val REQUEST_VIDEO_CAPTURE = 3
     }
 
     private lateinit var viewModel: FieldbookViewModel
     private lateinit var fragmentActivity: FragmentActivity
 
+    private lateinit var customView: View
     private lateinit var layout: LinearLayout
     private lateinit var title: EditText
 
-    private var imageUri = ""
+    private var currentName = ""
+    private var currentPath = ""
+    private var currentUri: Uri = Uri.EMPTY
 
+    private var blockID = 0
     private var content: MutableList<ContentBlockInterface> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        fieldbookDir = File(requireContext().filesDir,"fieldbook").also {
+        /**
+         * TODO: used function is deprecated from API 29 and onwards. Can still be used, because android:requestLegacyExternalStorage="true" in the manifest
+         * Eventually switch to the MediaStore API. Doesn't need READ/WRITE permissions anymore -> only to be imported for API 28 and lower
+         */
+        fieldbookDir = File(Environment.getExternalStorageDirectory(),"UU-UCE/Fieldbook").also {
             it.mkdirs()
         }
+
+        println(fieldbookDir)
 
         fragmentActivity = requireActivity()
 
         viewModel = fragmentActivity.run {
             ViewModelProvider(this)[FieldbookViewModel::class.java]
         }
+    }
+
+    private fun resetVariables () {
+        currentPath = ""
+        currentUri = Uri.EMPTY
+        currentName = ""
     }
 
     override fun onCreateView(
@@ -122,9 +141,10 @@ class FieldbookHomeFragment : Fragment() {
      * Opens a popup, in which we can make new entries to the fieldbook
      */
     private fun openFieldbookAdderPopup() {
-        imageUri = ""
+        blockID = 0
+        resetVariables()
 
-        val customView = layoutInflater.inflate(R.layout.add_fieldbook_popup, null, false)
+        customView = layoutInflater.inflate(R.layout.add_fieldbook_popup, null, false)
         val popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
         popupWindow.showAtLocation(fragmentActivity.findViewById(R.id.fieldbook_layout), Gravity.CENTER, 0, 0)
@@ -161,7 +181,7 @@ class FieldbookHomeFragment : Fragment() {
             location = LocationServices.lastKnownLocation
         }
         catch(e : Exception) {
-            Logger.log(LogType.Event, "Fielbook", "No last known location")
+            Logger.log(LogType.Event, "Fieldbook", "No last known location")
         }
 
         //TODO
@@ -169,7 +189,7 @@ class FieldbookHomeFragment : Fragment() {
         savePinButton.setOnClickListener{
             saveFieldbookEntry(
                 title.text.toString(),
-                imageUri,
+                currentUri.toString(),
                 getCurrentDateTime(DateTimeFormat.FIELDBOOK_ENTRY),
                 location
             )
@@ -178,6 +198,7 @@ class FieldbookHomeFragment : Fragment() {
     }
 
     private fun selectImage() {
+        resetVariables()
 
         val options = arrayOf("Choose from gallery", "Take Photo", " Cancel")
 
@@ -187,7 +208,7 @@ class FieldbookHomeFragment : Fragment() {
         dialog.setItems(options) { dialogInterface, which ->
 
             when (which) {
-                0 -> { // Choose from gallery
+                0 -> { // Choose (picture) from gallery
                     getPermissions(fragmentActivity, listOf(Manifest.permission.READ_EXTERNAL_STORAGE), CAMERA_REQUEST)
                     if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || fragmentActivity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
                         startActivityForResult(
@@ -195,7 +216,7 @@ class FieldbookHomeFragment : Fragment() {
                                 Intent.ACTION_PICK,
                                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI
                             ),
-                            RequestCode.REQUEST_IMAGE_UPLOAD.num
+                            REQUEST_IMAGE_UPLOAD
                         )
                     }
                 }
@@ -205,8 +226,20 @@ class FieldbookHomeFragment : Fragment() {
                         startActivityForResult(
                             Intent(
                                 MediaStore.ACTION_IMAGE_CAPTURE
-                            ),
-                            RequestCode.REQUEST_IMAGE_CAPTURE.num
+                            ).apply {
+                                resolveActivity(requireContext().packageManager)
+                                putExtra(
+                                    MediaStore.EXTRA_OUTPUT,
+                                    FileProvider.getUriForFile(
+                                        requireContext(),
+                                        "com.uu-uce.fileprovider",
+                                        imageLocation()
+                                    ).also{
+                                        currentUri = it
+                                    }
+                                )
+                            },
+                            REQUEST_IMAGE_CAPTURE
                         )
                     }
                 }
@@ -217,21 +250,48 @@ class FieldbookHomeFragment : Fragment() {
     }
 
     private fun selectVideo() {
-        val options = arrayOf("Record Video", " Cancel")
+        resetVariables()
+
+        val options = arrayOf("Choose from gallery", "Record Video", " Cancel")
 
         val dialog = AlertDialog.Builder(requireContext())
         dialog.setTitle("Upload a video")
 
         dialog.setItems(options) { dialogInterface, which ->
 
-            when (which) { //TODO: add check for permissions
-                0 -> {
+            when (which) { //TODO: add checks for permissions
+                0 -> { // Choose (video) from gallery
                     startActivityForResult(
                         Intent(
-                            MediaStore.ACTION_VIDEO_CAPTURE).also {
-                            it.resolveActivity(fragmentActivity.packageManager)
+                            Intent.ACTION_PICK,
+                            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                        ),
+                        REQUEST_VIDEO_UPLOAD
+                    )
+                }
+                1 -> { // Record video
+                    startActivityForResult(
+                        Intent(
+                            MediaStore.ACTION_VIDEO_CAPTURE
+                        ).apply {
+                            resolveActivity(requireContext().packageManager)
+                            putExtra(
+                                MediaStore.EXTRA_OUTPUT,
+                                FileProvider.getUriForFile(
+                                    requireContext(),
+                                    "com.uu-uce.fileprovider",
+                                    videoLocation()
+                                ).also{
+                                    currentUri = it
+                                    println(it)
+                                }
+                            )
+                            putExtra(
+                                MediaStore.EXTRA_VIDEO_QUALITY,
+                                1
+                            )
                         },
-                        RequestCode.REQUEST_VIDEO_CAPTURE.num
+                        REQUEST_VIDEO_CAPTURE
                     )
                 }
                 else -> dialogInterface.dismiss()
@@ -247,27 +307,33 @@ class FieldbookHomeFragment : Fragment() {
     ) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && data != null) {
-            if (requestCode == 0 || requestCode == 1) {
-                saveBitmapToLocation(
-                    when (requestCode) {
-                        0 -> { // Choose from gallery
-                            val uri = data.data
-                            uri?.let { getImageFromGallery(it) }!!
-                        }
-                        else -> {// Take photo
-                            //TODO: this is just a thumbnail... get full size picture
-                            data.extras?.get("data") as Bitmap
-                        }
+            when (requestCode) {
+                REQUEST_IMAGE_UPLOAD -> {
+                    val uri = data.data
+                    println(uri)
+                    if (uri != null) {
+                        currentUri = uri
+                        addImage(currentUri)
                     }
-                ).also {
-                    addImage(it)
                 }
-            } else { // Captured video; requestCode = 2
-                val uri = data.data
-                println(uri!!.path)
+                REQUEST_IMAGE_CAPTURE -> {
+                    addImage(currentUri)
+                    addToGallery(currentPath)
+                }
+                REQUEST_VIDEO_UPLOAD -> {
+                    val uri = data.data
+                    if (uri != null) {
+                        currentUri = uri
+                        addVideo(makeVideoThumbnail(currentUri))
+                    }
+                }
+                REQUEST_VIDEO_CAPTURE -> {
+                    addVideo(makeVideoThumbnail(currentUri))
+                    addToGallery(currentPath)
+                }
             }
         } else if (resultCode == Activity.RESULT_CANCELED) {
-            TODO()
+            Toast.makeText(requireContext(),"Failed to select media",Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -277,17 +343,136 @@ class FieldbookHomeFragment : Fragment() {
         layout.addView(text, layoutParams)
     }
 
-    private fun addImage(uri: Uri) {
-        val imageView = ImageView(requireContext())
-        layout.addView(imageView,layoutParams)
-        imageView.setImageURI(uri)
-        content.add(ImageContentBlock(uri))
+    private fun addImage(image: Uri) {
+        ImageContentBlock(
+            image,
+            makeImageThumbnail(image)
+        ).also{
+            it.generateContent(blockID++,layout,requireActivity(),customView,null)
+            content.add(it)
+        }
     }
 
-    private fun addVideo() {
-        //TODO
+    private fun addVideo(video: Uri) {
+        VideoContentBlock(
+            video,
+            makeVideoThumbnail(video)
+        ).also {
+            it.generateContent(blockID++,layout, requireActivity(),customView,null)
+            content.add(it)
+        }
     }
 
+    private fun imageLocation(): File {
+        val myDir: File = File(fieldbookDir,"Pictures").also{
+            it.mkdirs()
+        }
+        val fileName = "IMG_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}_UCE_"
+
+        return createTempFile(
+            fileName,
+            ".jpg",
+            myDir
+        ).apply {
+            currentName = nameWithoutExtension
+            currentPath = absolutePath
+        }
+    }
+
+    private fun videoLocation() : File {
+        val myDir: File = File(fieldbookDir,"Videos").also{
+            it.mkdirs()
+        }
+        val fileName = "VID_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}_UCE_"
+        return createTempFile(
+            fileName,
+            ".mp4",
+            myDir
+        ).apply {
+            currentName = name
+            currentPath = absolutePath
+        }
+    }
+
+    private fun makeImageThumbnail(uri: Uri) : Uri {
+        if (currentName == "") {
+            //TODO: get correct name
+            currentName = "IMG_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}_UCE.png"
+            /*
+            val cursor = requireContext().contentResolver.query(
+                uri,
+                arrayOf(MediaStore.Images.ImageColumns.DISPLAY_NAME),
+                null,
+                null,
+                null,
+                null
+            )
+
+            if (cursor != null) {
+                currentName =
+                    cursor.getString(
+                        cursor.getColumnIndex(
+                            MediaStore.Images.ImageColumns.DISPLAY_NAME
+                        )
+                    )
+                cursor.close()
+            }
+            println(currentName)*/
+        }
+
+        //TODO: scaling
+        return saveThumbnail (
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                requireContext().contentResolver.loadThumbnail(
+                    uri,
+                    Size(400,400),
+                    null
+                )
+            } else {
+                TODO("VERSION.SDK_INT < Q")
+            }
+        )
+    }
+
+    private fun makeVideoThumbnail(uri: Uri) : Uri {
+        val retriever = MediaMetadataRetriever().apply {
+            setDataSource(requireContext(),uri)
+        }
+
+        //TODO: scaling
+        return saveThumbnail (
+            retriever.getFrameAtTime(1000,0)
+        )
+    }
+
+    private fun saveThumbnail(bitmap: Bitmap) : Uri {
+        val dir = File(requireContext().
+                getExternalFilesDir(null),
+            "Fieldbook/Thumbnails"
+        ).apply{
+            mkdirs()
+        }
+
+        val file = File(dir,"$currentName.png")
+
+        FileOutputStream(file).also{
+            bitmap.compress(Bitmap.CompressFormat.PNG,100,it)
+        }.apply{
+            flush()
+            close()
+        }
+
+        return file.toUri()
+    }
+
+    private fun addToGallery(path: String) {
+        //TODO: should we do this?
+        Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).also { mediaScanIntent ->
+            val f = File(path)
+            mediaScanIntent.data = Uri.fromFile(f)
+            requireContext().sendBroadcast(mediaScanIntent)
+        }
+    }
 
     private fun saveFieldbookEntry(
         title: String,
@@ -330,47 +515,6 @@ class FieldbookHomeFragment : Fragment() {
         }
     }
 
-    private fun saveBitmapToLocation(image: Bitmap): Uri {
-        val file = imageLocation()
-
-        FileOutputStream(imageLocation()).also{
-            image.compress(Bitmap.CompressFormat.PNG,100,it)
-        }.apply{
-            flush()
-            close()
-        }
-
-        return file.toUri()
-    }
-
-    private fun getImageFromGallery(currentLocation: Uri): Bitmap {
-        return BitmapFactory.decodeStream(
-            fragmentActivity.contentResolver.openInputStream(
-                currentLocation
-            )
-        )
-    }
-
-    private fun imageLocation(): File {
-        val myDir: File = File(fieldbookDir,"Pictures").also{
-            it.mkdirs()
-        }
-        val fileName = "IMG_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}.png"
-        return File(myDir,fileName)
-    }
-
-    private fun saveVideoToLocation(uri: Uri) {
-
-    }
-
-    private fun videoLocation() : File {
-        val myDir: File = File(fieldbookDir,"Videos").also{
-            it.mkdirs()
-        }
-        val fileName = "VID_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}.mp4"
-        return File(myDir,fileName)
-    }
-
     private fun buildJSONContent(contentList: List<Pair<BlockTag,String>>): String {
         return  "[" +
                 "{" +
@@ -391,13 +535,13 @@ class FieldbookHomeFragment : Fragment() {
 
     private fun getCurrentDateTime(dtf: DateTimeFormat): String {
         val pattern: String = when(dtf) {
-            DateTimeFormat.FILE_PATH -> "yyyMMdd_HHmmss"
+            DateTimeFormat.FILE_PATH -> "yyyyMMdd_HHmmss"
             DateTimeFormat.FIELDBOOK_ENTRY -> "dd-MM-yyyy HH:mm"
         }
 
         return SimpleDateFormat(
             pattern,
-            Locale("nl_NL")
+            Locale("nl-NL")
         ).format(
             Date()
         )
