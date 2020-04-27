@@ -12,16 +12,17 @@ There are 4 different kinds of pin content blocks:
 2. Image content
     Use:		Displaying an image in the content of a pin.
     
-    Parameters: `tag`, `file_path`
+    Parameters: `tag`, `file_path`, `thumbnail(?)`
 3. Video content
     Use: 		Displaying a video in the content of a pin.
     
     Parameters: `tag`, `file_path`, `thumbnail(?)`, `title(?)`
-    (Parameters that are followed by `(?)` are optional and the `(?)` is not part of the parameter)
 4. Mutliple choice quiz
 	Use: 		Inserting buttons with different answers in the content of a pin.
 	
 	Parameters:	`tag`, `mc_correct_option`, `,mc_incorrect_option`, `reward`
+
+_Parameters that are followed by `(?)` are optional and the `(?)` is not part of the parameter_
 
 ## Format
 We use a JSON text format for storing the pin content, it works as follows:
@@ -74,9 +75,21 @@ Notes:
 
 
 ## File location (developer only)
-The entire file path (formated as Uri) is saved in the JSON file. All content for the pins is stored to
-```file:///data/data/com.uu_uce/files/pin_content/```
+The entire file path (formated as Uri) is saved in the JSON file, for the thumbnails and file locations of videos and images
+
+#### Pins
+Pins are created by the teacher. All content for the pins is stored to
+```file:///data/data/com.uu_uce/files/pin_content/```. It's not available in the gallery or any other way
 Additional file path is determined depending on the kind of file:
 - Images are stored in the: `images/` folder
 - Videos are stored in the: `videos/` folder
 - Thumbnails are stored in the: `videos/thumbnails` folder
+
+#### Fieldbook
+The fieldbook also makes use of PinContent. The pictures and images in the fieldbook are made by the users and should always be available to them (through the gallery). Content that's created outside of the UCE environment isn't moved and the file_path will reference its location in the camera directory, through a content uri.
+
+Content created inside of the UCE environment is stored to ```content://com.uu-uce.fileprovider/fieldbook/```, which refers to ```/storage/emulated/0/UU-UCE/Fieldbook```. This content is made available to the gallery and they are independent of the app. Additional file path is determined depending on the kind of file:
+- Images are stored in the `Pictures/` folder
+- Videos are stored in the `Videos/` folder
+
+To ensure that the user can still use its fieldbook, even after/if some media have been deleted/become unavailable, we store a thumbnail for all media added to the fieldbook, to ```file:///storage/emulated/0/Android/data/com.uu_uce/files/Fieldbook/Thumbnails/```. This directory is private to the app - and meant for runtime reading/writing - and all of its contents will be deleted on app deletion. The thumbnail name should - apart from exceptions - be equal to the original file name.
