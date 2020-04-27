@@ -1,6 +1,5 @@
 package com.uu_uce.fieldbook
 
-import android.icu.text.CaseMap
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 

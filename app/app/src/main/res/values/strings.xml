@@ -47,4 +47,10 @@
     <string name="fieldbook_textfield_hint">Enter your title here</string>
     <string name="menu_allpins_button_text">Pins</string>
     <string name="menu_fieldbook_button_text">My fieldbook</string>
+    <string name="text">Text</string>
+    <string name="image">Image</string>
+    <string name="video">Video</string>
+    <string name="fieldbook">Fieldbook</string>
+    <string name="pinmap">Pinmap</string>
+    <string name="route">Route</string>
 </resources>

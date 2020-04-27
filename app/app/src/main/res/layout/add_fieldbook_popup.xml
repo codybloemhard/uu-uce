@@ -84,7 +84,8 @@
                     android:layout_gravity="start"
                     android:layout_weight="1"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/ic_symbol_text_black" />
+                    android:src="@drawable/ic_symbol_text_black"
+                    android:contentDescription="@string/text" />
 
                 <ImageButton
                     android:id="@+id/add_image_block"
@@ -92,7 +93,8 @@
                     android:layout_height="60dp"
                     android:layout_weight="1"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/ic_symbol_image_black" />
+                    android:src="@drawable/ic_symbol_image_black"
+                    android:contentDescription="@string/image"/>
 
                 <ImageButton
                     android:id="@+id/add_video_block"
@@ -100,7 +102,8 @@
                     android:layout_height="60dp"
                     android:layout_weight="1"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/ic_symbol_video_black" />
+                    android:src="@drawable/ic_symbol_video_black"
+                    android:contentDescription="@string/video" />
             </LinearLayout>
 
             <Button

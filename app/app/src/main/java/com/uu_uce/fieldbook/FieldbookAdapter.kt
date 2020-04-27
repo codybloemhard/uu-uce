@@ -163,9 +163,3 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
         notifyDataSetChanged()
     }
 }
-
-fun addLeadingZeros(id: Int) : String {
-    val s = id.toString()
-    val zero : String = "0".repeat(3-s.length)
-    return "#$zero$id"
-}
