@@ -4,7 +4,7 @@
         android:color="#FFFFFF"/>
     <stroke
         android:width="2dp"
-        android:color="@color/colorUU2"/>
+        android:color="@color/Desire"/>
     <padding
         android:left="1dp"
         android:top="1dp"

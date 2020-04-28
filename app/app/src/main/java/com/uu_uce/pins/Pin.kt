@@ -148,6 +148,15 @@ class Pin(
         val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
         windowTitle.text = title
 
+        // Set completed visibility
+        val checkMark = customView.findViewById<ImageView>(R.id.completed_marker)
+        if(status == 2){
+            checkMark.visibility = VISIBLE
+        }
+        else{
+            checkMark.visibility = GONE
+        }
+
         // Add content to popup window
         val layout: LinearLayout = customView.findViewById(R.id.scrollLayout)
 
@@ -164,13 +173,14 @@ class Pin(
         if(containsQuiz && status < 2){
             val finishButton = Button(activity)
             finishButton.id = R.id.finish_quiz_button
-            finishButton.text = activity.getString(R.string.finish_text)
-            finishButton.background.setTint(ResourcesCompat.getColor(activity.resources, R.color.colorUU, null))
+            finishButton.text = activity.getString(R.string.pin_finish)
+            finishButton.isAllCaps = false
+            finishButton.setBackgroundResource(R.drawable.custom_border_button)
             val buttonLayout = LinearLayout.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.WRAP_CONTENT
             )
-            buttonLayout.setMargins(parentView.width / 7, 0, parentView.width / 7, 0)
+            buttonLayout.setMargins(parentView.width / 7, parentView.height / 50, parentView.width / 7, parentView.height / 50)
             finishButton.layoutParams = buttonLayout
             finishButton.setOnClickListener{
                 finishQuiz(activity, parentView)
@@ -183,7 +193,7 @@ class Pin(
 
         // Get elements
         val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
-        val checkBoxCompletePin = customView.findViewById<CheckBox>(R.id.complete_box)
+        /*val checkBoxCompletePin = customView.findViewById<CheckBox>(R.id.complete_box)
 
         // Set checkbox to correct state
         if(content.canCompletePin){
@@ -191,7 +201,7 @@ class Pin(
         }
         else{
             checkBoxCompletePin.visibility = View.INVISIBLE
-        }
+        }*/
 
         // Set onClickListeners
         btnClosePopupWindow.setOnClickListener {
@@ -283,18 +293,18 @@ class Pin(
 
             // Set content based on result
             if(sufficient){
-                georgeReaction.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.happy_george, null))
-                quizResultText.text     = activity.getString(R.string.quiz_success_head)
-                completeText.text       = activity.getString(R.string.quiz_success_body, title, reward, totalReward)
-                btnOpenQuiz.text        = activity.getString(R.string.reopen_button_success)
+                georgeReaction.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.ic_george_celebrating, null))
+                quizResultText.text     = activity.getString(R.string.pin_quiz_success_head)
+                completeText.text       = activity.getString(R.string.pin_quiz_success_body, title, reward, totalReward)
+                btnOpenQuiz.text        = activity.getString(R.string.pin_quiz_reopen_button_success)
                 rewardLayout.visibility = VISIBLE
-                rewardText.text         = activity.getString(R.string.reward_string, reward)
+                rewardText.text         = activity.getString(R.string.pin_reward_string, reward)
             }
             else{
-                georgeReaction.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.crying_george, null))
-                quizResultText.text     = activity.getString(R.string.quiz_fail_head)
-                completeText.text       = activity.getString(R.string.quiz_fail_body)
-                btnOpenQuiz.text        = activity.getString(R.string.reopen_button_fail)
+                georgeReaction.setImageDrawable(ResourcesCompat.getDrawable(activity.resources, R.drawable.ic_george_sad, null))
+                quizResultText.text     = activity.getString(R.string.pin_quiz_fail_head)
+                completeText.text       = activity.getString(R.string.pin_quiz_fail_body)
+                btnOpenQuiz.text        = activity.getString(R.string.pin_quiz_reopen_button_fail)
                 rewardLayout.visibility = GONE
             }
 

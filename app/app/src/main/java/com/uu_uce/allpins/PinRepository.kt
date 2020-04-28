@@ -38,6 +38,15 @@ class PinRepository(private val pinDao : PinDao){
         pinDao.setStatuses(pids, value)
     }
 
+    suspend fun searchPins(searchText : String, action : ((List<PinData>?) -> Unit)){
+        if(searchText.count() > 0){
+            action(pinDao.searchPins("%$searchText%"))
+        }
+        else{
+            action(allPins.value)
+        }
+    }
+
     @TestOnly
     suspend fun setPins(newData : List<PinData>) {
         pinDao.updateData(newData)

@@ -10,6 +10,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.recyclerview.widget.RecyclerView
+import com.mikhaellopez.circleview.CircleView
 import com.uu_uce.R
 import com.uu_uce.pins.PinContent
 
@@ -26,13 +27,12 @@ class PinListAdapter internal constructor(
 
     inner class PinViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         val parentView : View = itemView
+        val fullView : LinearLayout = itemView.findViewById(R.id.recyclerview_item)
         val pinTitle: TextView = itemView.findViewById(R.id.allpins_recyclerview_item_title)
-        val pinCoord: TextView = itemView.findViewById(R.id.textView2)
+        val pinCoord: TextView = itemView.findViewById(R.id.pin_coordinates)
         val pinType: ImageView = itemView.findViewById(R.id.type_image)
-        val pinDiff: TextView = itemView.findViewById(R.id.textView4)
-        val pinDiffC: View = itemView.findViewById(R.id.diff)
-        val pinStatus: CheckBox = itemView.findViewById(R.id.checkBox)
-        val pinButton: Button = itemView.findViewById(R.id.open_button)
+        val pinDiffC: CircleView = itemView.findViewById(R.id.diff)
+        val pinStatus: ImageView = itemView.findViewById(R.id.checkBox)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PinViewHolder {
@@ -46,15 +46,14 @@ class PinListAdapter internal constructor(
         holder.pinCoord.text = current.location
 
         // Set completed marker
-        if(pinCanComplete[position]){
+        if(pinCanComplete[position] && current.status == 2){
             holder.pinStatus.visibility = View.VISIBLE
-            holder.pinStatus.isChecked = (current.status == 2)
         }
         else{
             holder.pinStatus.visibility = View.GONE
         }
 
-        holder.pinButton.setOnClickListener{
+        holder.fullView.setOnClickListener{
             val pinConverter = PinConversion(activity)
             val pin = pinConverter.pinDataToPin(current, pinViewModel)
             pin.getContent().parent = pin
@@ -63,33 +62,21 @@ class PinListAdapter internal constructor(
         }
 
         when(current.difficulty){
-            1 -> {
-                holder.pinDiff.text = activity.getString(R.string.easy)
-                holder.pinDiffC.setBackgroundColor(Color.parseColor("#00B222"))
-            }
-            2 -> {
-                holder.pinDiff.text = activity.getString(R.string.medium)
-                holder.pinDiffC.setBackgroundColor(Color.parseColor("#FF862F"))
-            }
-            3 -> {
-                holder.pinDiff.text = activity.getString(R.string.hard)
-                holder.pinDiffC.setBackgroundColor(Color.parseColor("#EC1A3D"))
-            }
-            else -> {
-                holder.pinDiff.text = activity.getString(R.string.unknown)
-                holder.pinDiffC.setBackgroundColor(Color.parseColor("#686868"))
-            }
+            1       -> holder.pinDiffC.circleColor = Color.parseColor("#00B222")
+            2       -> holder.pinDiffC.circleColor = Color.parseColor("#FF862F")
+            3       -> holder.pinDiffC.circleColor = Color.parseColor("#EC1A3D")
+            else    -> holder.pinDiffC.circleColor = Color.parseColor("#686868")
         }
 
         when(current.type){
             "TEXT" -> holder.pinType.setImageDrawable(
-                ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_text_black, null) ?: error ("Image not found"))
+                ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_text, null) ?: error ("Image not found"))
             "IMAGE" -> holder.pinType.setImageDrawable(
-            ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image_black, null) ?: error ("Image not found"))
+            ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image, null) ?: error ("Image not found"))
             "VIDEO" -> holder.pinType.setImageDrawable(
-            ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video_black, null) ?: error ("Image not found"))
+            ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video, null) ?: error ("Image not found"))
             "MCQUIZ" -> holder.pinType.setImageDrawable(
-                ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz_black, null) ?: error ("Image not found"))
+                ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz, null) ?: error ("Image not found"))
         }
     }
 

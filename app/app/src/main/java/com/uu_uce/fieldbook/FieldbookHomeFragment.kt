@@ -12,11 +12,10 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
-import android.view.Gravity
+import android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+import android.view.*
+import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -72,7 +71,7 @@ class FieldbookHomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_fieldbook_home, container, false).also {view ->
+        return inflater.inflate(R.layout.fieldbook_fragment_home, container, false).also { view ->
             val recyclerView = view.findViewById<RecyclerView>(R.id.fieldbook_recyclerview)
             val addButton = view.findViewById<FloatingActionButton>(R.id.fieldbook_fab)
 
@@ -103,7 +102,7 @@ class FieldbookHomeFragment : Fragment() {
     private fun openFieldbookAdderPopup() {
         imageUri = ""
 
-        val customView = layoutInflater.inflate(R.layout.add_fieldbook_popup, null, false)
+        val customView = layoutInflater.inflate(R.layout.fieldbook_addpin_popup, null, false)
         val popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
         popupWindow.showAtLocation(fragmentActivity.findViewById(R.id.fieldbook_layout), Gravity.CENTER, 0, 0)
@@ -113,6 +112,7 @@ class FieldbookHomeFragment : Fragment() {
         popupWindow.update()
 
         text = customView.findViewById(R.id.addText)
+        text.inputType = TYPE_TEXT_FLAG_NO_SUGGESTIONS
 
         imageView = customView.findViewById(R.id.addImage)
 
@@ -128,6 +128,16 @@ class FieldbookHomeFragment : Fragment() {
         catch(e : Exception){
             Logger.log(LogType.Event, "Fielbook", "No last known location")
         }
+
+        val textField = customView.findViewById<EditText>(R.id.addText)
+        textField.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+                //Perform Code
+                hideKeyboard(fragmentActivity, customView)
+                return@OnKeyListener true
+            }
+            false
+        })
 
         val savePinButton = customView.findViewById<Button>(R.id.add_fieldbook_pin)
         savePinButton.setOnClickListener{
@@ -325,5 +335,22 @@ class FieldbookHomeFragment : Fragment() {
 
             }
         }
+    }
+
+    private fun hideKeyboard(activity: Activity, currentView : View? = null) {
+        val imm: InputMethodManager =
+            activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+
+        var view = currentView
+        if(view == null){
+            //Find the currently focused view, so we can grab the correct window token from it.
+            view = activity.currentFocus
+            //If no view currently has focus, create a new one, just so we can grab a window token from it
+            if (view == null) {
+                view = View(activity)
+            }
+        }
+
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 }

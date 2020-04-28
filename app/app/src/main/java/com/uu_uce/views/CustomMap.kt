@@ -18,13 +18,14 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.uu_uce.AllPins
+import com.uu_uce.Fieldbook
 import com.uu_uce.R
 import com.uu_uce.allpins.PinConversion
 import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.fieldbook.FullRoute
 import com.uu_uce.fieldbook.Route
-import com.uu_uce.Fieldbook
+import com.uu_uce.gestureDetection.*
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawLocation
 import com.uu_uce.mapOverlay.pointDistance
@@ -34,7 +35,6 @@ import com.uu_uce.misc.Logger
 import com.uu_uce.pins.Pin
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
-import com.uu_uce.gestureDetection.*
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 import java.time.LocalDate
@@ -112,9 +112,8 @@ class CustomMap : ViewTouchParent {
 
     fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout, buttonSize: Int, hasInfo: Boolean){
         smap.addLayer(lt, chunkGetter, hasInfo)
-
         val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle)
-        btn.setImageResource(R.drawable.logotp)
+        btn.setImageResource(R.drawable.ic_sprite_toggle_layer)
         val curLayers = nrLayers
         btn.setOnClickListener{
             toggleLayer(curLayers)

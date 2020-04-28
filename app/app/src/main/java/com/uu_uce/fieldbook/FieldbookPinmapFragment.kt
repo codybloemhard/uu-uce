@@ -31,7 +31,7 @@ class FieldbookPinmapFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_fieldbook_pinmap, container, false)
+        return inflater.inflate(R.layout.fieldbook_fragment_pinmap, container, false)
     }
 
     companion object {
