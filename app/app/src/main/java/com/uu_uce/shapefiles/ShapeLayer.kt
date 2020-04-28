@@ -2,14 +2,13 @@ package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
 import android.graphics.Paint
+import com.uu_uce.debug
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import java.io.File
 
-class ShapeLayer(path: File, chunkGetter: ChunkGetter, map: ShapeMap, onLoadedAction: (sl: ShapeLayer) -> Unit){
+class ShapeLayer(chunkGetter: ChunkGetter, map: ShapeMap, onLoadedAction: (sl: ShapeLayer) -> Unit, hasInfo: Boolean){
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk> = mutableMapOf()
-
-    private val chunkManager: ChunkManager = StopLoader(chunks, chunkGetter, map)
+    private val chunkManager: ChunkManager
 
     var bmin: p3
         private set
@@ -18,24 +17,47 @@ class ShapeLayer(path: File, chunkGetter: ChunkGetter, map: ShapeMap, onLoadedAc
 
 
     init{
-        val index = ChunkIndex(0,0,0)
-        val chunk = chunkGetter.getChunk(index)
-        chunks[index] = chunk
-        bmin = chunk.bmin
-        bmax = chunk.bmax
+        if(hasInfo) {
+            val info = chunkGetter.readInfo()
+            bmin = info.first
+            bmax = info.second
+        }
+        else {
+            val index = ChunkIndex(0, 0, 0)
+            val chunk = chunkGetter.getChunk(index)
+            chunks[index] = chunk
+            bmin = chunk.bmin
+            bmax = chunk.bmax
+            chunkGetter.nrCuts = listOf(1)
+        }
+
+        chunkManager = ChunkManager(chunks, chunkGetter, map, bmin, bmax, chunkGetter.nrCuts)
     }
 
-    fun updateChunks(viewport: Pair<p2,p2>, zoom: Int): ChunkUpdateResult{
-        return chunkManager.update(viewport, zoom)
+    fun setzooms(minzoom: Double, maxzoom: Double){
+        chunkManager.setZooms(minzoom, maxzoom)
     }
 
-    fun draw(canvas: Canvas, paint: Paint, viewport : Pair<p2,p2>, width: Int, height: Int, zoomLevel: Int){
-        Logger.log(LogType.Continuous, "zoom", zoomLevel.toString())
+    fun updateChunks(viewport: Pair<p2,p2>, zoom: Double, waspect: Double): ChunkUpdateResult{
+        return chunkManager.update(viewport, zoom, waspect)
+    }
+
+    fun draw(canvas: Canvas, paint: Paint, viewport : Pair<p2,p2>, width: Int, height: Int){
+        if(debug) chunkManager.debug(canvas,viewport, width,height)
 
         synchronized(chunks) {
+            var nrShapes = 0
+            var nrLines = 0
             for(chunk in chunks.values) {
                 chunk.draw(canvas, paint, viewport, width, height)
+
+                nrShapes += chunk.shapes.size
+                for(shape in chunk.shapes){
+                    nrLines+=shape.nrPoints-1
+                }
             }
+
+            Logger.log(LogType.Continuous, "ShapeLayer", "$nrShapes shapes with $nrLines lines, average ${if(nrShapes > 0) nrLines.toDouble()/nrShapes else 0} lines per shape")
         }
     }
 }

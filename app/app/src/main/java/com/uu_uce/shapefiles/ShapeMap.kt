@@ -46,7 +46,6 @@ class ShapeMap(private val nrOfLODs: Int,
     private var layers = mutableListOf<Pair<LayerType,ShapeLayer>>()
     private var bMin = p3Zero
     private var bMax = p3Zero
-    private var zoomLevel = 5
 
     private val layerPaints : List<Paint>
 
@@ -72,9 +71,15 @@ class ShapeMap(private val nrOfLODs: Int,
         }
     }
 
-    fun addLayer(type: LayerType, path: File, chunkGetter: ChunkGetter){
+    fun setzooms(minzoom: Double, maxzoom: Double){
+        for((type,layer) in layers){
+            layer.setzooms(minzoom,maxzoom)
+        }
+    }
+
+    fun addLayer(type: LayerType, chunkGetter: ChunkGetter, hasInfo: Boolean){
         val timeSave = measureTimeMillis {
-            layers.add(Pair(type,ShapeLayer(path, chunkGetter, this) {}))
+            layers.add(Pair(type,ShapeLayer(chunkGetter, this, {}, hasInfo)))
         }
 
         Logger.log(LogType.Info,"ShapeMap", "Save: $timeSave")
@@ -106,11 +111,9 @@ class ShapeMap(private val nrOfLODs: Int,
     }
 
     fun updateChunks(): ChunkUpdateResult{
-        zoomLevel = maxOf(0,minOf(nrOfLODs-1, nrOfLODs - 1 - ((camera.getZoom()-0.01)/(1.0/camera.wAspect-0.01) * nrOfLODs).toInt()))
-
         var res = ChunkUpdateResult.NOTHING
         for((_,layer) in layers){
-            val cur = layer.updateChunks(camera.getViewport(), zoomLevel)
+            val cur = layer.updateChunks(camera.getViewport(), camera.getZoom(), camera.wAspect)
             if(cur != ChunkUpdateResult.NOTHING)
                 res = cur
         }
@@ -118,7 +121,6 @@ class ShapeMap(private val nrOfLODs: Int,
     }
 
     fun draw(canvas: Canvas, width: Int, height: Int){
-        zoomLevel = maxOf(0,minOf(nrOfLODs-1, nrOfLODs - 1 - ((camera.getZoom()-0.01)/(1.0/camera.wAspect-0.01) * nrOfLODs).toInt()))
         val viewport = camera.getViewport()
 
         for(i in layers.indices) {
@@ -129,8 +131,7 @@ class ShapeMap(private val nrOfLODs: Int,
                     layerPaints[t.value],
                     viewport,
                     width,
-                    height,
-                    zoomLevel
+                    height
                 )
             }
         }

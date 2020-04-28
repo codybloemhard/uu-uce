@@ -10,7 +10,10 @@ import android.view.View
 interface TouchChild{
     fun getOnTouchEvent(event: MotionEvent?)
 }
-
+/*
+Easy way to add a gesturedetector to a view without having to override all the methods
+TouchChilds
+ */
 open class ViewTouchParent: View{
     constructor(context: Context): super(context)
     constructor(context: Context, attrs: AttributeSet): super(context, attrs)
