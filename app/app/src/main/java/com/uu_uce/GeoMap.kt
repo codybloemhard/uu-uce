@@ -23,6 +23,8 @@ import kotlinx.android.synthetic.main.activity_geo_map.*
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 
+const val debug = false
+
 class GeoMap : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel
     private val permissionsNeeded = listOf(Manifest.permission.READ_EXTERNAL_STORAGE)

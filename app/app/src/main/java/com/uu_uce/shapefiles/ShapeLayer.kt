@@ -2,6 +2,7 @@ package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
 import android.graphics.Paint
+import com.uu_uce.debug
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 
@@ -42,7 +43,7 @@ class ShapeLayer(chunkGetter: ChunkGetter, map: ShapeMap, onLoadedAction: (sl: S
     }
 
     fun draw(canvas: Canvas, paint: Paint, viewport : Pair<p2,p2>, width: Int, height: Int){
-        chunkManager.debug(canvas,viewport, width,height)
+        if(debug) chunkManager.debug(canvas,viewport, width,height)
 
         synchronized(chunks) {
             var nrShapes = 0
