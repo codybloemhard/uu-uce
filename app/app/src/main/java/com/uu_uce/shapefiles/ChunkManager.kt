@@ -67,6 +67,10 @@ class ChunkManager(
         this.maxzoom = maxzoom
     }
 
+    fun getZoomLevel() : Int{
+        return lastZoom
+    }
+
     private fun cancelCurrentLoading(){
         synchronized(chunks) {
             chunksLoadedListener?.cancel()

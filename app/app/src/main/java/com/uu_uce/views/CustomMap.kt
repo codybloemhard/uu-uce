@@ -13,16 +13,14 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.PopupWindow
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
-import com.uu_uce.AllPins
-import com.uu_uce.Fieldbook
-import com.uu_uce.R
-import com.uu_uce.Settings
+import com.uu_uce.*
 import com.uu_uce.allpins.PinConversion
 import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinViewModel
@@ -38,6 +36,9 @@ import com.uu_uce.misc.Logger
 import com.uu_uce.pins.Pin
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
+import kotlinx.android.synthetic.main.activity_geo_map.*
+import kotlinx.android.synthetic.main.activity_geo_map.view.*
+import kotlinx.android.synthetic.main.activity_geo_map.view.heightline_diff_text
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 import java.time.LocalDate
@@ -52,7 +53,7 @@ class CustomMap : ViewTouchParent {
     private var smap : ShapeMap = ShapeMap(5, this)
 
     // Settings
-    private lateinit var sharedPref : SharedPreferences
+    private var sharedPref : SharedPreferences
 
     // Location
     private val locationServices                            = LocationServices()
@@ -77,6 +78,7 @@ class CustomMap : ViewTouchParent {
 
     // Map
     private var nrLayers = 0
+    private lateinit var mods : List<Int>
     private lateinit var camera : Camera
 
     init{
@@ -129,6 +131,8 @@ class CustomMap : ViewTouchParent {
 
         btn.layoutParams = ViewGroup.LayoutParams(buttonSize, buttonSize)
         scrollLayout.addView(btn)
+
+        mods = smap.getMods()
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -146,6 +150,17 @@ class CustomMap : ViewTouchParent {
 
             // Draw map
             smap.draw(canvas, width, height)
+
+            if(context is GeoMap){
+                val zoomLevel = smap.getZoomLevel()
+                if(zoomLevel >= 0 && mods.count() > 0){
+                    (context as GeoMap).heightline_diff_text.text = (context as Activity).getString(R.string.geomap_heightline_diff_text, mods[zoomLevel])
+                }
+                else{
+                    val standardValue = 0
+                    (context as GeoMap).heightline_diff_text.text = (context as Activity).getString(R.string.geomap_heightline_diff_text, standardValue)
+                }
+            }
 
             Logger.log(LogType.Event, "DrawOverlay", "east: ${loc.east}, north: ${loc.north}")
 

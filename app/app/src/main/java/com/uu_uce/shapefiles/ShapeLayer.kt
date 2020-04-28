@@ -6,7 +6,7 @@ import com.uu_uce.debug
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 
-class ShapeLayer(chunkGetter: ChunkGetter, map: ShapeMap, onLoadedAction: (sl: ShapeLayer) -> Unit, hasInfo: Boolean){
+class ShapeLayer(private val chunkGetter: ChunkGetter, map: ShapeMap, onLoadedAction: (sl: ShapeLayer) -> Unit, hasInfo: Boolean){
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk> = mutableMapOf()
     private val chunkManager: ChunkManager
 
@@ -36,6 +36,14 @@ class ShapeLayer(chunkGetter: ChunkGetter, map: ShapeMap, onLoadedAction: (sl: S
 
     fun setzooms(minzoom: Double, maxzoom: Double){
         chunkManager.setZooms(minzoom, maxzoom)
+    }
+
+    fun getZoomLevel() : Int {
+        return chunkManager.getZoomLevel()
+    }
+
+    fun getMods() : List<Int> {
+        return chunkGetter.mods
     }
 
     fun updateChunks(viewport: Pair<p2,p2>, zoom: Double, waspect: Double): ChunkUpdateResult{

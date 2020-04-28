@@ -77,6 +77,24 @@ class ShapeMap(private val nrOfLODs: Int,
         }
     }
 
+    fun getZoomLevel() : Int {
+        var i = 0
+        while(i < layers.count() && layers[i].first != LayerType.Height) i++
+        return if(i == layers.count()) {
+            Logger.error("ShapeMap", "No heightlines found")
+            -1
+        } else layers[i].second.getZoomLevel()
+    }
+
+    fun getMods() : List<Int> {
+        var i = 0
+        while(i < layers.count() && layers[i].first != LayerType.Height) i++
+        return if(i == layers.count()) {
+            Logger.error("ShapeMap", "No heightlines found")
+            listOf()
+        } else layers[i].second.getMods()
+    }
+
     fun addLayer(type: LayerType, chunkGetter: ChunkGetter, hasInfo: Boolean){
         val timeSave = measureTimeMillis {
             layers.add(Pair(type,ShapeLayer(chunkGetter, this, {}, hasInfo)))
