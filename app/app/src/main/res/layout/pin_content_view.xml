@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/BestWhite"
-    android:gravity="center">
+    android:gravity="center"
+    tools:ignore="Overdraw">
 
     <ImageView
         android:id="@+id/completed_marker"
