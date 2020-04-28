@@ -2,17 +2,10 @@
     <string name="app_name">UCE</string>
     <string name="allpins_open">Open</string>
     <string name="allpins_checkmark_description">Checkmark displaying if a pin is done</string>
-    <string name="allpins_search_icon_description">Search icon</string>
     <string name="pin_close">Close</string>
-    <string name="pin_difficulty_easy">Easy</string>
-    <string name="pin_difficulty_medium">Medium</string>
-    <string name="pin_difficulty_hard">Hard</string>
-    <string name="pin_difficulty_unknown">Unknown</string>
-    <string name="pin_completed">Completed</string>
     <string name="pin_finish">Finish</string>
     <string name="pin_title">Pin Title</string>
     <string name="pin_coordinates">Pin coordinates</string>
-    <string name="pin_difficulty">Pin difficulty</string>
     <string name="pin_video_title_placeholder">Video title</string>
     <string name="pin_quiz_result_image_description">Image of mascot with emotion matching quiz result</string>
     <string name="pin_quiz_result_placeholder">QUIZRESULT</string>
@@ -47,4 +40,6 @@
     <string name="menu_button_description">Image showing what clicking the menu will do</string>
     <string name="menu_allpins_button_image">menu_allpins_button_image</string>
     <string name="menu_fieldbook_image_description">menu fieldbook image</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="settings_pin_size">Pin Size</string>-->
 </resources>

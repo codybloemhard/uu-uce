@@ -92,6 +92,9 @@ class GeoMap : AppCompatActivity() {
         val btn2 = fieldbook_button
         btn2.setOnClickListener{customMap.startFieldBook()}
 
+        val btn3 = settings_button
+        btn3.setOnClickListener{customMap.startSettings()}
+
         dragBar.clickAction      = {menu.dragButtonTap()}
         dragBar.dragAction       = { dx, dy -> menu.drag(dx,dy)}
         dragBar.dragEndAction    = { dx, dy -> menu.snap(dx, dy)}

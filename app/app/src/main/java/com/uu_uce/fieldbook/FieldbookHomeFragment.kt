@@ -55,7 +55,8 @@ class FieldbookHomeFragment : Fragment() {
 
     private var imageUri = ""
 
-    private lateinit var fragmentActivity: FragmentActivity
+    private lateinit var fragmentActivity   : FragmentActivity
+    private lateinit var fragmentView       : View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,8 +102,9 @@ class FieldbookHomeFragment : Fragment() {
 
     private fun openFieldbookAdderPopup() {
         imageUri = ""
+        fragmentView = requireView()
 
-        val customView = layoutInflater.inflate(R.layout.fieldbook_addpin_popup, null, false)
+        val customView = layoutInflater.inflate(R.layout.fieldbook_addpin_popup, fragmentView.parent as ViewGroup, false)
         val popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
 
         popupWindow.showAtLocation(fragmentActivity.findViewById(R.id.fieldbook_layout), Gravity.CENTER, 0, 0)

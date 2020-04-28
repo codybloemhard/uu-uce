@@ -4,7 +4,6 @@
     android:id="@+id/general_menu_layout"
     android:layout_width="match_parent"
     android:layout_height="50dp"
-    android:background="@color/BestWhite"
     android:orientation="vertical">
 
     <ImageButton

@@ -39,10 +39,10 @@ class Pin(
     // Used to determine if warning should show when closing pin
     private var madeProgress = false
 
-    private val pinWidth = 70 // TODO: set this in settings somewhere
+    private var pinWidth = 60
 
     // Calculate pin height to maintain aspect ratio
-    private val pinHeight =
+    private var pinHeight =
         pinWidth * (background.intrinsicHeight.toFloat() / background.intrinsicWidth.toFloat())
 
     private var iconWidth  : Double = 0.0
@@ -130,7 +130,7 @@ class Pin(
         val layoutInflater = activity.layoutInflater
 
         // Build an custom view (to be inflated on top of our current view & build it's popup window)
-        val customView = layoutInflater.inflate(R.layout.pin_content_view, null, false)
+        val customView = layoutInflater.inflate(R.layout.pin_content_view, parentView.parent as ViewGroup, false)
 
         popupWindow = PopupWindow(
             customView,
@@ -193,15 +193,6 @@ class Pin(
 
         // Get elements
         val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
-        /*val checkBoxCompletePin = customView.findViewById<CheckBox>(R.id.complete_box)
-
-        // Set checkbox to correct state
-        if(content.canCompletePin){
-            checkBoxCompletePin.isChecked = (getStatus() == 2)
-        }
-        else{
-            checkBoxCompletePin.visibility = View.INVISIBLE
-        }*/
 
         // Set onClickListeners
         btnClosePopupWindow.setOnClickListener {
@@ -267,7 +258,7 @@ class Pin(
             val layoutInflater = activity.layoutInflater
 
             // Build an custom view (to be inflated on top of our current view & build it's popup window)
-            val customView = layoutInflater.inflate(R.layout.quiz_complete_popup, null, false)
+            val customView = layoutInflater.inflate(R.layout.quiz_complete_popup, parentView.parent as ViewGroup, false)
 
             popupWindow = PopupWindow(
                 customView,
@@ -322,6 +313,24 @@ class Pin(
         else{
             // Questions left unanswered
             Toast.makeText(activity, "Some questions still lack answers", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun resize(pinSize : Int){
+        pinWidth = pinSize
+
+        // Calculate pin height to maintain aspect ratio
+        pinHeight =
+            pinWidth * (background.intrinsicHeight.toFloat() / background.intrinsicWidth.toFloat())
+
+        // Calculate icon measurements
+        if(icon.intrinsicHeight > icon.intrinsicWidth){
+            iconHeight = pinHeight * 0.5
+            iconWidth = iconHeight * (icon.intrinsicWidth.toFloat() / icon.intrinsicHeight.toFloat())
+        }
+        else{
+            iconWidth = pinWidth * 0.55
+            iconHeight = iconWidth * (icon.intrinsicHeight.toFloat() / icon.intrinsicWidth.toFloat())
         }
     }
 
