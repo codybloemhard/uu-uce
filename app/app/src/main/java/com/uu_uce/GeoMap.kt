@@ -26,6 +26,8 @@ import kotlinx.android.synthetic.main.activity_geo_map.*
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 
+const val debug = false
+
 class GeoMap : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel
     private val permissionsNeeded = listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -99,18 +101,19 @@ class GeoMap : AppCompatActivity() {
         dragBar.dragAction       = { dx, dy -> menu.drag(dx,dy)}
         dragBar.dragEndAction    = { dx, dy -> menu.snap(dx, dy)}
 
-        val dir = File(filesDir,"mydir")
+        val mydir = File(filesDir,"mydir")
         try {
-            customMap.addLayer(LayerType.Water, dir, HeightLineReader(dir), toggle_layer_layout, size)
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $dir")
+            val heightlines = File(mydir, "heightlines")
+            customMap.addLayer(LayerType.Water, HeightLineReader(heightlines), toggle_layer_layout, size, true)
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
         }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $dir.\nError: " + e.message)
+            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
         try {
-            customMap.addLayer(LayerType.Water, dir, PolygonReader(dir),  toggle_layer_layout, size)
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $dir")
+            customMap.addLayer(LayerType.Water, PolygonReader(mydir),  toggle_layer_layout, size, false)
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
         }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $dir.\nError: " + e.message)
+            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
 
         customMap.initializeCamera()

@@ -10,6 +10,34 @@ import kotlin.math.pow
 abstract class ChunkGetter(
     protected var dir: File){
     abstract fun getChunk(cIndex: ChunkIndex):Chunk
+    protected var xoff = 0.0
+    protected var yoff = 0.0
+    protected var zoff = 0.0
+    protected var mult = 0.0
+    protected var bmin = p3NaN
+    protected var bmax = p3NaN
+    var nrCuts: List<Int> = listOf()
+
+    fun readInfo(): Pair<p3,p3>{
+        val reader = FileReader(File(dir, "chunks.info"))
+
+        val nrLODs = reader.readULong()
+        nrCuts = List(nrLODs.toInt()) {
+            reader.readULong().toInt()
+        }
+
+        xoff = reader.readULong().toDouble()
+        yoff = reader.readULong().toDouble()
+        zoff = reader.readULong().toDouble() //not used
+        mult = reader.readULong().toDouble()
+
+
+
+        bmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult)
+        bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult)
+
+        return Pair(bmin, bmax)
+    }
 }
 
 //simple reader that can read basic types from a binary file
@@ -55,22 +83,18 @@ class FileReader{
 class HeightLineReader(
     dir: File
 ): ChunkGetter(dir) {
-    private val nrOfLODs = 5
     override fun getChunk(cIndex: ChunkIndex): Chunk {
         //find the correct file and read all information inside
         val time = System.currentTimeMillis()
-        val file = File(dir, "height")
+        val file = File(dir, chunkName(cIndex))
         val reader = FileReader(file)
 
-        val xoff = reader.readULong().toDouble()
-        val yoff = reader.readULong().toDouble()
-        val zoff = reader.readULong().toDouble() //not used
-        val mult = reader.readULong().toDouble()
-        val bmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult)
-        val bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult)
+        val lodLevel = reader.readULong()
+        val x = reader.readULong()
+        val y = reader.readULong()
 
         val nrShapes = reader.readULong()
-        var chunkShapes = List(nrShapes.toInt()) {
+        val shapes = List(nrShapes.toInt()) {
             val z = reader.readUShort().toDouble()
             val bb1 = p3(
                 reader.readUShort().toDouble()/mult + xoff,
@@ -92,77 +116,10 @@ class HeightLineReader(
         }
 
         val time1 = System.currentTimeMillis() - time
+        Logger.log(LogType.Continuous, "BinShapeReader", "loadtime: $time1")
 
-        //create zoom levels (temporary)
-        chunkShapes = chunkShapes.sortedBy{ it.meanZ() }
-
-        val zDens = hashMapOf<Int,Int>()
-        val zDensSorted: List<Int>
-        chunkShapes.map{ s ->
-            val mz = s.meanZ()
-            val old = zDens[mz] ?: 0
-            val new = old + 1
-            zDens.put(mz, new)
-        }
-        zDensSorted = zDens.keys.sorted()
-
-        val indices: MutableList<Int> = mutableListOf()
-        var nrHeights = 0
-        var curPow = log(zDensSorted.size.toDouble(), 2.0).toInt() + 1
-        var curStep = 0
-        var stepSize: Int = 1 shl curPow
-
-        val i = cIndex.third
-        val level = (i + 1).toDouble() / nrOfLODs
-        val factor = maxOf(level.pow(3), 0.1)
-        val totalHeights =
-            if (i == nrOfLODs - 1) zDensSorted.size
-            else (factor * zDensSorted.size).toInt()
-
-        while (nrHeights < totalHeights) {
-            val index: Int = curStep * stepSize
-            if (index >= zDensSorted.size) {
-                curPow--
-                stepSize = 1 shl curPow
-                curStep = 1
-                continue
-            }
-
-            indices.add(index)
-            nrHeights++
-            curStep += 2
-        }
-
-        val shapes: MutableList<HeightShapeZ> = mutableListOf()
-        indices.sort()
-        if (indices.isNotEmpty()) {
-            var a = 0
-            var b = 0
-            while (a < indices.size && b < chunkShapes.size) {
-                val shape = chunkShapes[b]
-                val z = zDensSorted[indices[a]]
-                when {
-                    shape.meanZ() == z -> {
-                        shapes.add(chunkShapes[b])
-                        //val factor =(level + level.pow(3))/2
-                        //shapes.add(ShapeZ((factor), allShapes[b]))
-                        b++
-                    }
-                    shape.meanZ() < z -> b++
-                    else -> a++
-                }
-            }
-        }
-
-        val time2 = System.currentTimeMillis() - time - time1
-
-        Logger.log(LogType.Continuous, "BinShapeReader", "first part: $time1")
-        Logger.log(LogType.Continuous, "BinShapeReader", "second part: $time2")
-
-        return Chunk(shapes, bmin, bmax)
+        return Chunk(shapes, bmin, bmax, LayerType.Height)
     }
-
-
 }
 
 @ExperimentalUnsignedTypes
@@ -204,7 +161,6 @@ class PolygonReader(
             PolygonZ(outerRings, innerRings, bbmin, bbmax)
         }
 
-        //todo: remove temporary boundingbox calculation
-        return Chunk(shapes, bmin, bmax)
+        return Chunk(shapes, bmin, bmax, LayerType.Water)
     }
 }
