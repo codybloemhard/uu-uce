@@ -17,6 +17,11 @@ abstract class ChunkGetter(
     protected var bmin = p3NaN
     protected var bmax = p3NaN
     var nrCuts: List<Int> = listOf()
+    // For each level, the modulo of the heigt lines
+    // Ex. mods[0] = 100
+    // Than level 0 has 100 meter between each heightline
+    // And every heightline height(z) is a multiple of 100
+    var mods: List<Int> = listOf()
 
     fun readInfo(): Pair<p3,p3>{
         val reader = FileReader(File(dir, "chunks.info"))
@@ -31,11 +36,13 @@ abstract class ChunkGetter(
         zoff = reader.readULong().toDouble() //not used
         mult = reader.readULong().toDouble()
 
-
-
         bmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult)
         bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult)
 
+        val nrMods = reader.readULong()
+        mods = List(nrMods.toInt()){
+            reader.readULong().toInt()
+        }
         return Pair(bmin, bmax)
     }
 }
