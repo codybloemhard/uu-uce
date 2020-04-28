@@ -8,6 +8,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.os.Build
+import android.preference.PreferenceManager
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.ImageButton
@@ -18,7 +19,6 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import androidx.preference.PreferenceManager
 import com.uu_uce.AllPins
 import com.uu_uce.Fieldbook
 import com.uu_uce.R
@@ -49,7 +49,7 @@ class CustomMap : ViewTouchParent {
     constructor(context: Context, attrs: AttributeSet): super(context, attrs)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    private var smap : ShapeMap = ShapeMap(5, this)
+    private var smap: ShapeMap
 
     // Settings
     private lateinit var sharedPref : SharedPreferences
@@ -83,7 +83,7 @@ class CustomMap : ViewTouchParent {
         //disable hardware acceleration for canvas.drawVertices
         setLayerType(LAYER_TYPE_SOFTWARE, null)
 
-        smap = ShapeMap(5, this)
+        smap = ShapeMap(this)
 
         // Logger mask settings
         Logger.setTagEnabled("CustomMap", false)

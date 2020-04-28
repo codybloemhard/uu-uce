@@ -6,7 +6,13 @@ import com.uu_uce.debug
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 
-class ShapeLayer(chunkGetter: ChunkGetter, map: ShapeMap, onLoadedAction: (sl: ShapeLayer) -> Unit, hasInfo: Boolean){
+/*
+a layer to be displayed in the map, consisting of multiple shapes
+chunkGetter: means of getting chunks associated with this layer
+map: the map this layer is part of
+hasInfo: temporary indicator whether this layer has an info file associated with it
+ */
+class ShapeLayer(chunkGetter: ChunkGetter, map: ShapeMap, hasInfo: Boolean){
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk> = mutableMapOf()
     private val chunkManager: ChunkManager
 
@@ -16,6 +22,7 @@ class ShapeLayer(chunkGetter: ChunkGetter, map: ShapeMap, onLoadedAction: (sl: S
         private set
 
 
+    //setup the chunk and bounding box information
     init{
         if(hasInfo) {
             val info = chunkGetter.readInfo()
@@ -38,10 +45,11 @@ class ShapeLayer(chunkGetter: ChunkGetter, map: ShapeMap, onLoadedAction: (sl: S
         chunkManager.setZooms(minzoom, maxzoom)
     }
 
-    fun updateChunks(viewport: Pair<p2,p2>, zoom: Double, waspect: Double): ChunkUpdateResult{
-        return chunkManager.update(viewport, zoom, waspect)
+    fun updateChunks(viewport: Pair<p2,p2>, zoom: Double): ChunkUpdateResult{
+        return chunkManager.update(viewport, zoom)
     }
 
+    //draw all chunks associated with this layer
     fun draw(canvas: Canvas, paint: Paint, viewport : Pair<p2,p2>, width: Int, height: Int){
         if(debug) chunkManager.debug(canvas,viewport, width,height)
 

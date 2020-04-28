@@ -7,10 +7,12 @@ import com.uu_uce.misc.LinkedList
 import com.uu_uce.misc.Logger
 import com.uu_uce.misc.Node
 
+//abstract class for drawing shapes
 abstract class DrawInfo{
     abstract fun draw(canvas: Canvas, paint: Paint)
 }
 
+//information for drawing a line
 class LineDrawInfo(nrPoints: Int): DrawInfo(){
     private var lines: FloatArray = FloatArray(nrPoints*4)
     var i = 0
@@ -20,6 +22,7 @@ class LineDrawInfo(nrPoints: Int): DrawInfo(){
     }
 }
 
+//information for drawing a polygon
 class PolygonDrawInfo(nrVertices: Int, nrIndices: Int): DrawInfo(){
     private var vertices = FloatArray(nrVertices*4)
     var v = 0
@@ -39,11 +42,13 @@ class PolygonDrawInfo(nrVertices: Int, nrIndices: Int): DrawInfo(){
     }
 }
 
+//generic shape
 abstract class ShapeZ(var bmin: p3, var bmax: p3){
     abstract fun draw(drawInfo: DrawInfo, viewport: Pair<p2,p2>, width: Int, height: Int)
     abstract val nrPoints: Int
 }
 
+//shape consisting of just lines on the same height
 class HeightShapeZ(private var points: List<p2>, bmi: p3, bma: p3): ShapeZ(bmi,bma) {
     override val nrPoints = points.size
 
@@ -71,12 +76,14 @@ class HeightShapeZ(private var points: List<p2>, bmi: p3, bma: p3): ShapeZ(bmi,b
     }
 }
 
+//type used in triangulation
 class PolyPoint(val point: p3, var reflex: Boolean, var ear: Boolean, val index: Int){
     var convex: Boolean
     get() { return !reflex}
         set(value) {reflex = !value}
 }
 
+//shape consisting of polygons that need to be colorized
 class PolygonZ(outerRings: List<List<p3>>, private var innerRings: List<List<p3>>, bmi: p3, bma:p3): ShapeZ(bmi,bma){
     lateinit var indices: MutableList<Short>
     private var vertices: List<p3>
@@ -162,10 +169,6 @@ class PolygonZ(outerRings: List<List<p3>>, private var innerRings: List<List<p3>
                 intersectIndex = (i + 1) % vertices.size
                 intersect = p3(x,y3,z)
             }
-
-            //rm1:(310127.85714285716, 4671878.142857143, 0.0)
-            //is1:(310138.63081861957, 4671878.142857143, 0.0)
-
             //intersection point is known: now add the original outer ring up to that point,
             //then the inner ring, then continue with the outer ring
             val newVertices: MutableList<p3> = mutableListOf()
