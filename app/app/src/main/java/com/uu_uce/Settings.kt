@@ -2,10 +2,7 @@ package com.uu_uce
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.KeyEvent
-import android.view.View
 import android.widget.SeekBar
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import com.uu_uce.ui.createTopbar

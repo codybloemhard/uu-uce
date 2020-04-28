@@ -19,6 +19,7 @@ import com.uu_uce.pins.VideoContentBlock
 class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookViewModel) : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>() {
 
     private var fieldbook: List<FieldbookEntry> = emptyList()
+    private lateinit var parentView : ViewGroup
 
     class FieldbookViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val parentView = itemView
@@ -31,6 +32,7 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FieldbookViewHolder {
         val itemView = activity.layoutInflater.inflate(R.layout.fieldbook_recyclerview_item, parent, false)
+        parentView = parent
         return FieldbookViewHolder(itemView)
     }
 
@@ -79,7 +81,7 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
                     val layoutInflater = activity.layoutInflater
 
                     // Build an custom view (to be inflated on top of our current view & build it's popup window)
-                    val customView = layoutInflater.inflate(R.layout.pin_content_view, null, false)
+                    val customView = layoutInflater.inflate(R.layout.pin_content_view, parentView, false)
 
                     val popupWindow = PopupWindow(
                         customView,

@@ -5,10 +5,9 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import androidx.core.content.ContextCompat
+import com.uu_uce.gestureDetection.TouchParent
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.gestureDetection.TouchParent
 
 class MainActivity : TouchParent() {
     override fun onCreate(savedInstanceState: Bundle?) {

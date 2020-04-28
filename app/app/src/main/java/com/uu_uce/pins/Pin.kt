@@ -130,7 +130,7 @@ class Pin(
         val layoutInflater = activity.layoutInflater
 
         // Build an custom view (to be inflated on top of our current view & build it's popup window)
-        val customView = layoutInflater.inflate(R.layout.pin_content_view, null, false)
+        val customView = layoutInflater.inflate(R.layout.pin_content_view, parentView.parent as ViewGroup, false)
 
         popupWindow = PopupWindow(
             customView,
@@ -258,7 +258,7 @@ class Pin(
             val layoutInflater = activity.layoutInflater
 
             // Build an custom view (to be inflated on top of our current view & build it's popup window)
-            val customView = layoutInflater.inflate(R.layout.quiz_complete_popup, null, false)
+            val customView = layoutInflater.inflate(R.layout.quiz_complete_popup, parentView.parent as ViewGroup, false)
 
             popupWindow = PopupWindow(
                 customView,
