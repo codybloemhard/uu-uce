@@ -5,18 +5,20 @@
     android:id="@+id/popup_window_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center">
+    android:background="@color/BestWhite"
+    android:gravity="center"
+    tools:ignore="Overdraw">
 
     <ImageView
         android:id="@+id/completed_marker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
+        android:contentDescription="@string/allpins_checkmark_description"
         app:layout_constraintBottom_toTopOf="@+id/sepparator"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_sprite_complete"
-        android:contentDescription="@string/allpins_checkmark_description" />
+        app:srcCompat="@drawable/ic_sprite_complete" />
 
     <TextView
         android:id="@+id/popup_window_title"
