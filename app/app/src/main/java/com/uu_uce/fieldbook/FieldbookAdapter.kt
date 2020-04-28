@@ -40,10 +40,11 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
     override fun onBindViewHolder(holder: FieldbookViewHolder, position: Int) {
         val entry : FieldbookEntry = fieldbook[position]
-        //holder.numberFb.text = addLeadingZeros(entry.id)
-        holder.numberFb.text = entry.title
-        holder.locationFb.text = entry.location
-        holder.datetimeFb.text = entry.dateTime
+        holder.apply {
+            numberFb.text = entry.title
+            locationFb.text = entry.location
+            datetimeFb.text = entry.dateTime
+        }
 
         val params = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
@@ -52,9 +53,8 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
         val content = PinContent(entry.content)
 
-        var uri: Uri = Uri.EMPTY
-
         var isThumbnail = false
+        var thumbnailUri = Uri.EMPTY
 
         //val textFb: TextView = parentView.findViewById(R.id.text_preview)
         //val imageFb: ImageView = parentView.findViewById(R.id.image_preview)
@@ -81,20 +81,22 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
                 else -> {
                     if (!isThumbnail) {
                         if (cB is ImageContentBlock)
-                            uri = cB.getThumbnailURI()
+                            thumbnailUri = cB.getThumbnailURI()
                         else if (cB is VideoContentBlock)
-                            uri = cB.getThumbnailURI()
-                        ImageView(activity).apply {
-                            scaleType = ImageView.ScaleType.CENTER_CROP
-                            setImageURI(uri)
-                        }.also {
-                            holder.frameFb.addView(it, params)
-                        }
+                            thumbnailUri = cB.getThumbnailURI()
                         isThumbnail = true
                     }
                 }
             }
         }
+
+        if (holder.frameFb.childCount == 0)
+            ImageView(activity).apply {
+                scaleType = ImageView.ScaleType.CENTER_CROP
+                setImageURI(thumbnailUri)
+            }.also {
+                holder.frameFb.addView(it, params)
+            }
 
         holder.parentView.setOnClickListener (
             View.OnClickListener(
@@ -140,17 +142,27 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
         holder.parentView.setOnLongClickListener(
             View.OnLongClickListener(
                 fun (_): Boolean {
-                    println(uri)
                     AlertDialog.Builder(activity)
                         .setTitle("Delete")
                         .setMessage("Are you sure you want to delete this entry?")
                         .setPositiveButton("YES") { _: DialogInterface, _: Int ->
                             viewModel.delete(entry)
-                            if (uri != Uri.EMPTY) uri.toFile().delete()
+                            for (cB in content.contentBlocks) {
+                                when (cB) {
+                                    is ImageContentBlock ->
+                                        cB.getThumbnailURI().apply {
+                                            if (this!=Uri.EMPTY)
+                                                toFile().delete()
+                                        }
+                                    is VideoContentBlock ->
+                                        cB.getThumbnailURI().apply {
+                                            if (this!=Uri.EMPTY)
+                                                toFile().delete()
+                                        }
+                                }
+                            }
                         }
-                        .setNegativeButton("NO") { _: DialogInterface, _: Int ->
-
-                        }
+                        .setNegativeButton("NO") { _: DialogInterface, _: Int -> }
                         .show()
                     return true
                 }

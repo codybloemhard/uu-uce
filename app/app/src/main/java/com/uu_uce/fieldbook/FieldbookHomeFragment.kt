@@ -14,14 +14,16 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Size
 import android.view.Gravity
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.FOCUS_DOWN
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,7 +32,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.R
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.pins.*
+import com.uu_uce.pins.ContentBlockInterface
+import com.uu_uce.pins.ImageContentBlock
+import com.uu_uce.pins.TextContentBlock
+import com.uu_uce.pins.VideoContentBlock
 import com.uu_uce.services.*
 import java.io.File
 import java.io.FileOutputStream
@@ -69,9 +74,10 @@ class FieldbookHomeFragment : Fragment() {
     private lateinit var viewModel: FieldbookViewModel
     private lateinit var fragmentActivity: FragmentActivity
 
-    private lateinit var customView: View
-    private lateinit var layout: LinearLayout
-    private lateinit var title: EditText
+    private lateinit var customView : View
+    private lateinit var scrollView : ScrollView
+    private lateinit var layout     : LinearLayout
+    private lateinit var title      : EditText
 
     private var currentName = ""
     private var currentPath = ""
@@ -137,17 +143,21 @@ class FieldbookHomeFragment : Fragment() {
         resetVariables()
 
         customView = layoutInflater.inflate(R.layout.add_fieldbook_popup, null, false)
-        val popupWindow = PopupWindow(customView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        val popupWindow = PopupWindow(
+            customView,
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        ).apply {
+            showAtLocation(fragmentActivity.findViewById(R.id.fieldbook_layout), Gravity.CENTER, 0, 0)
 
-        popupWindow.showAtLocation(fragmentActivity.findViewById(R.id.fieldbook_layout), Gravity.CENTER, 0, 0)
-
-        // makes sure the keyboard appears whenever we want to add text
-        popupWindow.isFocusable = true
-        popupWindow.update()
+            // makes sure the keyboard appears whenever we want to add text
+            isFocusable = true
+            update()
+        }
 
         title = customView.findViewById(R.id.add_title)
-
-        layout = customView.findViewById(R.id.fieldbook_content_blocks)
+        layout = customView.findViewById(R.id.fieldbook_content_container)
+        scrollView = customView.findViewById(R.id.fieldbook_scroll_view)
 
         customView.findViewById<ImageButton>(R.id.add_text_block).also{
             it.setOnClickListener {
@@ -330,18 +340,46 @@ class FieldbookHomeFragment : Fragment() {
     }
 
     private fun addText() {
-        //TODO
+        title.clearFocus()
         val text = EditText(requireContext())
         layout.addView(text, layoutParams)
-        TextContentBlock(
-            text.text.toString()
-        ).also{
-            it.generateContent(blockID++,layout,requireActivity(),customView,null)
-            content.add(it)
+        scrollToEnd()
+        val button = Button(requireContext()).apply {
+            setText("Done")
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                weight = 1.0f
+                gravity = Gravity.END
+            }
+            gravity = Gravity.CENTER
+            setOnClickListener {
+                text.clearFocus()
+                hideKeyboard(fragmentActivity, it)
+            }
+        }.also {
+            layout.addView(it)
+        }
+        text.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                TextContentBlock(
+                    text.text.toString()
+                ).also {
+                    it.generateContent(blockID++, layout, requireActivity(), customView, null)
+                    content.add(it)
+                }
+                layout.apply {
+                    removeView(text)
+                    removeView(button)
+                }
+                scrollToEnd()
+            }
         }
     }
 
     private fun addImage(image: Uri) {
+        //TODO: scroll to the newly added content/to bottom
         ImageContentBlock(
             image,
             makeImageThumbnail(image)
@@ -349,15 +387,24 @@ class FieldbookHomeFragment : Fragment() {
             it.generateContent(blockID++,layout,requireActivity(),customView,null)
             content.add(it)
         }
+        scrollToEnd()
     }
 
     private fun addVideo(video: Uri) {
+        title.clearFocus()
         VideoContentBlock(
             video,
             makeVideoThumbnail(video)
         ).also {
             it.generateContent(blockID++,layout, requireActivity(),customView,null)
             content.add(it)
+        }
+        scrollToEnd()
+    }
+
+    private fun scrollToEnd() {
+        scrollView.post {
+            scrollView.fullScroll(FOCUS_DOWN)
         }
     }
 
@@ -387,7 +434,7 @@ class FieldbookHomeFragment : Fragment() {
             ".mp4",
             myDir
         ).apply {
-            currentName = name
+            currentName = nameWithoutExtension
             currentPath = absolutePath
         }
     }
@@ -395,7 +442,7 @@ class FieldbookHomeFragment : Fragment() {
     private fun makeImageThumbnail(uri: Uri) : Uri {
         if (currentName == "") {
             //TODO: get correct name
-            currentName = "IMG_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}_UCE.png"
+            currentName = "IMG_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}_UCE"
             /*
             val cursor = requireContext().contentResolver.query(
                 uri,
@@ -561,5 +608,22 @@ class FieldbookHomeFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun hideKeyboard(activity: Activity, currentView : View? = null) {
+        val imm: InputMethodManager =
+            activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+
+        var view = currentView
+        if(view == null){
+            //Find the currently focused view, so we can grab the correct window token from it.
+            view = activity.currentFocus
+            //If no view currently has focus, create a new one, just so we can grab a window token from it
+            if (view == null) {
+                view = View(activity)
+            }
+        }
+
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 }

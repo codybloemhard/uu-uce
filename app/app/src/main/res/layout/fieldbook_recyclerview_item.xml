@@ -13,7 +13,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#F0F0F0"
+        android:background="@drawable/custom_border"
         android:padding="5dp">
 
         <LinearLayout

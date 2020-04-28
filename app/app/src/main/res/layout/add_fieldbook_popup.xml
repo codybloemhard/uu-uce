@@ -4,6 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#80000000"
+    android:clickable="true"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     android:padding="20dp">
 
     <androidx.cardview.widget.CardView
@@ -11,6 +14,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:maxHeight="600dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         app:cardBackgroundColor="@color/colorUU"
         app:cardCornerRadius="8dp"
         app:cardElevation="10dp"
@@ -41,6 +47,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ScrollView
+                android:id="@+id/fieldbook_scroll_view"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:orientation="vertical"
@@ -50,21 +57,10 @@
                 app:layout_constraintTop_toBottomOf="@id/add_title">
 
                 <LinearLayout
-                    android:id="@+id/fieldbook_content_blocks"
+                    android:id="@+id/fieldbook_content_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical" />
-
-                <!--
-                <ImageView
-                    android:id="@+id/add_image"
-                    android:layout_width="match_parent"
-                    android:layout_height="200dp"
-                    android:layout_marginBottom="10dp"
-                    android:background="@drawable/border"
-                    android:contentDescription="@string/uploaded_image_field_description"
-                    android:scaleType="centerCrop" />
-                    -->
 
             </ScrollView>
 
