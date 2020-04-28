@@ -151,6 +151,7 @@ class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Ur
         val content = ImageView(activity)
         try {
             content.setImageURI(imageURI)
+            content.scaleType = ImageView.ScaleType.CENTER_CROP
         } catch (e: Exception) {
             Logger.error("PinContent","Couldn't load $imageURI, so loaded the thumbnail $thumbnailURI instead")
             content.setImageURI(thumbnailURI)
