@@ -8,7 +8,7 @@ class Logger{
     companion object {
         private var typeMask = hashMapOf<LogType, Boolean>()
         private val tagMask = hashMapOf<String, Boolean>()
-        var defaultTagMask = true
+        private var defaultTagMask = true
 
         init{
             typeMask=hashMapOf(

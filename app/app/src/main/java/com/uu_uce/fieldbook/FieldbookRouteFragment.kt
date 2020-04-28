@@ -38,14 +38,13 @@ class FieldbookRouteFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fieldbook_fragment_route, container, false)
 
         // add layers here
         //view.routeViewer.initializeCamera()
         //view.routeViewer.tryStartLocServices(activity!!)
 
         // Inflate the layout for this fragment
-        return view
+        return inflater.inflate(R.layout.fieldbook_fragment_route, container, false)
     }
 
     companion object {

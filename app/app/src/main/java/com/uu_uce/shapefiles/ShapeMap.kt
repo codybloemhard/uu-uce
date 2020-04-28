@@ -100,7 +100,7 @@ class ShapeMap(private val nrOfLODs: Int,
         invalidate()
     }
 
-    fun invalidate(){
+    private fun invalidate(){
         camera.forceChanged()
         view.invalidate()
     }

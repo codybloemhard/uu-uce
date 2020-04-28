@@ -51,6 +51,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### QA Matrix
 | Version   | Date      | Documentation     | Linting status            |
 |-----------|-----------|-------------------|---------------------------|
+| 0.6.0     | 28-4-2020 | Content format    | Cleaned up android        |
 | 0.5.0     | 15-4-2020 | Content format    | Not much changed          |
 | 0.4.1     | 6-4-2020  | Content format    | New Issues pile up        |
 | 0.4.0     | 31-3-2020 | Content format    | Many things are unused    |
@@ -116,6 +117,7 @@ Used by shapefile-linter to save it's custom files for geological data.
 ### Detailed Linting Status
 | Version   | Linting Details Kotlin: (Nr, Worst) Android: (Nr, Worst)  |
 |-----------|-----------------------------------------------------------|
+| 0.6.0     | Kotlin: (17, mild), Android: (14, mild)
 | 0.5.0     | Kotlin: (14, mild), Android: (57: Medium)
 | 0.4.2     | Small decrease in issues, Kotlin: (7, mild) Android (61: Medium)
 | 0.4.1     | Issues expand again, Kotlin: (12, mild) Android (80: Major)

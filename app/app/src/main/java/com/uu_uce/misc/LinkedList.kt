@@ -23,9 +23,9 @@ class Node<T>(val value: T){
 }
 
 //not available in Kotlin so made a quick version myself
-class LinkedList<T>(e: List<T>, val cyclic: Boolean = false): Iterable<Node<T>> {
+class LinkedList<T>(e: List<T>, private val cyclic: Boolean = false): Iterable<Node<T>> {
     var first: Node<T>? = null
-    var last: Node<T>? = null
+    private var last: Node<T>? = null
     var size = 0
     init{
         size = e.size
@@ -66,7 +66,7 @@ class LinkedList<T>(e: List<T>, val cyclic: Boolean = false): Iterable<Node<T>> 
         }
     }
 
-    fun addAfter(element: T, after: Node<T>?){
+    private fun addAfter(element: T, after: Node<T>?){
         size++
         val newNode = Node(element)
         after?.next?.prev = newNode
