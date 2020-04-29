@@ -2,10 +2,10 @@ package com.uu_uce.views
 
 import android.content.Context
 import android.util.AttributeSet
+import android.widget.ImageView
 import android.widget.RelativeLayout
 import androidx.core.view.updateLayoutParams
 import com.uu_uce.R
-import kotlinx.android.synthetic.main.activity_geo_map.view.*
 
 class Menu : RelativeLayout {
     constructor(context: Context): super(context)
@@ -21,14 +21,18 @@ class Menu : RelativeLayout {
     private var screenHeight = 0
     private var minScroll = 0f
 
+    private lateinit var dragButton : ImageView
+
     fun setScreenHeight(scrnHeight: Int, openBtnHeight: Int, scrollHeight: Int, lowerMenuHeight: Int){
         screenHeight = scrnHeight
         downY = screenHeight - openBtnHeight.toFloat()
         barY = downY - scrollHeight.toFloat()
-        upY = barY - lowerMenuHeight.toFloat()
+        upY = barY - lowerMenuHeight.toFloat() * 1.2f
         updateLayoutParams{height = screenHeight}
         y = downY
         minScroll = screenHeight * 0.1f
+
+        dragButton = findViewById(R.id.dragButton)
     }
 
     fun snap(dx: Float, dy: Float){
@@ -57,19 +61,19 @@ class Menu : RelativeLayout {
     private fun up(){
         dragStatus = DragStatus.Up
         animate().y(upY)
-        dragButton.setImageResource(R.drawable.ic_menu_drag_down)
+        dragButton.setImageResource(R.drawable.ic_sprite_arrowdown)
     }
 
     private fun bar(){
         dragStatus = DragStatus.Bar
         animate().y(barY)
-        dragButton.setImageResource(R.drawable.ic_menu_drag_up)
+        dragButton.setImageResource(R.drawable.ic_sprite_arrowup)
     }
 
     fun down(){
         dragStatus = DragStatus.Down
         animate().y(downY)
-        dragButton.setImageResource(R.drawable.ic_menu_drag_up)
+        dragButton.setImageResource(R.drawable.ic_sprite_arrowup)
     }
 
     fun dragButtonTap(){

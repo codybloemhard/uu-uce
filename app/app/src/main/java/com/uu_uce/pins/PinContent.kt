@@ -9,9 +9,11 @@ import android.view.Gravity
 import android.view.View
 import android.widget.*
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.VideoViewer
+import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import java.io.StringReader
 
@@ -37,15 +39,17 @@ class PinContent(private val contentString: String) {
         reader.beginArray()
         while (reader.hasNext()) {
             val curBlock = readBlock(reader)
-            if(curBlock.canCompleteBlock) canCompletePin = true
-            contentBlocks.add(curBlock)
+            if(curBlock != null) {
+                if(curBlock.canCompleteBlock) canCompletePin = true
+                contentBlocks.add(curBlock)
+            }
         }
         reader.endArray()
         return contentBlocks
     }
 
     // Generate ContentBlock from JSON string
-    private fun readBlock(reader: JsonReader): ContentBlockInterface {
+    private fun readBlock(reader: JsonReader): ContentBlockInterface? {
         var blockTag                                    = BlockTag.UNDEFINED
         var textString                                  = ""
         var filePath                                    = ""
@@ -60,18 +64,29 @@ class PinContent(private val contentString: String) {
             when (reader.nextName()) {
                 "tag" -> {
                     blockTag = blockTagFromString(reader.nextString())
-                    if(blockTag == BlockTag.UNDEFINED) error("Undefined block tag")
                 }
                 "text" -> {
                     textString = reader.nextString()
                 }
                 "file_path" -> {
                     filePath = when(blockTag) {
-                        BlockTag.UNDEFINED  -> error("Undefined block tag")
-                        BlockTag.TEXT       -> error("Undefined function") //TODO: Add reading text from file?
+                        BlockTag.UNDEFINED  -> {
+                            Logger.error("PinContent", "Tag needs to be specified before file_path")
+                            ""
+                        }
+                        BlockTag.TEXT       -> {
+                            //TODO: Add reading text from file?
+                            Logger.log(LogType.NotImplemented, "PinContent", "file reading not implemented")
+                            reader.nextString()
+                            ""
+                        }
                         BlockTag.IMAGE      -> reader.nextString()
                         BlockTag.VIDEO      -> reader.nextString()
-                        BlockTag.MCQUIZ     -> error("Multiple choice blocks can not be loaded from file")
+                        BlockTag.MCQUIZ     -> {
+                            Logger.error("PinContent", "multiple choice quiz can not be read from file")
+                            reader.nextString()
+                            ""
+                        }
                     }
                 }
 
@@ -80,7 +95,6 @@ class PinContent(private val contentString: String) {
                 }
                 "thumbnail" -> {
                     thumbnailURI = Uri.parse(reader.nextString())
-                    //if(blockTag != BlockTag.VIDEO) //TODO: alert user that only VideoContentBlock uses thumbnail
                 }
                 "mc_correct_option" -> {
                     mcCorrectOptions.add(reader.nextString())
@@ -92,19 +106,25 @@ class PinContent(private val contentString: String) {
                     reward = reader.nextInt()
                 }
                 else -> {
-                    error("Wrong content format")
+                    Logger.error("PinContent", "Wrong content format")
+                    reader.nextString()
+                    reader.nextString()
                 }
             }
         }
         reader.endObject()
         return when(blockTag){
-            BlockTag.UNDEFINED  -> error("Undefined block tag")
+            BlockTag.UNDEFINED  -> {
+                Logger.error("PinContent", "No BlockTag specified")
+                return null
+            }
             BlockTag.TEXT       -> TextContentBlock(textString)
             BlockTag.IMAGE      -> ImageContentBlock(Uri.parse(filePath), thumbnailURI)
             BlockTag.VIDEO      -> VideoContentBlock(Uri.parse(filePath), thumbnailURI, title)
             BlockTag.MCQUIZ     -> {
                 if(mcIncorrectOptions.count() < 1 && mcCorrectOptions.count() < 1) {
-                    error("Mutliple choice questions require at least one correct and one incorrect answer")
+                    Logger.error("PinContent", "Mutliple choice questions require at least one correct and one incorrect answer")
+                    return null
                 }
                 MCContentBlock( mcCorrectOptions, mcIncorrectOptions, reward)
             }
@@ -247,12 +267,10 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
     private lateinit var selectedBackground : CardView
 
     override fun generateContent(blockId : Int, layout: LinearLayout, activity: Activity, view : View, parent : Pin?) {
-        if(parent == null) error("Mutliple choice quizzes can't be generated without a parent pin")
-
-        val unselectedColor = Color.parseColor("#2d98da")
-        val selectedColor   = Color.parseColor("#FD9644")
-        val correctColor    = Color.parseColor("#26DE81")
-        val incorrectColor  = Color.parseColor("#FC5C65")
+        if(parent == null) {
+            Logger.error("PinContent","Mutliple choice quizzes can't be generated without a parent pin")
+            return
+        }
 
         selectedBackground = CardView(activity)
         parent.addQuestion(blockId, reward)
@@ -292,6 +310,7 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
             val answer = TextView(activity)
             answer.text = shuffledAnswers[i].first
             answer.gravity = Gravity.CENTER
+            answer.setTextColor(ContextCompat.getColor(activity, R.color.BestWhite))
             val textParams = TableLayout.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.MATCH_PARENT
@@ -302,12 +321,12 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
             currentRow.addView(currentFrame)
 
             if(parent.getStatus() < 2){
-                background.setCardBackgroundColor(unselectedColor)
+                background.setCardBackgroundColor(ContextCompat.getColor(activity, R.color.Boyzone))
                 currentFrame.setOnClickListener {
-                    selectedBackground.setCardBackgroundColor(unselectedColor)
+                    selectedBackground.setCardBackgroundColor(ContextCompat.getColor(activity, R.color.Boyzone))
                     selectedAnswer = i
                     selectedBackground = background
-                    background.setCardBackgroundColor(selectedColor)
+                    background.setCardBackgroundColor(ContextCompat.getColor(activity, R.color.OrangeHibiscus))
                     if(shuffledAnswers[i].second){
                         parent.answerQuestion(blockId, reward)
                     }
@@ -318,10 +337,10 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
             }
             else{
                 if(shuffledAnswers[i].second){
-                    background.setCardBackgroundColor(correctColor)
+                    background.setCardBackgroundColor(ContextCompat.getColor(activity, R.color.ReptileGreen))
                 }
                 else{
-                    background.setCardBackgroundColor(incorrectColor)
+                    background.setCardBackgroundColor(ContextCompat.getColor(activity, R.color.FusionRed))
                 }
             }
 

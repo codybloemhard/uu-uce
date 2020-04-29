@@ -2,11 +2,11 @@ package com.uu_uce.instrumentedTests
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.view.KeyEvent
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.pressBack
+import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
@@ -27,6 +27,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.lang.Thread.sleep
 
 
 @RunWith(AndroidJUnit4::class)
@@ -120,7 +121,7 @@ class AllPinsTests {
         // Open first pin
         onView(withId(R.id.allpins_recyclerview)).perform(
                 actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                    0, clickChildViewWithId(R.id.open_button)
+                    0, clickChildViewWithId(R.id.recyclerview_item)
                 )
             )
 
@@ -147,7 +148,7 @@ class AllPinsTests {
         // Open first pin
         onView(withId(R.id.allpins_recyclerview)).perform(
             actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                0, clickChildViewWithId(R.id.open_button)
+                0, clickChildViewWithId(R.id.recyclerview_item)
             )
         )
 
@@ -172,7 +173,7 @@ class AllPinsTests {
         // Open video pin
         onView(withId(R.id.allpins_recyclerview)).perform(
             actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                3, clickChildViewWithId(R.id.open_button)
+                3, clickChildViewWithId(R.id.recyclerview_item)
             )
         )
 
@@ -210,7 +211,7 @@ class AllPinsTests {
         // Open video pin
         onView(withId(R.id.allpins_recyclerview)).perform(
             actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                3, clickChildViewWithId(R.id.open_button)
+                3, clickChildViewWithId(R.id.recyclerview_item)
             )
         )
 
@@ -246,7 +247,7 @@ class AllPinsTests {
         // Open multiple choice pin
         onView(withId(R.id.allpins_recyclerview)).perform(
             actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                1, clickChildViewWithId(R.id.open_button)
+                1, clickChildViewWithId(R.id.recyclerview_item)
             )
         )
 
@@ -266,17 +267,17 @@ class AllPinsTests {
             )
         )
             .inRoot(isPlatformPopup())
-            .perform(click())
+            .perform(scrollTo(), click())
 
         // Click finish button
         onView(withId(R.id.finish_quiz_button))
             .inRoot(isPlatformPopup())
-            .perform(click())
+            .perform(scrollTo(), click())
 
         // Check to see if popup was correct
         onView(withId(R.id.quiz_result_text))
             .inRoot(isPlatformPopup())
-            .check(matches(withText(R.string.quiz_success_head)))
+            .check(matches(withText(R.string.pin_quiz_success_head)))
 
         // Reopen popup
         onView(withId(R.id.reopen_button))
@@ -284,9 +285,9 @@ class AllPinsTests {
             .perform(click())
 
         // Check if pin is completed
-        onView(withId(R.id.complete_box))
+        onView(withId(R.id.completed_marker))
             .inRoot(isPlatformPopup())
-            .check(matches(isChecked()))
+            .check(matches(isDisplayed()))
     }
 
     @Test
@@ -294,7 +295,7 @@ class AllPinsTests {
         // Open multiple choice pin
         onView(withId(R.id.allpins_recyclerview)).perform(
             actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                1, clickChildViewWithId(R.id.open_button)
+                1, clickChildViewWithId(R.id.recyclerview_item)
             )
         )
 
@@ -314,17 +315,17 @@ class AllPinsTests {
             )
         )
             .inRoot(isPlatformPopup())
-            .perform(click())
+            .perform(scrollTo(), click())
 
         // Click finish button
         onView(withId(R.id.finish_quiz_button))
             .inRoot(isPlatformPopup())
-            .perform(click())
+            .perform(scrollTo(), click())
 
         // Check to see if popup was correct
         onView(withId(R.id.quiz_result_text))
             .inRoot(isPlatformPopup())
-            .check(matches(withText(R.string.quiz_fail_head)))
+            .check(matches(withText(R.string.pin_quiz_fail_head)))
 
         // Reopen popup
         onView(withId(R.id.reopen_button))
@@ -332,9 +333,9 @@ class AllPinsTests {
             .perform(click())
 
         // Check if pin is completed
-        onView(withId(R.id.complete_box))
+        onView(withId(R.id.completed_marker))
             .inRoot(isPlatformPopup())
-            .check(matches(not(isChecked())))
+            .check(matches(not(isDisplayed())))
     }
 
     @Test
@@ -342,7 +343,7 @@ class AllPinsTests {
         // Open multiple choice pin
         onView(withId(R.id.allpins_recyclerview)).perform(
             actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                1, clickChildViewWithId(R.id.open_button)
+                1, clickChildViewWithId(R.id.recyclerview_item)
             )
         )
 
@@ -361,7 +362,7 @@ class AllPinsTests {
                 withText("Also right")
             ))
             .inRoot(isPlatformPopup())
-            .perform(click())
+            .perform(scrollTo(), click())
 
         // Attempt to close pin
         onView(withId(R.id.popup_window_close_button))
@@ -403,7 +404,7 @@ class AllPinsTests {
         // Open multiple choice pin
         onView(withId(R.id.allpins_recyclerview)).perform(
             actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                1, clickChildViewWithId(R.id.open_button)
+                1, clickChildViewWithId(R.id.recyclerview_item)
             )
         )
 
@@ -423,6 +424,8 @@ class AllPinsTests {
         // Check to see that warning doesn't pops up when no progress is made
         onView(withText("Closing Pin"))
             .check(doesNotExist())
+
+        sleep(100)
 
         // Check if pin closed
         onView(withId(R.id.allpins_recyclerview))
@@ -467,38 +470,6 @@ class AllPinsTests {
         onView(withId(R.id.fab))
             .perform(click())
 
-        // Sort by type
-        onView(withText("Type a-z"))
-            .perform(click())
-
-        // Check if sorting was successful
-        onView(
-            allOf(
-                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
-                withId(R.id.allpins_recyclerview_item_title)
-            )
-        ).check(matches(withText("B")))
-
-        // Open sorting popup
-        onView(withId(R.id.fab))
-            .perform(click())
-
-        // Sort by type reversed
-        onView(withText("Type z-a"))
-            .perform(click())
-
-        // Check if sorting was successful
-        onView(
-            allOf(
-                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
-                withId(R.id.allpins_recyclerview_item_title)
-            )
-        ).check(matches(withText("C")))
-
-        // Open sorting popup
-        onView(withId(R.id.fab))
-            .perform(click())
-
         // Sort by difficulty
         onView(withText("Difficulty easy-hard"))
             .perform(click())
@@ -526,5 +497,82 @@ class AllPinsTests {
                 withId(R.id.allpins_recyclerview_item_title)
             )
         ).check(matches(withText("D")))
+
+        // Open sorting popup
+        onView(withId(R.id.fab))
+            .perform(click())
+
+        // Sort by type
+        onView(withText("Type a-z"))
+            .perform(click())
+
+        // Check if sorting was successful
+        onView(
+            allOf(
+                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
+                withId(R.id.allpins_recyclerview_item_title)
+            )
+        ).check(matches(withText("B")))
+
+        // Open sorting popup
+        onView(withId(R.id.fab))
+            .perform(click())
+
+        // Sort by type reversed
+        onView(withText("Type z-a"))
+            .perform(click())
+
+        // Check if sorting was successful
+        onView(
+            allOf(
+                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
+                withId(R.id.allpins_recyclerview_item_title)
+            )
+        ).check(matches(withText("C")))
+    }
+
+    @Test
+    fun pinSearching(){
+        // Search for D
+        onView(withId(R.id.searchbar))
+            .perform(typeText("D"), pressKey(KeyEvent.KEYCODE_ENTER))
+
+        sleep(100)
+
+        // Check if D was found
+        onView(
+            allOf(
+                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
+                withId(R.id.allpins_recyclerview_item_title)
+            )
+        ).check(matches(withText("D")))
+
+        // Press clear search to stop searching
+        onView(withId(R.id.searchbar))
+            .perform(clearText(), pressKey(KeyEvent.KEYCODE_ENTER))
+
+        sleep(100)
+
+        // Check if sorting was stopped
+        onView(
+            allOf(
+                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
+                withId(R.id.allpins_recyclerview_item_title)
+            )
+        ).check(matches(withText("B")))
+
+        // Search for C
+        onView(withId(R.id.searchbar))
+            .perform(typeText("C"), pressKey(KeyEvent.KEYCODE_ENTER))
+
+        sleep(100)
+
+        // Check if C was found
+        onView(
+            allOf(
+                isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
+                withId(R.id.allpins_recyclerview_item_title)
+            )
+        ).check(matches(withText("C")))
     }
 }

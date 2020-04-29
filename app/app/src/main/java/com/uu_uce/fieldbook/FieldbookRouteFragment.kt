@@ -1,13 +1,11 @@
 package com.uu_uce.fieldbook
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
+import androidx.fragment.app.Fragment
 import com.uu_uce.R
-import kotlinx.android.synthetic.main.fragment_fieldbook_route.view.*
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -39,14 +37,13 @@ class FieldbookRouteFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_fieldbook_route, container, false)
 
         // add layers here
-        view.routeViewer.initializeCamera()
-        view.routeViewer.tryStartLocServices(activity!!)
+        //view.routeViewer.initializeCamera()
+        //view.routeViewer.tryStartLocServices(activity!!)
 
         // Inflate the layout for this fragment
-        return view
+        return inflater.inflate(R.layout.fieldbook_fragment_route, container, false)
     }
 
     companion object {

@@ -20,10 +20,15 @@ import android.view.View.FOCUS_DOWN
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+import android.view.*
+import androidx.fragment.app.Fragment
+import android.widget.Button
+import android.widget.EditText
+import android.widget.PopupWindow
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -71,8 +76,9 @@ class FieldbookHomeFragment : Fragment() {
         const val REQUEST_VIDEO_CAPTURE = 3
     }
 
-    private lateinit var viewModel: FieldbookViewModel
-    private lateinit var fragmentActivity: FragmentActivity
+    private lateinit var viewModel          : FieldbookViewModel
+    private lateinit var fragmentActivity   : FragmentActivity
+    private lateinit var fragmentView       : View
 
     private lateinit var customView : View
     private lateinit var scrollView : ScrollView
@@ -114,7 +120,7 @@ class FieldbookHomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_fieldbook_home, container, false).also {view ->
+        return inflater.inflate(R.layout.fieldbook_fragment_home, container, false).also { view ->
             val recyclerView = view.findViewById<RecyclerView>(R.id.fieldbook_recyclerview)
             val addButton = view.findViewById<FloatingActionButton>(R.id.fieldbook_fab)
 
@@ -139,6 +145,7 @@ class FieldbookHomeFragment : Fragment() {
     private fun openFieldbookAdderPopup() {
         blockID = 0
         resetVariables()
+        fragmentView = requireView()
 
         customView = layoutInflater.inflate(R.layout.add_fieldbook_popup, null, false)
         val popupWindow = PopupWindow(
@@ -153,24 +160,35 @@ class FieldbookHomeFragment : Fragment() {
             update()
         }
 
-        title = customView.findViewById(R.id.add_title)
-        layout = customView.findViewById(R.id.fieldbook_content_container)
-        scrollView = customView.findViewById(R.id.fieldbook_scroll_view)
+        layout      = customView.findViewById(R.id.fieldbook_content_container)
+        scrollView  = customView.findViewById(R.id.fieldbook_scroll_view)
 
-        customView.findViewById<ImageButton>(R.id.add_text_block).also{
-            it.setOnClickListener {
+        title       = customView.findViewById<EditText>(R.id.add_title).apply{
+            setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
+                if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+                    //Perform Code
+                    hideKeyboard(fragmentActivity, customView)
+                    return@OnKeyListener true
+                }
+                false
+            })
+            inputType = TYPE_TEXT_FLAG_NO_SUGGESTIONS
+        }
+
+        customView.findViewById<ImageButton>(R.id.add_text_block).apply{
+            setOnClickListener {
                 addText()
             }
         }
 
-        customView.findViewById<ImageButton>(R.id.add_image_block).also{
-            it.setOnClickListener {
+        customView.findViewById<ImageButton>(R.id.add_image_block).apply{
+            setOnClickListener {
                 selectImage()
             }
         }
 
-        customView.findViewById<ImageButton>(R.id.add_video_block).also{
-            it.setOnClickListener {
+        customView.findViewById<ImageButton>(R.id.add_video_block).apply{
+            setOnClickListener {
                 selectVideo()
             }
         }
@@ -369,6 +387,7 @@ class FieldbookHomeFragment : Fragment() {
     private fun addText() {
         title.clearFocus()
         val text = EditText(requireContext())
+        text.inputType = TYPE_TEXT_FLAG_NO_SUGGESTIONS
         layout.addView(text, layoutParams)
         scrollToEnd()
 

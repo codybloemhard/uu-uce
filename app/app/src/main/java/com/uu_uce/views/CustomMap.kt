@@ -3,6 +3,7 @@ package com.uu_uce.views
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -17,14 +18,17 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import androidx.preference.PreferenceManager
 import com.uu_uce.AllPins
+import com.uu_uce.Fieldbook
 import com.uu_uce.R
+import com.uu_uce.Settings
 import com.uu_uce.allpins.PinConversion
 import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.fieldbook.FullRoute
 import com.uu_uce.fieldbook.Route
-import com.uu_uce.Fieldbook
+import com.uu_uce.gestureDetection.*
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.drawLocation
 import com.uu_uce.mapOverlay.pointDistance
@@ -34,7 +38,6 @@ import com.uu_uce.misc.Logger
 import com.uu_uce.pins.Pin
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
-import com.uu_uce.gestureDetection.*
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 import java.time.LocalDate
@@ -48,6 +51,9 @@ class CustomMap : ViewTouchParent {
 
     private var smap : ShapeMap = ShapeMap(5, this)
 
+    // Settings
+    private lateinit var sharedPref : SharedPreferences
+
     // Location
     private val locationServices                            = LocationServices()
     private val locationDeadZone    : Float                 = 5f // How much does the location have to change on the screen to warrant a redraw
@@ -55,6 +61,7 @@ class CustomMap : ViewTouchParent {
     private var loc                 : UTMCoordinate         = UTMCoordinate(31, 'N', 0.0, 0.0)
     private var lastDrawnLoc        : Pair<Float, Float>    = Pair(0f, 0f)
     var locationAvailable           : Boolean               = false
+    private var locAtCenterPress    : UTMCoordinate         = UTMCoordinate(31, 'N', 0.0, 0.0)
 
     // Paints
     private val deviceLocPaint      : Paint = Paint()
@@ -88,7 +95,8 @@ class CustomMap : ViewTouchParent {
         addChild(DoubleTapper(context, ::zoomOutMax))
         addChild(SingleTapper(context as AppCompatActivity, ::tapPin))
 
-
+        // Get settings
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(context as AppCompatActivity)
 
         // Init paints
         deviceLocPaint.color = Color.BLUE
@@ -100,6 +108,7 @@ class CustomMap : ViewTouchParent {
             val z = 1.0 / (camera.wAspect)
             camera.maxZoom = maxOf(1.0,z)
             camera.setZoom(z)
+            smap.setzooms(camera.minZoom, camera.maxZoom)
         }
     }
 
@@ -108,11 +117,10 @@ class CustomMap : ViewTouchParent {
         camera = smap.initialize()
     }
 
-    fun addLayer(lt: LayerType, path: File, chunkGetter: ChunkGetter, scrollLayout: LinearLayout, buttonSize: Int){
-        smap.addLayer(lt, path, chunkGetter)
-
+    fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout, buttonSize: Int, hasInfo: Boolean){
+        smap.addLayer(lt, chunkGetter, hasInfo)
         val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle)
-        btn.setImageResource(R.drawable.logotp)
+        btn.setImageResource(R.drawable.ic_sprite_toggle_layer)
         val curLayers = nrLayers
         btn.setOnClickListener{
             toggleLayer(curLayers)
@@ -252,9 +260,11 @@ class CustomMap : ViewTouchParent {
 
     private fun updatePinStatuses(newPinData: List<PinData>) {
         // Update pins from new data
+        val pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", 60)
         for(pin in newPinData) {
             if(pinStatuses[pin.pinId] == pin.status){
                 // Pin is present and unchanged
+                pins[pin.pinId]!!.resize(pinSize)
                 continue
             }
             when {
@@ -266,6 +276,7 @@ class CustomMap : ViewTouchParent {
                         Logger.log(LogType.Info, "CustomMap", "Adding pin")
                         pins[pin.pinId] = newPin
                         pinStatuses[newPin.id] = pin.status
+                        pins[pin.pinId]!!.resize(pinSize)
                         camera.forceChanged()
                         invalidate()
                     }
@@ -277,6 +288,7 @@ class CustomMap : ViewTouchParent {
                     changedPin?.tryUnlock {
                         changedPin.setStatus(1)
                         pinStatuses[changedPin.id] = 1
+                        pins[pin.pinId]!!.resize(pinSize)
                         camera.forceChanged()
                         invalidate()
                     }
@@ -288,6 +300,7 @@ class CustomMap : ViewTouchParent {
                     if (changedPin != null) {
                         changedPin.setStatus(pin.status)
                         pinStatuses[changedPin.id] = pin.status
+                        pins[pin.pinId]!!.resize(pinSize)
                         camera.forceChanged()
                         invalidate()
                     }
@@ -355,7 +368,12 @@ class CustomMap : ViewTouchParent {
 
     fun startFieldBook() {
         val i = Intent(context, Fieldbook::class.java)
-        startActivity(context,i,null)
+        startActivity(context, i,null)
+    }
+
+    fun startSettings() {
+        val i = Intent(context, Settings::class.java)
+        startActivity(context, i,null)
     }
 
     @TestOnly
@@ -370,7 +388,7 @@ class CustomMap : ViewTouchParent {
 
     @TestOnly
     fun userLocCentral() : Boolean {
-        val screenLoc = coordToScreen(loc, camera.getViewport(), width, height)
+        val screenLoc = coordToScreen(locAtCenterPress, camera.getViewport(), width, height)
         return (screenLoc.first.toInt() == width / 2 && screenLoc.second.toInt() == height / 2)
     }
 
@@ -382,5 +400,10 @@ class CustomMap : ViewTouchParent {
     @TestOnly
     fun zoomIn(){
         camera.setZoom(camera.minZoom)
+    }
+
+    @TestOnly
+    fun setCenterPos(){
+        locAtCenterPress = loc
     }
 }

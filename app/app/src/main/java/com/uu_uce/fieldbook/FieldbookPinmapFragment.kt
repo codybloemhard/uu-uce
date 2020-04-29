@@ -1,12 +1,11 @@
 package com.uu_uce.fieldbook
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-
 import com.uu_uce.R
 
 /**
@@ -31,7 +30,7 @@ class FieldbookPinmapFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_fieldbook_pinmap, container, false)
+        return inflater.inflate(R.layout.fieldbook_fragment_pinmap, container, false)
     }
 
     companion object {

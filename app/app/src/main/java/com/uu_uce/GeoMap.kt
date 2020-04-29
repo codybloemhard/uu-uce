@@ -3,10 +3,13 @@ package com.uu_uce
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.graphics.Point
+import android.os.Build
 import android.os.Bundle
 import android.view.Display
 import android.view.MotionEvent
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -23,6 +26,8 @@ import kotlinx.android.synthetic.main.activity_geo_map.*
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 
+const val debug = false
+
 class GeoMap : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel
     private val permissionsNeeded = listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -36,6 +41,14 @@ class GeoMap : AppCompatActivity() {
         Logger.setTagEnabled("LocationServices", false)
         Logger.setTagEnabled("Pin", false)
         Logger.setTagEnabled("DrawOverlay", false)
+
+        // Set statusbar text color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
+        }
+        else{
+            window.statusBarColor = Color.BLACK// set status background white
+        }
 
         super.onCreate(savedInstanceState)
 
@@ -81,22 +94,26 @@ class GeoMap : AppCompatActivity() {
         val btn2 = fieldbook_button
         btn2.setOnClickListener{customMap.startFieldBook()}
 
-        dragButton.clickAction      = {menu.dragButtonTap()}
-        dragButton.dragAction       = {dx, dy -> menu.drag(dx,dy)}
-        dragButton.dragEndAction    = {dx, dy -> menu.snap(dx, dy)}
+        val btn3 = settings_button
+        btn3.setOnClickListener{customMap.startSettings()}
 
-        val dir = File(filesDir,"mydir")
+        dragBar.clickAction      = {menu.dragButtonTap()}
+        dragBar.dragAction       = { dx, dy -> menu.drag(dx,dy)}
+        dragBar.dragEndAction    = { dx, dy -> menu.snap(dx, dy)}
+
+        val mydir = File(filesDir,"mydir")
         try {
-            customMap.addLayer(LayerType.Water, dir, HeightLineReader(dir), toggle_layer_layout, size)
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $dir")
+            val heightlines = File(mydir, "heightlines")
+            customMap.addLayer(LayerType.Water, HeightLineReader(heightlines), toggle_layer_layout, size, true)
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
         }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $dir.\nError: " + e.message)
+            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
         try {
-            customMap.addLayer(LayerType.Water, dir, PolygonReader(dir),  toggle_layer_layout, size)
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $dir")
+            customMap.addLayer(LayerType.Water, PolygonReader(mydir),  toggle_layer_layout, size, false)
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
         }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $dir.\nError: " + e.message)
+            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
 
         customMap.initializeCamera()
@@ -111,6 +128,7 @@ class GeoMap : AppCompatActivity() {
         center_button.setOnClickListener{
             if(customMap.locationAvailable){
                 customMap.zoomToDevice()
+                customMap.setCenterPos()
             }
             else{
                 Toast.makeText(this, "Location not avaiable", Toast.LENGTH_LONG).show()
@@ -151,7 +169,7 @@ class GeoMap : AppCompatActivity() {
     }
 
     private fun initMenu(){
-        menu.setScreenHeight(screenDim.y - statusBarHeight, dragButton.height, toggle_layer_scroll.height, lower_menu_layout.height)
+        menu.setScreenHeight(screenDim.y - statusBarHeight, dragBar.height, toggle_layer_scroll.height, lower_menu_layout.height)
     }
 
     // Respond to permission request result

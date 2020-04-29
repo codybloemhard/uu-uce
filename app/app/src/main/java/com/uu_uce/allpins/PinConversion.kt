@@ -1,7 +1,12 @@
 package com.uu_uce.allpins
 
 import android.content.Context
+import android.graphics.BlendMode
+import android.graphics.BlendModeColorFilter
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
+import android.os.Build
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.pins.Pin
@@ -16,9 +21,8 @@ class PinConversion(context: Context){
             val s = regex.findAll(coord)
             return UTMCoordinate(s.elementAt(0).value.toInt()       ,
                 s.elementAt(1).value.first()       ,
-                s.elementAt(2).value.toDouble()/10    ,
-                s.elementAt(4).value.toDouble()/10)
-
+                s.elementAt(4).value.toDouble()/10    ,
+                s.elementAt(2).value.toDouble()/10)
         }
     }
 
@@ -28,30 +32,46 @@ class PinConversion(context: Context){
         return PinContent(content)
     }
 
-    private fun stringToDrawable(type: String, difficulty: Int): Drawable {
-        var s  = "ic_pin"
-        s += when (type) {
-            "TEXT"      -> "_text"
-            "VIDEO"     -> "_video"
-            "IMAGE"     -> "_picture"
-            "MCQUIZ"    -> "_quest" // TODO: replace with mc sprite
-            else        -> {
-                "_link"
-            }
-        }
-        s += when (difficulty) {
-            1 -> "_groen"
-            2 -> "_oranje"
-            3 -> "_rood"
+    private fun difficultyToBackground(difficulty: Int): Drawable {
+        val color = when (difficulty) {
+            1 -> Color.parseColor("#5DB678")
+            2 -> Color.parseColor("#F08135")
+            3 -> Color.parseColor("#E83C5B")
             else -> {
-                "_grijs"
+                Color.parseColor("#696969") //Nice
             }
         }
-        return ResourcesCompat.getDrawable(
-            resource, resource.getIdentifier(s, "drawable",
-             "com.uu_uce"
-         ), null) ?: ResourcesCompat.getDrawable(resource, R.drawable.pin, null) ?: error ("Image not found")
+        val background =  ResourcesCompat.getDrawable(resource, R.drawable.ic_pin, null) ?: error ("Image not found")
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+             background.colorFilter = BlendModeColorFilter(color, BlendMode.SRC_ATOP)
+        }
+        else{
+            // Older versions will use depricated function
+            background.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
+        }
+        return background
+    }
+
+    private fun typeToIcon(type: String): Drawable {
+        val image = when (type) {
+            "TEXT"      -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_text, null)     ?: error("image not found")
+            "IMAGE"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image, null)    ?: error("image not found")
+            "VIDEO"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video, null)    ?: error("image not found")
+            "MCQUIZ"    -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz, null)    ?: error("image not found")
+            else        -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null)     ?: error("image not found")
+        }
+
+        val color = Color.WHITE
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            image.colorFilter = BlendModeColorFilter(color, BlendMode.SRC_ATOP)
+        }
+        else{
+            // Older versions will use depricated function
+            image.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
+        }
+        return image
     }
 
     private fun stringToIds(ids : String) : List<Int>{
@@ -64,7 +84,8 @@ class PinConversion(context: Context){
             stringToUtm(pinData.location)           , //location
             pinData.title                           ,
             stringToPinContent(pinData.content)     ,
-            stringToDrawable(pinData.type, pinData.difficulty),
+            difficultyToBackground(pinData.difficulty),
+            typeToIcon(pinData.type)                ,
             pinData.status                          ,
             stringToIds(pinData.predecessorIds)     ,
             stringToIds(pinData.followIds)          ,

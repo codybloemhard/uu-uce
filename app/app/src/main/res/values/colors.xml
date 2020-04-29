@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#fed402</color>
-    <color name="colorAccent">#D81B60</color>
-    <color name="colorUU">#fed402</color>
-    <color name="colorUU2">#ec1a3d</color>
+    <color name="colorPrimaryDark">#F3F3F3</color>
+    <color name="colorAccent">#FA8231</color>
+    <color name="Flirtatious">#FED330</color>
+    <color name="Desire">#EB3B5A</color>
+    <color name="BestWhite">#F3F3F3</color>
+    <color name="HighBlue">#45AAF2</color>
+    <color name="TextDarkGrey">#3A3A3A</color>
+    <color name="TextGrey">#8B8B8B</color>
+    <color name="Boyzone">#2E9CE0</color>
+    <color name="OrangeHibiscus">#FD9644</color>
+    <color name="ReptileGreen">#26DE81</color>
+    <color name="FusionRed">#FC5C65</color>
 </resources>

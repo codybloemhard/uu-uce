@@ -344,7 +344,7 @@ class FieldbookTests {
 
     private fun getFileBitmap(): Instrumentation.ActivityResult? {
         val resultData = Intent()
-        val filePath: String = "/data/data/com.uu_uce/files/pin_content/images/test.png"
+        val filePath = "/data/data/com.uu_uce/files/pin_content/images/test.png"
         val bitmap = BitmapFactory.decodeFile(filePath)
         resultData.putExtra("data", bitmap)
         return Instrumentation.ActivityResult(Activity.RESULT_OK, resultData)

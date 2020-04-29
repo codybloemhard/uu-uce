@@ -4,14 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#00FFFFFF"
     tools:visibility="visible">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="50dp"
-        android:layout_marginEnd="50dp"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="25dp"
         app:cardCornerRadius="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -25,34 +24,40 @@
             <ImageView
                 android:id="@+id/george_reaction"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="200dp"
                 android:layout_marginTop="30dp"
-                android:contentDescription="@string/quiz_result_image_description"
+                android:contentDescription="@string/pin_quiz_result_image_description"
                 app:layout_constraintBottom_toTopOf="@+id/quiz_result_text"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:srcCompat="@drawable/happy_george" />
+                tools:srcCompat="@drawable/ic_george_celebrating" />
 
             <TextView
                 android:id="@+id/quiz_result_text"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="50dp"
                 android:layout_marginTop="10dp"
+                android:layout_marginEnd="50dp"
                 android:fontFamily="@font/roboto_bold"
-                android:text="@string/quizresult_placeholder"
+                android:gravity="center"
+                android:text="@string/pin_quiz_result_placeholder"
+                android:textColor="@color/TextDarkGrey"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/george_reaction" />
 
             <TextView
                 android:id="@+id/complete_text"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="50dp"
                 android:layout_marginTop="10dp"
+                android:layout_marginEnd="50dp"
                 android:fontFamily="@font/roboto"
                 android:gravity="center_horizontal"
-                android:text="@string/quiz_complete_text_placeholder"
+                android:text="@string/pin_quiz_complete_text_placeholder"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/quiz_result_text" />
@@ -73,7 +78,7 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="@string/reward_text_placeholder"
+                    android:text="@string/pin_reward_text_placeholder"
                     android:textColor="#9159FF" />
 
                 <ImageView
@@ -81,29 +86,40 @@
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:layout_marginStart="5dp"
-                    android:contentDescription="@string/points_logo_description"
-                    app:srcCompat="@drawable/points_icon" />
+                    android:contentDescription="@string/pin_points_logo_description"
+                    app:srcCompat="@drawable/ic_sprite_points" />
 
             </LinearLayout>
 
             <Button
                 android:id="@+id/reopen_button"
-                android:layout_width="wrap_content"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="40dp"
                 android:layout_marginTop="10dp"
-                android:backgroundTint="@color/colorUU"
-                android:text="@string/reopen_button_success"
+                android:layout_marginEnd="40dp"
+                android:background="@drawable/custom_border_button"
+                android:text="@string/pin_quiz_reopen_button_success"
+                android:textAllCaps="false"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/reward_layout" />
 
             <Button
                 android:id="@+id/close_button"
-                android:layout_width="wrap_content"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/colorUU"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="40dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/custom_border_button"
                 android:fontFamily="@font/roboto_bold"
                 android:text="@android:string/ok"
+                android:textAllCaps="true"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/reopen_button" />

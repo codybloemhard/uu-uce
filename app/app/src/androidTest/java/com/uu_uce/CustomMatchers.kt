@@ -52,7 +52,7 @@ fun cameraCentered(): Matcher<View> {
 fun cameraZoomedOut(): Matcher<View> {
     return object : TypeSafeMatcher<View>() {
         override fun describeTo(description: Description) {
-            description.appendText("User location is at center of the screen")
+            description.appendText("Camera is zoomed out all the way")
         }
 
         public override fun matchesSafely(view: View): Boolean {
