@@ -95,12 +95,17 @@ class FieldbookHomeFragment : Fragment() {
          * TODO: used function is deprecated from API 29 and onwards. Can still be used, because android:requestLegacyExternalStorage="true" in the manifest
          * Eventually switch to the MediaStore API. Doesn't need READ/WRITE permissions anymore -> only to be imported for API 28 and lower
          */
-        getPermissions(fragmentActivity, listOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), CAMERA_REQUEST)
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || fragmentActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+        getPermissions(fragmentActivity, listOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE), CAMERA_REQUEST)
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+            fragmentActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED ||
+                fragmentActivity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             fieldbookDir =
                 File(Environment.getExternalStorageDirectory(), "UU-UCE/Fieldbook").also {
                     it.mkdirs()
                 }
+        } else {
+            println("insufficient permissions")
+            println(PackageManager.GET_PERMISSIONS)
         }
 
         viewModel = fragmentActivity.run {
