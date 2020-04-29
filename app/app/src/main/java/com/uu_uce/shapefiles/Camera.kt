@@ -104,10 +104,12 @@ class Camera(
         val maxx = viewMax.first - lastWoff
         val miny = viewMin.second + lastHoff
         val maxy = viewMax.second - lastHoff
-        if(minx >= maxx || miny >= maxy)
-            setPosCenter()
-        else
-            setXy(newX.coerceIn(minx, maxx),newY.coerceIn(miny, maxy))
+
+        val xvalue = if(minx >= maxx) mx else newX.coerceIn(minx, maxx)
+        val yvalue = if(miny >= maxy) my else newY.coerceIn(miny, maxy)
+        /*if(minx >= maxx || miny >= maxy)
+            setPosCenter()*/
+        setXy(xvalue,yvalue)
 
     }
 
