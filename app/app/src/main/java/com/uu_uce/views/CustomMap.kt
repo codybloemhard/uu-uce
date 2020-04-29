@@ -43,13 +43,14 @@ import java.io.File
 import java.time.LocalDate
 import kotlin.system.measureTimeMillis
 
+/*
+the view displayed in the app that holds the map
+ */
 class CustomMap : ViewTouchParent {
 
     constructor(context: Context): super(context)
     constructor(context: Context, attrs: AttributeSet): super(context, attrs)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
-
-    private var smap: ShapeMap
 
     // Settings
     private lateinit var sharedPref : SharedPreferences
@@ -76,12 +77,14 @@ class CustomMap : ViewTouchParent {
     var activePopup: PopupWindow? = null
 
     // Map
+    private var smap: ShapeMap
     private var nrLayers = 0
     private lateinit var camera : Camera
 
     init{
         //disable hardware acceleration for canvas.drawVertices
-        setLayerType(LAYER_TYPE_SOFTWARE, null)
+        //potentially not necessary?
+        //setLayerType(LAYER_TYPE_SOFTWARE, null)
 
         smap = ShapeMap(this)
 
@@ -102,6 +105,8 @@ class CustomMap : ViewTouchParent {
         deviceLocPaint.color = Color.BLUE
         deviceLocEdgePaint.color = Color.WHITE
 
+        //width and height are not set in the init{} yet
+        //we delay calculations that use them by using post
         post{
             camera.wAspect = width.toDouble()/height
 
@@ -117,6 +122,7 @@ class CustomMap : ViewTouchParent {
         camera = smap.initialize()
     }
 
+    //add a new layer to the map, and generate a button to toggle it
     fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout, buttonSize: Int, hasInfo: Boolean){
         smap.addLayer(lt, chunkGetter, hasInfo)
         val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle)
@@ -132,6 +138,7 @@ class CustomMap : ViewTouchParent {
     }
 
     override fun onDraw(canvas: Canvas) {
+        //if both the camera and the map have no updates, don't redraw
         val res = camera.update()
         val chunkRes = smap.updateChunks()
         if(res == UpdateResult.NOOP && chunkRes == ChunkUpdateResult.NOTHING){
@@ -140,6 +147,12 @@ class CustomMap : ViewTouchParent {
 
 
         val viewport = camera.getViewport()
+
+        if(viewport == p2ZeroPair){
+            Logger.error("CustomMap", "Camera could not be initialized")
+            return
+        }
+
         val timeDraw = measureTimeMillis {
             // Set canvas background color
             canvas.drawColor(Color.rgb(234, 243, 245))
@@ -175,6 +188,8 @@ class CustomMap : ViewTouchParent {
             //route.draw(viewport,this,canvas)
         }
         Logger.log(LogType.Continuous, "CustomMap", "Draw MS: $timeDraw")
+
+        //invalidate so onDraw is called again next frame if necessary
         if(res == UpdateResult.ANIM || chunkRes == ChunkUpdateResult.LOADING)
             invalidate()
     }
@@ -185,6 +200,11 @@ class CustomMap : ViewTouchParent {
         loc = degreeToUTM(newLoc)
 
         val viewport = camera.getViewport()
+        if(viewport == p2ZeroPair){
+            Logger.error("CustomMap", "Camera could not be initialized")
+            return
+        }
+
         val screenLoc = coordToScreen(loc, viewport, width, height)
 
         // Check if redraw is necessary
@@ -213,6 +233,7 @@ class CustomMap : ViewTouchParent {
         }
     }
 
+    //used to zoom the camera in and out
     private fun zoomMap(zoom: Float){
         val deltaOne = 1.0 - zoom.toDouble().coerceIn(0.5, 1.5)
         camera.zoomIn(1.0 + deltaOne)
@@ -220,6 +241,7 @@ class CustomMap : ViewTouchParent {
             invalidate()
     }
 
+    //used to scroll the camera
     private fun moveMap(dxpxf: Float, dypxf: Float){
         Logger.log(LogType.Continuous, "CustomMap", "$dypxf")
         val dxpx = dxpxf.toDouble()
@@ -231,18 +253,21 @@ class CustomMap : ViewTouchParent {
             invalidate()
     }
 
+    //zoomout until the whole map is visible
     private fun zoomOutMax(){
         camera.zoomOutMax(500.0)
         if(camera.needsInvalidate())
             invalidate()
     }
 
+    //zoom in to the blue dot, at some arbitrary height
     fun zoomToDevice(){
         camera.startAnimation(Triple(loc.east, loc.north, 0.02), 1500.0)
         if(camera.needsInvalidate())
             invalidate()
     }
 
+    //to be called when the map needs to be redrawn
     fun redrawMap(){
         camera.forceChanged()
         invalidate()
@@ -309,9 +334,9 @@ class CustomMap : ViewTouchParent {
         }
     }
 
+    //called when the screen is tapped at tapLocation
     private fun tapPin(tapLocation : p2, activity : Activity){
-        for(entry in pins.toList().asReversed()){
-            val pin = entry.second
+        for((_,pin) in pins.toList().asReversed()){
             if(!pin.inScreen || pin.getStatus() < 1) continue
             if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, pinTapBufferSize)){
                 pin.openContent(this, activity) {activePopup = null}
@@ -349,6 +374,7 @@ class CustomMap : ViewTouchParent {
         }
     }
 
+    //turn a layer on or off
     private fun toggleLayer(l: Int){
         smap.toggleLayer(l)
     }
@@ -361,21 +387,26 @@ class CustomMap : ViewTouchParent {
         lfOwner = lifecycleOwner
     }
 
+    //open the all pins activity
     fun startAllPins(){
         val i = Intent(context, AllPins::class.java)
         startActivity(context, i, null)
     }
 
+    //open fieldbook activity
     fun startFieldBook() {
         val i = Intent(context, Fieldbook::class.java)
         startActivity(context, i,null)
     }
 
+    //open settings activity
     fun startSettings() {
         val i = Intent(context, Settings::class.java)
         startActivity(context, i,null)
     }
 
+
+    //functions used for testing
     @TestOnly
     fun getPinLocation() : Pair<Float, Float>{
         return pins[0]!!.getScreenLocation(camera.getViewport(), width, height)

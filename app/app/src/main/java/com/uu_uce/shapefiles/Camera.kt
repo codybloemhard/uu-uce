@@ -56,6 +56,9 @@ class Camera(
 
     //retrieve the topleft and bottomright coordinates that are visible in the camera
     fun getViewport(): Pair<p2,p2>{
+        //if camera is not initialized properly, return dummy value
+        if (viewMax.first < viewMin.first || viewMax.second < viewMin.second || viewMax.third < viewMin.third) return p2ZeroPair
+
         val w = viewMax.first - viewMin.first
         val h = viewMax.second - viewMin.second
         val woff = w * wAspect / 2.0 * zoom

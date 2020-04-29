@@ -13,7 +13,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 
-
+//activity in which videos from video pins are shown
 class VideoViewer : Activity() {
     private var uiVisible : Boolean = true
     private lateinit var mediaController : MediaController
@@ -43,6 +43,7 @@ class VideoViewer : Activity() {
 
         val titleBar = findViewById<ConstraintLayout>(R.id.video_title)
 
+        //override show/hide functions to make the bar on top appear and disappear too
         mediaController = object : MediaController(this) {
             override fun show() {
                 show(0)
@@ -71,8 +72,8 @@ class VideoViewer : Activity() {
             videoPlayer.start()
         }
 
+        //set close button
         val closeVideoButton = findViewById<Button>(R.id.close_video_player)
-
         closeVideoButton.setOnClickListener {
             this.finish()
         }

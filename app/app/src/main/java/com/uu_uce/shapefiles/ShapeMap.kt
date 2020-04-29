@@ -14,6 +14,7 @@ typealias p2 = Pair<Double, Double>
 typealias p3 = Triple<Double,Double,Double>
 
 val p2Zero = Pair(0.0,0.0)
+val p2ZeroPair = Pair(p2Zero,p2Zero)
 val p3Min = Triple(Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE)
 val p3Zero = Triple(0.0,0.0,0.0)
 val p3Max = Triple(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE)

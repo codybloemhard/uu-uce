@@ -9,7 +9,6 @@ import com.uu_uce.ui.createTopbar
 import kotlinx.android.synthetic.main.activity_settings.*
 
 class Settings : AppCompatActivity() {
-    // private variables
     private val minPinSize = 50
     private val maxPinSize = 100
 
