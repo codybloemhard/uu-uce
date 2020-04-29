@@ -89,15 +89,19 @@ class FieldbookHomeFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        fragmentActivity = requireActivity()
+
         /**
          * TODO: used function is deprecated from API 29 and onwards. Can still be used, because android:requestLegacyExternalStorage="true" in the manifest
          * Eventually switch to the MediaStore API. Doesn't need READ/WRITE permissions anymore -> only to be imported for API 28 and lower
          */
-        fieldbookDir = File(Environment.getExternalStorageDirectory(),"UU-UCE/Fieldbook").also {
-            it.mkdirs()
+        getPermissions(fragmentActivity, listOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), CAMERA_REQUEST)
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || fragmentActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            fieldbookDir =
+                File(Environment.getExternalStorageDirectory(), "UU-UCE/Fieldbook").also {
+                    it.mkdirs()
+                }
         }
-
-        fragmentActivity = requireActivity()
 
         viewModel = fragmentActivity.run {
             ViewModelProvider(this)[FieldbookViewModel::class.java]
@@ -229,8 +233,6 @@ class FieldbookHomeFragment : Fragment() {
                                 Intent.ACTION_PICK,
                                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI
                             )
-                                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
                             ,
                             REQUEST_IMAGE_UPLOAD
                         )
