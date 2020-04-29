@@ -125,7 +125,7 @@ class PolygonReader(
     dir: File
 ): ChunkGetter(dir) {
     override fun getChunk(cIndex: ChunkIndex): Chunk {
-        val file = File(dir, "river")
+        val file = File(dir, "river.dms")
         val reader = FileReader(file)
 
         val xoff = reader.readULong().toDouble()
