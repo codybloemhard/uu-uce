@@ -405,6 +405,7 @@ class FieldbookHomeFragment : Fragment() {
         //TODO: remove focus from editText when the user touches outside of it
         val button = Button(requireContext()).apply {
             setText(context.getString(R.string.fieldbook_done_button_text))
+
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT

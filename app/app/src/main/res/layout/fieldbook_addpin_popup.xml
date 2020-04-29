@@ -93,6 +93,7 @@
                     android:src="@drawable/ic_symbol_image"
                     android:contentDescription="@string/fieldbook_image_image_description"/>
 
+
                 <ImageButton
                     android:id="@+id/add_video_block"
                     android:layout_width="60dp"
@@ -101,6 +102,7 @@
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_symbol_video"
                     android:contentDescription="@string/fieldbook_video_image_description" />
+              
             </LinearLayout>
 
             <Button
