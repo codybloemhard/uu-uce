@@ -4,8 +4,6 @@ import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import java.io.File
 import java.io.FileInputStream
-import kotlin.math.log
-import kotlin.math.pow
 
 abstract class ChunkGetter(
     protected var dir: File){
@@ -127,7 +125,7 @@ class PolygonReader(
     dir: File
 ): ChunkGetter(dir) {
     override fun getChunk(cIndex: ChunkIndex): Chunk {
-        val file = File(dir, "river")
+        val file = File(dir, "river.dms")
         val reader = FileReader(file)
 
         val xoff = reader.readULong().toDouble()

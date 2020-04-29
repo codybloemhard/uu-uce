@@ -1,7 +1,10 @@
 package com.uu_uce.allpins
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.BlendMode
+import android.graphics.BlendModeColorFilter
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.core.content.res.ResourcesCompat

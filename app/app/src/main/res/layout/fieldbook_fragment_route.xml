@@ -6,12 +6,14 @@
     android:layout_height="match_parent"
     tools:context=".fieldbook.FieldbookRouteFragment">
 
+    <!--
     <com.uu_uce.views.CustomMap
         android:id="@+id/routeViewer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clickable="true"
         android:focusable="true" />
+        -->
 
     <Spinner
         android:id="@+id/spinner"

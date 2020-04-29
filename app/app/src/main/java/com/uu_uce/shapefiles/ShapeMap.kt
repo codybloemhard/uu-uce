@@ -7,7 +7,6 @@ import android.view.View
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import org.jetbrains.annotations.TestOnly
-import java.io.File
 import kotlin.system.measureTimeMillis
 
 typealias p2 = Pair<Double, Double>
