@@ -13,22 +13,15 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.View
-import android.view.View.FOCUS_DOWN
-import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
-import android.widget.*
 import android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
 import android.view.*
-import androidx.fragment.app.Fragment
-import android.widget.Button
-import android.widget.EditText
-import android.widget.PopupWindow
+import android.view.View.FOCUS_DOWN
+import android.view.inputmethod.InputMethodManager
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -78,19 +71,20 @@ class FieldbookHomeFragment : Fragment() {
 
     private lateinit var viewModel          : FieldbookViewModel
     private lateinit var fragmentActivity   : FragmentActivity
-    private lateinit var fragmentView       : View
 
-    private lateinit var customView : View
-    private lateinit var scrollView : ScrollView
-    private lateinit var layout     : LinearLayout
-    private lateinit var title      : EditText
+    private lateinit var content: MutableList<ContentBlockInterface>
+
+    private lateinit var fragmentView   : View
+    private lateinit var customView     : View
+    private lateinit var scrollView     : ScrollView
+    private lateinit var layout         : LinearLayout
+    private lateinit var title          : EditText
 
     private var currentName = ""
     private var currentPath = ""
     private var currentUri: Uri = Uri.EMPTY
 
     private var blockID = 0
-    private var content: MutableList<ContentBlockInterface> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -145,9 +139,11 @@ class FieldbookHomeFragment : Fragment() {
     private fun openFieldbookAdderPopup() {
         blockID = 0
         resetVariables()
+        content = mutableListOf()
+
         fragmentView = requireView()
 
-        customView = layoutInflater.inflate(R.layout.add_fieldbook_popup, null, false)
+        customView = layoutInflater.inflate(R.layout.fieldbook_addpin_popup, fragmentView.parent as ViewGroup, false)
         val popupWindow = PopupWindow(
             customView,
             ViewGroup.LayoutParams.MATCH_PARENT,
