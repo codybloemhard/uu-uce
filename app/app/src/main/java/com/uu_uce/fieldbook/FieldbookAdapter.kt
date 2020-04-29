@@ -2,6 +2,7 @@ package com.uu_uce.fieldbook
 
 import android.app.Activity
 import android.content.DialogInterface
+import android.graphics.Color.rgb
 import android.net.Uri
 import android.view.Gravity
 import android.view.View
@@ -23,11 +24,10 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
     class FieldbookViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val parentView = itemView
-        val numberFb: TextView = parentView.findViewById(R.id.no)
+        val numberFb: TextView = parentView.findViewById(R.id.title)
         val locationFb: TextView = parentView.findViewById(R.id.pin_coordinates)
         val datetimeFb: TextView = parentView.findViewById(R.id.datetime)
-        val textFb: TextView = parentView.findViewById(R.id.text_preview)
-        val imageFb: ImageView = parentView.findViewById(R.id.image_preview)
+        val frameFb: FrameLayout = parentView.findViewById(R.id.frame_layout)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FieldbookViewHolder {
@@ -42,38 +42,63 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
     override fun onBindViewHolder(holder: FieldbookViewHolder, position: Int) {
         val entry : FieldbookEntry = fieldbook[position]
-        holder.numberFb.text = addLeadingZeros(entry.id)
-        holder.locationFb.text = entry.location
-        holder.datetimeFb.text = entry.dateTime
+        holder.apply {
+            numberFb.text = entry.title
+            locationFb.text = entry.location
+            datetimeFb.text = entry.dateTime
+        }
+
+        val params = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        )
 
         val content = PinContent(entry.content)
 
-        var uri: Uri = Uri.EMPTY
+        var isThumbnail = false
+        var thumbnailUri = Uri.EMPTY
 
-        var displayingText = false
-        var displayingImage = false
+        //val textFb: TextView = parentView.findViewById(R.id.text_preview)
+        //val imageFb: ImageView = parentView.findViewById(R.id.image_preview)
 
-        for (cB in content.contentBlocks)
-        {
-            if (displayingText && displayingImage)
-                break
+        //1x alles doorlopen, niet meer checken op dingen die we al gehad hebben...
+        //als er een textblock is, gebruiken we die...
+        //anders gebruiken we een afbeelding (sws thumbnail)
+        //anders gebruiken we een video thumbnail
 
-            if (cB is TextContentBlock && !displayingText) {
-                displayingText = true
-                holder.textFb.text = cB.getTextContent()
-            } else if (!displayingImage) {
-                displayingImage = true
-
-                if (cB is ImageContentBlock) {
-                    uri = cB.getImageURI()
-                    holder.imageFb.setImageURI(uri)
+        loop@ for (cB in content.contentBlocks) {
+            when (cB) {
+                is TextContentBlock -> {
+                    TextView(activity).apply {
+                        textSize = 12f
+                        setTextColor(rgb(100, 100, 100))
+                        text = cB.getTextContent()
+                        //Text direction?
+                        //What to do when text goes over the edge?
+                    }.also {
+                        holder.frameFb.addView(it, params)
+                    }
+                    break@loop
                 }
-                if (cB is VideoContentBlock) {
-                    uri = cB.getThumbnailURI()
-                    holder.imageFb.setImageURI(uri)
+                else -> {
+                    if (!isThumbnail) {
+                        if (cB is ImageContentBlock)
+                            thumbnailUri = cB.getThumbnailURI()
+                        else if (cB is VideoContentBlock)
+                            thumbnailUri = cB.getThumbnailURI()
+                        isThumbnail = true
+                    }
                 }
             }
         }
+
+        if (holder.frameFb.childCount == 0)
+            ImageView(activity).apply {
+                scaleType = ImageView.ScaleType.CENTER_CROP
+                setImageURI(thumbnailUri)
+            }.also {
+                holder.frameFb.addView(it, params)
+            }
 
         holder.parentView.setOnClickListener (
             View.OnClickListener(
@@ -91,7 +116,7 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
                     // Add the title for the popup window
                     val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
-                    windowTitle.text = entry.location
+                    windowTitle.text = entry.title
 
                     // Add content to popup window
                     val layout: LinearLayout = customView.findViewById(R.id.scrollLayout)
@@ -119,17 +144,27 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
         holder.parentView.setOnLongClickListener(
             View.OnLongClickListener(
                 fun (_): Boolean {
-                    println(uri)
                     AlertDialog.Builder(activity)
                         .setTitle("Delete")
                         .setMessage("Are you sure you want to delete this entry?")
                         .setPositiveButton("YES") { _: DialogInterface, _: Int ->
                             viewModel.delete(entry)
-                            if (uri != Uri.EMPTY) uri.toFile().delete()
+                            for (cB in content.contentBlocks) {
+                                when (cB) {
+                                    is ImageContentBlock ->
+                                        cB.getThumbnailURI().apply {
+                                            if (this!=Uri.EMPTY)
+                                                toFile().delete()
+                                        }
+                                    is VideoContentBlock ->
+                                        cB.getThumbnailURI().apply {
+                                            if (this!=Uri.EMPTY)
+                                                toFile().delete()
+                                        }
+                                }
+                            }
                         }
-                        .setNegativeButton("NO") { _: DialogInterface, _: Int ->
-
-                        }
+                        .setNegativeButton("NO") { _: DialogInterface, _: Int -> }
                         .show()
                     return true
                 }
@@ -141,10 +176,4 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
         this.fieldbook = fieldbook
         notifyDataSetChanged()
     }
-}
-
-fun addLeadingZeros(id: Int) : String {
-    val s = id.toString()
-    val zero : String = "0".repeat(3-s.length)
-    return "#$zero$id"
 }

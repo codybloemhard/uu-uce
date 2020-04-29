@@ -3,12 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#80000000"
+    android:clickable="true"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     android:padding="20dp">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/add_fieldbook_pin_popup"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:maxHeight="600dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         app:cardBackgroundColor="@color/Flirtatious"
         app:cardCornerRadius="8dp"
         app:cardElevation="10dp"
@@ -17,56 +25,91 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_margin="5dp"
             android:background="#FFFFFF"
             android:orientation="vertical"
             android:padding="20dp">
 
-
-            <TextView
-                android:id="@+id/textView5"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:text="@string/fieldbook_edit_text_hint" />
-
             <EditText
-                android:id="@+id/addText"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/border"
-                android:ems="10"
-                android:gravity="start|top"
-                android:hint="@string/fieldbook_textfield_hint"
-                android:importantForAutofill="no"
-                android:inputType="textMultiLine" />
-
-            <TextView
-                android:id="@+id/textView6"
+                android:id="@+id/add_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:text="@string/fieldbook_image_field_hint" />
+                android:ems="16"
+                android:hint="@string/fieldbook_title_hint"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:maxLines="1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
-                android:id="@+id/addImage"
+            <ScrollView
+                android:id="@+id/fieldbook_scroll_view"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/border"
-                android:contentDescription="@string/fieldbook_uploaded_image_field_description"
-                android:scaleType="centerCrop" />
+                android:layout_height="0dp"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toTopOf="@id/button_container"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/add_title"
+                android:layout_marginBottom="10dp" >
+
+                <LinearLayout
+                    android:id="@+id/fieldbook_content_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+            </ScrollView>
+
+            <LinearLayout
+                android:id="@+id/button_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toTopOf="@id/add_fieldbook_pin"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
+
+                <ImageButton
+                    android:id="@+id/add_text_block"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="start"
+                    android:layout_weight="1"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_symbol_text"
+                    android:contentDescription="@string/fieldbook_text_image_description" />
+
+                <ImageButton
+                    android:id="@+id/add_image_block"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_symbol_image"
+                    android:contentDescription="@string/fieldbook_image_image_description"/>
+
+                <ImageButton
+                    android:id="@+id/add_video_block"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_symbol_video"
+                    android:contentDescription="@string/fieldbook_video_image_description" />
+            </LinearLayout>
 
             <Button
                 android:id="@+id/add_fieldbook_pin"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="end"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 android:minWidth="64dp"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
@@ -76,8 +119,8 @@
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </LinearLayout>
     </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

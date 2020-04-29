@@ -69,7 +69,7 @@ class FieldbookTests {
             .check(matches(isDisplayed()))
 
         // Type text
-        onView(withId(R.id.addText))
+        onView(withId(R.id.add_text_block))
             .inRoot(isPlatformPopup())
             .perform(typeText(testText), closeSoftKeyboard())
 
@@ -159,7 +159,7 @@ class FieldbookTests {
             .check(matches(isDisplayed()))
 
         // Upload image
-        onView(withId(R.id.addImage))
+        onView(withId(R.id.add_image_block))
             .inRoot(isPlatformPopup())
             .perform(click())
 
@@ -252,7 +252,7 @@ class FieldbookTests {
             .check(matches(isDisplayed()))
 
         // Upload image
-        onView(withId(R.id.addImage))
+        onView(withId(R.id.add_video_block))
             .inRoot(isPlatformPopup())
             .perform(click())
 
