@@ -74,7 +74,7 @@ class CustomMap : ViewTouchParent {
     private var pinStatuses             : MutableMap<Int, Int>  = mutableMapOf()
     private lateinit var pinViewModel   : PinViewModel
     private lateinit var lfOwner        : LifecycleOwner
-    var activePopup: PopupWindow? = null
+    var activePopup                     : PopupWindow? = null
 
     // Map
     private var nrLayers = 0

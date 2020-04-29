@@ -79,6 +79,9 @@ class Pin(
         val screenLocation: Pair<Float, Float> =
             coordToScreen(coordinate, viewport, view.width, view.height)
 
+        if(screenLocation.first.isNaN() || screenLocation.second.isNaN())
+            return //TODO: Should not be called with NaN
+
         // Calculate pin bounds on canvas
         val minX = (screenLocation.first - pinWidth / 2).roundToInt()
         val minY = (screenLocation.second - pinHeight).roundToInt()
