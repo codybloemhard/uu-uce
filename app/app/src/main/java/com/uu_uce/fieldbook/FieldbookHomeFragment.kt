@@ -321,7 +321,6 @@ class FieldbookHomeFragment : Fragment() {
                                         videoLocation()
                                     ).also {
                                         currentUri = it
-                                        println(it)
                                     }
                                 )
                                 putExtra(
@@ -345,31 +344,40 @@ class FieldbookHomeFragment : Fragment() {
         intent: Intent?
     ) {
         super.onActivityResult(requestCode, resultCode, intent)
-        if (resultCode == Activity.RESULT_OK && intent != null) {
+        if (intent == null)
+            println("I don't return a value")
+
+        if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
                 REQUEST_IMAGE_UPLOAD -> {
-                    val uri = intent.data
-                    if (uri != null) {
-                        val cr = requireContext().contentResolver
-                        cr.query(uri,null,null,null,null)?.use {
-                            val nameIndex = it.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME)
-                            it.moveToFirst()
-                            currentName = File(it.getString(nameIndex)).nameWithoutExtension
+                    if (intent != null) {
+                        val uri = intent.data
+                        if (uri != null) {
+                            val cr = requireContext().contentResolver
+                            cr.query(uri, null, null, null, null)?.use {
+                                val nameIndex =
+                                    it.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME)
+                                it.moveToFirst()
+                                currentName = File(it.getString(nameIndex)).nameWithoutExtension
+                            }
+                            currentUri = uri
+                            addImage(currentUri)
                         }
-                        println(currentName)
-                        currentUri = uri
-                        addImage(currentUri)
                     }
                 }
                 REQUEST_IMAGE_CAPTURE -> {
+                    println(currentUri)
+                    println(currentPath)
                     addImage(currentUri)
                     addToGallery(currentPath)
                 }
                 REQUEST_VIDEO_UPLOAD -> {
-                    val uri = intent.data
-                    if (uri != null) {
-                        currentUri = uri
-                        addVideo(makeVideoThumbnail(currentUri))
+                    if (intent != null) {
+                        val uri = intent.data
+                        if (uri != null) {
+                            currentUri = uri
+                            addVideo(makeVideoThumbnail(currentUri))
+                        }
                     }
                 }
                 REQUEST_VIDEO_CAPTURE -> {
@@ -425,6 +433,10 @@ class FieldbookHomeFragment : Fragment() {
     }
 
     private fun addImage(image: Uri) {
+        println(image)
+        println(currentName)
+        println(currentUri)
+
         ImageContentBlock(
             image,
             makeImageThumbnail(image)
