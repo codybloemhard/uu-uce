@@ -53,7 +53,7 @@ class ChunkManager(
 
     var maxzoom = 0.0
 
-    var zoom = nrOfLODs
+    var zoom = nrOfLODs-1
 
     init{
         debugPaint.color = Color.RED

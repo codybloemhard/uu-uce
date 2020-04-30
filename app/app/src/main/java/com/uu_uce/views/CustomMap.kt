@@ -148,8 +148,7 @@ class CustomMap : ViewTouchParent {
         if(res == UpdateResult.NOOP && chunkRes == ChunkUpdateResult.NOTHING){
                 return
         }
-
-
+        
         val viewport = camera.getViewport()
 
         if(viewport == p2ZeroPair){

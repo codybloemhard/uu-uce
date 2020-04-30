@@ -141,6 +141,7 @@ class ShapeMap(
             val cur = layer.updateChunks(camera.getViewport(), camera.getZoom())
             if(cur != ChunkUpdateResult.NOTHING)
                 res = cur
+            if(res == ChunkUpdateResult.LOADING) break
         }
         return res
     }
