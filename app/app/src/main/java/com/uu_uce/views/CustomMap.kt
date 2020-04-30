@@ -69,7 +69,6 @@ class CustomMap : ViewTouchParent {
     private val deviceLocEdgePaint  : Paint = Paint()
 
     // Pins
-    private val pinTapBufferSize        : Int                   = 10
     private var pins                    : MutableMap<Int, Pin>  = mutableMapOf()
     private var pinStatuses             : MutableMap<Int, Int>  = mutableMapOf()
     private lateinit var pinViewModel   : PinViewModel
@@ -328,7 +327,7 @@ class CustomMap : ViewTouchParent {
         for(entry in pins.toList().asReversed()){
             val pin = entry.second
             if(!pin.inScreen || pin.getStatus() < 1) continue
-            if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, pinTapBufferSize)){
+            if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, 0)){
                 pin.openContent(this, activity) {activePopup = null}
                 activePopup = pin.popupWindow
                 Logger.log(LogType.Info, "CustomMap", "${pin.getTitle()}: I have been tapped.")
