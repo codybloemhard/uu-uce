@@ -26,8 +26,9 @@ import kotlinx.android.synthetic.main.activity_geo_map.*
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 
-const val debug = false
+const val debug = true
 
+//main activity in which the map and menu are displayed
 class GeoMap : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel
     private val permissionsNeeded = listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -84,12 +85,11 @@ class GeoMap : AppCompatActivity() {
             statusBarHeight = resources.getDimensionPixelSize(resourceId)
         }
 
-        // Get screen dimentions
+        // Initialize menu
         (Display::getSize)(windowManager.defaultDisplay, screenDim)
         val longest = maxOf(screenDim.x, screenDim.y)
         val size = (longest*menu.buttonPercent).toInt()
 
-        // Initialize menu
         val btn1 = allpins_button
         btn1.setOnClickListener{customMap.startAllPins()}
 
@@ -103,7 +103,7 @@ class GeoMap : AppCompatActivity() {
         dragBar.dragAction       = { dx, dy -> menu.drag(dx,dy)}
         dragBar.dragEndAction    = { dx, dy -> menu.snap(dx, dy)}
 
-        // Load files
+        //add layers to map
         val mydir = File(filesDir,"mydir")
         try {
             val heightlines = File(mydir, "heightlines")
@@ -119,10 +119,12 @@ class GeoMap : AppCompatActivity() {
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
 
+        //create camera based on layers
         customMap.initializeCamera()
 
         customMap.tryStartLocServices(this)
 
+        //more menu initialization which needs its width/height
         menu.post{
             initMenu()
         }
@@ -143,7 +145,8 @@ class GeoMap : AppCompatActivity() {
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        // Move the menu down when the map is tapped
+        //move the menu down when the map is tapped
+        //this needs to be done in dispatch so the touch can't be consumed by other views
         if(menu.dragStatus != DragStatus.Down &&
             ev.action == MotionEvent.ACTION_DOWN &&
             !(ev.x > menu.x && ev.x < menu.x + menu.width && ev.y-statusBarHeight > menu.y && ev.y-statusBarHeight < menu.y + menu.height)){
@@ -154,6 +157,7 @@ class GeoMap : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        //move the menu down when it's up, otherwise close the current popup
         if(menu.dragStatus != DragStatus.Down){
             menu.down()
             return
