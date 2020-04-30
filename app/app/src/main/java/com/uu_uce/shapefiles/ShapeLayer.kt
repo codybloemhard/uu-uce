@@ -2,7 +2,6 @@ package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
 import android.graphics.Paint
-import com.uu_uce.debug
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 
@@ -58,7 +57,7 @@ class ShapeLayer(private val chunkGetter: ChunkGetter, map: ShapeMap, hasInfo: B
     }
 
     //draw all chunks associated with this layer
-    fun draw(canvas: Canvas, paint: Paint, viewport : Pair<p2,p2>, width: Int, height: Int){
+    fun draw(canvas: Canvas, paint: Paint, viewport : Pair<p2,p2>, width: Int, height: Int, debug : Boolean){
         if(debug) chunkManager.debug(canvas,viewport, width,height)
 
         synchronized(chunks) {
