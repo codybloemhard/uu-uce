@@ -68,6 +68,10 @@ class ChunkManager(
         this.maxzoom = maxzoom
     }
 
+    fun getZoomLevel() : Int{
+        return lastZoom
+    }
+
     //cancel all threads that are currently trying to load new chunks
     private fun cancelCurrentLoading(){
         synchronized(chunks) {

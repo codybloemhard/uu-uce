@@ -1,7 +1,6 @@
 package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import com.uu_uce.mapOverlay.aaBoundingBoxIntersect
 

@@ -5,6 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "fieldbook")
 class FieldbookEntry(
+    var title          : String,
     var location       : String,
     var dateTime       : String,
     var content        : String

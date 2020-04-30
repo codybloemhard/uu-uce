@@ -79,6 +79,7 @@ class GeoMap : AppCompatActivity() {
         this.customMap.setLifeCycleOwner(this)
         this.customMap.setPins(pinViewModel.allPinData)
 
+        // Get statusbar height
         resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
         if (resourceId > 0) {
             statusBarHeight = resources.getDimensionPixelSize(resourceId)
@@ -102,12 +103,11 @@ class GeoMap : AppCompatActivity() {
         dragBar.dragAction       = { dx, dy -> menu.drag(dx,dy)}
         dragBar.dragEndAction    = { dx, dy -> menu.snap(dx, dy)}
 
-
         //add layers to map
         val mydir = File(filesDir,"mydir")
         try {
             val heightlines = File(mydir, "heightlines")
-            customMap.addLayer(LayerType.Water, HeightLineReader(heightlines), toggle_layer_layout, size, true)
+            customMap.addLayer(LayerType.Height, HeightLineReader(heightlines), toggle_layer_layout, size, true)
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
         }catch(e: Exception){
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)

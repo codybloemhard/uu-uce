@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
     <external-path
-        name="my_images"
-        path="Android/data/com.uu_uce/files/Pictures" />
+        path="UU-UCE/Fieldbook/"
+        name="fieldbook" />
+
+    <external-files-path
+        path="UU-UCE/Fieldbook/"
+        name="fieldbook_thumbnails" />
 </paths>

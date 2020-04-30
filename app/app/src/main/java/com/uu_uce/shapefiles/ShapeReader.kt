@@ -4,8 +4,6 @@ import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import java.io.File
 import java.io.FileInputStream
-import kotlin.math.log
-import kotlin.math.pow
 
 /*
 a way of getting chunks, possibly from storage or a server
@@ -22,6 +20,11 @@ abstract class ChunkGetter(
     protected var bmin = p3NaN
     protected var bmax = p3NaN
     var nrCuts: List<Int> = listOf()
+    // For each level, the modulo of the heigt lines
+    // Ex. mods[0] = 100
+    // Than level 0 has 100 meter between each heightline
+    // And every heightline height(z) is a multiple of 100
+    var mods: List<Int> = listOf()
 
     //read the information file provided for most layers
     //returns bounding box of the entire layer
@@ -41,6 +44,10 @@ abstract class ChunkGetter(
         bmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult)
         bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult)
 
+        val nrMods = reader.readULong()
+        mods = List(nrMods.toInt()){
+            reader.readULong().toInt()
+        }
         return Pair(bmin, bmax)
     }
 }
@@ -136,7 +143,7 @@ class PolygonReader(
     dir: File
 ): ChunkGetter(dir) {
     override fun getChunk(cIndex: ChunkIndex): Chunk {
-        val file = File(dir, "river")
+        val file = File(dir, "river.dms")
         val reader = FileReader(file)
 
         val xoff = reader.readULong().toDouble()

@@ -7,7 +7,6 @@ import android.view.View
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import org.jetbrains.annotations.TestOnly
-import java.io.File
 import kotlin.system.measureTimeMillis
 
 typealias p2 = Pair<Double, Double>
@@ -81,6 +80,24 @@ class ShapeMap(
         for((type,layer) in layers){
             layer.setzooms(minzoom,maxzoom)
         }
+    }
+
+    fun getZoomLevel() : Int {
+        var i = 0
+        while(i < layers.count() && layers[i].first != LayerType.Height) i++
+        return if(i == layers.count()) {
+            Logger.error("ShapeMap", "No heightlines found")
+            -1
+        } else layers[i].second.getZoomLevel()
+    }
+
+    fun getMods() : List<Int> {
+        var i = 0
+        while(i < layers.count() && layers[i].first != LayerType.Height) i++
+        return if(i == layers.count()) {
+            Logger.error("ShapeMap", "No heightlines found")
+            listOf()
+        } else layers[i].second.getMods()
     }
 
     fun addLayer(type: LayerType, chunkGetter: ChunkGetter, hasInfo: Boolean){
