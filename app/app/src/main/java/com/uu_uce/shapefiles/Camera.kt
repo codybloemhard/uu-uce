@@ -93,15 +93,9 @@ class Camera(
     //set the x and y to new values, while not going out of bounds
     private fun setPos(newX: Double, newY: Double){
         if(isBusy()) return
-        val minx = viewMin.first + lastWoff
-        val maxx = viewMax.first - lastWoff
-        val miny = viewMin.second + lastHoff
-        val maxy = viewMax.second - lastHoff
-
-        val xvalue = if(minx >= maxx) mx else newX.coerceIn(minx, maxx)
-        val yvalue = if(miny >= maxy) my else newY.coerceIn(miny, maxy)
+        val xvalue = newX.coerceIn(viewMin.first,viewMax.first)
+        val yvalue = newY.coerceIn(viewMin.second,viewMax.second)
         setXy(xvalue,yvalue)
-
     }
 
     fun moveView(dx: Double, dy: Double){
