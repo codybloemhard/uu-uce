@@ -10,7 +10,7 @@ import kotlinx.android.synthetic.main.activity_settings.*
 
 class Settings : AppCompatActivity() {
     // private variables
-    private val minPinSize = 50
+    private val minPinSize = 10
     private val maxPinSize = 100
 
     private lateinit var sharedPref : SharedPreferences

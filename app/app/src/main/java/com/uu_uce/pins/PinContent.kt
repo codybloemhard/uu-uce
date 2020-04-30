@@ -171,7 +171,8 @@ class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Ur
         val content = ImageView(activity)
         try {
             content.setImageURI(imageURI)
-            content.scaleType = ImageView.ScaleType.CENTER_CROP
+            content.scaleType = ImageView.ScaleType.FIT_CENTER
+            content.adjustViewBounds = true
         } catch (e: Exception) {
             Logger.error("PinContent","Couldn't load $imageURI, so loaded the thumbnail $thumbnailURI instead")
             content.setImageURI(thumbnailURI)
@@ -214,7 +215,8 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         else{
             val thumbnail = ImageView(activity)
             thumbnail.setImageURI(thumbnailURI)
-            thumbnail.scaleType = ImageView.ScaleType.CENTER
+            thumbnail.scaleType = ImageView.ScaleType.FIT_CENTER
+            thumbnail.adjustViewBounds = true
             frameLayout.addView(thumbnail)
         }
 
