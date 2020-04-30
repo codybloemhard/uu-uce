@@ -2,6 +2,7 @@ package com.uu_uce
 
 import android.Manifest
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Point
@@ -13,6 +14,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.misc.LogType
@@ -26,8 +28,6 @@ import kotlinx.android.synthetic.main.activity_geo_map.*
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 
-const val debug = true
-
 //main activity in which the map and menu are displayed
 class GeoMap : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel
@@ -36,6 +36,7 @@ class GeoMap : AppCompatActivity() {
     private var statusBarHeight = 0
     private var resourceId = 0
     private var started = false
+    private lateinit var sharedPref : SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Logger.setTagEnabled("CustomMap", false)
@@ -66,8 +67,14 @@ class GeoMap : AppCompatActivity() {
     private fun start(){
         setContentView(R.layout.activity_geo_map)
 
+        // Get preferences
+        sharedPref = getDefaultSharedPreferences(this)
+
+        // Set settings
+        customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
+        customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", 60)
+
         // TODO: Remove when database is fully implemented
-        val sharedPref = getPreferences(Context.MODE_PRIVATE)
         with(sharedPref.edit()) {
             putInt("com.uu_uce.USER_POINTS", 0)
             apply()
@@ -169,6 +176,8 @@ class GeoMap : AppCompatActivity() {
     override fun onResume() {
         if(started){
             super.onResume()
+            customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
+            customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", 60)
             customMap.setPins(pinViewModel.allPinData)
             customMap.redrawMap()
         }

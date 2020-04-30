@@ -53,9 +53,6 @@ class CustomMap : ViewTouchParent {
     constructor(context: Context, attrs: AttributeSet): super(context, attrs)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    // Settings
-    private var sharedPref : SharedPreferences
-
     // Location
     private val locationServices                            = LocationServices()
     private val locationDeadZone    : Float                 = 5f // How much does the location have to change on the screen to warrant a redraw
@@ -70,25 +67,25 @@ class CustomMap : ViewTouchParent {
     private val deviceLocEdgePaint  : Paint = Paint()
 
     // Pins
-    private val pinTapBufferSize        : Int                   = 10
     private var pins                    : MutableMap<Int, Pin>  = mutableMapOf()
     private var pinStatuses             : MutableMap<Int, Int>  = mutableMapOf()
     private lateinit var pinViewModel   : PinViewModel
     private lateinit var lfOwner        : LifecycleOwner
-    var activePopup                     : PopupWindow? = null
+    var activePopup                     : PopupWindow?          = null
+    var pinSize                                                 = 60
 
     // Map
-    private var smap: ShapeMap
+    var debug = false
+    private var smap = ShapeMap(this)
     private var nrLayers = 0
     private lateinit var mods : List<Int>
     private lateinit var camera : Camera
+
 
     init{
         //disable hardware acceleration for canvas.drawVertices
         //potentially not necessary?
         //setLayerType(LAYER_TYPE_SOFTWARE, null)
-
-        smap = ShapeMap(this)
 
         // Logger mask settings
         Logger.setTagEnabled("CustomMap", false)
@@ -99,9 +96,6 @@ class CustomMap : ViewTouchParent {
         addChild(Scroller(context, ::moveMap))
         addChild(DoubleTapper(context, ::zoomOutMax))
         addChild(SingleTapper(context as AppCompatActivity, ::tapPin))
-
-        // Get settings
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(context as AppCompatActivity)
 
         // Init paints
         deviceLocPaint.color = Color.BLUE
@@ -161,7 +155,7 @@ class CustomMap : ViewTouchParent {
             canvas.drawColor(Color.rgb(234, 243, 245))
 
             // Draw map
-            smap.draw(canvas, width, height)
+            smap.draw(canvas, width, height, debug)
 
             if(context is GeoMap){
                 val zoomLevel = smap.getZoomLevel()
@@ -299,7 +293,6 @@ class CustomMap : ViewTouchParent {
 
     private fun updatePinStatuses(newPinData: List<PinData>) {
         // Update pins from new data
-        val pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", 60)
         for(pin in newPinData) {
             if(pinStatuses[pin.pinId] == pin.status){
                 // Pin is present and unchanged
@@ -352,7 +345,7 @@ class CustomMap : ViewTouchParent {
     private fun tapPin(tapLocation : p2, activity : Activity){
         for((_,pin) in pins.toList().asReversed()){
             if(!pin.inScreen || pin.getStatus() < 1) continue
-            if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, pinTapBufferSize)){
+            if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, 0)){
                 pin.openContent(this, activity) {activePopup = null}
                 activePopup = pin.popupWindow
                 Logger.log(LogType.Info, "CustomMap", "${pin.getTitle()}: I have been tapped.")

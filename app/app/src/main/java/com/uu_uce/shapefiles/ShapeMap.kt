@@ -147,7 +147,7 @@ class ShapeMap(
     }
 
     //draw all layers
-    fun draw(canvas: Canvas, width: Int, height: Int){
+    fun draw(canvas: Canvas, width: Int, height: Int, debug : Boolean){
         val viewport = camera.getViewport()
 
         for(i in layers.indices) {
@@ -158,7 +158,8 @@ class ShapeMap(
                     layerPaints[t.value],
                     viewport,
                     width,
-                    height
+                    height,
+                    debug
                 )
             }
         }
