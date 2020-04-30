@@ -18,8 +18,14 @@ enum class AnimType{
 
 enum class UpdateResult{
     NOOP, REDRAW, ANIM
-}
+    }
 
+/*
+basic camera used to track which part of the world we are viewing
+x,y: position of the middle point of the camera
+zoom: current zoom/height
+viewMin/viewMax: bounds of the currently loaded layers, which the camera can't leave
+ */
 class Camera(
     private var x: Double,
     private var y: Double,
@@ -48,7 +54,11 @@ class Camera(
 
     var wAspect = 0.0
 
+    //retrieve the topleft and bottomright coordinates that are visible in the camera
     fun getViewport(): Pair<p2,p2>{
+        //if camera is not initialized properly, return dummy value
+        if (viewMax.first < viewMin.first || viewMax.second < viewMin.second || viewMax.third < viewMin.third) return p2ZeroPair
+
         val w = viewMax.first - viewMin.first
         val h = viewMax.second - viewMin.second
         val woff = w * wAspect / 2.0 * zoom
@@ -60,10 +70,12 @@ class Camera(
         return Pair(nmin, nmax)
     }
 
+    //whether the camera is currently animating
     private fun isBusy(): Boolean{
         return animType != AnimType.NONE
     }
 
+    //whether the camera needs the screen to be redrawn
     fun needsInvalidate(): Boolean{
         return changed || isBusy()
     }
@@ -78,22 +90,12 @@ class Camera(
         y = yy
     }
 
-    private fun setPosCenter(){
-        if(isBusy()) return
-        setXy(mx, my)
-    }
-
+    //set the x and y to new values, while not going out of bounds
     private fun setPos(newX: Double, newY: Double){
         if(isBusy()) return
-        val minx = viewMin.first + lastWoff
-        val maxx = viewMax.first - lastWoff
-        val miny = viewMin.second + lastHoff
-        val maxy = viewMax.second - lastHoff
-        if(minx >= maxx || miny >= maxy)
-            setPosCenter()
-        else
-            setXy(newX.coerceIn(minx, maxx),newY.coerceIn(miny, maxy))
-
+        val xvalue = newX.coerceIn(viewMin.first,viewMax.first)
+        val yvalue = newY.coerceIn(viewMin.second,viewMax.second)
+        setXy(xvalue,yvalue)
     }
 
     fun moveView(dx: Double, dy: Double){
@@ -121,6 +123,7 @@ class Camera(
         setZ(z.coerceIn(minZoom, maxZoom))
     }
 
+    //fully zoom out
     fun zoomOutMax(duration: Double){
         if(isBusy()) return
         animBegin = Triple(x, y, zoom)
@@ -131,6 +134,7 @@ class Camera(
         animT = 0.0
     }
 
+    //initialize the animation from current position to target in durationMs milisecs
     fun startAnimation(target: p3, durationMs: Double){
         if(isBusy()) return
         animBegin = Triple(x, y, zoom)
@@ -162,6 +166,7 @@ class Camera(
             UpdateResult.REDRAW
     }
 
+    //animate a full zoomout
     private fun updateOut(){
         val ct = System.currentTimeMillis().toDouble()
         val t = ((ct - animStartT) / animDuration).coerceIn(0.0, 1.0)
@@ -174,6 +179,7 @@ class Camera(
         }
     }
 
+    //animate the movement to animTarget
     private fun updateTrans(){
         val ct = System.currentTimeMillis().toDouble()
         val t = ((ct - animStartT) / animDuration).coerceIn(0.0, 1.0)

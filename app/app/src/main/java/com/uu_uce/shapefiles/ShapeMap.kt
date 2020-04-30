@@ -13,11 +13,13 @@ typealias p2 = Pair<Double, Double>
 typealias p3 = Triple<Double,Double,Double>
 
 val p2Zero = Pair(0.0,0.0)
+val p2ZeroPair = Pair(p2Zero,p2Zero)
 val p3Min = Triple(Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE)
 val p3Zero = Triple(0.0,0.0,0.0)
 val p3Max = Triple(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE)
 val p3NaN = Triple(Double.NaN, Double.NaN, Double.NaN)
 
+//merge a list of bounding boxes in one big one containing them all
 fun mergeBBs(mins: List<p3>,maxs: List<p3>): Pair<p3,p3>{
     var bmin = mutableListOf(Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE)
     var bmax = mutableListOf(Double.MIN_VALUE,Double.MIN_VALUE,Double.MIN_VALUE)
@@ -35,9 +37,13 @@ fun mergeBBs(mins: List<p3>,maxs: List<p3>): Pair<p3,p3>{
         bb
     })
     return Pair(Triple(bmin[0],bmin[1],bmin[2]),Triple(bmax[0],bmax[1],bmax[2]))
-}
+    }
 
-class ShapeMap(private val nrOfLODs: Int,
+/*
+a map to be displayed in the app, consisting of multiple layers
+view: the view this is displayed in
+ */
+class ShapeMap(
                private val view: View
 ){
     private var layerMask = mutableListOf<Boolean>()
@@ -96,7 +102,7 @@ class ShapeMap(private val nrOfLODs: Int,
 
     fun addLayer(type: LayerType, chunkGetter: ChunkGetter, hasInfo: Boolean){
         val timeSave = measureTimeMillis {
-            layers.add(Pair(type,ShapeLayer(chunkGetter, this, {}, hasInfo)))
+            layers.add(Pair(type,ShapeLayer(chunkGetter, this, hasInfo)))
         }
 
         Logger.log(LogType.Info,"ShapeMap", "Save: $timeSave")
@@ -105,6 +111,7 @@ class ShapeMap(private val nrOfLODs: Int,
         layerMask.add(true)
     }
 
+    //create a camera with the correct bounding box
     fun initialize(): Camera{
         val bminmax = mergeBBs(
             layers.map{l -> l.second.bmin},
@@ -127,16 +134,19 @@ class ShapeMap(private val nrOfLODs: Int,
         view.invalidate()
     }
 
+    //update chunks of all layers
     fun updateChunks(): ChunkUpdateResult{
         var res = ChunkUpdateResult.NOTHING
         for((_,layer) in layers){
-            val cur = layer.updateChunks(camera.getViewport(), camera.getZoom(), camera.wAspect)
+            val cur = layer.updateChunks(camera.getViewport(), camera.getZoom())
             if(cur != ChunkUpdateResult.NOTHING)
                 res = cur
+            if(res == ChunkUpdateResult.LOADING) break
         }
         return res
     }
 
+    //draw all layers
     fun draw(canvas: Canvas, width: Int, height: Int){
         val viewport = camera.getViewport()
 
