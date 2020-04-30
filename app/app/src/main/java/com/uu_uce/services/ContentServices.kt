@@ -1,15 +1,15 @@
 package com.uu_uce.services
-/*
+
 import android.Manifest
 import android.app.Activity
 import android.app.DownloadManager
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.net.Uri
-import android.os.Environment.DIRECTORY_DOWNLOADS
+import com.uu_uce.misc.Logger
 import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
+import java.net.URL
 
 
 val permissionsNeeded = listOf(Manifest.permission.INTERNET, Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -57,25 +57,26 @@ onCompleteAction : A function to be executed when all files are present.
 It will download all files and start onCompleteAction.
  */
 fun getFiles(requiredFilePaths : List<String>, activity: Activity, onCompleteAction : (() -> Unit)){
-    val manager = activity.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+    //val manager = activity.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
 
-    val downloadDone : MutableMap<Long, Boolean> = mutableMapOf()
+    //val downloadDone : MutableMap<Long, Boolean> = mutableMapOf()
 
-    for(filePath in requiredFilePaths){ //TODO implement our own server
-        val fileName = filePath.split('/').last()
-        val request = DownloadManager.Request(Uri.parse(filePath))
+    for(filePath in requiredFilePaths){
+        downloadFileInBackground(filePath)
+
+        /*val request = DownloadManager.Request(Uri.parse(filePath))
         request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI)
 
-        //request.setDestinationUri(Uri.parse(filePath))
-        request.setDestinationInExternalPublicDir(DIRECTORY_DOWNLOADS, fileName)
+        request.setDestinationUri(Uri.parse(filePath))
+        //request.setDestinationInExternalPublicDir(, fileName)
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
 
         val id : Long = manager.enqueue(request)
         downloadDone[id] = false
-        manager.enqueue(request)
+        manager.enqueue(request)*/
     }
 
-    val onComplete: BroadcastReceiver = object : BroadcastReceiver() {
+    /*val onComplete: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctxt: Context, intent: Intent) {
             val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
             if(downloadDone[id] != null){
@@ -86,5 +87,51 @@ fun getFiles(requiredFilePaths : List<String>, activity: Activity, onCompleteAct
             }
         }
     }
-    activity.registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
-}*/
+    activity.registerReceiver(onComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))*/
+}
+
+fun downloadFileInBackground (filePath : String) : Boolean
+{
+    var download : Boolean
+    val fileName = filePath.split('/').last()
+
+    val directory = File(filePath.split('/').dropLast(1).toString()) //create directory to keep your downloaded file
+
+    if (!directory.exists()) {
+        directory.mkdir()
+    }
+
+    val fileUrl = "" // TODO: Get URL from server
+
+    try {
+        var input: InputStream? = null
+        try {
+            val url =
+                URL(fileUrl) // link of the song which you want to download like (http://...)
+            input = url.openStream()
+            val output: OutputStream = FileOutputStream(File(directory, fileName))
+            download = true
+            try {
+                val buffer = ByteArray(1024)
+                var bytesRead = 0
+                while (input.read(buffer, 0, buffer.size).also({ bytesRead = it }) >= 0) {
+                    output.write(buffer, 0, bytesRead)
+                    download = true
+                }
+                output.close()
+            } catch (exception: Exception) {
+                Logger.error("ContentServices","output exception in catch.....$exception")
+                download = false
+                output.close()
+            }
+        } catch (exception: Exception) {
+            Logger.error("ContentServices","input exception in catch.....$exception")
+            download = false
+        } finally {
+            input!!.close()
+        }
+    } catch (exception: Exception) {
+        download = false
+    }
+    return download
+}
