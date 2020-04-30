@@ -97,14 +97,10 @@ class GeoMap : AppCompatActivity() {
         val longest = maxOf(screenDim.x, screenDim.y)
         val size = (longest*menu.buttonPercent).toInt()
 
-        val btn1 = allpins_button
-        btn1.setOnClickListener{customMap.startAllPins()}
-
-        val btn2 = fieldbook_button
-        btn2.setOnClickListener{customMap.startFieldBook()}
-
-        val btn3 = settings_button
-        btn3.setOnClickListener{customMap.startSettings()}
+        allpins_button.setOnClickListener{customMap.startAllPins()}
+        fieldbook_button.setOnClickListener{customMap.startFieldBook()}
+        settings_button.setOnClickListener{customMap.startSettings()}
+        profile_button.setOnClickListener{customMap.startProfile()}
 
         dragBar.clickAction      = {menu.dragButtonTap()}
         dragBar.dragAction       = { dx, dy -> menu.drag(dx,dy)}

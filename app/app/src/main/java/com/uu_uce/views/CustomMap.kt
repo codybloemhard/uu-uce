@@ -412,6 +412,12 @@ class CustomMap : ViewTouchParent {
         startActivity(context, i,null)
     }
 
+    //open profile activity
+    fun startProfile() {
+        val i = Intent(context, Profile::class.java)
+        startActivity(context, i,null)
+    }
+
 
     //functions used for testing
     @TestOnly
