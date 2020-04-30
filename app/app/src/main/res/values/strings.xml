@@ -51,7 +51,10 @@
     <string name="profile_user_name">User name</string>
     <string name="profile_orginization_image_description">The logo of the orginization that this person belongs to</string>
     <string name="profile_user_number">User number</string>
-    <string name="profile_university_name">University name</string>
+    <string name="profile_university_name">Organization name</string>
     <string name="menu_profile_button_text">Profile</string>
     <string name="menu_settings_button_text">Settings</string>
+    <string name="profile_badges">Badges</string>
+    <string name="profile_achievements">Achievements</string>
+    <string name="profile_statistics">Statistics</string>
 </resources>
