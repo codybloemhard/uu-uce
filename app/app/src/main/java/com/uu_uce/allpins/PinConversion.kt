@@ -7,13 +7,14 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.os.Build
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.pins.Pin
 import com.uu_uce.pins.PinContent
 import com.uu_uce.services.UTMCoordinate
 
-class PinConversion(context: Context){
+class PinConversion(val context: Context){
 
     companion object {
         fun stringToUtm(coord: String): UTMCoordinate {
@@ -34,9 +35,9 @@ class PinConversion(context: Context){
 
     private fun difficultyToBackground(difficulty: Int): Drawable {
         val color = when (difficulty) {
-            1 -> Color.parseColor("#5DB678")
-            2 -> Color.parseColor("#F08135")
-            3 -> Color.parseColor("#E83C5B")
+            1 -> ContextCompat.getColor(context, R.color.ReptileGreen)
+            2 -> ContextCompat.getColor(context, R.color.OrangeHibiscus)
+            3 -> ContextCompat.getColor(context, R.color.Desire)
             else -> {
                 Color.parseColor("#696969") //Nice
             }
