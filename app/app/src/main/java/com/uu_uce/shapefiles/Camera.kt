@@ -90,14 +90,7 @@ class Camera(
         y = yy
     }
 
-    private fun setPosCenter(){
-        if(isBusy()) return
-        setXy(mx, my)
-    }
-
-    /*
-    set the x and y to new values, while not going out of bounds
-     */
+    //set the x and y to new values, while not going out of bounds
     private fun setPos(newX: Double, newY: Double){
         if(isBusy()) return
         val minx = viewMin.first + lastWoff
@@ -107,8 +100,6 @@ class Camera(
 
         val xvalue = if(minx >= maxx) mx else newX.coerceIn(minx, maxx)
         val yvalue = if(miny >= maxy) my else newY.coerceIn(miny, maxy)
-        /*if(minx >= maxx || miny >= maxy)
-            setPosCenter()*/
         setXy(xvalue,yvalue)
 
     }
