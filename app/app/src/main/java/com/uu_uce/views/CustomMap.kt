@@ -244,7 +244,7 @@ class CustomMap : ViewTouchParent {
     //used to zoom the camera in and out
     private fun zoomMap(zoom: Float){
         val deltaOne = 1.0 - zoom.toDouble().coerceIn(0.5, 1.5)
-        camera.zoomIn(1.0 + deltaOne)
+        camera.zoomIn(1.0 + deltaOne*2)
         if(camera.needsInvalidate())
             invalidate()
     }
@@ -256,7 +256,7 @@ class CustomMap : ViewTouchParent {
         val dypx = dypxf.toDouble()
         val dx = dxpx / width
         val dy = dypx / height
-        camera.moveView(dx, -dy)
+        camera.moveView(dx*2, -dy*2)
         if(camera.needsInvalidate())
             invalidate()
     }
