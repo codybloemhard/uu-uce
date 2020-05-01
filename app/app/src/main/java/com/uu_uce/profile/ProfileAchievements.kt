@@ -20,14 +20,4 @@ class ProfileAchievements : Fragment() {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_profile_achievements, container, false)
     }
-
-    companion object {
-        @JvmStatic
-        fun newInstance() =
-            ProfileAchievements().apply {
-                arguments = Bundle().apply {
-
-                }
-            }
-    }
 }

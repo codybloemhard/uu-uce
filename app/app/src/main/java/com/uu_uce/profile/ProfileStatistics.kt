@@ -20,14 +20,4 @@ class ProfileStatistics : Fragment() {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_profile_statistics, container, false)
     }
-
-    companion object {
-        @JvmStatic
-        fun newInstance() =
-            ProfileStatistics().apply {
-                arguments = Bundle().apply {
-
-                }
-            }
-    }
 }

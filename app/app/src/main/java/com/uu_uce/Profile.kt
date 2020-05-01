@@ -25,7 +25,7 @@ class Profile : AppCompatActivity() {
 
         selectedOptionText = badges_button_text
         selectedOptionBar = badges_button_bar
-        openFragment(ProfileBadges.newInstance())
+        openFragment(ProfileBadges())
 
         badges_button.setOnClickListener{
             if(selectedOptionBar != badges_button_bar){
@@ -38,7 +38,7 @@ class Profile : AppCompatActivity() {
                 selectedOptionText = badges_button_text
                 selectedOptionBar  = badges_button_bar
 
-                openFragment(ProfileBadges.newInstance())
+                openFragment(ProfileBadges())
             }
         }
 
@@ -53,7 +53,7 @@ class Profile : AppCompatActivity() {
                 selectedOptionText = achievements_button_text
                 selectedOptionBar  = achievements_button_bar
 
-                openFragment(ProfileAchievements.newInstance())
+                openFragment(ProfileAchievements())
             }
         }
 
@@ -68,7 +68,7 @@ class Profile : AppCompatActivity() {
                 selectedOptionText = statistics_button_text
                 selectedOptionBar  = statistics_button_bar
 
-                openFragment(ProfileStatistics.newInstance())
+                openFragment(ProfileStatistics())
             }
         }
     }
