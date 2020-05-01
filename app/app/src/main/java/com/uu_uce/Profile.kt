@@ -5,7 +5,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.core.view.children
+import androidx.fragment.app.Fragment
+import com.uu_uce.profile.ProfileAchievements
+import com.uu_uce.profile.ProfileBadges
+import com.uu_uce.profile.ProfileStatistics
 import com.uu_uce.ui.createTopbar
 import kotlinx.android.synthetic.main.activity_profile.*
 
@@ -22,6 +25,7 @@ class Profile : AppCompatActivity() {
 
         selectedOptionText = badges_button_text
         selectedOptionBar = badges_button_bar
+        openFragment(ProfileBadges.newInstance())
 
         badges_button.setOnClickListener{
             if(selectedOptionBar != badges_button_bar){
@@ -34,7 +38,7 @@ class Profile : AppCompatActivity() {
                 selectedOptionText = badges_button_text
                 selectedOptionBar  = badges_button_bar
 
-                // TODO: switch fragment here
+                openFragment(ProfileBadges.newInstance())
             }
         }
 
@@ -49,7 +53,7 @@ class Profile : AppCompatActivity() {
                 selectedOptionText = achievements_button_text
                 selectedOptionBar  = achievements_button_bar
 
-                // TODO: switch fragment here
+                openFragment(ProfileAchievements.newInstance())
             }
         }
 
@@ -64,9 +68,15 @@ class Profile : AppCompatActivity() {
                 selectedOptionText = statistics_button_text
                 selectedOptionBar  = statistics_button_bar
 
-                // TODO: switch fragment here
+                openFragment(ProfileStatistics.newInstance())
             }
         }
     }
 
+    private fun openFragment(fragment: Fragment) {
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.profile_container, fragment)
+        transaction.addToBackStack(null)
+        transaction.commit()
+    }
 }
