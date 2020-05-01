@@ -4,7 +4,7 @@ import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
 
 
-
+//same as viewtouchparent, but for activities
 open class TouchParent: AppCompatActivity(){
     private var children = mutableListOf<TouchChild>()
 

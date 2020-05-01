@@ -5,6 +5,7 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import androidx.core.view.GestureDetectorCompat
 
+//performs action(dx,dy) when scrolled
 class Scroller(
     parent: Context,
     var action: (Float, Float) -> Unit)

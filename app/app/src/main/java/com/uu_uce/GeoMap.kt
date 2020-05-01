@@ -2,6 +2,7 @@ package com.uu_uce
 
 import android.Manifest
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Point
@@ -13,6 +14,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.misc.LogType
@@ -26,8 +28,7 @@ import kotlinx.android.synthetic.main.activity_geo_map.*
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 
-const val debug = false
-
+//main activity in which the map and menu are displayed
 class GeoMap : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel
     private val permissionsNeeded = listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -35,6 +36,7 @@ class GeoMap : AppCompatActivity() {
     private var statusBarHeight = 0
     private var resourceId = 0
     private var started = false
+    private lateinit var sharedPref : SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Logger.setTagEnabled("CustomMap", false)
@@ -65,8 +67,14 @@ class GeoMap : AppCompatActivity() {
     private fun start(){
         setContentView(R.layout.activity_geo_map)
 
+        // Get preferences
+        sharedPref = getDefaultSharedPreferences(this)
+
+        // Set settings
+        customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
+        customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", 60)
+
         // TODO: Remove when database is fully implemented
-        val sharedPref = getPreferences(Context.MODE_PRIVATE)
         with(sharedPref.edit()) {
             putInt("com.uu_uce.USER_POINTS", 0)
             apply()
@@ -84,12 +92,11 @@ class GeoMap : AppCompatActivity() {
             statusBarHeight = resources.getDimensionPixelSize(resourceId)
         }
 
-        // Get screen dimentions
+        // Initialize menu
         (Display::getSize)(windowManager.defaultDisplay, screenDim)
         val longest = maxOf(screenDim.x, screenDim.y)
         val size = (longest*menu.buttonPercent).toInt()
 
-        // Initialize menu
         val btn1 = allpins_button
         btn1.setOnClickListener{customMap.startAllPins()}
 
@@ -103,7 +110,7 @@ class GeoMap : AppCompatActivity() {
         dragBar.dragAction       = { dx, dy -> menu.drag(dx,dy)}
         dragBar.dragEndAction    = { dx, dy -> menu.snap(dx, dy)}
 
-        // Load files
+        //add layers to map
         val mydir = File(filesDir,"mydir")
         try {
             val heightlines = File(mydir, "heightlines")
@@ -119,10 +126,12 @@ class GeoMap : AppCompatActivity() {
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
 
+        //create camera based on layers
         customMap.initializeCamera()
 
         customMap.tryStartLocServices(this)
 
+        //more menu initialization which needs its width/height
         menu.post{
             initMenu()
         }
@@ -143,7 +152,8 @@ class GeoMap : AppCompatActivity() {
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        // Move the menu down when the map is tapped
+        //move the menu down when the map is tapped
+        //this needs to be done in dispatch so the touch can't be consumed by other views
         if(menu.dragStatus != DragStatus.Down &&
             ev.action == MotionEvent.ACTION_DOWN &&
             !(ev.x > menu.x && ev.x < menu.x + menu.width && ev.y-statusBarHeight > menu.y && ev.y-statusBarHeight < menu.y + menu.height)){
@@ -154,6 +164,7 @@ class GeoMap : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        //move the menu down when it's up, otherwise close the current popup
         if(menu.dragStatus != DragStatus.Down){
             menu.down()
             return
@@ -165,6 +176,8 @@ class GeoMap : AppCompatActivity() {
     override fun onResume() {
         if(started){
             super.onResume()
+            customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
+            customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", 60)
             customMap.setPins(pinViewModel.allPinData)
             customMap.redrawMap()
         }
