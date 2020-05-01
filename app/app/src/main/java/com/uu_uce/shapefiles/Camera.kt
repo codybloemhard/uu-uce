@@ -59,8 +59,8 @@ class Camera(
     private var animT = 0.0
 
     //variables for sliding camera
-    private val factor = 0.9
-    private val epsilonFactor = 1.0
+    private var decline = p2(1.0,1.0)
+    private var declineLength = 40.0
 
     var wAspect = 0.0
 
@@ -117,6 +117,7 @@ class Camera(
         velo = p2((dx * lastWoff), (dy * lastHoff))
         changed = true
         animType = AnimType.SLIDE
+        decline = p2(velo.first/declineLength,velo.second/declineLength)
         //setPos(velo.first, velo.second)
     }
 
@@ -226,10 +227,12 @@ class Camera(
     private fun updateSlide(){
         changed = true
         setPos(x + velo.first, y + velo.second)
-        var newXVel = velo.first * factor
-        if(abs(newXVel) < epsilonFactor*zoom) newXVel = 0.0
-        var newYVel = velo.second * factor
-        if(abs(newYVel) < epsilonFactor*zoom) newYVel = 0.0
+        val newXVel =
+            if(decline.first > 0) maxOf(0.0,velo.first - decline.first)
+            else minOf(0.0,velo.first - decline.first)
+        val newYVel =
+            if(decline.second > 0) maxOf(0.0,velo.second - decline.second)
+            else minOf(0.0,velo.second - decline.second)
         velo = p2(newXVel,newYVel)
         Logger.log(LogType.Event, "Camera", "vel: (${velo.first},${velo.second})")
         if(velo == p2Zero) {
