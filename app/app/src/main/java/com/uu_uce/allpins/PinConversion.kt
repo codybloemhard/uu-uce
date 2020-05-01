@@ -20,9 +20,10 @@ class PinConversion(val context: Context){
         fun stringToUtm(coord: String): UTMCoordinate {
             val regex = "(\\d+|[a-zA-Z])".toRegex()
             val s = regex.findAll(coord)
-            return UTMCoordinate(s.elementAt(0).value.toInt()       ,
-                s.elementAt(1).value.first()       ,
-                s.elementAt(4).value.toDouble()/10    ,
+            return UTMCoordinate(
+                s.elementAt(0).value.toInt(),
+                s.elementAt(1).value.first(),
+                s.elementAt(4).value.toDouble()/10,
                 s.elementAt(2).value.toDouble()/10)
         }
     }
@@ -39,16 +40,18 @@ class PinConversion(val context: Context){
             2 -> ContextCompat.getColor(context, R.color.OrangeHibiscus)
             3 -> ContextCompat.getColor(context, R.color.Desire)
             else -> {
-                Color.parseColor("#696969") //Nice
+                ContextCompat.getColor(context, R.color.TextGrey)
             }
         }
-        val background =  ResourcesCompat.getDrawable(resource, R.drawable.ic_pin, null) ?: error ("Image not found")
+        var background =  ResourcesCompat.getDrawable(resource, R.drawable.ic_pin, null) ?: error ("Image not found")
+        background = background.mutate()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
              background.colorFilter = BlendModeColorFilter(color, BlendMode.SRC_ATOP)
         }
         else{
             // Older versions will use depricated function
+            @Suppress("DEPRECATION")
             background.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
         }
         return background
@@ -59,8 +62,8 @@ class PinConversion(val context: Context){
             "TEXT"      -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_text, null)     ?: error("image not found")
             "IMAGE"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image, null)    ?: error("image not found")
             "VIDEO"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video, null)    ?: error("image not found")
-            "MCQUIZ"    -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz, null)    ?: error("image not found")
-            else        -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null)     ?: error("image not found")
+            "MCQUIZ"    -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz, null)     ?: error("image not found")
+            else        -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null)    ?: error("image not found")
         }
 
         val color = Color.WHITE
@@ -70,6 +73,7 @@ class PinConversion(val context: Context){
         }
         else{
             // Older versions will use depricated function
+            @Suppress("DEPRECATION")
             image.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
         }
         return image

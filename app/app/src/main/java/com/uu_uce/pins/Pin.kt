@@ -39,16 +39,19 @@ class Pin(
     // Used to determine if warning should show when closing pin
     private var madeProgress = false
 
+    // Set default pin size TODO: Get this from settings
     private var pinWidth = 60
 
     // Calculate pin height to maintain aspect ratio
     private var pinHeight =
         pinWidth * (background.intrinsicHeight.toFloat() / background.intrinsicWidth.toFloat())
 
+    // Declare variables for icon size
     private var iconWidth  : Double = 0.0
     private var iconHeight : Double = 0.0
 
     init {
+        // Check if predecessors contain self
         predecessorIds.forEach { I ->
             if (I == id) error("Pin can not be own predecessor")
         }
@@ -108,6 +111,7 @@ class Pin(
         boundingBox = Pair(p2(minX.toDouble(), minY.toDouble()), p2(maxX.toDouble(), maxY.toDouble()))
 
         background.setBounds(minX, minY, maxX, maxY)
+        val test = background.colorFilter
         background.draw(canvas)
 
         val iconX = minX + pinWidth  * 0.5
