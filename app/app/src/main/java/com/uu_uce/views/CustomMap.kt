@@ -84,8 +84,7 @@ class CustomMap : ViewTouchParent {
 
     init{
         //disable hardware acceleration for canvas.drawVertices
-        //potentially not necessary?
-        //setLayerType(LAYER_TYPE_SOFTWARE, null)
+        setLayerType(LAYER_TYPE_SOFTWARE, null)
 
         // Logger mask settings
         Logger.setTagEnabled("CustomMap", false)
@@ -244,7 +243,7 @@ class CustomMap : ViewTouchParent {
     //used to zoom the camera in and out
     private fun zoomMap(zoom: Float){
         val deltaOne = 1.0 - zoom.toDouble().coerceIn(0.5, 1.5)
-        camera.zoomIn(1.0 + deltaOne*2)
+        camera.zoomIn(1.0 + deltaOne)
         if(camera.needsInvalidate())
             invalidate()
     }
