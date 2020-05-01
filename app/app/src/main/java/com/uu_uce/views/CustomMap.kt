@@ -241,7 +241,7 @@ class CustomMap : ViewTouchParent {
         val dypx = dypxf.toDouble()
         val dx = dxpx / width
         val dy = dypx / height
-        camera.moveView(dx * 2, dy * -2)
+        camera.moveView(dx, -dy)
         if(camera.needsInvalidate())
             invalidate()
     }

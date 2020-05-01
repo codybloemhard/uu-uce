@@ -1,5 +1,8 @@
 package com.uu_uce.shapefiles
 
+import com.uu_uce.misc.LogType
+import com.uu_uce.misc.Logger
+import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -13,7 +16,7 @@ fun lerp(a: Double, b: Double, t: Double): Double{
 }
 
 enum class AnimType{
-    NONE, TRANS, OUT
+    NONE, TRANS, OUT, SLIDE
 }
 
 enum class UpdateResult{
@@ -30,6 +33,7 @@ class Camera(
     private val mx = (viewMin.first + viewMax.first) / 2.0
     private val my = (viewMin.second + viewMax.second) / 2.0
     private val maxDistXy = distXy(viewMin, viewMax)
+    private var velo = p2Zero
 
     var maxZoom = 1.0
     set(value) {minZoom = value/500; field = value}
@@ -40,11 +44,23 @@ class Camera(
     private var changed = true
 
     private var animType: AnimType = AnimType.NONE
+    private set(value){
+        when(value){
+            AnimType.SLIDE -> {}
+            else -> { velo = p2Zero}
+        }
+        field = value
+    }
+
     private var animBegin = p3Zero
     private var animTarget = p3Zero
     private var animDuration = 0.0
     private var animStartT = 0.0
     private var animT = 0.0
+
+    //variables for sliding camera
+    private val factor = 0.9
+    private val epsilonFactor = 1.0
 
     var wAspect = 0.0
 
@@ -61,7 +77,7 @@ class Camera(
     }
 
     private fun isBusy(): Boolean{
-        return animType != AnimType.NONE
+        return !(animType == AnimType.NONE || animType == AnimType.SLIDE)
     }
 
     fun needsInvalidate(): Boolean{
@@ -98,7 +114,10 @@ class Camera(
 
     fun moveView(dx: Double, dy: Double){
         if(isBusy()) return
-        setPos(x + (dx * lastWoff), y + (dy * lastHoff))
+        velo = p2((dx * lastWoff), (dy * lastHoff))
+        changed = true
+        animType = AnimType.SLIDE
+        //setPos(velo.first, velo.second)
     }
 
     fun getZoom(): Double{
@@ -152,11 +171,12 @@ class Camera(
         }
         changed = false
         when(animType){
-            AnimType.NONE -> {}
             AnimType.TRANS -> updateTrans()
             AnimType.OUT -> updateOut()
+            AnimType.SLIDE -> updateSlide()
+            AnimType.NONE -> {}
         }
-        return if(isBusy())
+        return if(isBusy() || changed)
             UpdateResult.ANIM
         else
             UpdateResult.REDRAW
@@ -200,6 +220,20 @@ class Camera(
         if(ct > animStartT + animDuration){
             animType = AnimType.NONE
             return
+        }
+    }
+
+    private fun updateSlide(){
+        changed = true
+        setPos(x + velo.first, y + velo.second)
+        var newXVel = velo.first * factor
+        if(abs(newXVel) < epsilonFactor*zoom) newXVel = 0.0
+        var newYVel = velo.second * factor
+        if(abs(newYVel) < epsilonFactor*zoom) newYVel = 0.0
+        velo = p2(newXVel,newYVel)
+        Logger.log(LogType.Event, "Camera", "vel: (${velo.first},${velo.second})")
+        if(velo == p2Zero) {
+            animType = AnimType.NONE
         }
     }
 }
