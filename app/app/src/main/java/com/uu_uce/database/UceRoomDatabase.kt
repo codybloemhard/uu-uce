@@ -72,7 +72,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
             pinList.add(
                 PinData(
                     3,
-                    "31N46715335N3134680E",
+                    "31N46655335N3134680E",
                     3,
                     "MCQUIZ",
                     "Test quiz",
