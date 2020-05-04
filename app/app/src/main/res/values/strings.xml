@@ -59,4 +59,5 @@
     <string name="profile_statistics">Statistics</string>
     <string name="profile_badge_title">Badge Title</string>
     <string name="profile_badge_description">Badge Description</string>
+    <string name="profile_wip_image">wip image</string>
 </resources>
