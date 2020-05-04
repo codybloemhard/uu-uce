@@ -6,6 +6,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".profile.ProfileBadges">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="Badges" />
+
     <!--
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/badge_recyclerview"
