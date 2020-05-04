@@ -111,7 +111,6 @@ class Pin(
         boundingBox = Pair(p2(minX.toDouble(), minY.toDouble()), p2(maxX.toDouble(), maxY.toDouble()))
 
         background.setBounds(minX, minY, maxX, maxY)
-        val test = background.colorFilter
         background.draw(canvas)
 
         val iconX = minX + pinWidth  * 0.5

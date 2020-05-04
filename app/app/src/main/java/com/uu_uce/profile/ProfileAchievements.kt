@@ -18,6 +18,6 @@ class ProfileAchievements : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile_achievements, container, false)
+        return inflater.inflate(R.layout.profile_fragment_achievements, container, false)
     }
 }
