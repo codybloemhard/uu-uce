@@ -17,6 +17,8 @@ import com.uu_uce.R
 import com.uu_uce.VideoViewer
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
+import com.uu_uce.services.findMissingFilePaths
+import com.uu_uce.services.getFiles
 import java.io.StringReader
 
 class PinContent(private val contentString: String) {
@@ -187,6 +189,8 @@ class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Ur
         content.id = R.id.image_block
         PhotoViewAttacher(content)
 
+        findMissingFilePaths(listOf(imageURI.toString()))
+
         layout.addView(content)
     }
 
@@ -241,8 +245,8 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
     }
 
     override fun getFilePath() : List<String>{
-        if(thumbnailURI == Uri.EMPTY) return listOf()
-        return listOf(thumbnailURI.toString())
+        if(thumbnailURI == Uri.EMPTY) return listOf(videoURI.toString())
+        return listOf(thumbnailURI.toString(), videoURI.toString())
     }
 
     override fun toString() : String {
