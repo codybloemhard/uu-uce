@@ -4,6 +4,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
+import com.uu_uce.views.CustomMap
 
 /*
 a layer to be displayed in the map, consisting of multiple shapes

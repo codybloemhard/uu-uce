@@ -6,6 +6,7 @@ import android.graphics.Paint
 import android.view.View
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
+import com.uu_uce.views.CustomMap
 import org.jetbrains.annotations.TestOnly
 import kotlin.system.measureTimeMillis
 
@@ -44,7 +45,7 @@ a map to be displayed in the app, consisting of multiple layers
 view: the view this is displayed in
  */
 class ShapeMap(
-               private val view: View
+               private val view: CustomMap
 ){
     private var layerMask = mutableListOf<Boolean>()
 
@@ -61,15 +62,13 @@ class ShapeMap(
             val p = Paint()
             when(i){
                 LayerType.Water.value -> {
-                    p.color = Color.rgb(33,11,203)
-                    p.color = Color.BLACK
+                    p.color = Color.BLUE
                 }
                 LayerType.Height.value -> {
-                    p.color = Color.rgb(0,0,0)
+                    p.color = Color.BLACK
                 }
                 LayerType.Vegetation.value -> {
-                    p.color = Color.rgb(0,133,31)
-                    p.color = Color.BLACK
+                    p.color = Color.GREEN
                 }
             }
             p

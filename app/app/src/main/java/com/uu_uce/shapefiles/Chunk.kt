@@ -3,6 +3,7 @@ package com.uu_uce.shapefiles
 import android.graphics.Canvas
 import android.graphics.Paint
 import com.uu_uce.mapOverlay.aaBoundingBoxIntersect
+import com.uu_uce.views.CustomMap
 
 //chunkindex (x,y,z) is the x'th chunk from the left, the y'th
 //from the bottom, in zoomlevel z

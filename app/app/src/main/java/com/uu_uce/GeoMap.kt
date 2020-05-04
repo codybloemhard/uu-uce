@@ -73,6 +73,7 @@ class GeoMap : AppCompatActivity() {
         // Set settings
         customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
         customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", 60)
+        customMap.hardwareAccelerated = sharedPref.getBoolean("com.uu_uce.HARDWARE", false)
 
         // TODO: Remove when database is fully implemented
         with(sharedPref.edit()) {
@@ -110,20 +111,36 @@ class GeoMap : AppCompatActivity() {
         dragBar.dragAction       = { dx, dy -> menu.drag(dx,dy)}
         dragBar.dragEndAction    = { dx, dy -> menu.snap(dx, dy)}
 
+        val mydir = File(filesDir, "mydir")
         //add layers to map
-        val mydir = File(filesDir,"mydir")
-        try {
-            val heightlines = File(mydir, "heightlines")
-            customMap.addLayer(LayerType.Height, HeightLineReader(heightlines), toggle_layer_layout, size, true)
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
-        }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
+        for(i in 0..0) {
+            try {
+                val heightlines = File(mydir, "heightlines")
+                customMap.addLayer(
+                    LayerType.Height,
+                    HeightLineReader(heightlines),
+                    toggle_layer_layout,
+                    size,
+                    true
+                )
+                Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
+            } catch (e: Exception) {
+                Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
+            }
         }
-        try {
-            customMap.addLayer(LayerType.Water, PolygonReader(mydir),  toggle_layer_layout, size, false)
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
-        }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
+        for(i in 0..0) {
+            try {
+                customMap.addLayer(
+                    LayerType.Water,
+                    PolygonReader(mydir),
+                    toggle_layer_layout,
+                    size,
+                    false
+                )
+                Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
+            } catch (e: Exception) {
+                Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
+            }
         }
 
         //create camera based on layers
@@ -178,6 +195,7 @@ class GeoMap : AppCompatActivity() {
             super.onResume()
             customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
             customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", 60)
+            customMap.hardwareAccelerated = sharedPref.getBoolean("com.uu_uce.HARDWARE", false)
             customMap.setPins(pinViewModel.allPinData)
             customMap.redrawMap()
         }

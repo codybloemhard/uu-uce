@@ -3,9 +3,11 @@ package com.uu_uce.shapefiles
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.view.View
 import com.uu_uce.misc.LinkedList
 import com.uu_uce.misc.Logger
 import com.uu_uce.misc.Node
+import com.uu_uce.views.CustomMap
 
 //abstract class for drawing shapes
 abstract class DrawInfo{
@@ -36,9 +38,8 @@ class PolygonDrawInfo(nrVertices: Int, nrIndices: Int): DrawInfo(){
     }
 
     override fun draw(canvas: Canvas, paint: Paint) {
-        val colors = IntArray(vertices.size){ Color.CYAN}
+        val colors = IntArray(vertices.size){ paint.color}
         canvas.drawVertices(Canvas.VertexMode.TRIANGLES, vertices.size, vertices, 0, null, 0, colors, 0, indices, 0,indices.size, paint)
-
     }
 }
 

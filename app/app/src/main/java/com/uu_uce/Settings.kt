@@ -59,5 +59,15 @@ class Settings : AppCompatActivity() {
                 apply()
             }
         }
+
+        // hardware acceleration
+        val curHardware = sharedPref.getBoolean("com.uu_uce.HARDWARE", false)
+        hardware_switch.isChecked = curHardware
+        hardware_switch.setOnClickListener{
+            with(sharedPref.edit()) {
+                putBoolean("com.uu_uce.HARDWARE", hardware_switch.isChecked)
+                apply()
+            }
+        }
     }
 }

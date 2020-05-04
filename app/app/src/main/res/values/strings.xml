@@ -48,4 +48,5 @@
     <string name="settings_pin_size">Pin Size</string>
     <string name="geomap_heightline_diff_text">%1$dm</string>
     <string name="settings_debug">Debug</string>
+    <string name="settings_hardware">Hardware Accelerated</string>
 </resources>
