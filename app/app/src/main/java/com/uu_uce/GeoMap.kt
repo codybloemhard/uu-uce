@@ -111,16 +111,17 @@ class GeoMap : AppCompatActivity() {
         dragBar.dragEndAction    = { dx, dy -> menu.snap(dx, dy)}
 
         //add layers to map
-        val mydir = File(filesDir,"mydir")
+        val mydir = File(getExternalFilesDir(null)?.path + "/Maps/")
         try {
-            val heightlines = File(mydir, "heightlines")
+            val heightlines = File(mydir, "Heightlines")
             customMap.addLayer(LayerType.Height, HeightLineReader(heightlines), toggle_layer_layout, size, true)
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
         }catch(e: Exception){
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
         try {
-            customMap.addLayer(LayerType.Water, PolygonReader(mydir),  toggle_layer_layout, size, false)
+            val polygons = File(mydir, "Polygons")
+            customMap.addLayer(LayerType.Water, PolygonReader(polygons),  toggle_layer_layout, size, false)
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
         }catch(e: Exception){
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)

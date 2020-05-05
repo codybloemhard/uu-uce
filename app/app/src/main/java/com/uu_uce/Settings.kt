@@ -8,6 +8,7 @@ import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
+import com.uu_uce.services.updateFiles
 import com.uu_uce.ui.createTopbar
 import kotlinx.android.synthetic.main.activity_settings.*
 
@@ -15,6 +16,8 @@ class Settings : AppCompatActivity() {
     // private variables
     private val minPinSize = 10
     private val maxPinSize = 100
+
+    private val maps : List<String> = listOf()
 
     private lateinit var sharedPref : SharedPreferences
 
@@ -58,6 +61,21 @@ class Settings : AppCompatActivity() {
                 putBoolean("com.uu_uce.DEBUG", debug_switch.isChecked)
                 apply()
             }
+        }
+
+        // Network downloading
+        val curNetworkDownloading = sharedPref.getBoolean("com.uu_uce.NETWORK_DOWNLOADING", false)
+        networkdownload_switch.isChecked = curNetworkDownloading
+        networkdownload_switch.setOnClickListener{
+            with(sharedPref.edit()) {
+                putBoolean("com.uu_uce.NETWORK_DOWNLOADING", networkdownload_switch.isChecked)
+                apply()
+            }
+        }
+
+        // Download maps
+        download_maps_button.setOnClickListener{
+            updateFiles(maps, this){}
         }
     }
 }

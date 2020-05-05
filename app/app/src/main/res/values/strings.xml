@@ -48,4 +48,7 @@
     <string name="settings_pin_size">Pin Size</string>
     <string name="geomap_heightline_diff_text">%1$dm</string>
     <string name="settings_debug">Debug</string>
+    <string name="settings_networkdownload">Mobile data downloading</string>
+    <string name="settings_download_maps">Download maps</string>
+    <string name="settings_download_button_text">Download</string>
 </resources>

@@ -18,6 +18,7 @@ import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.services.UTMCoordinate
+import com.uu_uce.services.updateFiles
 import com.uu_uce.shapefiles.p2
 import com.uu_uce.shapefiles.p2Zero
 import org.jetbrains.annotations.TestOnly
@@ -163,50 +164,63 @@ class Pin(
         // Set up quiz
         resetQuestions()
         var containsQuiz = false
-        for(i in 0 until content.contentBlocks.count()){
-            val current = content.contentBlocks[i]
-            current.generateContent(i, layout, activity, parentView, this)
-            if(current is MCContentBlock) containsQuiz = true
+
+        // Get necessary files
+        val fileList = mutableListOf<String>()
+        for(block in content.contentBlocks){
+            for(path in block.getFilePaths()){
+                fileList.add(path)
+            }
         }
 
-        // Fill layout of popup
-        if(containsQuiz && status < 2){
-            val finishButton = Button(activity)
-            finishButton.id = R.id.finish_quiz_button
-            finishButton.text = activity.getString(R.string.pin_finish)
-            finishButton.isAllCaps = false
-            finishButton.setBackgroundResource(R.drawable.custom_border_button)
-            val buttonLayout = LinearLayout.LayoutParams(
-                TableRow.LayoutParams.MATCH_PARENT,
-                TableRow.LayoutParams.WRAP_CONTENT
-            )
-            buttonLayout.setMargins(parentView.width / 7, parentView.height / 50, parentView.width / 7, parentView.height / 50)
-            finishButton.layoutParams = buttonLayout
-            finishButton.setOnClickListener{
-                finishQuiz(activity, parentView)
+        // Gets files
+        updateFiles(fileList, activity){
+            // Generate content
+            for(i in 0 until content.contentBlocks.count()){
+                val current = content.contentBlocks[i]
+                current.generateContent(i, layout, activity, parentView, this)
+                if(current is MCContentBlock) containsQuiz = true
             }
-            layout.addView(finishButton)
-        }
 
-        // Open popup
-        popupWindow?.showAtLocation(parentView, Gravity.CENTER, 0, 0)
-
-        // Get elements
-        val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
-
-        // Set onClickListeners
-        btnClosePopupWindow.setOnClickListener {
-            if(madeProgress){
-                AlertDialog.Builder(activity)
-                    .setIcon(R.drawable.ic_sprite_warning)
-                    .setTitle("Closing Pin")
-                    .setMessage("Are you sure you want to close pin? All progress will be lost.")
-                    .setPositiveButton("Yes") { _, _ -> popupWindow?.dismiss() }
-                    .setNegativeButton("No", null)
-                    .show()
+            // Fill layout of popup
+            if(containsQuiz && status < 2){
+                val finishButton = Button(activity)
+                finishButton.id = R.id.finish_quiz_button
+                finishButton.text = activity.getString(R.string.pin_finish)
+                finishButton.isAllCaps = false
+                finishButton.setBackgroundResource(R.drawable.custom_border_button)
+                val buttonLayout = LinearLayout.LayoutParams(
+                    TableRow.LayoutParams.MATCH_PARENT,
+                    TableRow.LayoutParams.WRAP_CONTENT
+                )
+                buttonLayout.setMargins(parentView.width / 7, parentView.height / 50, parentView.width / 7, parentView.height / 50)
+                finishButton.layoutParams = buttonLayout
+                finishButton.setOnClickListener{
+                    finishQuiz(activity, parentView)
+                }
+                layout.addView(finishButton)
             }
-            else{
-                popupWindow?.dismiss()
+
+            // Open popup
+            popupWindow?.showAtLocation(parentView, Gravity.CENTER, 0, 0)
+
+            // Get elements
+            val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
+
+            // Set onClickListeners
+            btnClosePopupWindow.setOnClickListener {
+                if(madeProgress){
+                    AlertDialog.Builder(activity)
+                        .setIcon(R.drawable.ic_sprite_warning)
+                        .setTitle("Closing Pin")
+                        .setMessage("Are you sure you want to close pin? All progress will be lost.")
+                        .setPositiveButton("Yes") { _, _ -> popupWindow?.dismiss() }
+                        .setNegativeButton("No", null)
+                        .show()
+                }
+                else{
+                    popupWindow?.dismiss()
+                }
             }
         }
     }

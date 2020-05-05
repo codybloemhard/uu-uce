@@ -139,7 +139,7 @@ class PinContent(private val contentString: String) {
 interface ContentBlockInterface{
     val canCompleteBlock : Boolean
     fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?)
-    fun getFilePath() : List<String>
+    fun getFilePaths() : List<String>
     override fun toString() : String
 }
 
@@ -154,7 +154,7 @@ class TextContentBlock(private val textContent : String) : ContentBlockInterface
         layout.addView(content)
     }
 
-    override fun getFilePath() : List<String>{
+    override fun getFilePaths() : List<String>{
         return listOf()
     }
 
@@ -171,6 +171,7 @@ class TextContentBlock(private val textContent : String) : ContentBlockInterface
 class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Uri) : ContentBlockInterface{
     private val tag = BlockTag.IMAGE
     override val canCompleteBlock = false
+
     override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
         val content = PhotoView(activity)
         try {
@@ -189,12 +190,10 @@ class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Ur
         content.id = R.id.image_block
         PhotoViewAttacher(content)
 
-        findMissingFilePaths(listOf(imageURI.toString()))
-
         layout.addView(content)
     }
 
-    override fun getFilePath() : List<String>{
+    override fun getFilePaths() : List<String>{
         return listOf(imageURI.toString())
     }
 
@@ -212,6 +211,7 @@ class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Ur
 class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : Uri, private val title : String? = null) : ContentBlockInterface{
     private val tag = BlockTag.VIDEO
     override val canCompleteBlock = false
+
     override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
         val frameLayout = FrameLayout(activity)
 
@@ -244,7 +244,7 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         layout.addView(frameLayout)
     }
 
-    override fun getFilePath() : List<String>{
+    override fun getFilePaths() : List<String>{
         if(thumbnailURI == Uri.EMPTY) return listOf(videoURI.toString())
         return listOf(thumbnailURI.toString(), videoURI.toString())
     }
@@ -365,7 +365,7 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
         layout.addView(table)
     }
 
-    override fun getFilePath(): List<String> {
+    override fun getFilePaths(): List<String> {
         return listOf()
     }
 
