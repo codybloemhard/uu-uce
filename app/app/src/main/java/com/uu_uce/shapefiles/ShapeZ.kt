@@ -1,13 +1,10 @@
 package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
-import android.view.View
 import com.uu_uce.misc.LinkedList
 import com.uu_uce.misc.Logger
 import com.uu_uce.misc.Node
-import com.uu_uce.views.CustomMap
 
 //abstract class for drawing shapes
 abstract class DrawInfo{

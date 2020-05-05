@@ -3,12 +3,10 @@ package com.uu_uce.views
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.os.Build
-import android.preference.PreferenceManager
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.ImageButton
@@ -19,11 +17,8 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import com.uu_uce.AllPins
-import com.uu_uce.Fieldbook
-import com.uu_uce.R
-import com.uu_uce.Settings
 import com.uu_uce.*
+import com.uu_uce.Fieldbook
 import com.uu_uce.allpins.PinConversion
 import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinViewModel

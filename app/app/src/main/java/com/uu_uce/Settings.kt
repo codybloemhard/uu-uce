@@ -1,12 +1,9 @@
 package com.uu_uce
 
-import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.widget.CompoundButton
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.ui.createTopbar
 import kotlinx.android.synthetic.main.activity_settings.*
