@@ -22,7 +22,7 @@ import java.net.URL
 
 val permissionsNeeded = listOf(Manifest.permission.INTERNET, Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
-private val serverURL = "http://131.211.31.176:8080"
+private val serverURL = "http://131.211.31.176:8080" // TODO: This should be dependedent of the users orginization
 
 private lateinit var sharedPref : SharedPreferences
 
