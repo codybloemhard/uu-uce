@@ -17,8 +17,6 @@ import com.uu_uce.R
 import com.uu_uce.VideoViewer
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.services.findMissingFilePaths
-import com.uu_uce.services.getFiles
 import java.io.StringReader
 
 class PinContent(private val contentString: String) {

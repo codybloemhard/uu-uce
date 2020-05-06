@@ -24,9 +24,9 @@ class ProfileBadges : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.profile_fragment_badges, container, false).also { view ->
+        return inflater.inflate(R.layout.profile_fragment_badges, container, false)//.also { view ->
             /*recyclerView = view.findViewById(R.id.badge_recyclerview)
             recyclerView.layoutManager = GridLayoutManager(fragmentActivity, 3)*/
-        }
+        //}
     }
 }

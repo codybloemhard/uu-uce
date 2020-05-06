@@ -5,9 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.wifi.WifiManager
-import android.os.AsyncTask
 import android.widget.Toast
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.preference.PreferenceManager
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
@@ -22,7 +20,7 @@ import java.net.URL
 
 val permissionsNeeded = listOf(Manifest.permission.INTERNET, Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
-private val serverURL = "http://131.211.31.176:8080" // TODO: This should be dependedent of the users orginization
+private const val serverURL = "http://131.211.31.176:8080" // TODO: This should be dependedent of the users orginization
 
 private lateinit var sharedPref : SharedPreferences
 
