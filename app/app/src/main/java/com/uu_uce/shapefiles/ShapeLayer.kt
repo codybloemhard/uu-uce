@@ -58,14 +58,14 @@ class ShapeLayer(private val chunkGetter: ChunkGetter, map: ShapeMap, hasInfo: B
     }
 
     //draw all chunks associated with this layer
-    fun draw(canvas: Canvas, paint: Paint, viewport : Pair<p2,p2>, width: Int, height: Int, debug : Boolean){
-        if(debug) chunkManager.debug(canvas,viewport, width,height)
+    fun draw(program: Int, scale: FloatArray, trans: FloatArray, paint: Paint, viewport : Pair<p2,p2>, width: Int, height: Int, debug : Boolean){
+        if(debug) chunkManager.debug(viewport, width,height)
 
         synchronized(chunks) {
             var nrShapes = 0
             var nrLines = 0
             for(chunk in chunks.values) {
-                chunk.draw(canvas, paint, viewport, width, height)
+                chunk.draw(program, scale, trans, paint, viewport, width, height)
 
                 nrShapes += chunk.shapes.size
                 for(shape in chunk.shapes){

@@ -73,7 +73,6 @@ class GeoMap : AppCompatActivity() {
         // Set settings
         customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
         customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", 60)
-        customMap.hardwareAccelerated = sharedPref.getBoolean("com.uu_uce.HARDWARE", false)
 
         // TODO: Remove when database is fully implemented
         with(sharedPref.edit()) {
@@ -192,10 +191,8 @@ class GeoMap : AppCompatActivity() {
 
     override fun onResume() {
         if(started){
-            super.onResume()
             customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
             customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", 60)
-            customMap.hardwareAccelerated = sharedPref.getBoolean("com.uu_uce.HARDWARE", false)
             customMap.setPins(pinViewModel.allPinData)
             customMap.redrawMap()
         }

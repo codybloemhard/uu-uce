@@ -216,26 +216,26 @@ class ChunkManager(
     }
 
     //debug function for showing chunks explicitly
-    fun debug(canvas: Canvas, viewport: Pair<p2,p2>, width: Int, height: Int){
+    fun debug(viewport: Pair<p2,p2>, width: Int, height: Int){
         synchronized(chunks) {
             for ((index, chunk) in chunks) {
                 val (x, y, z) = index
                 val xstep = (bmax.first-bmin.first)/nrCuts[z]
                 val ystep = (bmax.second-bmin.second)/nrCuts[z]
-                canvas.drawRect(
+                /*canvas.drawRect(
                     (((bmin.first + x * xstep) - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat(),
                     (height - ((bmin.second + y * ystep) - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat(),
                     (((bmin.first + (x + 1) * xstep) - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat(),
                     (height - ((bmin.second + (y + 1) * ystep) - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat(),
                     loadedChunkPaint
-                )
+                )*/
             }
         }
 
         val xstep = (bmax.first-bmin.first)/nrCuts[zoom]
         val ystep = (bmax.second-bmin.second)/nrCuts[zoom]
         for(x in 0..nrCuts[zoom])for(y in 0..nrCuts[zoom]){
-            canvas.drawLine(
+            /*canvas.drawLine(
                 (((bmin.first + x*xstep) - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat(),
                 (height - ((bmin.second) - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat(),
                 (((bmin.first + x*xstep) - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat(),
@@ -246,7 +246,7 @@ class ChunkManager(
                 (height - ((bmin.second + y*ystep) - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat(),
                 (((bmax.first) - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat(),
                 (height - ((bmin.second + y*ystep) - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat(),
-                debugPaint)
+                debugPaint)*/
         }
     }
 }

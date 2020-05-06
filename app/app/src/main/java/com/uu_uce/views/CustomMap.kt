@@ -7,6 +7,8 @@ import android.content.SharedPreferences
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.opengl.GLES20
+import android.opengl.Matrix
 import android.os.Build
 import android.preference.PreferenceManager
 import android.util.AttributeSet
@@ -24,6 +26,7 @@ import com.uu_uce.Fieldbook
 import com.uu_uce.R
 import com.uu_uce.Settings
 import com.uu_uce.*
+import com.uu_uce.OpenGL.CustomMapGLRenderer
 import com.uu_uce.allpins.PinConversion
 import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinViewModel
@@ -51,7 +54,11 @@ class CustomMap : ViewTouchParent {
 
     constructor(context: Context): super(context)
     constructor(context: Context, attrs: AttributeSet): super(context, attrs)
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+
+    //gl renderer
+    private val renderer: CustomMapGLRenderer
+    private var scale = FloatArray(2)
+    private var trans = FloatArray(2)
 
     // Location
     private val locationServices                            = LocationServices()
@@ -81,15 +88,12 @@ class CustomMap : ViewTouchParent {
     private lateinit var mods : List<Int>
     private lateinit var camera : Camera
 
-    var hardwareAccelerated = true
-    set(value){
-        //disable hardware acceleration for canvas.drawVertices
-        if(value) setLayerType(LAYER_TYPE_HARDWARE, null)
-        else setLayerType(LAYER_TYPE_SOFTWARE, null)
-        field = value
-    }
-
     init{
+        setEGLContextClientVersion(2)
+
+        renderer = CustomMapGLRenderer(this)
+        setRenderer(renderer)
+
         // Logger mask settings
         Logger.setTagEnabled("CustomMap", false)
         Logger.setTagEnabled("zoom", false)
@@ -138,15 +142,16 @@ class CustomMap : ViewTouchParent {
         mods = smap.getMods()
     }
 
-    override fun onDraw(canvas: Canvas) {
+    fun onDrawFrame(program: Int){
         //if both the camera and the map have no updates, don't redraw
         val res = camera.update()
         val chunkRes = smap.updateChunks()
         if(res == UpdateResult.NOOP && chunkRes == ChunkUpdateResult.NOTHING){
-                return
+            return
         }
-        
+
         val viewport = camera.getViewport()
+        val (scale,trans) = camera.getScaleTrans()
 
         if(viewport == p2ZeroPair){
             Logger.error("CustomMap", "Camera could not be initialized")
@@ -154,20 +159,21 @@ class CustomMap : ViewTouchParent {
         }
 
         val timeDraw = measureTimeMillis {
-            // Set canvas background color
-            canvas.drawColor(Color.rgb(234, 243, 245))
+            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
 
             // Draw map
-            smap.draw(canvas, width, height, debug)
+            smap.draw(program, scale, trans, width, height, debug)
 
             if(context is GeoMap){
                 val zoomLevel = smap.getZoomLevel()
                 if(zoomLevel >= 0 && mods.count() > 0){
-                    (context as GeoMap).heightline_diff_text.text = (context as Activity).getString(R.string.geomap_heightline_diff_text, mods[zoomLevel])
+                    //TODO fix this
+                    //(context as GeoMap).heightline_diff_text.text = (context as Activity).getString(R.string.geomap_heightline_diff_text, mods[zoomLevel])
                 }
                 else{
                     val standardValue = 0
-                    (context as GeoMap).heightline_diff_text.text = (context as Activity).getString(R.string.geomap_heightline_diff_text, standardValue)
+                    //TODO and this
+                    //(context as GeoMap).heightline_diff_text.text = (context as Activity).getString(R.string.geomap_heightline_diff_text, standardValue)
                 }
             }
 
@@ -177,21 +183,21 @@ class CustomMap : ViewTouchParent {
             val deviceScreenLoc = coordToScreen(loc, viewport, width, height)
             val locInScreen =
                 deviceScreenLoc.first > 0 && deviceScreenLoc.first < width &&
-                deviceScreenLoc.second > 0 && deviceScreenLoc.second < height
+                        deviceScreenLoc.second > 0 && deviceScreenLoc.second < height
             if(locationAvailable && locInScreen){
-                drawLocation(
+                /*drawLocation(
                     deviceScreenLoc,
                     canvas,
                     deviceLocPaint,
                     deviceLocEdgePaint,
                     locSize * 0.57f,
-                    locSize * 0.25f)
+                    locSize * 0.25f)*/
                 lastDrawnLoc = deviceScreenLoc
             }
 
             // Draw pins
             pins.forEach{ entry ->
-                entry.value.draw(viewport, width, height,this, canvas)
+                //entry.value.draw(viewport, width, height,this, canvas)
             }
 
             // TODO: drawing route
@@ -203,6 +209,10 @@ class CustomMap : ViewTouchParent {
         //invalidate so onDraw is called again next frame if necessary
         if(res == UpdateResult.ANIM || chunkRes == ChunkUpdateResult.LOADING)
             invalidate()
+    }
+
+    override fun onDraw(canvas: Canvas) {
+
     }
 
     private fun updateLoc(newLoc : p2) {
@@ -257,9 +267,8 @@ class CustomMap : ViewTouchParent {
         Logger.log(LogType.Continuous, "CustomMap", "$dypxf")
         val dxpx = dxpxf.toDouble()
         val dypx = dypxf.toDouble()
-        val fac = if(hardwareAccelerated) 2 else 1 //account for different speed when hardware accelerated
-        val dx = dxpx / width * fac
-        val dy = dypx / height * fac
+        val dx = dxpx / width
+        val dy = dypx / height
         camera.moveView(dx, -dy)
         if(camera.needsInvalidate())
             invalidate()

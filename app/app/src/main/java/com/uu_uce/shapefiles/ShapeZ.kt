@@ -1,26 +1,101 @@
 package com.uu_uce.shapefiles
 
-import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
-import android.view.View
+import android.opengl.GLES20
+import com.uu_uce.OpenGL.coordsPerVertex
 import com.uu_uce.misc.LinkedList
 import com.uu_uce.misc.Logger
 import com.uu_uce.misc.Node
-import com.uu_uce.views.CustomMap
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.nio.FloatBuffer
+import java.nio.ShortBuffer
 
 //abstract class for drawing shapes
 abstract class DrawInfo{
-    abstract fun draw(canvas: Canvas, paint: Paint)
+    abstract fun draw(program: Int, scale: FloatArray, trans: FloatArray, paint: Paint)
+    abstract fun finalize()
 }
 
 //information for drawing a line
-class LineDrawInfo(nrPoints: Int): DrawInfo(){
-    private var lines: FloatArray = FloatArray(nrPoints*4)
+class LineDrawInfo(nrPoints: Int, nrLines: Int): DrawInfo(){
+    private var vertices: FloatArray = FloatArray(nrPoints*4)
     var i = 0
-    fun addLine(item: Float){lines[i++] = item}
-    override fun draw(canvas: Canvas, paint: Paint) {
-        canvas.drawLines(lines, paint)
+    private var indices: ShortArray = ShortArray(nrLines*2)
+    var j = 0
+    private lateinit var vertexBuffer: FloatBuffer
+    private lateinit var indexBuffer: ShortBuffer
+    var curIndex = 0.toShort()
+
+    fun shapeLength(length: Int){
+
+        for(k in 0 until length){
+            indices[j++] = curIndex
+            indices[j++] = ++curIndex
+        }
+        curIndex++
+    }
+
+    fun addVertex(item: Float){vertices[i++] = item}
+
+    override fun draw(program: Int, scale: FloatArray, trans: FloatArray, paint: Paint) {
+        val color = floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f)
+
+        GLES20.glUseProgram(program)
+
+        // get handle to vertex shader's vPosition member
+        val positionHandle = GLES20.glGetAttribLocation(program, "vPosition")
+
+        // Enable a handle to the triangle vertices
+        GLES20.glEnableVertexAttribArray(positionHandle)
+
+        // Prepare the triangle coordinate data
+        GLES20.glVertexAttribPointer(
+            positionHandle,
+            coordsPerVertex,
+            GLES20.GL_FLOAT,
+            false,
+            coordsPerVertex*4,
+            vertexBuffer
+        )
+
+        val colorHandle = GLES20.glGetUniformLocation(program, "vColor")
+        GLES20.glUniform4fv(colorHandle, 1, color, 0)
+
+        val scaleHandle = GLES20.glGetUniformLocation(program, "scale")
+        GLES20.glUniform2fv(scaleHandle, 1, scale, 0)
+
+        val transHandle = GLES20.glGetUniformLocation(program, "trans")
+        GLES20.glUniform2fv(transHandle, 1, trans, 0)
+
+        // Draw the triangle
+        //GLES20.glDrawElements(GLES20.GL_LINES, lines.size, GLES20.GL_UNSIGNED_SHORT, 0)
+        GLES20.glDrawElements(GLES20.GL_LINES, indices.size, GLES20.GL_UNSIGNED_SHORT, indexBuffer)
+
+        // Disable vertex array
+        GLES20.glDisableVertexAttribArray(positionHandle)
+    }
+
+    override fun finalize() {
+        vertexBuffer =
+            // (# of coordinate values * 4 bytes per float)
+            ByteBuffer.allocateDirect(vertices.size * 4).run {
+                order(ByteOrder.nativeOrder())
+                asFloatBuffer().apply {
+                    put(vertices)
+                    position(0)
+                }
+            }
+        indexBuffer=
+            // (# of coordinate values * 2 bytes per short)
+            ByteBuffer.allocateDirect(indices.size * 2).run {
+                order(ByteOrder.nativeOrder())
+                asShortBuffer().apply {
+                    put(indices)
+                    position(0)
+                }
+            }
+
     }
 }
 
@@ -30,21 +105,87 @@ class PolygonDrawInfo(nrVertices: Int, nrIndices: Int): DrawInfo(){
     private var v = 0
     private var indices = ShortArray(nrIndices)
     private var i = 0
+    private lateinit var vertexBuffer: FloatBuffer
+    private lateinit var indexBuffer: ShortBuffer
 
     fun addVertex(item: Float) {vertices[v++]=item}
     fun addIndices(idcs: MutableList<Short>){
         for(index in idcs) indices[i++]=index
     }
 
-    override fun draw(canvas: Canvas, paint: Paint) {
-        val colors = IntArray(vertices.size){ paint.color}
-        canvas.drawVertices(Canvas.VertexMode.TRIANGLES, vertices.size, vertices, 0, null, 0, colors, 0, indices, 0,indices.size, paint)
+    override fun draw(program: Int, scale: FloatArray, trans: FloatArray, paint: Paint) {
+        //canvas.drawVertices(Canvas.VertexMode.TRIANGLES, vertices.size, vertices, 0, null, 0, colors, 0, indices, 0,indices.size, paint)
+        val color = floatArrayOf(0.1f, 0.2f, 0.8f, 1.0f)
+
+        GLES20.glUseProgram(program)
+
+        // get handle to vertex shader's vPosition member
+        val positionHandle = GLES20.glGetAttribLocation(program, "vPosition")
+
+        // Enable a handle to the triangle vertices
+        GLES20.glEnableVertexAttribArray(positionHandle)
+
+        // Prepare the triangle coordinate data
+        GLES20.glVertexAttribPointer(
+            positionHandle,
+            coordsPerVertex,
+            GLES20.GL_FLOAT,
+            false,
+            coordsPerVertex*4,
+            vertexBuffer
+        )
+
+        val colorHandle = GLES20.glGetUniformLocation(program, "vColor")
+        GLES20.glUniform4fv(colorHandle, 1, color, 0)
+
+        val scaleHandle = GLES20.glGetUniformLocation(program, "scale")
+        GLES20.glUniform2fv(scaleHandle, 1, scale, 0)
+
+        val transHandle = GLES20.glGetUniformLocation(program, "trans")
+        GLES20.glUniform2fv(transHandle, 1, trans, 0)
+
+        // Draw the triangle
+        GLES20.glDrawElements(GLES20.GL_LINES, indices.size, GLES20.GL_UNSIGNED_SHORT, indexBuffer)
+
+        // Disable vertex array
+        GLES20.glDisableVertexAttribArray(positionHandle)
+    }
+
+    override fun finalize() {
+        vertexBuffer =
+                // (# of coordinate values * 4 bytes per float)
+            ByteBuffer.allocateDirect(vertices.size * 4).run {
+                order(ByteOrder.nativeOrder())
+                asFloatBuffer().apply {
+                    put(vertices)
+                    position(0)
+                }
+            }
+        val newIndices:MutableList<Short> = mutableListOf()
+        for(i in indices.indices){
+            if(i%3 != 0)continue
+            newIndices.add(indices[i])
+            newIndices.add(indices[i+1])
+            newIndices.add(indices[i+1])
+            newIndices.add(indices[i+2])
+            newIndices.add(indices[i+2])
+            newIndices.add(indices[i])
+        }
+        indexBuffer=
+                // (# of coordinate values * 2 bytes per short)
+            ByteBuffer.allocateDirect(newIndices.size * 2).run {
+                order(ByteOrder.nativeOrder())
+                asShortBuffer().apply {
+                    put(newIndices.toShortArray())
+                    position(0)
+                }
+            }
     }
 }
 
 //generic shape
 abstract class ShapeZ(var bmin: p3, var bmax: p3){
-    abstract fun draw(drawInfo: DrawInfo, viewport: Pair<p2,p2>, width: Int, height: Int)
+    abstract fun initDrawInfo(drawInfo: DrawInfo)
     abstract val nrPoints: Int
 }
 
@@ -52,27 +193,19 @@ abstract class ShapeZ(var bmin: p3, var bmax: p3){
 class HeightShapeZ(private var points: List<p2>, bmi: p3, bma: p3): ShapeZ(bmi,bma) {
     override val nrPoints = points.size
 
-    override fun draw(
-        drawInfo: DrawInfo,
-        viewport : Pair<p2, p2>,
-        width: Int,
-        height: Int
+    override fun initDrawInfo(
+        drawInfo: DrawInfo
     ) {
         if (points.size < 2) return
 
         if(drawInfo is LineDrawInfo) {
-            for (i in 0..points.size - 2) {
-                drawInfo.addLine(((points[i].first - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat())
-                drawInfo.addLine((height - (points[i].second - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat())
-                drawInfo.addLine(((points[i + 1].first - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat())
-                drawInfo.addLine((height - (points[i + 1].second - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat())
+            drawInfo.shapeLength(points.size-1)
+            for (i in points.indices) {
+                drawInfo.addVertex(points[i].first.toFloat())
+                drawInfo.addVertex(points[i].second.toFloat())
             }
         }
         else Logger.error("ShapeZ", "wrong draw information for heightshape")
-    }
-
-    fun meanZ(): Int{
-        return ((bmin.third + bmax.third) / 2).toInt()
     }
 }
 
@@ -98,20 +231,13 @@ class PolygonZ(outerRings: List<List<p3>>, private var innerRings: List<List<p3>
         nrPoints = vertices.size
     }
 
-    override fun draw(
-        drawInfo: DrawInfo,
-        viewport: Pair<p2, p2>,
-        width: Int,
-        height: Int
+    override fun initDrawInfo(
+        drawInfo: DrawInfo
     ) {
         if(drawInfo is PolygonDrawInfo) {
-            for (i in 0 until vertices.size * 2) {
-                drawInfo.addVertex(
-                    if (i % 2 == 0)
-                        ((vertices[i / 2].first - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat()
-                    else
-                        (height - (vertices[i / 2].second - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat()
-                )
+            for (i in 0 until vertices.size) {
+                drawInfo.addVertex(vertices[i / 2].first.toFloat())
+                drawInfo.addVertex(vertices[i / 2].second.toFloat())
             }
             drawInfo.addIndices(indices)
         }

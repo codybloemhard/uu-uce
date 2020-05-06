@@ -1,5 +1,6 @@
 package com.uu_uce.shapefiles
 
+import android.opengl.Matrix
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import kotlin.math.abs
@@ -69,6 +70,18 @@ class Camera(
     private var declineLength = 40.0
 
     var wAspect = 0.0
+
+    //get matrix for drawing lines
+    fun getScaleTrans(): Pair<FloatArray,FloatArray>{
+        val trans = floatArrayOf(-x.toFloat(), -y.toFloat())
+
+        val w = viewMax.first - viewMin.first
+        val h = viewMax.second - viewMin.second
+        val width = (w * wAspect / 2 * zoom).toFloat()
+        val height = (h / 2 * zoom).toFloat()
+        val scale = floatArrayOf(1f/width, 1f/height)
+        return Pair(scale, trans)
+    }
 
     //retrieve the topleft and bottomright coordinates that are visible in the camera
     fun getViewport(): Pair<p2,p2>{
