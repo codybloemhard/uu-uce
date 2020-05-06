@@ -1,7 +1,6 @@
 package com.uu_uce
 
 import android.Manifest
-import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -73,6 +72,7 @@ class GeoMap : AppCompatActivity() {
         // Set settings
         customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
         customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", 60)
+        customMap.hardwareAccelerated = sharedPref.getBoolean("com.uu_uce.HARDWARE", false)
 
         // TODO: Remove when database is fully implemented
         with(sharedPref.edit()) {
@@ -97,14 +97,10 @@ class GeoMap : AppCompatActivity() {
         val longest = maxOf(screenDim.x, screenDim.y)
         val size = (longest*menu.buttonPercent).toInt()
 
-        val btn1 = allpins_button
-        btn1.setOnClickListener{customMap.startAllPins()}
-
-        val btn2 = fieldbook_button
-        btn2.setOnClickListener{customMap.startFieldBook()}
-
-        val btn3 = settings_button
-        btn3.setOnClickListener{customMap.startSettings()}
+        allpins_button.setOnClickListener{customMap.startAllPins()}
+        fieldbook_button.setOnClickListener{customMap.startFieldBook()}
+        settings_button.setOnClickListener{customMap.startSettings()}
+        profile_button.setOnClickListener{customMap.startProfile()}
 
         dragBar.clickAction      = {menu.dragButtonTap()}
         dragBar.dragAction       = { dx, dy -> menu.drag(dx,dy)}
@@ -114,14 +110,26 @@ class GeoMap : AppCompatActivity() {
         val mydir = File(getExternalFilesDir(null)?.path + "/Maps/")
         try {
             val heightlines = File(mydir, "Heightlines")
-            customMap.addLayer(LayerType.Height, HeightLineReader(heightlines), toggle_layer_layout, size, true)
+            customMap.addLayer(
+                LayerType.Height,
+                HeightLineReader(heightlines),
+                toggle_layer_layout,
+                size,
+                true
+            )
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
         }catch(e: Exception){
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
         try {
             val polygons = File(mydir, "Polygons")
-            customMap.addLayer(LayerType.Water, PolygonReader(polygons),  toggle_layer_layout, size, false)
+            customMap.addLayer(
+                LayerType.Water,
+                PolygonReader(polygons),
+                toggle_layer_layout,
+                size,
+                false
+            )
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
         }catch(e: Exception){
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
@@ -179,6 +187,7 @@ class GeoMap : AppCompatActivity() {
             super.onResume()
             customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
             customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", 60)
+            customMap.hardwareAccelerated = sharedPref.getBoolean("com.uu_uce.HARDWARE", false)
             customMap.setPins(pinViewModel.allPinData)
             customMap.redrawMap()
         }

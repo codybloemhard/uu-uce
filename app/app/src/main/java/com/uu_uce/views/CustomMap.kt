@@ -3,12 +3,10 @@ package com.uu_uce.views
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.os.Build
-import android.preference.PreferenceManager
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.ImageButton
@@ -19,11 +17,8 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import com.uu_uce.AllPins
-import com.uu_uce.Fieldbook
-import com.uu_uce.R
-import com.uu_uce.Settings
 import com.uu_uce.*
+import com.uu_uce.Fieldbook
 import com.uu_uce.allpins.PinConversion
 import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinViewModel
@@ -81,12 +76,15 @@ class CustomMap : ViewTouchParent {
     private lateinit var mods : List<Int>
     private lateinit var camera : Camera
 
+    var hardwareAccelerated = true
+    set(value){
+        //disable hardware acceleration for canvas.drawVertices
+        if(value) setLayerType(LAYER_TYPE_HARDWARE, null)
+        else setLayerType(LAYER_TYPE_SOFTWARE, null)
+        field = value
+    }
 
     init{
-        //disable hardware acceleration for canvas.drawVertices
-        //potentially not necessary?
-        //setLayerType(LAYER_TYPE_SOFTWARE, null)
-
         // Logger mask settings
         Logger.setTagEnabled("CustomMap", false)
         Logger.setTagEnabled("zoom", false)
@@ -254,9 +252,10 @@ class CustomMap : ViewTouchParent {
         Logger.log(LogType.Continuous, "CustomMap", "$dypxf")
         val dxpx = dxpxf.toDouble()
         val dypx = dypxf.toDouble()
-        val dx = dxpx / width
-        val dy = dypx / height
-        camera.moveView(dx * 2, dy * -2)
+        val fac = if(hardwareAccelerated) 2 else 1 //account for different speed when hardware accelerated
+        val dx = dxpx / width * fac
+        val dy = dypx / height * fac
+        camera.moveView(dx, -dy)
         if(camera.needsInvalidate())
             invalidate()
     }
@@ -409,6 +408,12 @@ class CustomMap : ViewTouchParent {
     //open settings activity
     fun startSettings() {
         val i = Intent(context, Settings::class.java)
+        startActivity(context, i,null)
+    }
+
+    //open profile activity
+    fun startProfile() {
+        val i = Intent(context, Profile::class.java)
         startActivity(context, i,null)
     }
 

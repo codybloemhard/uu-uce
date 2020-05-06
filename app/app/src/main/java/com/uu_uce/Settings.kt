@@ -1,12 +1,9 @@
 package com.uu_uce
 
-import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.widget.CompoundButton
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.services.updateFiles
 import com.uu_uce.ui.createTopbar
@@ -76,6 +73,16 @@ class Settings : AppCompatActivity() {
         // Download maps
         download_maps_button.setOnClickListener{
             updateFiles(maps, this){}
+        }
+
+        // hardware acceleration
+        val curHardware = sharedPref.getBoolean("com.uu_uce.HARDWARE", false)
+        hardware_switch.isChecked = curHardware
+        hardware_switch.setOnClickListener{
+            with(sharedPref.edit()) {
+                putBoolean("com.uu_uce.HARDWARE", hardware_switch.isChecked)
+                apply()
+            }
         }
     }
 }

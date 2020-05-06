@@ -1,7 +1,6 @@
 package com.uu_uce.shapefiles
 
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import com.uu_uce.misc.LinkedList
 import com.uu_uce.misc.Logger
@@ -25,20 +24,18 @@ class LineDrawInfo(nrPoints: Int): DrawInfo(){
 //information for drawing a polygon
 class PolygonDrawInfo(nrVertices: Int, nrIndices: Int): DrawInfo(){
     private var vertices = FloatArray(nrVertices*4)
-    var v = 0
-    var indices = ShortArray(nrIndices)
-    var i = 0
+    private var v = 0
+    private var indices = ShortArray(nrIndices)
+    private var i = 0
 
     fun addVertex(item: Float) {vertices[v++]=item}
-    private fun addIndex(item: Short) {indices[i++]=item}
     fun addIndices(idcs: MutableList<Short>){
-        for(index in idcs) addIndex(index)
+        for(index in idcs) indices[i++]=index
     }
 
     override fun draw(canvas: Canvas, paint: Paint) {
-        val colors = IntArray(vertices.size){ Color.CYAN}
+        val colors = IntArray(vertices.size){ paint.color}
         canvas.drawVertices(Canvas.VertexMode.TRIANGLES, vertices.size, vertices, 0, null, 0, colors, 0, indices, 0,indices.size, paint)
-
     }
 }
 
