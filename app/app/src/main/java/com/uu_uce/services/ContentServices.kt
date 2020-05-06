@@ -22,13 +22,7 @@ import java.net.URL
 
 val permissionsNeeded = listOf(Manifest.permission.INTERNET, Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
-private val universityName = "UU"
-private val facultyName    = "GEO"
-private val areaName       = "PYR"
-private val className      = "1A"
-private val serverURL      = "http://uce.edu"
-
-private lateinit var task : AsyncTask<Void, Void, Int>
+private val serverURL = "http://131.211.31.176:8080"
 
 private lateinit var sharedPref : SharedPreferences
 
@@ -51,7 +45,7 @@ fun updateFiles(requiredFilePaths : List<String>, activity : Activity, onComplet
 }
 
 /*
-Gets a list of the filepaths of missing files
+Gets a list of the filepaths of missing files.
 requestedPaths: A list of file paths to all files that are requested.
 It will return a list of the file paths of all missing files in String format.
  */
@@ -60,7 +54,7 @@ fun findMissingFilePaths(requestedFilePaths : List<String>) : List<Pair<String, 
     val adding : MutableMap<String, Boolean> = mutableMapOf()
     for(filePath in requestedFilePaths){
         if(!File(filePath).exists() && !adding.containsKey(filePath)){
-            val fileName = filePath.split('/').last()
+            val fileName = filePath.split('/').last().split('.').first() // Because we use UUID4 names there can never be a / or . in the file name
             missingFilePaths.add(Pair(filePath, fileName))
             adding[fileName] = true
         }
@@ -95,7 +89,7 @@ fun getFiles(requiredFilePaths : List<Pair<String, String>>, activity: Activity,
         for(job in jobList){
             job.join()
         }
-        onCompleteAction()
+        activity.runOnUiThread(onCompleteAction)
     }
 }
 
