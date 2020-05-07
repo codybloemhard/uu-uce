@@ -4,6 +4,10 @@ import android.util.Log
 
 enum class LogType{ Event, Continuous, Info, NotImplemented }
 
+/*
+a custom logger used to print various debug information to the console
+you can disable logtypes or tags if you don't want them to be displayed anymore
+ */
 class Logger{
     companion object {
         private var typeMask = hashMapOf<LogType, Boolean>()

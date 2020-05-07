@@ -1,5 +1,7 @@
 package com.uu_uce.shapefiles
 
+import com.uu_uce.misc.LogType
+import com.uu_uce.misc.Logger
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -13,13 +15,19 @@ fun lerp(a: Double, b: Double, t: Double): Double{
 }
 
 enum class AnimType{
-    NONE, TRANS, OUT
+    NONE, TRANS, OUT, SLIDE
 }
 
 enum class UpdateResult{
     NOOP, REDRAW, ANIM
-}
+    }
 
+/*
+basic camera used to track which part of the world we are viewing
+x,y: position of the middle point of the camera
+zoom: current zoom/height
+viewMin/viewMax: bounds of the currently loaded layers, which the camera can't leave
+ */
 class Camera(
     private var x: Double,
     private var y: Double,
@@ -30,6 +38,7 @@ class Camera(
     private val mx = (viewMin.first + viewMax.first) / 2.0
     private val my = (viewMin.second + viewMax.second) / 2.0
     private val maxDistXy = distXy(viewMin, viewMax)
+    private var velo = p2Zero
 
     var maxZoom = 1.0
     set(value) {minZoom = value/500; field = value}
@@ -40,15 +49,31 @@ class Camera(
     private var changed = true
 
     private var animType: AnimType = AnimType.NONE
+    private set(value){
+        when(value){
+            AnimType.SLIDE -> {}
+            else -> { velo = p2Zero}
+        }
+        field = value
+    }
+
     private var animBegin = p3Zero
     private var animTarget = p3Zero
     private var animDuration = 0.0
     private var animStartT = 0.0
     private var animT = 0.0
 
+    //variables for sliding camera
+    private var decline = p2(1.0,1.0)
+    private var declineLength = 40.0
+
     var wAspect = 0.0
 
+    //retrieve the topleft and bottomright coordinates that are visible in the camera
     fun getViewport(): Pair<p2,p2>{
+        //if camera is not initialized properly, return dummy value
+        if (viewMax.first < viewMin.first || viewMax.second < viewMin.second || viewMax.third < viewMin.third) return p2ZeroPair
+
         val w = viewMax.first - viewMin.first
         val h = viewMax.second - viewMin.second
         val woff = w * wAspect / 2.0 * zoom
@@ -60,10 +85,12 @@ class Camera(
         return Pair(nmin, nmax)
     }
 
+    //whether the camera is currently animating
     private fun isBusy(): Boolean{
-        return animType != AnimType.NONE
+        return !(animType == AnimType.NONE || animType == AnimType.SLIDE)
     }
 
+    //whether the camera needs the screen to be redrawn
     fun needsInvalidate(): Boolean{
         return changed || isBusy()
     }
@@ -78,27 +105,21 @@ class Camera(
         y = yy
     }
 
-    private fun setPosCenter(){
-        if(isBusy()) return
-        setXy(mx, my)
-    }
-
+    //set the x and y to new values, while not going out of bounds
     private fun setPos(newX: Double, newY: Double){
         if(isBusy()) return
-        val minx = viewMin.first + lastWoff
-        val maxx = viewMax.first - lastWoff
-        val miny = viewMin.second + lastHoff
-        val maxy = viewMax.second - lastHoff
-        if(minx >= maxx || miny >= maxy)
-            setPosCenter()
-        else
-            setXy(newX.coerceIn(minx, maxx),newY.coerceIn(miny, maxy))
-
+        val xvalue = newX.coerceIn(viewMin.first,viewMax.first)
+        val yvalue = newY.coerceIn(viewMin.second,viewMax.second)
+        setXy(xvalue,yvalue)
     }
 
     fun moveView(dx: Double, dy: Double){
         if(isBusy()) return
-        setPos(x + (dx * lastWoff), y + (dy * lastHoff))
+        velo = p2((dx * lastWoff), (dy * lastHoff))
+        changed = true
+        animType = AnimType.SLIDE
+        decline = p2(velo.first/declineLength,velo.second/declineLength)
+        //setPos(velo.first, velo.second)
     }
 
     fun getZoom(): Double{
@@ -121,6 +142,7 @@ class Camera(
         setZ(z.coerceIn(minZoom, maxZoom))
     }
 
+    //fully zoom out
     fun zoomOutMax(duration: Double){
         if(isBusy()) return
         animBegin = Triple(x, y, zoom)
@@ -131,6 +153,7 @@ class Camera(
         animT = 0.0
     }
 
+    //initialize the animation from current position to target in durationMs milisecs
     fun startAnimation(target: p3, durationMs: Double){
         if(isBusy()) return
         animBegin = Triple(x, y, zoom)
@@ -152,16 +175,18 @@ class Camera(
         }
         changed = false
         when(animType){
-            AnimType.NONE -> {}
             AnimType.TRANS -> updateTrans()
             AnimType.OUT -> updateOut()
+            AnimType.SLIDE -> updateSlide()
+            AnimType.NONE -> {}
         }
-        return if(isBusy())
+        return if(isBusy() || changed)
             UpdateResult.ANIM
         else
             UpdateResult.REDRAW
     }
 
+    //animate a full zoomout
     private fun updateOut(){
         val ct = System.currentTimeMillis().toDouble()
         val t = ((ct - animStartT) / animDuration).coerceIn(0.0, 1.0)
@@ -174,6 +199,7 @@ class Camera(
         }
     }
 
+    //animate the movement to animTarget
     private fun updateTrans(){
         val ct = System.currentTimeMillis().toDouble()
         val t = ((ct - animStartT) / animDuration).coerceIn(0.0, 1.0)
@@ -200,6 +226,22 @@ class Camera(
         if(ct > animStartT + animDuration){
             animType = AnimType.NONE
             return
+        }
+    }
+
+    private fun updateSlide(){
+        changed = true
+        setPos(x + velo.first, y + velo.second)
+        val newXVel =
+            if(decline.first > 0) maxOf(0.0,velo.first - decline.first)
+            else minOf(0.0,velo.first - decline.first)
+        val newYVel =
+            if(decline.second > 0) maxOf(0.0,velo.second - decline.second)
+            else minOf(0.0,velo.second - decline.second)
+        velo = p2(newXVel,newYVel)
+        Logger.log(LogType.Event, "Camera", "vel: (${velo.first},${velo.second})")
+        if(velo == p2Zero) {
+            animType = AnimType.NONE
         }
     }
 }

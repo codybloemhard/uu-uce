@@ -1,5 +1,6 @@
 package com.uu_uce.misc
 
+
 class LinkedListIterator<T>(private var cur: Node<T>?): Iterator<Node<T>>{
     val first = cur
     private var firstTime = true

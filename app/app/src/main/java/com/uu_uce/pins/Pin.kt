@@ -39,16 +39,19 @@ class Pin(
     // Used to determine if warning should show when closing pin
     private var madeProgress = false
 
+    // Set default pin size TODO: Get this from settings
     private var pinWidth = 60
 
     // Calculate pin height to maintain aspect ratio
     private var pinHeight =
         pinWidth * (background.intrinsicHeight.toFloat() / background.intrinsicWidth.toFloat())
 
+    // Declare variables for icon size
     private var iconWidth  : Double = 0.0
     private var iconHeight : Double = 0.0
 
     init {
+        // Check if predecessors contain self
         predecessorIds.forEach { I ->
             if (I == id) error("Pin can not be own predecessor")
         }
@@ -78,6 +81,9 @@ class Pin(
     fun draw(viewport: Pair<p2, p2>, width : Int, height : Int, view: View, canvas: Canvas) {
         val screenLocation: Pair<Float, Float> =
             coordToScreen(coordinate, viewport, view.width, view.height)
+
+        /*if(screenLocation.first.isNaN() || screenLocation.second.isNaN())
+            return //TODO: Should not be called with NaN*/
 
         // Calculate pin bounds on canvas
         val minX = (screenLocation.first - pinWidth / 2).roundToInt()

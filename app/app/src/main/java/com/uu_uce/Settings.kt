@@ -4,13 +4,13 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceManager
+import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.ui.createTopbar
 import kotlinx.android.synthetic.main.activity_settings.*
 
 class Settings : AppCompatActivity() {
     // private variables
-    private val minPinSize = 50
+    private val minPinSize = 10
     private val maxPinSize = 100
 
     private lateinit var sharedPref : SharedPreferences
@@ -19,7 +19,7 @@ class Settings : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)//this.getPreferences(Context.MODE_PRIVATE)
+        sharedPref = getDefaultSharedPreferences(this)
 
         createTopbar(this, "Settings")
 
@@ -46,5 +46,25 @@ class Settings : AppCompatActivity() {
                 }
             }
         })
+
+        // Debug
+        val curDebug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
+        debug_switch.isChecked = curDebug
+        debug_switch.setOnClickListener{
+            with(sharedPref.edit()) {
+                putBoolean("com.uu_uce.DEBUG", debug_switch.isChecked)
+                apply()
+            }
+        }
+
+        // hardware acceleration
+        val curHardware = sharedPref.getBoolean("com.uu_uce.HARDWARE", false)
+        hardware_switch.isChecked = curHardware
+        hardware_switch.setOnClickListener{
+            with(sharedPref.edit()) {
+                putBoolean("com.uu_uce.HARDWARE", hardware_switch.isChecked)
+                apply()
+            }
+        }
     }
 }

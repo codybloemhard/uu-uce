@@ -40,18 +40,9 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
-/**
- * A simple [Fragment] subclass.
- * Use the [FieldbookHomeFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class FieldbookHomeFragment : Fragment() {
 
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         */
         fun newInstance() =
             FieldbookHomeFragment()
 
@@ -149,16 +140,15 @@ class FieldbookHomeFragment : Fragment() {
         }
     }
 
-    /**e
-     * Opens a popup, in which we can make new entries to the fieldbook
-     */
+
+    // Opens a popup, in which we can make new entries to the fieldbook
     private fun openFieldbookAdderPopup() {
 
         /**
          * TODO: used function is deprecated from API 29 and onwards. Can still be used, because android:requestLegacyExternalStorage="true" in the manifest
          * Eventually switch to the MediaStore API. Doesn't need READ/WRITE permissions anymore -> only to be imported for API 28 and lower
          */
-        getPermissions(fragmentActivity, listOf(Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE), CAMERA_REQUEST)
+        getPermissions(fragmentActivity, listOf(Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE), PHOTOCAMERA_REQUEST)
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
             fragmentActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED ||
                     fragmentActivity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
@@ -257,7 +247,7 @@ class FieldbookHomeFragment : Fragment() {
 
             when (which) {
                 0 -> { // Choose (picture) from gallery
-                    getPermissions(fragmentActivity, listOf(Manifest.permission.READ_EXTERNAL_STORAGE), CAMERA_REQUEST)
+                    getPermissions(fragmentActivity, listOf(Manifest.permission.READ_EXTERNAL_STORAGE), PHOTOCAMERA_REQUEST)
                     if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || fragmentActivity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
                         startActivityForResult(
                             Intent(
@@ -270,7 +260,7 @@ class FieldbookHomeFragment : Fragment() {
                     }
                 }
                 1 -> { // Take photo
-                    getPermissions(fragmentActivity, listOf(Manifest.permission.CAMERA), CAMERA_REQUEST)
+                    getPermissions(fragmentActivity, listOf(Manifest.permission.CAMERA), PHOTOCAMERA_REQUEST)
                     if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || fragmentActivity.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                         startActivityForResult(
                             Intent(
@@ -333,7 +323,7 @@ class FieldbookHomeFragment : Fragment() {
                     getPermissions(
                         fragmentActivity,
                         listOf(Manifest.permission.CAMERA),
-                        CAMERA_REQUEST
+                        VIDEOCAMERA_REQUEST
                     )
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M || fragmentActivity.checkSelfPermission(
                             Manifest.permission.CAMERA
@@ -427,7 +417,7 @@ class FieldbookHomeFragment : Fragment() {
 
         //TODO: remove focus from editText when the user touches outside of it
         val button = Button(requireContext()).apply {
-            setText(context.getString(R.string.done))
+            setText(context.getString(R.string.fieldbook_done_button_text))
             id = R.id.close_text_field
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -648,9 +638,52 @@ class FieldbookHomeFragment : Fragment() {
         grantResults: IntArray
     ) {
         when (requestCode) {
-            CAMERA_REQUEST -> {
+            PHOTOCAMERA_REQUEST -> {
                 if(grantResults[0] == 0) {
-                    startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE), 0)
+                    startActivityForResult(
+                        Intent(
+                            MediaStore.ACTION_IMAGE_CAPTURE
+                        ).apply {
+                            resolveActivity(requireContext().packageManager)
+                            putExtra(
+                                MediaStore.EXTRA_OUTPUT,
+                                FileProvider.getUriForFile(
+                                    requireContext(),
+                                    "com.uu-uce.fileprovider",
+                                    imageLocation()
+                                ).also{
+                                    currentUri = it
+                                }
+                            )
+                        },
+                        REQUEST_IMAGE_CAPTURE
+                    )
+                }
+            }
+            VIDEOCAMERA_REQUEST -> {
+                if(grantResults[0] == 0) {
+                    startActivityForResult(
+                        Intent(
+                            MediaStore.ACTION_VIDEO_CAPTURE
+                        ).apply {
+                            resolveActivity(requireContext().packageManager)
+                            putExtra(
+                                MediaStore.EXTRA_OUTPUT,
+                                FileProvider.getUriForFile(
+                                    requireContext(),
+                                    "com.uu-uce.fileprovider",
+                                    videoLocation()
+                                ).also {
+                                    currentUri = it
+                                }
+                            )
+                            putExtra(
+                                MediaStore.EXTRA_VIDEO_QUALITY,
+                                1
+                            )
+                        },
+                        REQUEST_VIDEO_CAPTURE
+                    )
                 }
             }
             EXTERNAL_FILES_REQUEST -> {
@@ -659,7 +692,9 @@ class FieldbookHomeFragment : Fragment() {
                         Intent(
                             Intent.ACTION_PICK,
                             MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                        ), 1
+                        )
+                        ,
+                        REQUEST_IMAGE_UPLOAD
                     )
                 }
             }

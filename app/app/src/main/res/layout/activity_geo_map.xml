@@ -20,6 +20,18 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
 
+    <TextView
+        android:id="@+id/heightline_diff_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="38dp"
+        android:fontFamily="@font/roboto_bold"
+        android:text="@string/geomap_heightline_diff_text"
+        android:textColor="@color/TextDarkGrey"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <com.uu_uce.views.Menu
         android:id="@+id/menu"
         android:layout_width="match_parent"
@@ -88,6 +100,43 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/sepparator"
             android:orientation="vertical">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/profile_button"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp">
+
+                <ImageView
+                    android:id="@+id/profile_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:adjustViewBounds="false"
+                    android:contentDescription="@string/menu_fieldbook_image_description"
+                    android:cropToPadding="false"
+                    android:scaleType="fitEnd"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/profile_button_text"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_menu_symbol_profile" />
+
+                <TextView
+                    android:id="@+id/profile_button_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:background="#F3F3F3"
+                    android:fontFamily="@font/roboto_bold"
+                    android:text="@string/menu_profile_button_text"
+                    android:textAllCaps="false"
+                    android:textColor="#767676"
+                    android:textSize="20sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/profile_image"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/fieldbook_button"
@@ -191,7 +240,7 @@
                     android:layout_marginStart="5dp"
                     android:background="#F3F3F3"
                     android:fontFamily="@font/roboto_bold"
-                    android:text="@string/title_activity_settings"
+                    android:text="@string/menu_settings_button_text"
                     android:textAllCaps="false"
                     android:textColor="#767676"
                     android:textSize="20sp"
@@ -199,6 +248,7 @@
                     app:layout_constraintStart_toEndOf="@id/settings_image"
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
+
         </LinearLayout>
     </com.uu_uce.views.Menu>
 

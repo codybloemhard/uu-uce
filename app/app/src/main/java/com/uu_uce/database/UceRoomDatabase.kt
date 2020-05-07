@@ -46,7 +46,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
             pinList.add(
                 PinData(
                     1,
-                    "31N46718336N3133680E",
+                    "31N46758336N3133680E",
                     2,
                     "IMAGE",
                     "Test image",
@@ -59,7 +59,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
             pinList.add(
                 PinData(
                     2,
-                    "31N46710000N3130000E",
+                    "31N46670000N3130000E",
                     3,
                     "VIDEO",
                     "Test video",
@@ -72,7 +72,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
             pinList.add(
                 PinData(
                     3,
-                    "31N46715335N3134680E",
+                    "31N46655335N3134680E",
                     3,
                     "MCQUIZ",
                     "Test quiz",

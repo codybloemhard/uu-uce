@@ -82,7 +82,7 @@
                     android:layout_weight="1"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_symbol_text"
-                    android:contentDescription="@string/text" />
+                    android:contentDescription="@string/fieldbook_text_image_description" />
 
                 <ImageButton
                     android:id="@+id/add_image_block"
@@ -91,7 +91,8 @@
                     android:layout_weight="1"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_symbol_image"
-                    android:contentDescription="@string/image"/>
+                    android:contentDescription="@string/fieldbook_image_image_description"/>
+
 
                 <ImageButton
                     android:id="@+id/add_video_block"
@@ -100,7 +101,8 @@
                     android:layout_weight="1"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_symbol_video"
-                    android:contentDescription="@string/video" />
+                    android:contentDescription="@string/fieldbook_video_image_description" />
+              
             </LinearLayout>
 
             <Button

@@ -9,6 +9,7 @@ import com.uu_uce.gestureDetection.TouchParent
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 
+//currently used only to switch to the GeoMap activity
 class MainActivity : TouchParent() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

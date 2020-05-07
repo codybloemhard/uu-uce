@@ -59,27 +59,30 @@ Used by shapefile-linter to save it's custom files for geological data.
 | 0.x.x     | ...       | None              | Only small issues         |
 | 0.0.1     | 8-2-2020  | None              | None                      |
 ### Test Coverage Matrix
-| Version   | Pixel 2 Emulator API 29 | Nokia 2 API 24  | One Plus 5 API 28 | Pixel 3 Emulator API 29 | Pixel C API 27 |
-|-----------|-------------------------|-----------------|-------------------|-------------------------|----------------|
-| 0.5.0     | 100% tested             | 100% tested     |
-| 0.4.2     | 100% tested             | 100% tested     | 100% tested       | 100% tested             | 100% tested    |
-| 0.4.1     | 100% tested             | 100% tested     | 100% tested       | 100% tested             | 100% tested    |
-| 0.3.1     | 100% tested             | 100% tested     | 100% tested       | 100% tested             | 100% tested    |
-| 0.x.x     | 100% tested             | 100% tested     | Partial: GPS, Map | 100% tested             | None           |
-| 0.0.1     | 100% tested             | None            | None              | None                    | None           |
+| Version   | Pixel 2 Emulator API 29 | Nokia 2 API 24  | One Plus 5 API 28 | Pixel 3 Emulator API 29 | Pixel C API 27 | 2.7 QVGA API 22 |
+|-----------|-------------------------|-----------------|-------------------|-------------------------|----------------|-----------------|
+| 0.6.0     | 100% tested             | 100% tested     | 100% tested       | 100% tested             | 100% tested    | 100% tested     |
+| 0.5.0     | 100% tested             | 100% tested     | 100% tested       | 100% tested             | 100% tested    | 100% tested     |
+| 0.4.2     | 100% tested             | 100% tested     | 100% tested       | 100% tested             | 100% tested    | None            |
+| 0.4.1     | 100% tested             | 100% tested     | 100% tested       | 100% tested             | 100% tested    | None            |
+| 0.3.1     | 100% tested             | 100% tested     | 100% tested       | 100% tested             | 100% tested    | None            |
+| 0.x.x     | 100% tested             | 100% tested     | Partial: GPS, Map | 100% tested             | None           | None            |
+| 0.0.1     | 100% tested             | None            | None              | None                    | None           | None            |
 ### Test Issues Matrix
-| Version   | Pixel 2 Emulator API 29   | Nokia 2 API 24            | One Plus 5 API 28 | Moto g5s+         | Pixel 3 Emulator API 29 | Pixel C API 27 |
-|-----------|---------------------------|---------------------------|-------------------|-------------------|-------------------------|----------------|
-| 0.5.0     | IK6                       | Ik9
-| 0.4.2     | IK6, IK8                  | IK7, IK8                  | IK8               |                   | IK8                     | IK8            |
-| 0.4.1     | IK6                       | IK7                       | None              |                   | None                    | IK6            |
-| 0.4.0     | None                      |                           | None              |                   | None                    | IK6            |
-| 0.3.1     | IK2                       | None                      | None              | IK1, IK2          | None                    | IK6            |
-| 0.x.x     | None                      | Popup UI scaling (IC3)    | Partialy Tested   | Partially tested  | Not tested              | Not tested     |
-| 0.0.1     | None                      | Not Tested                | Not Tested        | Not tested        | Not tested              | Not tested     |
+| Version   | Pixel 2 Emulator API 29   | Nokia 2 API 24            | One Plus 5 API 28 | Moto g5s+         | Pixel 3 Emulator API 29 | Pixel C API 27 | 2.7 QVGA API 22 |
+|-----------|---------------------------|---------------------------|-------------------|-------------------|-------------------------|----------------|-----------------|
+| 0.5.0     | IK6                       | Ik9                       |                   |                   |                         |                | IK10            |
+| 0.5.0     | IK6                       | Ik9                       |                   |                   |                         |                |                 |
+| 0.4.2     | IK6, IK8                  | IK7, IK8                  | IK8               |                   | IK8                     | IK8            | IK8             |
+| 0.4.1     | IK6                       | IK7                       | None              |                   | None                    | IK6            | IK6             |
+| 0.4.0     | None                      |                           | None              |                   | None                    | IK6            | IK6             |
+| 0.3.1     | IK2                       | None                      | None              | IK1, IK2          | None                    | IK6            | IK6             |
+| 0.x.x     | None                      | Popup UI scaling (IC3)    | Partialy Tested   | Partially tested  | Not tested              | Not tested     | Not tested      |
+| 0.0.1     | None                      | Not Tested                | Not Tested        | Not tested        | Not tested              | Not tested     | Not tested      |
 ### Know Issues Matrix
 | Version       | ID    | What              |
 |---------------|-------|-------------------|
+| 0.6.0         | IK10  | No audio and "Can't play video" error
 | 0.5.0         | IK9   | Crash on add pin.
 | 0.4.1         | IK8   | Crash on remove pin without image from fieldbook `java.lang.IllegalArgumentException: Uri lacks 'file' scheme`
 | 0.4.1         | IK7   | Crash on load: `Only the original thread that created a view hierarchy can touch its views`

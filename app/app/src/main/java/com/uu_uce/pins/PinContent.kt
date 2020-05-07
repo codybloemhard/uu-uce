@@ -11,6 +11,8 @@ import android.widget.*
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import com.github.chrisbanes.photoview.PhotoView
+import com.github.chrisbanes.photoview.PhotoViewAttacher
 import com.uu_uce.R
 import com.uu_uce.VideoViewer
 import com.uu_uce.misc.LogType
@@ -168,10 +170,11 @@ class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Ur
     private val tag = BlockTag.IMAGE
     override val canCompleteBlock = false
     override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
-        val content = ImageView(activity)
+        val content = PhotoView(activity)
         try {
             content.setImageURI(imageURI)
             content.scaleType = ImageView.ScaleType.FIT_CENTER
+            content.adjustViewBounds = true
         } catch (e: Exception) {
             Logger.error("PinContent","Couldn't load $imageURI, so loaded the thumbnail $thumbnailURI instead")
             content.setImageURI(thumbnailURI)
@@ -182,6 +185,7 @@ class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Ur
         )
         content.layoutParams = imageLayoutParams
         content.id = R.id.image_block
+        PhotoViewAttacher(content)
 
         layout.addView(content)
     }
@@ -214,7 +218,8 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         else{
             val thumbnail = ImageView(activity)
             thumbnail.setImageURI(thumbnailURI)
-            thumbnail.scaleType = ImageView.ScaleType.CENTER
+            thumbnail.scaleType = ImageView.ScaleType.FIT_CENTER
+            thumbnail.adjustViewBounds = true
             frameLayout.addView(thumbnail)
         }
 
