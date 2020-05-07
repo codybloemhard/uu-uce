@@ -67,9 +67,12 @@ class FieldbookHomeFragment : Fragment() {
         const val REQUEST_IMAGE_CAPTURE = 1
         const val REQUEST_VIDEO_UPLOAD  = 2
         const val REQUEST_VIDEO_CAPTURE = 3
+
+        var currentUri: Uri = Uri.EMPTY
     }
 
     private lateinit var viewModel          : FieldbookViewModel
+    private lateinit var viewAdapter        : FieldbookAdapter
     private lateinit var fragmentActivity   : FragmentActivity
 
     private lateinit var content: MutableList<ContentBlockInterface>
@@ -82,7 +85,7 @@ class FieldbookHomeFragment : Fragment() {
 
     private var currentName = ""
     private var currentPath = ""
-    private var currentUri: Uri = Uri.EMPTY
+
 
     private var blockID = 0
 
@@ -110,14 +113,26 @@ class FieldbookHomeFragment : Fragment() {
             val recyclerView = view.findViewById<RecyclerView>(R.id.fieldbook_recyclerview)
             val addButton = view.findViewById<FloatingActionButton>(R.id.fieldbook_fab)
 
-            val fieldbookAdapter = FieldbookAdapter(fragmentActivity, viewModel)
+            viewAdapter = FieldbookAdapter(fragmentActivity, viewModel)
 
             viewModel.allFieldbookEntries.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
-                fieldbookAdapter.setFieldbook(it)
+                viewAdapter.setFieldbook(it)
             })
 
             recyclerView.layoutManager = LinearLayoutManager(fragmentActivity)
-            recyclerView.adapter = fieldbookAdapter
+            recyclerView.adapter = viewAdapter
+
+            val searchBar = view.findViewById<EditText>(R.id.fieldbook_searchbar)
+
+            searchBar.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
+                if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+                    //Perform Code
+                    val search = searchBar.text.toString()
+                    searchPins(search)
+                    return@OnKeyListener true
+                }
+                false
+            })
 
             addButton.setOnClickListener {
                 openFieldbookAdderPopup()
@@ -125,7 +140,16 @@ class FieldbookHomeFragment : Fragment() {
         }
     }
 
-    /**
+    private fun searchPins(search : String){
+        viewModel.search(search){ fieldbook ->
+            fieldbook?.let {
+                viewAdapter.setFieldbook(fieldbook)
+            }
+            hideKeyboard(fragmentActivity)
+        }
+    }
+
+    /**e
      * Opens a popup, in which we can make new entries to the fieldbook
      */
     private fun openFieldbookAdderPopup() {
@@ -351,9 +375,6 @@ class FieldbookHomeFragment : Fragment() {
         intent: Intent?
     ) {
         super.onActivityResult(requestCode, resultCode, intent)
-        if (intent == null)
-            println("I don't return a value")
-
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
                 REQUEST_IMAGE_UPLOAD -> {
@@ -397,14 +418,17 @@ class FieldbookHomeFragment : Fragment() {
 
     private fun addText() {
         title.clearFocus()
-        val text = EditText(requireContext())
-        text.inputType = TYPE_TEXT_FLAG_NO_SUGGESTIONS
+        val text = EditText(requireContext()).apply{
+            inputType = TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            id = R.id.text_field
+        }
         layout.addView(text, layoutParams)
         scrollToEnd()
 
         //TODO: remove focus from editText when the user touches outside of it
         val button = Button(requireContext()).apply {
             setText(context.getString(R.string.done))
+            id = R.id.close_text_field
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -438,10 +462,7 @@ class FieldbookHomeFragment : Fragment() {
     }
 
     private fun addImage(image: Uri) {
-        println(image)
-        println(currentName)
-        println(currentUri)
-
+        title.clearFocus()
         ImageContentBlock(
             image,
             makeImageThumbnail(image)
@@ -502,17 +523,20 @@ class FieldbookHomeFragment : Fragment() {
     }
 
     private fun makeImageThumbnail(uri: Uri) : Uri {
-
-        return saveThumbnail (
-            requireContext().contentResolver.openInputStream(uri).let {
-                BitmapFactory.decodeStream(it)
-            }
-        )
+        return try {
+            saveThumbnail(
+                requireContext().contentResolver.openInputStream(uri).let {
+                    BitmapFactory.decodeStream(it)
+                }
+            )
+        } catch (e: Exception) {
+            Uri.EMPTY
+        }
     }
 
     private fun makeVideoThumbnail(uri: Uri) : Uri {
         val retriever = MediaMetadataRetriever().apply {
-            setDataSource(fragmentActivity,uri)
+            setDataSource(requireContext(),uri)
         }
 
         return saveThumbnail (
@@ -541,11 +565,14 @@ class FieldbookHomeFragment : Fragment() {
     }
 
     private fun addToGallery(path: String) {
-        //TODO: should we do this?
-        Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).also { mediaScanIntent ->
-            val f = File(path)
-            mediaScanIntent.data = Uri.fromFile(f)
-            requireContext().sendBroadcast(mediaScanIntent)
+        try {
+            Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).also { mediaScanIntent ->
+                val f = File(path)
+                mediaScanIntent.data = Uri.fromFile(f)
+                requireContext().sendBroadcast(mediaScanIntent)
+            }
+        } catch (e: Exception) {
+
         }
     }
 
@@ -655,4 +682,6 @@ class FieldbookHomeFragment : Fragment() {
 
         imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
+
+
 }

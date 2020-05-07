@@ -61,11 +61,6 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
         //val textFb: TextView = parentView.findViewById(R.id.text_preview)
         //val imageFb: ImageView = parentView.findViewById(R.id.image_preview)
 
-        //1x alles doorlopen, niet meer checken op dingen die we al gehad hebben...
-        //als er een textblock is, gebruiken we die...
-        //anders gebruiken we een afbeelding (sws thumbnail)
-        //anders gebruiken we een video thumbnail
-
         loop@ for (cB in content.contentBlocks) {
             when (cB) {
                 is TextContentBlock -> {
@@ -73,8 +68,6 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
                         textSize = 12f
                         setTextColor(rgb(100, 100, 100))
                         text = cB.getTextContent()
-                        //Text direction?
-                        //What to do when text goes over the edge?
                     }.also {
                         holder.frameFb.addView(it, params)
                     }

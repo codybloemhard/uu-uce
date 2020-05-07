@@ -56,7 +56,7 @@ class AllPins : AppCompatActivity() {
 
         sharedPref = this.getPreferences(Context.MODE_PRIVATE)
 
-        val searchBar = findViewById<EditText>(R.id.searchbar)
+        val searchBar = findViewById<EditText>(R.id.pins_searchbar)
 
         searchBar.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
@@ -82,8 +82,8 @@ class AllPins : AppCompatActivity() {
             viewAdapter.activePopup?.dismiss()
             return
         }
-        else if(searchbar.text.toString().count() > 0){
-            searchbar.text.clear()
+        else if(pins_searchbar.text.toString().count() > 0){
+            pins_searchbar.text.clear()
             searchPins("")
             return
         }

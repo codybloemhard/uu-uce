@@ -26,7 +26,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <EditText
-                android:id="@+id/searchbar"
+                android:id="@+id/pins_searchbar"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/custom_border_search"

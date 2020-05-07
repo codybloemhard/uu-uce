@@ -126,7 +126,7 @@ class AllPinsTests {
             )
 
         // Check if pin successfully opened
-        onView(withId(R.id.scrollLayout))
+        onView(withId(R.id.popup_window_view))
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
 
@@ -153,7 +153,7 @@ class AllPinsTests {
         )
 
         // Check if pin successfully opened
-        onView(withId(R.id.scrollLayout))
+        onView(withId(R.id.popup_window_view))
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
 
@@ -191,7 +191,7 @@ class AllPinsTests {
             .perform(click())
 
         // Check if video player opened successfully
-        onView(withId(R.id.video_player))
+        onView(withId(R.id.video_viewer_layout))
             .inRoot(not(isPlatformPopup()))
             .check(matches(isDisplayed()))
 
@@ -229,7 +229,7 @@ class AllPinsTests {
             .perform(click())
 
         // Check if video player opened successfully
-        onView(withId(R.id.video_player))
+        onView(withId(R.id.video_viewer_layout))
             .inRoot(not(isPlatformPopup()))
             .check(matches(isDisplayed()))
 
