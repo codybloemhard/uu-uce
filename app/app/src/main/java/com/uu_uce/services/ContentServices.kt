@@ -12,10 +12,12 @@ import com.uu_uce.misc.Logger
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
+import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipInputStream
 
 
 val permissionsNeeded = listOf(Manifest.permission.INTERNET, Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -31,14 +33,14 @@ activity: The activity from which this function is called.
 onCompleteAction : A function to be executed when all files are present.
 It will call getFiles for all missing files.
  */
-fun updateFiles(requiredFilePaths : List<String>, activity : Activity, onCompleteAction : (() -> Unit)){
+fun updateFiles(requiredFilePaths : List<String>, activity : Activity, onCompleteAction : (() -> Unit), progressAction : (Int) -> Unit){
     val missingFiles = findMissingFilePaths(requiredFilePaths)
     if(missingFiles.count() > 0){
         getPermissions(activity, permissionsNeeded, EXTERNAL_FILES_REQUEST)
-        getFiles(missingFiles, activity, onCompleteAction)
+        getFiles(missingFiles, activity, onCompleteAction, progressAction)
     }
     else{
-        onCompleteAction()
+        GlobalScope.launch { onCompleteAction() }
     }
 }
 
@@ -67,7 +69,7 @@ activity: The activity from which this function is called.
 onCompleteAction : A function to be executed when all files are present.
 It will download all files and start onCompleteAction.
  */
-fun getFiles(requiredFilePaths : List<Pair<String, String>>, activity: Activity, onCompleteAction : (() -> Unit)){
+fun getFiles(requiredFilePaths : List<Pair<String, String>>, activity: Activity, onCompleteAction : (() -> Unit), progressAction : (Int) -> Unit){
     val jobList : MutableList<Job> = mutableListOf()
     val wifiManager = activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager?
     sharedPref = PreferenceManager.getDefaultSharedPreferences(activity)
@@ -79,7 +81,7 @@ fun getFiles(requiredFilePaths : List<Pair<String, String>>, activity: Activity,
     for(filePath in requiredFilePaths){
         jobList.add(GlobalScope.launch{
             downloadFile(
-                URL(serverURL + "/api/files/download/" + filePath.second), filePath.first)
+                URL(serverURL + "/api/files/download/" + filePath.second), filePath.first, progressAction)
         })
     }
 
@@ -87,7 +89,7 @@ fun getFiles(requiredFilePaths : List<Pair<String, String>>, activity: Activity,
         for(job in jobList){
             job.join()
         }
-        activity.runOnUiThread(onCompleteAction)
+        onCompleteAction()
     }
 }
 
@@ -97,7 +99,7 @@ targetUrl: The URL from which a file needs to be downloaded
 fileDestination: The filepath to which the downloaded file will be downloaded.
 It will download the file.
  */
-fun downloadFile(targetUrl : URL, fileDestination : String) {
+fun downloadFile(targetUrl : URL, fileDestination : String, progressAction : (Int) -> Unit) {
     with(targetUrl.openConnection() as HttpURLConnection) {
         requestMethod = "GET"
 
@@ -112,14 +114,66 @@ fun downloadFile(targetUrl : URL, fileDestination : String) {
             }
             val file = File(fileDestination)
             FileOutputStream(file).use { output ->
+                val length = contentLength
+                var total = 0.0
                 val buffer = ByteArray(4 * 1024) // or other buffer size
                 var read: Int
                 while (inputStream.read(buffer).also { read = it } != -1) {
+                    if(length > 0){
+                        total += read
+                        progressAction((total / length * 100).toInt())
+                    }
                     output.write(buffer, 0, read)
                 }
                 output.flush()
             }
         }
     }
+}
+
+fun unpackZip(zipPath: String, progressAction : (Int) -> Unit): Boolean {
+    val splitPath = zipPath.split('/')
+    val destinationPath = splitPath.take(splitPath.count() - 1).fold(splitPath.first()){s1, s2 -> "$s1${File.separator}$s2"}.drop(1)
+
+    val zipSize =  ZipFile(zipPath).size()
+    val `is`: InputStream
+    val zis: ZipInputStream
+    try {
+        var filename: String
+        `is` = FileInputStream(zipPath)
+        zis = ZipInputStream(BufferedInputStream(`is`))
+        var ze: ZipEntry?
+        val buffer = ByteArray(1024)
+        var count: Int
+        var i = 0.0
+        while (zis.nextEntry.also { ze = it } != null) {
+            if(ze != null){
+                filename = ze!!.name
+
+                // Need to create directories if not exists, or
+                // it will generate an Exception...
+                if (ze!!.isDirectory) {
+                    val fmd = File(destinationPath + File.separator + filename)
+                    fmd.mkdirs()
+                    continue
+                }
+                val fout = FileOutputStream(destinationPath + File.separator + filename)
+                while (zis.read(buffer).also { count = it } != -1) {
+                    fout.write(buffer, 0, count)
+                }
+
+                i++
+                progressAction((i / zipSize * 100).toInt())
+
+                fout.close()
+                zis.closeEntry()
+            }
+        }
+        zis.close()
+    } catch (e: IOException) {
+        e.printStackTrace()
+        return false
+    }
+    return true
 }
 

@@ -35,6 +35,7 @@ class GeoMap : AppCompatActivity() {
     private var statusBarHeight = 0
     private var resourceId = 0
     private var started = false
+    private var missingMaps = false
     private lateinit var sharedPref : SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,10 +72,10 @@ class GeoMap : AppCompatActivity() {
 
         // Set settings
         customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
-        customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", 60)
+        customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
         customMap.hardwareAccelerated = sharedPref.getBoolean("com.uu_uce.HARDWARE", false)
 
-        // TODO: Remove when database is fully implemented
+        // TODO: Remove when releasing
         with(sharedPref.edit()) {
             putInt("com.uu_uce.USER_POINTS", 0)
             apply()
@@ -93,10 +94,6 @@ class GeoMap : AppCompatActivity() {
         }
 
         // Initialize menu
-        (Display::getSize)(windowManager.defaultDisplay, screenDim)
-        val longest = maxOf(screenDim.x, screenDim.y)
-        val size = (longest*menu.buttonPercent).toInt()
-
         allpins_button.setOnClickListener{customMap.startAllPins()}
         fieldbook_button.setOnClickListener{customMap.startFieldBook()}
         settings_button.setOnClickListener{customMap.startSettings()}
@@ -107,36 +104,7 @@ class GeoMap : AppCompatActivity() {
         dragBar.dragEndAction    = { dx, dy -> menu.snap(dx, dy)}
 
         //add layers to map
-        val mydir = File(getExternalFilesDir(null)?.path + "/Maps/")
-        try {
-            val heightlines = File(mydir, "Heightlines")
-            customMap.addLayer(
-                LayerType.Height,
-                HeightLineReader(heightlines),
-                toggle_layer_layout,
-                size,
-                true
-            )
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
-        }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
-        }
-        try {
-            val polygons = File(mydir, "Polygons")
-            customMap.addLayer(
-                LayerType.Water,
-                PolygonReader(polygons),
-                toggle_layer_layout,
-                size,
-                false
-            )
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
-        }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
-        }
-
-        //create camera based on layers
-        customMap.initializeCamera()
+        loadMap()
 
         customMap.tryStartLocServices(this)
 
@@ -183,10 +151,11 @@ class GeoMap : AppCompatActivity() {
     }
 
     override fun onResume() {
+        if(missingMaps) loadMap()
         if(started){
             super.onResume()
             customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
-            customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", 60)
+            customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
             customMap.hardwareAccelerated = sharedPref.getBoolean("com.uu_uce.HARDWARE", false)
             customMap.setPins(pinViewModel.allPinData)
             customMap.redrawMap()
@@ -227,6 +196,46 @@ class GeoMap : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun loadMap(){
+        (Display::getSize)(windowManager.defaultDisplay, screenDim)
+        val longest = maxOf(screenDim.x, screenDim.y)
+        val size = (longest*menu.buttonPercent).toInt()
+
+        missingMaps = false
+        val mydir = File(getExternalFilesDir(null)?.path + "/Maps/")
+        try {
+            val heightlines = File(mydir, "Heightlines")
+            customMap.addLayer(
+                LayerType.Height,
+                HeightLineReader(heightlines),
+                toggle_layer_layout,
+                size,
+                true
+            )
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
+        }catch(e: Exception){
+            missingMaps = true
+            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
+        }
+        try {
+            val polygons = File(mydir, "Polygons")
+            customMap.addLayer(
+                LayerType.Water,
+                PolygonReader(polygons),
+                toggle_layer_layout,
+                size,
+                false
+            )
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
+        }catch(e: Exception){
+            missingMaps = true
+            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
+        }
+
+        //create camera based on layers
+        customMap.initializeCamera()
     }
 
     @TestOnly

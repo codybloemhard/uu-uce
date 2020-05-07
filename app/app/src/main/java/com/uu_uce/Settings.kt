@@ -2,19 +2,27 @@ package com.uu_uce
 
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.view.View
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
+import com.uu_uce.services.unpackZip
 import com.uu_uce.services.updateFiles
 import com.uu_uce.ui.createTopbar
 import kotlinx.android.synthetic.main.activity_settings.*
+import java.io.*
+
+// Default settings
+const val defaultPinSize = 60
 
 class Settings : AppCompatActivity() {
     // private variables
     private val minPinSize = 10
     private val maxPinSize = 100
 
-    private val maps : List<String> = listOf()
+    private val mapsName = "Maps.zip"
+    private lateinit var maps : List<String>
 
     private lateinit var sharedPref : SharedPreferences
 
@@ -22,12 +30,14 @@ class Settings : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
+        maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapsName)
+
         sharedPref = getDefaultSharedPreferences(this)
 
         createTopbar(this, "Settings")
 
         // PinSize
-        val curSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", 60)
+        val curSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
         pinsize_seekbar.max = maxPinSize - minPinSize
         pinsize_seekbar.progress = curSize - minPinSize
         pinsize_numberview.text = curSize.toString()
@@ -72,7 +82,20 @@ class Settings : AppCompatActivity() {
 
         // Download maps
         download_maps_button.setOnClickListener{
-            updateFiles(maps, this){}
+            updateFiles(
+                maps,
+                this,
+                {
+                    runOnUiThread{
+                        Toast.makeText(this, "Download completed, unpacking", Toast.LENGTH_LONG).show()
+                    }
+                    unpackZip(maps.first()) { progress -> runOnUiThread { maps_downloading_progress.progress = progress } }
+                    runOnUiThread{
+                        Toast.makeText(this, "Unpacking completed", Toast.LENGTH_LONG).show()
+                    }
+                },
+                { progress -> runOnUiThread { maps_downloading_progress.progress = progress }}
+            )
         }
 
         // hardware acceleration
