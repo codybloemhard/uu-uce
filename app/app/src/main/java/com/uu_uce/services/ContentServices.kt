@@ -74,8 +74,9 @@ fun getFiles(requiredFilePaths : List<Pair<String, String>>, activity: Activity,
     val wifiManager = activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager?
     sharedPref = PreferenceManager.getDefaultSharedPreferences(activity)
     val networkDownloadAllowed = sharedPref.getBoolean("com.uu_uce.NETWORK_DOWNLOADING", false)
-    if (!wifiManager!!.isWifiEnabled && networkDownloadAllowed){
+    if (!wifiManager!!.isWifiEnabled && !networkDownloadAllowed){
         Toast.makeText(activity, "Enable wifi or allow network downloading", Toast.LENGTH_LONG).show()
+        onCompleteAction()
         return
     }
     for(filePath in requiredFilePaths){

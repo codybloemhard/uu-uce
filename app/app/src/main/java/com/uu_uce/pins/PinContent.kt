@@ -17,6 +17,7 @@ import com.uu_uce.R
 import com.uu_uce.VideoViewer
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
+import com.uu_uce.services.updateFiles
 import java.io.StringReader
 
 class PinContent(private val contentString: String) {
@@ -237,14 +238,21 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
 
         // Add thumbnail and button
         frameLayout.addView(playButton)
-        frameLayout.setOnClickListener{openVideoView(videoURI, title, activity)}
+        frameLayout.setOnClickListener{
+            updateFiles(
+                listOf(videoURI.toString()),
+                activity,
+                { openVideoView(videoURI, title, activity) },
+                {}
+            )
+        }
         frameLayout.id = R.id.start_video_button
         layout.addView(frameLayout)
     }
 
     override fun getFilePaths() : List<String>{
-        if(thumbnailURI == Uri.EMPTY) return listOf(videoURI.toString())
-        return listOf(thumbnailURI.toString(), videoURI.toString())
+        if(thumbnailURI == Uri.EMPTY) return listOf()
+        return listOf(thumbnailURI.toString())
     }
 
     override fun toString() : String {

@@ -108,11 +108,6 @@ class GeoMap : AppCompatActivity() {
 
         customMap.tryStartLocServices(this)
 
-        //more menu initialization which needs its width/height
-        menu.post{
-            initMenu()
-        }
-
         // Set center on location button functionality
         center_button.setOnClickListener{
             if(customMap.locationAvailable){
@@ -236,6 +231,11 @@ class GeoMap : AppCompatActivity() {
 
         //create camera based on layers
         customMap.initializeCamera()
+
+        //more menu initialization which needs its width/height
+        menu.post{
+            initMenu()
+        }
     }
 
     @TestOnly

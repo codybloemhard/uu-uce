@@ -1,5 +1,6 @@
 package com.uu_uce
 
+import android.app.AlertDialog
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
@@ -21,7 +22,7 @@ class Settings : AppCompatActivity() {
     private val minPinSize = 10
     private val maxPinSize = 100
 
-    private val mapsName = "Maps.zip"
+    private val mapsName = "maps.zip"
     private lateinit var maps : List<String>
 
     private lateinit var sharedPref : SharedPreferences
@@ -74,10 +75,33 @@ class Settings : AppCompatActivity() {
         val curNetworkDownloading = sharedPref.getBoolean("com.uu_uce.NETWORK_DOWNLOADING", false)
         networkdownload_switch.isChecked = curNetworkDownloading
         networkdownload_switch.setOnClickListener{
-            with(sharedPref.edit()) {
-                putBoolean("com.uu_uce.NETWORK_DOWNLOADING", networkdownload_switch.isChecked)
-                apply()
+            if(networkdownload_switch.isChecked){
+                AlertDialog.Builder(this)
+                    .setIcon(R.drawable.ic_sprite_warning)
+                    .setTitle("Closing Pin")
+                    .setMessage("Are you sure you want to enable downloading over mobile data? This may lead to significant amounts of data being used.")
+                    .setPositiveButton("Yes") { _, _ ->
+                        with(sharedPref.edit()) {
+                            putBoolean(
+                                "com.uu_uce.NETWORK_DOWNLOADING",
+                                true
+                            )
+                            apply()
+                        }
+                    }
+                    .setNegativeButton("No") { _, _ -> networkdownload_switch.isChecked = false }
+                    .show()
             }
+            else{
+                with(sharedPref.edit()) {
+                    putBoolean(
+                        "com.uu_uce.NETWORK_DOWNLOADING",
+                        false
+                    )
+                    apply()
+                }
+            }
+
         }
 
         // Download maps
