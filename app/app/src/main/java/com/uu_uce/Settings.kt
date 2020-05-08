@@ -106,6 +106,7 @@ class Settings : AppCompatActivity() {
 
         // Download maps
         download_maps_button.setOnClickListener{
+            maps_downloading_progress.visibility = View.VISIBLE
             updateFiles(
                 maps,
                 this,
@@ -116,6 +117,7 @@ class Settings : AppCompatActivity() {
                     unpackZip(maps.first()) { progress -> runOnUiThread { maps_downloading_progress.progress = progress } }
                     runOnUiThread{
                         Toast.makeText(this, "Unpacking completed", Toast.LENGTH_LONG).show()
+                        maps_downloading_progress.visibility = View.INVISIBLE
                     }
                 },
                 { progress -> runOnUiThread { maps_downloading_progress.progress = progress }}
