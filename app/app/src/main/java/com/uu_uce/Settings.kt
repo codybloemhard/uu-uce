@@ -78,7 +78,7 @@ class Settings : AppCompatActivity() {
             if(networkdownload_switch.isChecked){
                 AlertDialog.Builder(this)
                     .setIcon(R.drawable.ic_sprite_warning)
-                    .setTitle("Closing Pin")
+                    .setTitle("Enabling mobile data")
                     .setMessage("Are you sure you want to enable downloading over mobile data? This may lead to significant amounts of data being used.")
                     .setPositiveButton("Yes") { _, _ ->
                         with(sharedPref.edit()) {

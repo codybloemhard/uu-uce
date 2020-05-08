@@ -236,6 +236,9 @@ class GeoMap : AppCompatActivity() {
         menu.post{
             initMenu()
         }
+
+        customMap.setCameraWAspect()
+
     }
 
     @TestOnly

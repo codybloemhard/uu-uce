@@ -102,12 +102,7 @@ class CustomMap : ViewTouchParent {
         //width and height are not set in the init{} yet
         //we delay calculations that use them by using post
         post{
-            camera.wAspect = width.toDouble()/height
-
-            val z = 1.0 / (camera.wAspect)
-            camera.maxZoom = maxOf(1.0,z)
-            camera.setZoom(z)
-            smap.setzooms(camera.minZoom, camera.maxZoom)
+            setCameraWAspect()
         }
     }
 
@@ -378,6 +373,15 @@ class CustomMap : ViewTouchParent {
         } else {
             TODO("VERSION.SDK_INT < O")
         }
+    }
+
+    fun setCameraWAspect(){
+        camera.wAspect = width.toDouble()/height
+
+        val z = 1.0 / (camera.wAspect)
+        camera.maxZoom = maxOf(1.0,z)
+        camera.setZoom(z)
+        smap.setzooms(camera.minZoom, camera.maxZoom)
     }
 
     //turn a layer on or off
