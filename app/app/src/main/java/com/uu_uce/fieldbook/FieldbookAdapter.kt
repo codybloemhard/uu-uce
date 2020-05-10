@@ -24,7 +24,8 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
     class FieldbookViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val parentView = itemView
-        val numberFb: TextView = parentView.findViewById(R.id.title)
+        val titleFb: TextView = parentView.findViewById(R.id.title)
+        val numberFb: TextView = parentView.findViewById(R.id.number)
         val locationFb: TextView = parentView.findViewById(R.id.pin_coordinates)
         val datetimeFb: TextView = parentView.findViewById(R.id.datetime)
         val frameFb: FrameLayout = parentView.findViewById(R.id.frame_layout)
@@ -43,7 +44,8 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
     override fun onBindViewHolder(holder: FieldbookViewHolder, position: Int) {
         val entry : FieldbookEntry = fieldbook[position]
         holder.apply {
-            numberFb.text = entry.title
+            titleFb.text = entry.title
+            numberFb.text = addLeadingZeros(entry.id)
             locationFb.text = entry.location
             datetimeFb.text = entry.dateTime
         }
@@ -57,9 +59,6 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
         var isThumbnail = false
         var thumbnailUri = Uri.EMPTY
-
-        //val textFb: TextView = parentView.findViewById(R.id.text_preview)
-        //val imageFb: ImageView = parentView.findViewById(R.id.image_preview)
 
         loop@ for (cB in content.contentBlocks) {
             when (cB) {
@@ -168,5 +167,11 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
     fun setFieldbook(fieldbook: List<FieldbookEntry>) {
         this.fieldbook = fieldbook
         notifyDataSetChanged()
+    }
+
+    fun addLeadingZeros(id: Int) : String {
+        val s = id.toString()
+        val zero : String = "0".repeat(3-s.length)
+        return "#$zero$id"
     }
 }
