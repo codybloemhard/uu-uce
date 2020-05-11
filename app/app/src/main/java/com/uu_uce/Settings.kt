@@ -7,7 +7,10 @@ import android.view.View
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
+import com.uu_uce.allpins.PinViewModel
+import com.uu_uce.pins.PinContent
 import com.uu_uce.services.unpackZip
 import com.uu_uce.services.updateFiles
 import com.uu_uce.ui.createTopbar
@@ -27,6 +30,8 @@ class Settings : AppCompatActivity() {
     private lateinit var maps : List<String>
 
     private lateinit var sharedPref : SharedPreferences
+    private lateinit var pinViewModel: PinViewModel
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +40,7 @@ class Settings : AppCompatActivity() {
         maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapsName)
 
         sharedPref = getDefaultSharedPreferences(this)
+        pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
 
         createTopbar(this, "Settings")
 
@@ -179,6 +185,37 @@ class Settings : AppCompatActivity() {
                 }
                 .setNegativeButton("No", null)
                 .show()
+        }
+
+        // Downlaod pin content
+        download_content_button.setOnClickListener{
+            val table =  pinViewModel.allPinData.value
+            val contentList = mutableListOf<String>()
+            if(table != null){
+                for (data in table){
+                    for (block in PinContent(data.content).contentBlocks){
+                        for (path in block.getFilePaths()){
+                            contentList.add(path)
+                        }
+                    }
+                }
+
+                content_downloading_progress.visibility = View.VISIBLE
+
+                updateFiles(
+                    contentList,
+                    this,
+                    {
+                        runOnUiThread {
+                            Toast.makeText(this, "Downloading completed", Toast.LENGTH_LONG).show()
+                            maps_downloading_progress.visibility = View.INVISIBLE
+                        }
+                    },
+                    {
+                            progress -> runOnUiThread { content_downloading_progress.progress = progress }
+                    }
+                )
+            }
         }
     }
 }

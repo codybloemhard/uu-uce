@@ -66,4 +66,9 @@
     <string name="profile_wip_image">wip image</string>
     <string name="settings_delete_maps_button_text">Delete</string>
     <string name="settings_delete_maps_text">Delete maps</string>
+    <string name="settings_maps">Maps</string>
+    <string name="settings_content">Content</string>
+    <string name="settings_download_content_text">Download content</string>
+    <string name="settings_general">General</string>
+    <string name="progress_popup_progress">Progress</string>
 </resources>

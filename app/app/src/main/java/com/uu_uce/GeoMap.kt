@@ -7,9 +7,9 @@ import android.graphics.Color
 import android.graphics.Point
 import android.os.Build
 import android.os.Bundle
-import android.view.Display
-import android.view.MotionEvent
-import android.view.View
+import android.view.*
+import android.widget.PopupWindow
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -24,6 +24,8 @@ import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.PolygonReader
 import com.uu_uce.views.DragStatus
 import kotlinx.android.synthetic.main.activity_geo_map.*
+import kotlinx.android.synthetic.main.activity_settings.*
+import kotlinx.android.synthetic.main.progress_popup.*
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 
@@ -32,13 +34,16 @@ var needsReload = false
 //main activity in which the map and menu are displayed
 class GeoMap : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel
-    //private val permissionsNeeded = listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
     private var screenDim = Point(0,0)
     private var statusBarHeight = 0
     private var resourceId = 0
     private var started = false
 
     private lateinit var sharedPref : SharedPreferences
+
+    // Popup for showing download progress
+    private var popupWindow: PopupWindow? = null
+    private lateinit var progressBar : ProgressBar
 
     // TODO: Remove temporary hardcoded map information
     private val mapsName = "maps.zip"
@@ -69,6 +74,7 @@ class GeoMap : AppCompatActivity() {
                 .setTitle("Streaming is unavailable")
                 .setMessage("Streaming maps is currently unsupported, to use the maps supplied by your organization you will have to download them. Would you like to download the maps now?")
                 .setPositiveButton("Yes") { _, _ ->
+                    openProgressPopup(window.decorView.rootView)
                     updateFiles(
                         maps,
                         this,
@@ -76,13 +82,14 @@ class GeoMap : AppCompatActivity() {
                             runOnUiThread{
                                 Toast.makeText(this, "Download completed, unpacking", Toast.LENGTH_LONG).show()
                             }
-                            unpackZip(maps.first()) { }
+                            unpackZip(maps.first()) { progress -> runOnUiThread { progressBar.progress = progress } }
                             runOnUiThread{
                                 Toast.makeText(this, "Unpacking completed", Toast.LENGTH_LONG).show()
+                                popupWindow?.dismiss()
                                 start()
                             }
                         },
-                        {  }
+                        { progress -> runOnUiThread { progressBar.progress = progress } }
                     )
                 }
                 .setNegativeButton("No") { _, _ ->
@@ -260,6 +267,24 @@ class GeoMap : AppCompatActivity() {
 
         customMap.setCameraWAspect()
         needsReload = false
+    }
+
+    private fun openProgressPopup(currentView: View){
+        val layoutInflater = layoutInflater
+
+        // Build an custom view (to be inflated on top of our current view & build it's popup window)
+        val customView = layoutInflater.inflate(R.layout.progress_popup, geoMapLayout, false)
+
+        popupWindow = PopupWindow(
+            customView,
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
+
+        progressBar = customView.findViewById(R.id.progress_popup_progressBar)
+
+        // Open popup
+        popupWindow?.showAtLocation(currentView, Gravity.CENTER, 0, 0)
     }
 
     @TestOnly

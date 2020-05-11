@@ -81,7 +81,9 @@ fun getFiles(requiredFilePaths : List<Pair<String, String>>, activity: Activity,
     }
     for(filePath in requiredFilePaths){
         jobList.add(GlobalScope.launch{
-            Toast.makeText(activity, "Downloading", Toast.LENGTH_SHORT).show()
+            activity.runOnUiThread{
+                Toast.makeText(activity, "Downloading", Toast.LENGTH_SHORT).show()
+            }
             downloadFile(
                 URL(serverURL + "/api/files/download/" + filePath.second), filePath.first, progressAction)
         })
