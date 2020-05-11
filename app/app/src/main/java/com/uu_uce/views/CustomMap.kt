@@ -111,7 +111,7 @@ class CustomMap : ViewTouchParent {
         camera = smap.initialize()
     }
 
-    //add a new layer to the map, and generate a button to toggle it
+    // Add a new layer to the map, and generate a button to toggle it
     fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout, buttonSize: Int, hasInfo: Boolean){
         smap.addLayer(lt, chunkGetter, hasInfo)
         val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle)
@@ -126,6 +126,13 @@ class CustomMap : ViewTouchParent {
         scrollLayout.addView(btn)
 
         mods = smap.getMods()
+    }
+
+    // Remove all layers from map to avoid duplicates
+    fun removeLayers(scrollLayout: LinearLayout){
+        smap.removeLayers()
+        nrLayers = 0
+        scrollLayout.removeAllViewsInLayout()
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -168,7 +175,7 @@ class CustomMap : ViewTouchParent {
             val locInScreen =
                 deviceScreenLoc.first > 0 && deviceScreenLoc.first < width &&
                 deviceScreenLoc.second > 0 && deviceScreenLoc.second < height
-            if(locationAvailable && locInScreen){
+            if (locationAvailable && locInScreen) {
                 drawLocation(
                     deviceScreenLoc,
                     canvas,
@@ -180,7 +187,7 @@ class CustomMap : ViewTouchParent {
             }
 
             // Draw pins
-            pins.forEach{ entry ->
+            pins.forEach { entry ->
                 entry.value.draw(viewport, width, height,this, canvas)
             }
 

@@ -1,6 +1,5 @@
 package com.uu_uce
 
-import android.Manifest
 import android.app.AlertDialog
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -25,9 +24,10 @@ import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.PolygonReader
 import com.uu_uce.views.DragStatus
 import kotlinx.android.synthetic.main.activity_geo_map.*
-import kotlinx.android.synthetic.main.activity_settings.*
 import org.jetbrains.annotations.TestOnly
 import java.io.File
+
+var needsReload = false
 
 //main activity in which the map and menu are displayed
 class GeoMap : AppCompatActivity() {
@@ -37,7 +37,7 @@ class GeoMap : AppCompatActivity() {
     private var statusBarHeight = 0
     private var resourceId = 0
     private var started = false
-    private var missingMaps = false
+
     private lateinit var sharedPref : SharedPreferences
 
     // TODO: Remove temporary hardcoded map information
@@ -178,7 +178,7 @@ class GeoMap : AppCompatActivity() {
     }
 
     override fun onResume() {
-        if(missingMaps) loadMap()
+        if(needsReload) loadMap()
         if(started){
             super.onResume()
             customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
@@ -201,16 +201,6 @@ class GeoMap : AppCompatActivity() {
         grantResults: IntArray
     ) {
         when (requestCode) {
-            /*EXTERNAL_FILES_REQUEST -> {
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                    Logger.log(LogType.Info,"GeoMap", "Permissions granted")
-                    start()
-                }
-                else{
-                    Logger.log(LogType.Info,"GeoMap", "Permissions were not granted, asking again")
-                    getPermissions(this, permissionsNeeded, EXTERNAL_FILES_REQUEST)
-                }
-            }*/
             LOCATION_REQUEST -> {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     Logger.log(LogType.Info,"GeoMap", "Permissions granted")
@@ -230,7 +220,8 @@ class GeoMap : AppCompatActivity() {
         val longest = maxOf(screenDim.x, screenDim.y)
         val size = (longest*menu.buttonPercent).toInt()
 
-        missingMaps = false
+        customMap.removeLayers(toggle_layer_layout)
+
         val mydir = File(getExternalFilesDir(null)?.path + "/Maps/")
         try {
             val heightlines = File(mydir, "Heightlines")
@@ -243,7 +234,6 @@ class GeoMap : AppCompatActivity() {
             )
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
         }catch(e: Exception){
-            missingMaps = true
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
         try {
@@ -257,7 +247,6 @@ class GeoMap : AppCompatActivity() {
             )
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
         }catch(e: Exception){
-            missingMaps = true
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
 
@@ -270,7 +259,7 @@ class GeoMap : AppCompatActivity() {
         }
 
         customMap.setCameraWAspect()
-
+        needsReload = false
     }
 
     @TestOnly

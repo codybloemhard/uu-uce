@@ -104,6 +104,16 @@ class Settings : AppCompatActivity() {
             }
         }
 
+        // hardware acceleration
+        val curHardware = sharedPref.getBoolean("com.uu_uce.HARDWARE", false)
+        hardware_switch.isChecked = curHardware
+        hardware_switch.setOnClickListener{
+            with(sharedPref.edit()) {
+                putBoolean("com.uu_uce.HARDWARE", hardware_switch.isChecked)
+                apply()
+            }
+        }
+
         // Download maps
         fun downloadMaps(){
             maps_downloading_progress.visibility = View.VISIBLE
@@ -123,6 +133,8 @@ class Settings : AppCompatActivity() {
                     runOnUiThread {
                         Toast.makeText(this, "Unpacking completed", Toast.LENGTH_LONG).show()
                         maps_downloading_progress.visibility = View.INVISIBLE
+                        needsReload = true // TODO: Do this in a neater way
+                        delete_maps_button.visibility = View.VISIBLE
                     }
                 },
                 { progress -> runOnUiThread { maps_downloading_progress.progress = progress } }
@@ -146,16 +158,27 @@ class Settings : AppCompatActivity() {
             }
         }
 
-
-
-        // hardware acceleration
-        val curHardware = sharedPref.getBoolean("com.uu_uce.HARDWARE", false)
-        hardware_switch.isChecked = curHardware
-        hardware_switch.setOnClickListener{
-            with(sharedPref.edit()) {
-                putBoolean("com.uu_uce.HARDWARE", hardware_switch.isChecked)
-                apply()
-            }
+        // Delete maps
+        delete_maps_button.visibility =
+            if(File(getExternalFilesDir(null)?.path + File.separator + "Maps").exists()){
+            View.VISIBLE
+        }
+        else{
+            View.INVISIBLE
+        }
+        delete_maps_button.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setIcon(R.drawable.ic_sprite_warning)
+                .setTitle("Deleting maps")
+                .setMessage("Are you sure you want to delete the maps.")
+                .setPositiveButton("Yes") { _, _ ->
+                    File(getExternalFilesDir(null)?.path + File.separator + "Maps").deleteRecursively()
+                    needsReload = true
+                    delete_maps_button.visibility = View.INVISIBLE
+                    Toast.makeText(this, "Maps deleted", Toast.LENGTH_LONG).show()
+                }
+                .setNegativeButton("No", null)
+                .show()
         }
     }
 }
