@@ -22,6 +22,7 @@ class Settings : AppCompatActivity() {
     private val minPinSize = 10
     private val maxPinSize = 100
 
+    // TODO: Remove temporary hardcoded map information
     private val mapsName = "maps.zip"
     private lateinit var maps : List<String>
 
@@ -101,28 +102,51 @@ class Settings : AppCompatActivity() {
                     apply()
                 }
             }
-
         }
 
         // Download maps
-        download_maps_button.setOnClickListener{
+        fun downloadMaps(){
             maps_downloading_progress.visibility = View.VISIBLE
             updateFiles(
                 maps,
                 this,
                 {
-                    runOnUiThread{
-                        Toast.makeText(this, "Download completed, unpacking", Toast.LENGTH_LONG).show()
+                    runOnUiThread {
+                        Toast.makeText(this, "Download completed, unpacking", Toast.LENGTH_LONG)
+                            .show()
                     }
-                    unpackZip(maps.first()) { progress -> runOnUiThread { maps_downloading_progress.progress = progress } }
-                    runOnUiThread{
+                    unpackZip(maps.first()) { progress ->
+                        runOnUiThread {
+                            maps_downloading_progress.progress = progress
+                        }
+                    }
+                    runOnUiThread {
                         Toast.makeText(this, "Unpacking completed", Toast.LENGTH_LONG).show()
                         maps_downloading_progress.visibility = View.INVISIBLE
                     }
                 },
-                { progress -> runOnUiThread { maps_downloading_progress.progress = progress }}
+                { progress -> runOnUiThread { maps_downloading_progress.progress = progress } }
             )
         }
+
+        download_maps_button.setOnClickListener{
+            if(!File(getExternalFilesDir(null)?.path + File.separator + "Maps").exists()) {
+                downloadMaps()
+            }
+            else{
+                AlertDialog.Builder(this)
+                    .setIcon(R.drawable.ic_sprite_warning)
+                    .setTitle("Maps already downloaded")
+                    .setMessage("Are you sure you want to download the maps again?")
+                    .setPositiveButton("Yes") { _, _ ->
+                        downloadMaps()
+                    }
+                    .setNegativeButton("No", null)
+                    .show()
+            }
+        }
+
+
 
         // hardware acceleration
         val curHardware = sharedPref.getBoolean("com.uu_uce.HARDWARE", false)

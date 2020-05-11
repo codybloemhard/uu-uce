@@ -1,6 +1,7 @@
 package com.uu_uce
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -24,19 +25,24 @@ import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.PolygonReader
 import com.uu_uce.views.DragStatus
 import kotlinx.android.synthetic.main.activity_geo_map.*
+import kotlinx.android.synthetic.main.activity_settings.*
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 
 //main activity in which the map and menu are displayed
 class GeoMap : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel
-    private val permissionsNeeded = listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+    //private val permissionsNeeded = listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
     private var screenDim = Point(0,0)
     private var statusBarHeight = 0
     private var resourceId = 0
     private var started = false
     private var missingMaps = false
     private lateinit var sharedPref : SharedPreferences
+
+    // TODO: Remove temporary hardcoded map information
+    private val mapsName = "maps.zip"
+    private lateinit var maps : List<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Logger.setTagEnabled("CustomMap", false)
@@ -48,16 +54,42 @@ class GeoMap : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
         }
-        else{
+        else {
             window.statusBarColor = Color.BLACK// set status background white
         }
 
         super.onCreate(savedInstanceState)
 
-        //start()
-        // This is needed on older phones, even though maps are in internal memory
-        if(checkPermissions(this, permissionsNeeded).count() > 0){
-            getPermissions(this, permissionsNeeded, EXTERNAL_FILES_REQUEST)
+        maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapsName)
+
+        // TODO: remove when streaming is implemented
+        if(!File(getExternalFilesDir(null)?.path + File.separator + "Maps").exists()){
+            AlertDialog.Builder(this)
+                .setIcon(R.drawable.ic_sprite_warning)
+                .setTitle("Streaming is unavailable")
+                .setMessage("Streaming maps is currently unsupported, to use the maps supplied by your organization you will have to download them. Would you like to download the maps now?")
+                .setPositiveButton("Yes") { _, _ ->
+                    updateFiles(
+                        maps,
+                        this,
+                        {
+                            runOnUiThread{
+                                Toast.makeText(this, "Download completed, unpacking", Toast.LENGTH_LONG).show()
+                            }
+                            unpackZip(maps.first()) { }
+                            runOnUiThread{
+                                Toast.makeText(this, "Unpacking completed", Toast.LENGTH_LONG).show()
+                                start()
+                            }
+                        },
+                        {  }
+                    )
+                }
+                .setNegativeButton("No") { _, _ ->
+                    start()
+                    Toast.makeText(this, "Maps can be manually downloaded from settings", Toast.LENGTH_LONG).show()
+                }
+                .show()
         }
         else{
             start()
@@ -169,7 +201,7 @@ class GeoMap : AppCompatActivity() {
         grantResults: IntArray
     ) {
         when (requestCode) {
-            EXTERNAL_FILES_REQUEST -> {
+            /*EXTERNAL_FILES_REQUEST -> {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     Logger.log(LogType.Info,"GeoMap", "Permissions granted")
                     start()
@@ -178,7 +210,7 @@ class GeoMap : AppCompatActivity() {
                     Logger.log(LogType.Info,"GeoMap", "Permissions were not granted, asking again")
                     getPermissions(this, permissionsNeeded, EXTERNAL_FILES_REQUEST)
                 }
-            }
+            }*/
             LOCATION_REQUEST -> {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     Logger.log(LogType.Info,"GeoMap", "Permissions granted")
