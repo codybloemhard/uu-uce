@@ -175,6 +175,8 @@ fun unpackZip(zipPath: String, progressAction : (Int) -> Unit): Boolean {
         e.printStackTrace()
         return false
     }
+
+    File(zipPath).delete()
     return true
 }
 

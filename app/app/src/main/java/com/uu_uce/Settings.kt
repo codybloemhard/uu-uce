@@ -135,7 +135,7 @@ class Settings : AppCompatActivity() {
             }
             else{
                 AlertDialog.Builder(this)
-                    .setIcon(R.drawable.ic_sprite_warning)
+                    .setIcon(R.drawable.ic_sprite_question)
                     .setTitle("Maps already downloaded")
                     .setMessage("Are you sure you want to download the maps again?")
                     .setPositiveButton("Yes") { _, _ ->
