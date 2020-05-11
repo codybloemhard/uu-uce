@@ -4,9 +4,11 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.text.InputType
 import android.util.JsonReader
 import android.view.Gravity
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
@@ -135,14 +137,40 @@ class PinContent(private val contentString: String) {
 }
 
 interface ContentBlockInterface{
+    val tag : BlockTag
     val canCompleteBlock : Boolean
     fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?)
     fun getFilePath() : List<String>
     override fun toString() : String
 }
 
+class EditTextBlock() : ContentBlockInterface {
+    lateinit var content : EditText
+    override val tag = BlockTag.TEXT
+    override val canCompleteBlock = false
+    override fun generateContent(blockId : Int, layout : LinearLayout, activity: Activity, view : View, parent : Pin?) {
+        content = EditText(activity).apply {
+            inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            isSingleLine = false
+            imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION
+            id = R.id.text_field
+        }.also{
+            layout.addView(it)
+        }
+    }
+
+    override fun getFilePath() : List<String> {
+        return listOf()
+    }
+
+    override fun toString() : String {
+        return "{${tagToJsonString(tag)}," +
+                "${textToJsonString(content.text.toString())}}"
+    }
+}
+
 class TextContentBlock(private val textContent : String) : ContentBlockInterface{
-    private val tag = BlockTag.TEXT
+    override val tag = BlockTag.TEXT
     override val canCompleteBlock = false
     override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
         val content = TextView(activity)
@@ -167,7 +195,7 @@ class TextContentBlock(private val textContent : String) : ContentBlockInterface
 }
 
 class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Uri) : ContentBlockInterface{
-    private val tag = BlockTag.IMAGE
+    override val tag = BlockTag.IMAGE
     override val canCompleteBlock = false
     override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
         val content = PhotoView(activity)
@@ -206,7 +234,7 @@ class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Ur
 }
 
 class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : Uri, private val title : String? = null) : ContentBlockInterface{
-    private val tag = BlockTag.VIDEO
+    override val tag = BlockTag.VIDEO
     override val canCompleteBlock = false
     override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
         val frameLayout = FrameLayout(activity)
@@ -267,7 +295,7 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
 }
 
 class MCContentBlock(private val correctAnswers : List<String>, private val incorrectAnswers : List<String>, private val reward : Int) : ContentBlockInterface{
-    private val tag = BlockTag.MCQUIZ
+    override val tag = BlockTag.MCQUIZ
     override val canCompleteBlock = true
     private var selectedAnswer : Int = -1
     private lateinit var selectedBackground : CardView

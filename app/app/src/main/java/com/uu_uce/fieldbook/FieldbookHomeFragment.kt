@@ -31,8 +31,8 @@ import com.uu_uce.R
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.pins.ContentBlockInterface
+import com.uu_uce.pins.EditTextBlock
 import com.uu_uce.pins.ImageContentBlock
-import com.uu_uce.pins.TextContentBlock
 import com.uu_uce.pins.VideoContentBlock
 import com.uu_uce.services.*
 import java.io.File
@@ -77,7 +77,7 @@ class FieldbookHomeFragment : Fragment() {
     private var currentName = ""
     private var currentPath = ""
 
-
+    private var latestBlockIndex = 0
     private var blockID = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -407,69 +407,39 @@ class FieldbookHomeFragment : Fragment() {
     }
 
     private fun addText() {
+        latestBlockIndex++
         title.clearFocus()
-        val text = EditText(requireContext()).apply{
-            inputType = TYPE_TEXT_FLAG_NO_SUGGESTIONS
-            id = R.id.text_field
+        EditTextBlock().also {
+            it.generateContent(blockID++,layout,fragmentActivity,customView,null)
+            content.add(it)
         }
-        layout.addView(text, layoutParams)
         scrollToEnd()
 
-        //TODO: remove focus from editText when the user touches outside of it
-        val button = Button(requireContext()).apply {
-            setText(context.getString(R.string.fieldbook_done_button_text))
-            id = R.id.close_text_field
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                weight = 1.0f
-                gravity = Gravity.END
-            }
-            gravity = Gravity.CENTER
-            setOnClickListener {
-                text.clearFocus()
-                hideKeyboard(fragmentActivity, it)
-            }
-        }.also {
-            layout.addView(it)
-        }
-        text.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                TextContentBlock(
-                    text.text.toString()
-                ).also {
-                    it.generateContent(blockID++, layout, requireActivity(), customView, null)
-                    content.add(it)
-                }
-                layout.apply {
-                    removeView(text)
-                    removeView(button)
-                }
-                scrollToEnd()
-            }
-        }
+        //hideKeyboard(fragmentActivity, it)
+
     }
 
     private fun addImage(image: Uri) {
+        latestBlockIndex++
         title.clearFocus()
         ImageContentBlock(
             image,
             makeImageThumbnail(image)
         ).also{
-            it.generateContent(blockID++,layout,requireActivity(),customView,null)
+            it.generateContent(blockID++, layout, fragmentActivity, customView, null)
             content.add(it)
         }
         scrollToEnd()
     }
 
     private fun addVideo(video: Uri) {
+        latestBlockIndex++
         title.clearFocus()
         VideoContentBlock(
             video,
             makeVideoThumbnail(video)
         ).also {
-            it.generateContent(blockID++,layout, requireActivity(),customView,null)
+            it.generateContent(blockID++, layout, fragmentActivity, customView, null)
             content.add(it)
         }
         scrollToEnd()
