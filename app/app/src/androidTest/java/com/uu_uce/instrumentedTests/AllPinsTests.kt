@@ -534,7 +534,7 @@ class AllPinsTests {
     @Test
     fun pinSearching(){
         // Search for D
-        onView(withId(R.id.searchbar))
+        onView(withId(R.id.pins_searchbar))
             .perform(typeText("D"), pressKey(KeyEvent.KEYCODE_ENTER))
 
         sleep(100)
@@ -548,7 +548,7 @@ class AllPinsTests {
         ).check(matches(withText("D")))
 
         // Press clear search to stop searching
-        onView(withId(R.id.searchbar))
+        onView(withId(R.id.pins_searchbar))
             .perform(clearText(), pressKey(KeyEvent.KEYCODE_ENTER))
 
         sleep(100)
@@ -562,7 +562,7 @@ class AllPinsTests {
         ).check(matches(withText("B")))
 
         // Search for C
-        onView(withId(R.id.searchbar))
+        onView(withId(R.id.pins_searchbar))
             .perform(typeText("C"), pressKey(KeyEvent.KEYCODE_ENTER))
 
         sleep(100)
