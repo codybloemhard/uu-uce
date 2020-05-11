@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinViewModel
+import com.uu_uce.misc.ListenableBoolean
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.services.*
@@ -24,12 +25,10 @@ import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.PolygonReader
 import com.uu_uce.views.DragStatus
 import kotlinx.android.synthetic.main.activity_geo_map.*
-import kotlinx.android.synthetic.main.activity_settings.*
-import kotlinx.android.synthetic.main.progress_popup.*
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 
-var needsReload = false
+var needsReload = ListenableBoolean()
 
 //main activity in which the map and menu are displayed
 class GeoMap : AppCompatActivity() {
@@ -159,6 +158,14 @@ class GeoMap : AppCompatActivity() {
             }
         }
 
+        needsReload.setListener(object : ListenableBoolean.ChangeListener {
+            override fun onChange() {
+                if(needsReload.getValue()){
+                    loadMap()
+                }
+            }
+        })
+
         started = true
     }
 
@@ -185,7 +192,7 @@ class GeoMap : AppCompatActivity() {
     }
 
     override fun onResume() {
-        if(needsReload) loadMap()
+        if(needsReload.getValue()) loadMap()
         if(started){
             super.onResume()
             customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
@@ -266,7 +273,8 @@ class GeoMap : AppCompatActivity() {
         }
 
         customMap.setCameraWAspect()
-        needsReload = false
+        needsReload.setValue(false)
+        customMap.redrawMap()
     }
 
     private fun openProgressPopup(currentView: View){

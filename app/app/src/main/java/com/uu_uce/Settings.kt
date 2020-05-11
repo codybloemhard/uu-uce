@@ -139,7 +139,7 @@ class Settings : AppCompatActivity() {
                     runOnUiThread {
                         Toast.makeText(this, "Unpacking completed", Toast.LENGTH_LONG).show()
                         maps_downloading_progress.visibility = View.INVISIBLE
-                        needsReload = true // TODO: Do this in a neater way
+                        needsReload.setValue(true)
                         delete_maps_button.visibility = View.VISIBLE
                     }
                 },
@@ -179,7 +179,7 @@ class Settings : AppCompatActivity() {
                 .setMessage("Are you sure you want to delete the maps.")
                 .setPositiveButton("Yes") { _, _ ->
                     File(getExternalFilesDir(null)?.path + File.separator + "Maps").deleteRecursively()
-                    needsReload = true
+                    needsReload.setValue(true)
                     delete_maps_button.visibility = View.INVISIBLE
                     Toast.makeText(this, "Maps deleted", Toast.LENGTH_LONG).show()
                 }
