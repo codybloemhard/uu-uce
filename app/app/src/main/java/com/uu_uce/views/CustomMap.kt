@@ -80,9 +80,13 @@ class CustomMap : ViewTouchParent {
     private var nrLayers = 0
     private lateinit var mods : List<Int>
     private lateinit var camera : Camera
+    private var bufferFrames = 2
+    private var curBufferFrame = 0
 
     init{
         setEGLContextClientVersion(2)
+        debugFlags = DEBUG_CHECK_GL_ERROR; // enable log
+        preserveEGLContextOnPause = true; // default is false
 
         renderer = CustomMapGLRenderer(this)
         setRenderer(renderer)
@@ -139,9 +143,14 @@ class CustomMap : ViewTouchParent {
         //if both the camera and the map have no updates, don't redraw
         val res = camera.update()
         val chunkRes = smap.updateChunks()
+
         if(res == UpdateResult.NOOP && chunkRes == ChunkUpdateResult.NOTHING){
-            return
+            //bufferframes to make sure everything is redrawn when returning from a different activity
+            curBufferFrame++
+            if(curBufferFrame >= bufferFrames)
+                return
         }
+        else curBufferFrame = 0
 
         val viewport = camera.getViewport()
         val (scale,trans) = camera.getScaleTrans()
