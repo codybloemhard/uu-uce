@@ -8,9 +8,7 @@ import com.uu_uce.misc.Logger
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
 import kotlin.math.ceil
-import kotlin.math.floor
 import kotlin.math.log
 import kotlin.math.pow
 

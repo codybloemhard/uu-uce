@@ -3,6 +3,7 @@ package com.uu_uce.views
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.opengl.GLES20
@@ -17,12 +18,9 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import com.uu_uce.AllPins
-import com.uu_uce.Fieldbook
-import com.uu_uce.R
-import com.uu_uce.Settings
 import com.uu_uce.*
 import com.uu_uce.OpenGL.CustomMapGLRenderer
+import com.uu_uce.Fieldbook
 import com.uu_uce.allpins.PinConversion
 import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinViewModel
@@ -50,8 +48,6 @@ class CustomMap : ViewTouchParent {
 
     //gl renderer
     private val renderer: CustomMapGLRenderer
-    private var scale = FloatArray(2)
-    private var trans = FloatArray(2)
 
     // Location
     private val locationServices                            = LocationServices()
@@ -80,7 +76,7 @@ class CustomMap : ViewTouchParent {
     private var nrLayers = 0
     private lateinit var mods : List<Int>
     private lateinit var camera : Camera
-    private var bufferFrames = 2
+    private var bufferFrames = 5
     private var curBufferFrame = 0
 
     init{
@@ -108,12 +104,7 @@ class CustomMap : ViewTouchParent {
         //width and height are not set in the init{} yet
         //we delay calculations that use them by using post
         post{
-            camera.wAspect = width.toDouble()/height
-
-            val z = 1.0 / (camera.wAspect)
-            camera.maxZoom = maxOf(1.0,z)
-            camera.setZoom(z)
-            smap.setzooms(camera.minZoom, camera.maxZoom)
+            setCameraWAspect()
         }
     }
 
@@ -152,6 +143,8 @@ class CustomMap : ViewTouchParent {
         }
         else curBufferFrame = 0
 
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+
         val viewport = camera.getViewport()
         val (scale,trans) = camera.getScaleTrans()
 
@@ -161,8 +154,6 @@ class CustomMap : ViewTouchParent {
         }
 
         val timeDraw = measureTimeMillis {
-            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
-
             // Draw map
             smap.draw(standardProgram, scale, trans, width, height, debug)
 
@@ -400,6 +391,15 @@ class CustomMap : ViewTouchParent {
         }
     }
 
+    fun setCameraWAspect(){
+        camera.wAspect = width.toDouble()/height
+
+        val z = 1.0 / (camera.wAspect)
+        camera.maxZoom = maxOf(1.0,z)
+        camera.setZoom(z)
+        smap.setzooms(camera.minZoom, camera.maxZoom)
+    }
+
     //turn a layer on or off
     private fun toggleLayer(l: Int){
         smap.toggleLayer(l)
@@ -428,6 +428,12 @@ class CustomMap : ViewTouchParent {
     //open settings activity
     fun startSettings() {
         val i = Intent(context, Settings::class.java)
+        startActivity(context, i,null)
+    }
+
+    //open profile activity
+    fun startProfile() {
+        val i = Intent(context, Profile::class.java)
         startActivity(context, i,null)
     }
 

@@ -68,4 +68,8 @@ class Fieldbook : AppCompatActivity() {
         transaction.addToBackStack(null)
         transaction.commit()
     }
+
+    override fun onBackPressed() {
+        finish()
+    }
 }

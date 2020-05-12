@@ -35,6 +35,7 @@ class GeoMap : AppCompatActivity() {
     private var statusBarHeight = 0
     private var resourceId = 0
     private var started = false
+    private var missingMaps = false
     private lateinit var sharedPref : SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,9 +72,9 @@ class GeoMap : AppCompatActivity() {
 
         // Set settings
         customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
-        customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", 60)
+        customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
 
-        // TODO: Remove when database is fully implemented
+        // TODO: Remove when releasing
         with(sharedPref.edit()) {
             putInt("com.uu_uce.USER_POINTS", 0)
             apply()
@@ -92,66 +93,19 @@ class GeoMap : AppCompatActivity() {
         }
 
         // Initialize menu
-        (Display::getSize)(windowManager.defaultDisplay, screenDim)
-        val longest = maxOf(screenDim.x, screenDim.y)
-        val size = (longest*menu.buttonPercent).toInt()
-
-        val btn1 = allpins_button
-        btn1.setOnClickListener{customMap.startAllPins()}
-
-        val btn2 = fieldbook_button
-        btn2.setOnClickListener{customMap.startFieldBook()}
-
-        val btn3 = settings_button
-        btn3.setOnClickListener{customMap.startSettings()}
+        allpins_button.setOnClickListener{customMap.startAllPins()}
+        fieldbook_button.setOnClickListener{customMap.startFieldBook()}
+        settings_button.setOnClickListener{customMap.startSettings()}
+        profile_button.setOnClickListener{customMap.startProfile()}
 
         dragBar.clickAction      = {menu.dragButtonTap()}
         dragBar.dragAction       = { dx, dy -> menu.drag(dx,dy)}
         dragBar.dragEndAction    = { dx, dy -> menu.snap(dx, dy)}
 
-        val mydir = File(filesDir, "mydir")
         //add layers to map
-        for(i in 0..0) {
-            val xoffset = i*1000f
-            try {
-                val heightlines = File(mydir, "heightlines")
-                customMap.addLayer(
-                    LayerType.Height,
-                    HeightLineReader(heightlines, xoffset),
-                    toggle_layer_layout,
-                    size,
-                    true
-                )
-                Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
-            } catch (e: Exception) {
-                Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
-            }
-        }
-        for(i in 0..0) {
-            try {
-                val xoffset = i*1000f
-                customMap.addLayer(
-                    LayerType.Water,
-                    PolygonReader(mydir, xoffset),
-                    toggle_layer_layout,
-                    size,
-                    false
-                )
-                Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
-            } catch (e: Exception) {
-                Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
-            }
-        }
-
-        //create camera based on layers
-        customMap.initializeCamera()
+        loadMap()
 
         customMap.tryStartLocServices(this)
-
-        //more menu initialization which needs its width/height
-        menu.post{
-            initMenu()
-        }
 
         // Set center on location button functionality
         center_button.setOnClickListener{
@@ -191,9 +145,10 @@ class GeoMap : AppCompatActivity() {
     }
 
     override fun onResume() {
+        if(missingMaps) loadMap()
         if(started){
             customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
-            customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", 60)
+            customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
             customMap.setPins(pinViewModel.allPinData)
             customMap.redrawMap()
         }
@@ -201,7 +156,7 @@ class GeoMap : AppCompatActivity() {
     }
 
     private fun initMenu(){
-        menu.setScreenHeight(screenDim.y - statusBarHeight, dragBar.height, toggle_layer_scroll.height, lower_menu_layout.height)
+        menu.setScreenHeight(customMap.height, dragBar.height, toggle_layer_scroll.height, lower_menu_layout.height)
     }
 
     // Respond to permission request result
@@ -233,6 +188,54 @@ class GeoMap : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun loadMap(){
+        (Display::getSize)(windowManager.defaultDisplay, screenDim)
+        val longest = maxOf(screenDim.x, screenDim.y)
+        val size = (longest*menu.buttonPercent).toInt()
+
+        missingMaps = false
+        val mydir = File(getExternalFilesDir(null)?.path + "/Maps/")
+        try {
+            val heightlines = File(mydir, "Heightlines")
+            customMap.addLayer(
+                LayerType.Height,
+                HeightLineReader(heightlines),
+                toggle_layer_layout,
+                size,
+                true
+            )
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
+        }catch(e: Exception){
+            missingMaps = true
+            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
+        }
+        try {
+            val polygons = File(mydir, "Polygons")
+            customMap.addLayer(
+                LayerType.Water,
+                PolygonReader(polygons),
+                toggle_layer_layout,
+                size,
+                false
+            )
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
+        }catch(e: Exception){
+            missingMaps = true
+            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
+        }
+
+        //create camera based on layers
+        customMap.initializeCamera()
+
+        //more menu initialization which needs its width/height
+        menu.post{
+            initMenu()
+        }
+
+        customMap.setCameraWAspect()
+
     }
 
     @TestOnly

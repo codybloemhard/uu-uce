@@ -3,7 +3,6 @@ package com.uu_uce.shapefiles
 import android.opengl.Matrix
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 

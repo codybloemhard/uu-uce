@@ -1,5 +1,6 @@
 package com.uu_uce.shapefiles
 
+
 import android.graphics.Paint
 import android.opengl.GLES20
 import com.uu_uce.OpenGL.coordsPerVertex
@@ -10,6 +11,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer
+import android.graphics.Canvas
 
 //abstract class for drawing shapes
 abstract class DrawInfo{

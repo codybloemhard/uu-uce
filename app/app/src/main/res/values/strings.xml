@@ -48,5 +48,20 @@
     <string name="settings_pin_size">Pin Size</string>
     <string name="geomap_heightline_diff_text">%1$dm</string>
     <string name="settings_debug">Debug</string>
+    <string name="settings_networkdownload">Enable downloads on mobile data</string>
+    <string name="settings_download_maps">Download maps</string>
+    <string name="settings_download_button_text">Download</string>
     <string name="settings_hardware">Hardware Accelerated</string>
+    <string name="profile_user_name">User name</string>
+    <string name="profile_orginization_image_description">The logo of the orginization that this person belongs to</string>
+    <string name="profile_user_number">User number</string>
+    <string name="profile_university_name">Organization name</string>
+    <string name="menu_profile_button_text">Profile</string>
+    <string name="menu_settings_button_text">Settings</string>
+    <string name="profile_badges">Badges</string>
+    <string name="profile_achievements">Achievements</string>
+    <string name="profile_statistics">Statistics</string>
+    <string name="profile_badge_title">Badge Title</string>
+    <string name="profile_badge_description">Badge Description</string>
+    <string name="profile_wip_image">wip image</string>
 </resources>

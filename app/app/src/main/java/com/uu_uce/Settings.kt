@@ -1,20 +1,29 @@
 package com.uu_uce
 
-import android.content.Context
+import android.app.AlertDialog
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.widget.CompoundButton
+import android.view.View
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
+import com.uu_uce.services.unpackZip
+import com.uu_uce.services.updateFiles
 import com.uu_uce.ui.createTopbar
 import kotlinx.android.synthetic.main.activity_settings.*
+import java.io.*
+
+// Default settings
+const val defaultPinSize = 60
 
 class Settings : AppCompatActivity() {
     // private variables
     private val minPinSize = 10
     private val maxPinSize = 100
+
+    private val mapsName = "maps.zip"
+    private lateinit var maps : List<String>
 
     private lateinit var sharedPref : SharedPreferences
 
@@ -22,12 +31,14 @@ class Settings : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
+        maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapsName)
+
         sharedPref = getDefaultSharedPreferences(this)
 
         createTopbar(this, "Settings")
 
         // PinSize
-        val curSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", 60)
+        val curSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
         pinsize_seekbar.max = maxPinSize - minPinSize
         pinsize_seekbar.progress = curSize - minPinSize
         pinsize_numberview.text = curSize.toString()
@@ -58,6 +69,59 @@ class Settings : AppCompatActivity() {
                 putBoolean("com.uu_uce.DEBUG", debug_switch.isChecked)
                 apply()
             }
+        }
+
+        // Network downloading
+        val curNetworkDownloading = sharedPref.getBoolean("com.uu_uce.NETWORK_DOWNLOADING", false)
+        networkdownload_switch.isChecked = curNetworkDownloading
+        networkdownload_switch.setOnClickListener{
+            if(networkdownload_switch.isChecked){
+                AlertDialog.Builder(this)
+                    .setIcon(R.drawable.ic_sprite_warning)
+                    .setTitle("Enabling mobile data")
+                    .setMessage("Are you sure you want to enable downloading over mobile data? This may lead to significant amounts of data being used.")
+                    .setPositiveButton("Yes") { _, _ ->
+                        with(sharedPref.edit()) {
+                            putBoolean(
+                                "com.uu_uce.NETWORK_DOWNLOADING",
+                                true
+                            )
+                            apply()
+                        }
+                    }
+                    .setNegativeButton("No") { _, _ -> networkdownload_switch.isChecked = false }
+                    .show()
+            }
+            else{
+                with(sharedPref.edit()) {
+                    putBoolean(
+                        "com.uu_uce.NETWORK_DOWNLOADING",
+                        false
+                    )
+                    apply()
+                }
+            }
+
+        }
+
+        // Download maps
+        download_maps_button.setOnClickListener{
+            maps_downloading_progress.visibility = View.VISIBLE
+            updateFiles(
+                maps,
+                this,
+                {
+                    runOnUiThread{
+                        Toast.makeText(this, "Download completed, unpacking", Toast.LENGTH_LONG).show()
+                    }
+                    unpackZip(maps.first()) { progress -> runOnUiThread { maps_downloading_progress.progress = progress } }
+                    runOnUiThread{
+                        Toast.makeText(this, "Unpacking completed", Toast.LENGTH_LONG).show()
+                        maps_downloading_progress.visibility = View.INVISIBLE
+                    }
+                },
+                { progress -> runOnUiThread { maps_downloading_progress.progress = progress }}
+            )
         }
 
         // hardware acceleration
