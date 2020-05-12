@@ -311,7 +311,7 @@ class GeoMapTests {
             .check(matches(cameraZoomedOut()))
     }
 
-    @Test
+    /*@Test
     fun deleteAndDownloadMaps(){
         // Open settings
         onView(withId(R.id.dragBar))
@@ -385,5 +385,5 @@ class GeoMapTests {
         // Check if maps are reloaded
         onView(withId(R.id.customMap))
             .check(matches(layersLoaded()))
-    }
+    }*/
 }
