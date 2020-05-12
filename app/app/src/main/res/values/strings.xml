@@ -65,10 +65,13 @@
     <string name="profile_badge_description">Badge Description</string>
     <string name="profile_wip_image">wip image</string>
     <string name="settings_delete_maps_button_text">Delete</string>
-    <string name="settings_delete_maps_text">Delete maps</string>
     <string name="settings_maps">Maps</string>
     <string name="settings_content">Content</string>
     <string name="settings_download_content_text">Download content</string>
     <string name="settings_general">General</string>
     <string name="progress_popup_progress">Progress</string>
+    <string name="positive_button_text">Yes</string>
+    <string name="negative_button_text">No</string>
+    <string name="settings_map_deleted_text">Maps deleted</string>
+    <string name="settings_maps_storage">Storage used for maps: </string>
 </resources>

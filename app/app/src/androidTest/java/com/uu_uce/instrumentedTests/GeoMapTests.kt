@@ -1,16 +1,21 @@
 package com.uu_uce.instrumentedTests
 
+import android.content.Context
+import android.net.wifi.WifiManager
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.doubleClick
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
+import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.rule.ActivityTestRule
+import androidx.test.rule.GrantPermissionRule
 import com.uu_uce.*
 import com.uu_uce.allpins.PinData
 import org.hamcrest.Matchers.not
@@ -19,16 +24,29 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class GeoMapTests {
     private lateinit var pinLocation : Pair<Float, Float>
+    private var wifi : WifiManager? = null
+
     @get:Rule
     var activityRule: ActivityTestRule<GeoMap>
             = ActivityTestRule(GeoMap::class.java)
 
+    @Rule
+    @JvmField
+    var mGrantPermissionRule =
+        GrantPermissionRule.grant(
+            "android.permission.ACCESS_FINE_LOCATION",
+            "android.permission.ACCESS_COARSE_LOCATION",
+            "android.permission.WRITE_EXTERNAL_STORAGE"
+        )
+
     @Before
     fun init(){
+        wifi = activityRule.activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager?
         val pinList: MutableList<PinData> = mutableListOf()
         pinList.add(
             PinData(
@@ -121,17 +139,17 @@ class GeoMapTests {
     }
 
     @Test
-    fun allPinsButton(){
-        // First click should open the layer toggle buttons
+    fun profileButton(){
+        // First click should open the layer toggle buttons the second should open the lower menu
         onView(withId(R.id.dragBar))
             .perform(click(), click())
 
-        // Test switching to all pins
-        onView(withId(R.id.allpins_button))
+        // Test switching to profile
+        onView(withId(R.id.profile_button))
             .perform(click())
 
-        // Check if allpins successfully loaded
-        onView(withId(R.id.allpins_recyclerview))
+        // Check if profile successfully loaded
+        onView(withId(R.id.user_name_text))
             .check(matches(isDisplayed()))
 
         // Switch back to geomap
@@ -145,16 +163,62 @@ class GeoMapTests {
 
     @Test
     fun fieldbookButton(){
-        // First click should open the layer toggle buttons
+        // First click should open the layer toggle buttons the second should open the lower menu
         onView(withId(R.id.dragBar))
             .perform(click(), click())
 
-        // Test switching to all pins
+        // Test switching to fieldbook
         onView(withId(R.id.fieldbook_button))
             .perform(click())
 
-        // Check if allpins successfully loaded
+        // Check if fieldbook successfully loaded
         onView(withId(R.id.fieldbook_recyclerview))
+            .check(matches(isDisplayed()))
+
+        // Switch back to geomap
+        onView(withId(R.id.toolbar_back_button))
+            .perform(click())
+
+        // Check if geomap successfully loaded
+        onView(withId(R.id.lower_menu_layout))
+            .check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun allPinsButton(){
+        // First click should open the layer toggle buttons the second should open the lower menu
+        onView(withId(R.id.dragBar))
+            .perform(click(), click())
+
+        // Test switching to allPins
+        onView(withId(R.id.allpins_button))
+            .perform(click())
+
+        // Check if allPins successfully loaded
+        onView(withId(R.id.allpins_recyclerview))
+            .check(matches(isDisplayed()))
+
+        // Switch back to geomap
+        onView(withId(R.id.toolbar_back_button))
+            .perform(click())
+
+        // Check if geomap successfully loaded
+        onView(withId(R.id.lower_menu_layout))
+            .check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun settingsButton(){
+        // First click should open the layer toggle buttons the second should open the lower menu
+        onView(withId(R.id.dragBar))
+            .perform(click(), click())
+
+        // Test switching to settings
+        onView(withId(R.id.settings_button))
+            .perform(click())
+
+        // Check if settings successfully loaded
+        onView(withId(R.id.settings_scrollview))
             .check(matches(isDisplayed()))
 
         // Switch back to geomap
@@ -245,5 +309,81 @@ class GeoMapTests {
         // Check if camera is zoomed out
         onView(withId(R.id.customMap))
             .check(matches(cameraZoomedOut()))
+    }
+
+    @Test
+    fun deleteAndDownloadMaps(){
+        // Open settings
+        onView(withId(R.id.dragBar))
+            .perform(click(), click())
+
+        onView(withId(R.id.settings_button))
+            .perform(click())
+
+        // Check if settings successfully loaded
+        onView(withId(R.id.settings_scrollview))
+            .check(matches(isDisplayed()))
+
+        // Delete maps
+        onView(withId(R.id.delete_maps_button))
+            .perform(click())
+
+        // Do not delete maps
+        onView(ViewMatchers.withText("No"))
+            .perform(click())
+
+        // Check that delete button not disappeared
+        onView(withId(R.id.delete_maps_button))
+            .check(matches(isDisplayed()))
+
+        // Delete maps
+        onView(withId(R.id.delete_maps_button))
+            .perform(click())
+
+        // Do not delete maps
+        onView(ViewMatchers.withText("Yes"))
+            .perform(click())
+
+        // Check that delete button has disappeared
+        onView(withId(R.id.delete_maps_button))
+            .check(matches(not(isDisplayed())))
+
+        // Check that delete button has disappeared
+        onView(withId(R.id.delete_maps_button))
+            .check(matches(not(isDisplayed())))
+
+        // Switch back to geomap
+        onView(withId(R.id.toolbar_back_button))
+            .perform(click())
+
+        // Check if maps are unloaded
+        onView(withId(R.id.customMap))
+            .check(matches(noLayersLoaded()))
+
+        // Go back to settings
+        onView(withId(R.id.dragBar))
+            .perform(click())
+
+        onView(withId(R.id.settings_button))
+            .perform(click())
+
+        // Check if delete is still gone
+        onView(withId(R.id.delete_maps_button))
+            .check(matches(not(isDisplayed())))
+
+        // Download maps
+        onView(withId(R.id.download_maps_button))
+            .perform(click())
+
+        // Wait for download to complete
+
+
+        // Switch back to geomap
+        onView(withId(R.id.toolbar_back_button))
+            .perform(click())
+
+        // Check if maps are reloaded
+        onView(withId(R.id.customMap))
+            .check(matches(layersLoaded()))
     }
 }

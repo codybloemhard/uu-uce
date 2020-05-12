@@ -10,6 +10,7 @@
         layout="@layout/menu_bar" />
 
     <ScrollView
+        android:id="@+id/settings_scrollview"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -190,7 +191,7 @@
                     android:id="@+id/delete_maps_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/settings_delete_maps_text"
+                    android:text="@string/settings_maps_storage"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -202,6 +203,15 @@
                     android:text="@string/settings_delete_maps_button_text"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/maps_storage_size"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/delete_maps_text"
                     app:layout_constraintTop_toTopOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>

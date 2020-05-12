@@ -428,6 +428,9 @@ class CustomMap : ViewTouchParent {
         startActivity(context, i,null)
     }
 
+    fun getLayerCount() : Int{
+        return nrLayers
+    }
 
     //functions used for testing
     @TestOnly

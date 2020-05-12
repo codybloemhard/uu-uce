@@ -16,6 +16,7 @@ import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.zip.ZipEntry
+import java.util.zip.ZipException
 import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 
@@ -139,47 +140,87 @@ fun unpackZip(zipPath: String, progressAction : (Int) -> Unit): Boolean {
     val splitPath = zipPath.split('/')
     val destinationPath = splitPath.take(splitPath.count() - 1).fold(splitPath.first()){s1, s2 -> "$s1${File.separator}$s2"}.drop(1)
 
-    val zipSize =  ZipFile(zipPath).size()
-    val `is`: InputStream
-    val zis: ZipInputStream
-    try {
-        var filename: String
-        `is` = FileInputStream(zipPath)
-        zis = ZipInputStream(BufferedInputStream(`is`))
-        var ze: ZipEntry?
-        val buffer = ByteArray(1024)
-        var count: Int
-        var i = 0.0
-        while (zis.nextEntry.also { ze = it } != null) {
-            if(ze != null){
-                filename = ze!!.name
+    try{
+        val zipSize =  ZipFile(zipPath).size()
+        val `is`: InputStream
+        val zis: ZipInputStream
+        try {
+            var filename: String
+            `is` = FileInputStream(zipPath)
+            zis = ZipInputStream(BufferedInputStream(`is`))
+            var ze: ZipEntry?
+            val buffer = ByteArray(1024)
+            var count: Int
+            var i = 0.0
+            while (zis.nextEntry.also { ze = it } != null) {
+                if(ze != null){
+                    filename = ze!!.name
 
-                // Need to create directories if not exists, or
-                // it will generate an Exception...
-                if (ze!!.isDirectory) {
-                    val fmd = File(destinationPath + File.separator + filename)
-                    fmd.mkdirs()
-                    continue
+                    // Need to create directories if not exists, or
+                    // it will generate an Exception...
+                    if (ze!!.isDirectory) {
+                        val fmd = File(destinationPath + File.separator + filename)
+                        fmd.mkdirs()
+                        continue
+                    }
+                    val fout = FileOutputStream(destinationPath + File.separator + filename)
+                    while (zis.read(buffer).also { count = it } != -1) {
+                        fout.write(buffer, 0, count)
+                    }
+
+                    i++
+                    progressAction((i / zipSize * 100).toInt())
+
+                    fout.close()
+                    zis.closeEntry()
                 }
-                val fout = FileOutputStream(destinationPath + File.separator + filename)
-                while (zis.read(buffer).also { count = it } != -1) {
-                    fout.write(buffer, 0, count)
-                }
-
-                i++
-                progressAction((i / zipSize * 100).toInt())
-
-                fout.close()
-                zis.closeEntry()
             }
+            zis.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return false
         }
-        zis.close()
-    } catch (e: IOException) {
-        e.printStackTrace()
+
+        File(zipPath).delete()
+        return true
+    }
+    catch (e: ZipException) {
+        File(zipPath).delete()
         return false
     }
+}
 
-    File(zipPath).delete()
-    return true
+fun dirSize(dir: File): Long {
+    if (dir.exists()) {
+        var result: Long = 0
+        val fileList = dir.listFiles()
+        if (fileList != null) {
+            for (i in fileList.indices) {
+                // Recursive call if it's a directory
+                result += if (fileList[i].isDirectory) {
+                    dirSize(fileList[i])
+                }
+                else {
+                    // Sum the file size in bytes
+                    fileList[i].length()
+                }
+            }
+            return result // return the file size
+        }
+    }
+    return 0
+}
+
+fun writableSize(bytes : Long) : String {
+    val units = listOf("B", "KB", "MB", "GB")
+
+    var curSize = bytes.toDouble()
+    var curUnit = 0
+    while (curSize > 512) {
+        curUnit++
+        curSize /= 1024
+    }
+
+    return String.format("%.2f", curSize) + " " + units[curUnit]
 }
 

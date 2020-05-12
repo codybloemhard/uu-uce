@@ -81,9 +81,10 @@ class GeoMap : AppCompatActivity() {
                             runOnUiThread{
                                 Toast.makeText(this, "Download completed, unpacking", Toast.LENGTH_LONG).show()
                             }
-                            unpackZip(maps.first()) { progress -> runOnUiThread { progressBar.progress = progress } }
+                            val result = unpackZip(maps.first()) { progress -> runOnUiThread { progressBar.progress = progress } }
                             runOnUiThread{
-                                Toast.makeText(this, "Unpacking completed", Toast.LENGTH_LONG).show()
+                                if(result) Toast.makeText(this, "Unpacking completed", Toast.LENGTH_LONG).show()
+                                else Toast.makeText(this, "Unpacking failed", Toast.LENGTH_LONG).show()
                                 popupWindow?.dismiss()
                                 start()
                             }
@@ -187,8 +188,12 @@ class GeoMap : AppCompatActivity() {
             menu.down()
             return
         }
-
-        customMap.activePopup?.dismiss()
+        if(customMap.activePopup != null){
+            customMap.activePopup!!.dismiss()
+        }
+        else{
+            moveTaskToBack(true)
+        }
     }
 
     override fun onResume() {
@@ -205,7 +210,12 @@ class GeoMap : AppCompatActivity() {
     }
 
     private fun initMenu(){
-        menu.setScreenHeight(customMap.height, dragBar.height, toggle_layer_scroll.height, lower_menu_layout.height)
+        if(customMap.getLayerCount() > 0){
+            menu.setScreenHeight(customMap.height, dragBar.height, toggle_layer_scroll.height, lower_menu_layout.height)
+        }
+        else{
+            menu.setScreenHeight(customMap.height, dragBar.height, 0, lower_menu_layout.height)
+        }
     }
 
     // Respond to permission request result
@@ -296,12 +306,12 @@ class GeoMap : AppCompatActivity() {
     }
 
     @TestOnly
-    fun setPinData(newPinData : List<PinData>){
+    fun setPinData(newPinData : List<PinData>) {
         pinViewModel.setPins(newPinData)
     }
 
     @TestOnly
-    fun getPinLocation() : Pair<Float, Float>{
+    fun getPinLocation() : Pair<Float, Float> {
         return customMap.getPinLocation()
     }
 }

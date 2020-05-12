@@ -2,10 +2,12 @@ package com.uu_uce.views
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import androidx.core.view.updateLayoutParams
 import com.uu_uce.R
+import kotlinx.android.synthetic.main.activity_geo_map.view.*
 
 //view that holds most buttons, and can be dragged up and down
 class Menu : RelativeLayout {
@@ -14,6 +16,7 @@ class Menu : RelativeLayout {
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     var dragStatus = DragStatus.Down
+    var disableBar = false
 
     //various height variables
     val buttonPercent = 0.1f
@@ -27,6 +30,15 @@ class Menu : RelativeLayout {
 
     //when screen height is known, it should be passed on to Menu to update its variables
     fun setScreenHeight(scrnHeight: Int, openBtnHeight: Int, scrollHeight: Int, lowerMenuHeight: Int){
+        disableBar = scrollHeight == 0 // Disable bar when no layers are available
+        if(disableBar){
+            toggle_layer_scroll.visibility = View.GONE
+        }
+        else{
+            toggle_layer_scroll.visibility = View.VISIBLE
+        }
+
+        dragStatus = DragStatus.Down
         screenHeight = scrnHeight
         downY = screenHeight - openBtnHeight.toFloat()
         barY = downY - scrollHeight.toFloat()
@@ -36,6 +48,7 @@ class Menu : RelativeLayout {
         minScroll = screenHeight * 0.1f
 
         dragButton = findViewById(R.id.dragButton)
+        dragButton.setImageResource(R.drawable.ic_sprite_arrowup)
     }
 
     //when the button is released, snap to the closest position in the drag-direction
@@ -89,7 +102,8 @@ class Menu : RelativeLayout {
         animate().y(y-100)
         when(dragStatus){
             DragStatus.Down ->{
-                bar()
+                if(disableBar) up()
+                else bar()
             }
             DragStatus.Bar ->{
                 up()
