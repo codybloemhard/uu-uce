@@ -1,7 +1,6 @@
 package com.uu_uce
 
 import android.Manifest
-import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -113,11 +112,12 @@ class GeoMap : AppCompatActivity() {
         val mydir = File(filesDir, "mydir")
         //add layers to map
         for(i in 0..0) {
+            val xoffset = i*1000f
             try {
                 val heightlines = File(mydir, "heightlines")
                 customMap.addLayer(
                     LayerType.Height,
-                    HeightLineReader(heightlines),
+                    HeightLineReader(heightlines, xoffset),
                     toggle_layer_layout,
                     size,
                     true
@@ -129,9 +129,10 @@ class GeoMap : AppCompatActivity() {
         }
         for(i in 0..0) {
             try {
+                val xoffset = i*1000f
                 customMap.addLayer(
                     LayerType.Water,
-                    PolygonReader(mydir),
+                    PolygonReader(mydir, xoffset),
                     toggle_layer_layout,
                     size,
                     false

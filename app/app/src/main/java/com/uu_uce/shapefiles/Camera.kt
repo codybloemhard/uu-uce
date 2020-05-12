@@ -43,7 +43,7 @@ class Camera(
     private var velo = p2Zero
 
     var maxZoom = 1.0
-    set(value) {minZoom = value/500; field = value}
+        set(value) {minZoom = value/500; field = value}
     var minZoom = 0.01
 
     private var lastWoff = 0.0

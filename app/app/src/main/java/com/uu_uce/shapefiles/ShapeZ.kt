@@ -145,7 +145,7 @@ class PolygonDrawInfo(nrVertices: Int, nrIndices: Int): DrawInfo(){
         GLES20.glUniform2fv(transHandle, 1, trans, 0)
 
         // Draw the triangle
-        GLES20.glDrawElements(GLES20.GL_LINES, indices.size, GLES20.GL_UNSIGNED_SHORT, indexBuffer)
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, indices.size, GLES20.GL_UNSIGNED_SHORT, indexBuffer)
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(positionHandle)
@@ -161,22 +161,12 @@ class PolygonDrawInfo(nrVertices: Int, nrIndices: Int): DrawInfo(){
                     position(0)
                 }
             }
-        val newIndices:MutableList<Short> = mutableListOf()
-        for(i in indices.indices){
-            if(i%3 != 0)continue
-            newIndices.add(indices[i])
-            newIndices.add(indices[i+1])
-            newIndices.add(indices[i+1])
-            newIndices.add(indices[i+2])
-            newIndices.add(indices[i+2])
-            newIndices.add(indices[i])
-        }
         indexBuffer=
                 // (# of coordinate values * 2 bytes per short)
-            ByteBuffer.allocateDirect(newIndices.size * 2).run {
+            ByteBuffer.allocateDirect(indices.size * 2).run {
                 order(ByteOrder.nativeOrder())
                 asShortBuffer().apply {
-                    put(newIndices.toShortArray())
+                    put(indices)
                     position(0)
                 }
             }
@@ -235,9 +225,9 @@ class PolygonZ(outerRings: List<List<p3>>, private var innerRings: List<List<p3>
         drawInfo: DrawInfo
     ) {
         if(drawInfo is PolygonDrawInfo) {
-            for (i in 0 until vertices.size) {
-                drawInfo.addVertex(vertices[i / 2].first.toFloat())
-                drawInfo.addVertex(vertices[i / 2].second.toFloat())
+            for (i in vertices.indices) {
+                drawInfo.addVertex(vertices[i].first.toFloat())
+                drawInfo.addVertex(vertices[i].second.toFloat())
             }
             drawInfo.addIndices(indices)
         }

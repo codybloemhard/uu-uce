@@ -11,7 +11,8 @@ see documentation at shapefile-linter for file specific information
 unsigned types are marked as experimental, but they are perfectly safe to use
  */
 abstract class ChunkGetter(
-    protected var dir: File){
+    protected var dir: File,
+    protected val xoffset: Float){
     abstract fun getChunk(cIndex: ChunkIndex):Chunk
     protected var xoff = 0.0
     protected var yoff = 0.0
@@ -36,7 +37,7 @@ abstract class ChunkGetter(
             reader.readULong().toInt()
         }
 
-        xoff = reader.readULong().toDouble()
+        xoff = reader.readULong().toDouble() + xoffset
         yoff = reader.readULong().toDouble()
         zoff = reader.readULong().toDouble()
         mult = reader.readULong().toDouble()
@@ -96,8 +97,9 @@ class FileReader{
 
 @ExperimentalUnsignedTypes
 class HeightLineReader(
-    dir: File
-): ChunkGetter(dir) {
+    dir: File,
+    xoffset: Float
+): ChunkGetter(dir, xoffset) {
     override fun getChunk(cIndex: ChunkIndex): Chunk {
         //find the correct file and read all information inside
         val time = System.currentTimeMillis()
@@ -140,13 +142,14 @@ class HeightLineReader(
 //reader for polygon chunks
 @ExperimentalUnsignedTypes
 class PolygonReader(
-    dir: File
-): ChunkGetter(dir) {
+    dir: File,
+    xoffset: Float
+): ChunkGetter(dir, xoffset) {
     override fun getChunk(cIndex: ChunkIndex): Chunk {
         val file = File(dir, "river")
         val reader = FileReader(file)
 
-        val xoff = reader.readULong().toDouble()
+        val xoff = reader.readULong().toDouble() + xoffset
         val yoff = reader.readULong().toDouble()
         val zoff = reader.readULong().toDouble()
         val mult = reader.readULong().toDouble()
