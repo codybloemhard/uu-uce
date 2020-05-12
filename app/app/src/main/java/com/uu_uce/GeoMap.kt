@@ -70,9 +70,9 @@ class GeoMap : AppCompatActivity() {
         if(!File(getExternalFilesDir(null)?.path + File.separator + "Maps").exists()){
             AlertDialog.Builder(this)
                 .setIcon(R.drawable.ic_sprite_question)
-                .setTitle("Streaming is unavailable")
-                .setMessage("Streaming maps is currently unsupported, to use the maps supplied by your organization you will have to download them. Would you like to download the maps now?")
-                .setPositiveButton("Yes") { _, _ ->
+                .setTitle(getString(R.string.geomap_download_warning_head))
+                .setMessage(getString(R.string.geomap_download_warning_body))
+                .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
                     openProgressPopup(window.decorView.rootView)
                     updateFiles(
                         maps,
@@ -92,7 +92,7 @@ class GeoMap : AppCompatActivity() {
                         { progress -> runOnUiThread { progressBar.progress = progress } }
                     )
                 }
-                .setNegativeButton("No") { _, _ ->
+                .setNegativeButton(getString(R.string.negative_button_text)) { _, _ ->
                     start()
                     Toast.makeText(this, "Maps can be manually downloaded from settings", Toast.LENGTH_LONG).show()
                 }

@@ -16,7 +16,7 @@ class Menu : RelativeLayout {
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     var dragStatus = DragStatus.Down
-    var disableBar = false
+    private var disableBar = false
 
     //various height variables
     val buttonPercent = 0.1f

@@ -2,14 +2,12 @@ package com.uu_uce.instrumentedTests
 
 import android.content.Context
 import android.net.wifi.WifiManager
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.doubleClick
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
-import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -37,7 +35,7 @@ class GeoMapTests {
 
     @Rule
     @JvmField
-    var mGrantPermissionRule =
+    var mGrantPermissionRule: GrantPermissionRule =
         GrantPermissionRule.grant(
             "android.permission.ACCESS_FINE_LOCATION",
             "android.permission.ACCESS_COARSE_LOCATION",

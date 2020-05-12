@@ -90,8 +90,8 @@ class Settings : AppCompatActivity() {
             if(networkdownload_switch.isChecked){
                 AlertDialog.Builder(this)
                     .setIcon(R.drawable.ic_sprite_warning)
-                    .setTitle("Enabling mobile data")
-                    .setMessage("Are you sure you want to enable downloading over mobile data? This may lead to significant amounts of data being used.")
+                    .setTitle(getString(R.string.settings_mobiledata_warning_head))
+                    .setMessage(getString(R.string.settings_mobiledata_warning_body))
                     .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
                         with(sharedPref.edit()) {
                             putBoolean(
@@ -133,7 +133,7 @@ class Settings : AppCompatActivity() {
                 this,
                 {
                     runOnUiThread {
-                        Toast.makeText(this, "Download completed, unpacking", Toast.LENGTH_LONG)
+                        Toast.makeText(this, getString(R.string.settings_zip_download_complete), Toast.LENGTH_LONG)
                             .show()
                     }
                     val result = unpackZip(maps.first()) { progress ->
@@ -142,8 +142,8 @@ class Settings : AppCompatActivity() {
                         }
                     }
                     runOnUiThread {
-                        if(result) Toast.makeText(this, "Unpacking completed", Toast.LENGTH_LONG).show()
-                        else Toast.makeText(this, "Unpacking failed", Toast.LENGTH_LONG).show()
+                        if(result) Toast.makeText(this, getString(R.string.settings_zip_unpacked), Toast.LENGTH_LONG).show()
+                        else Toast.makeText(this, getString(R.string.settings_zip_not_unpacked), Toast.LENGTH_LONG).show()
                         maps_downloading_progress.visibility = View.INVISIBLE
                         needsReload.setValue(true)
                         delete_maps_button.visibility = View.VISIBLE
@@ -161,8 +161,8 @@ class Settings : AppCompatActivity() {
             else{
                 AlertDialog.Builder(this)
                     .setIcon(R.drawable.ic_sprite_question)
-                    .setTitle("Maps already downloaded")
-                    .setMessage("Are you sure you want to download the maps again?")
+                    .setTitle(getString(R.string.settings_redownload_map_head))
+                    .setMessage(getString(R.string.settings_redownload_map_body))
                     .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
                         downloadMaps()
                     }
@@ -185,8 +185,8 @@ class Settings : AppCompatActivity() {
         delete_maps_button.setOnClickListener {
             AlertDialog.Builder(this)
                 .setIcon(R.drawable.ic_sprite_warning)
-                .setTitle("Deleting maps")
-                .setMessage("Are you sure you want to delete the maps.")
+                .setTitle(getString(R.string.settings_delete_maps_warning_head))
+                .setMessage(getString(R.string.settings_delete_maps_warning_body))
                 .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
                     File(getExternalFilesDir(null)?.path + File.separator + "Maps").deleteRecursively()
                     needsReload.setValue(true)
@@ -218,7 +218,7 @@ class Settings : AppCompatActivity() {
                     this,
                     {
                         runOnUiThread {
-                            Toast.makeText(this, "Downloading completed", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this, getString(R.string.settings_download_complete), Toast.LENGTH_LONG).show()
                             maps_downloading_progress.visibility = View.INVISIBLE
                         }
                     },

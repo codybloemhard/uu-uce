@@ -30,7 +30,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
-import java.security.Permissions
 
 
 @RunWith(AndroidJUnit4::class)
@@ -44,7 +43,7 @@ class FieldbookTests {
 
     @Rule
     @JvmField
-    var mGrantPermissionRule =
+    var mGrantPermissionRule: GrantPermissionRule =
         GrantPermissionRule.grant(
             "android.permission.ACCESS_FINE_LOCATION",
             "android.permission.ACCESS_COARSE_LOCATION",

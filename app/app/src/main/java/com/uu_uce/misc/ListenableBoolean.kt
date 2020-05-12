@@ -13,10 +13,6 @@ class ListenableBoolean {
         if (listener != null) listener!!.onChange()
     }
 
-    fun getListener(): ChangeListener? {
-        return listener
-    }
-
     fun setListener(listener: ChangeListener?) {
         this.listener = listener
     }
