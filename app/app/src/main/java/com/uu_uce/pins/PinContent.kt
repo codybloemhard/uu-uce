@@ -251,8 +251,8 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
     }
 
     override fun getFilePaths() : List<String>{
-        if(thumbnailURI == Uri.EMPTY) return listOf()
-        return listOf(thumbnailURI.toString())
+        if(thumbnailURI == Uri.EMPTY) return listOf(videoURI.toString())
+        return listOf(thumbnailURI.toString(), videoURI.toString())
     }
 
     override fun toString() : String {

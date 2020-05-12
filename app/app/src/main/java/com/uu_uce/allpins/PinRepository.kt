@@ -47,6 +47,13 @@ class PinRepository(private val pinDao : PinDao){
         }
     }
 
+    suspend fun getContent(list : MutableList<String>, action : (() -> Unit)){
+        for(content in pinDao.getContent()){
+            list.add(content)
+        }
+        action()
+    }
+
     @TestOnly
     suspend fun setPins(newData : List<PinData>) {
         pinDao.updateData(newData)

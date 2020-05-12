@@ -30,8 +30,10 @@ class Settings : AppCompatActivity() {
     // TODO: Remove temporary hardcoded map information
     private val mapsName = "maps.zip"
     private val mapsFolderName = "Maps"
+    private val contentFolderName = "PinContent"
     private lateinit var maps : List<String>
     private lateinit var mapsDir : String
+    private lateinit var contentDir : String
 
     private lateinit var sharedPref : SharedPreferences
     private lateinit var pinViewModel: PinViewModel
@@ -42,6 +44,8 @@ class Settings : AppCompatActivity() {
         setContentView(R.layout.activity_settings)
 
         mapsDir = getExternalFilesDir(null)?.path + File.separator + mapsFolderName
+        contentDir = getExternalFilesDir(null)?.path + File.separator + contentFolderName
+
         maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapsName)
 
         sharedPref = getDefaultSharedPreferences(this)
@@ -173,7 +177,7 @@ class Settings : AppCompatActivity() {
 
         // Maps storage
         delete_maps_button.visibility =
-            if(File(getExternalFilesDir(null)?.path + File.separator + "Maps").exists()){
+            if(File(mapsDir).exists()){
             View.VISIBLE
         }
         else{
@@ -188,7 +192,7 @@ class Settings : AppCompatActivity() {
                 .setTitle(getString(R.string.settings_delete_maps_warning_head))
                 .setMessage(getString(R.string.settings_delete_maps_warning_body))
                 .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
-                    File(getExternalFilesDir(null)?.path + File.separator + "Maps").deleteRecursively()
+                    File(mapsDir).deleteRecursively()
                     needsReload.setValue(true)
                     delete_maps_button.visibility = View.INVISIBLE
                     maps_storage_size.text = writableSize(dirSize(File(mapsDir)))
@@ -200,13 +204,15 @@ class Settings : AppCompatActivity() {
 
         // Download pin content
         download_content_button.setOnClickListener{
-            val table =  pinViewModel.allPinData.value
-            val contentList = mutableListOf<String>()
-            if(table != null){
-                for (data in table){
-                    for (block in PinContent(data.content).contentBlocks){
+            val list = mutableListOf<String>()
+
+            pinViewModel.getContent(list){
+                val pathList = mutableListOf<String>()
+
+                for (data in list){
+                    for (block in PinContent(data).contentBlocks){
                         for (path in block.getFilePaths()){
-                            contentList.add(path)
+                            pathList.add(path)
                         }
                     }
                 }
@@ -214,12 +220,14 @@ class Settings : AppCompatActivity() {
                 content_downloading_progress.visibility = View.VISIBLE
 
                 updateFiles(
-                    contentList,
+                    pathList,
                     this,
                     {
                         runOnUiThread {
                             Toast.makeText(this, getString(R.string.settings_download_complete), Toast.LENGTH_LONG).show()
-                            maps_downloading_progress.visibility = View.INVISIBLE
+                            content_downloading_progress.visibility = View.INVISIBLE
+                            content_storage_size.text = writableSize(dirSize(File(contentDir)))
+                            delete_content_button.visibility = View.VISIBLE
                         }
                     },
                     {
@@ -227,6 +235,33 @@ class Settings : AppCompatActivity() {
                     }
                 )
             }
+        }
+
+        // Content storage
+        delete_content_button.visibility =
+            if(File(contentDir).exists()){
+                View.VISIBLE
+            }
+            else{
+                View.INVISIBLE
+            }
+
+        content_storage_size.text = writableSize(dirSize(File(contentDir)))
+
+        delete_content_button.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setIcon(R.drawable.ic_sprite_warning)
+                .setTitle(getString(R.string.settings_delete_content_warning_head))
+                .setMessage(getString(R.string.settings_delete_content_warning_body))
+                .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
+                    File(contentDir).deleteRecursively()
+                    needsReload.setValue(true)
+                    delete_content_button.visibility = View.INVISIBLE
+                    content_storage_size.text = writableSize(dirSize(File(contentDir)))
+                    Toast.makeText(this, getString(R.string.settings_content_deleted_text), Toast.LENGTH_LONG).show()
+                }
+                .setNegativeButton(getString(R.string.negative_button_text), null)
+                .show()
         }
     }
 }

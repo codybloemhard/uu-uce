@@ -157,14 +157,13 @@ class CustomMap : ViewTouchParent {
             // Draw map
             smap.draw(canvas, width, height, debug)
 
-            if(context is GeoMap){
+            if (context is GeoMap) {
                 val zoomLevel = smap.getZoomLevel()
-                if(zoomLevel >= 0 && mods.count() > 0){
+                if (zoomLevel >= 0 && mods.count() > 0) {
                     (context as GeoMap).heightline_diff_text.text = (context as Activity).getString(R.string.geomap_heightline_diff_text, mods[zoomLevel])
                 }
-                else{
-                    val standardValue = 0
-                    (context as GeoMap).heightline_diff_text.text = (context as Activity).getString(R.string.geomap_heightline_diff_text, standardValue)
+                else {
+                    (context as GeoMap).heightline_diff_text.text = ""
                 }
             }
 

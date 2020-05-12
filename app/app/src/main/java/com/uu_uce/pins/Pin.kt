@@ -336,7 +336,7 @@ class Pin(
         }
         else{
             // Questions left unanswered
-            Toast.makeText(activity, activity.getString(R.string.pins_missing_answer_message), Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, activity.getString(R.string.pin_missing_answer_message), Toast.LENGTH_SHORT).show()
         }
     }
 

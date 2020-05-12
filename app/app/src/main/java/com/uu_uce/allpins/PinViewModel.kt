@@ -41,6 +41,10 @@ class PinViewModel(application: Application) : AndroidViewModel(application) {
         pinRepository.searchPins(searchText, action)
     }
 
+    fun getContent(list : MutableList<String>, action : (() -> Unit))= viewModelScope.launch {
+        pinRepository.getContent(list, action)
+    }
+
     @TestOnly
     fun setPins(newData : List<PinData>) = viewModelScope.launch {
         pinRepository.setPins(newData)
