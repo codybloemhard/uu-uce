@@ -102,5 +102,6 @@
     <string name="profile_achievements">Achievements</string>
     <string name="profile_statistics">Statistics</string>
     <string name="profile_wip_image">wip image</string>
+    <string name="pin_image_title_placeholder">image title</string>
 
 </resources>

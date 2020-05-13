@@ -23,7 +23,7 @@ class VideoViewer : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.video_viewer)
+        setContentView(R.layout.activity_video_viewer)
 
         // Set statusbar text color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -93,10 +93,5 @@ class VideoViewer : Activity() {
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putInt("prevVideoPos", prevVideoPos)
         super.onSaveInstanceState(outState)
-    }
-
-    override fun onBackPressed() {
-        Logger.log(LogType.Continuous, "VideoViewer", "test3")
-        finish()
     }
 }
