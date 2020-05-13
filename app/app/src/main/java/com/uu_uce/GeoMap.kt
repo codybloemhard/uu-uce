@@ -104,7 +104,7 @@ class GeoMap : AppCompatActivity() {
                 }
                 .setNegativeButton(getString(R.string.negative_button_text)) { _, _ ->
                     start()
-                    Toast.makeText(this, "Maps can be manually downloaded from settings", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, getString(R.string.geomap_maps_download_instructions), Toast.LENGTH_LONG).show()
                 }
                 .show()
         }

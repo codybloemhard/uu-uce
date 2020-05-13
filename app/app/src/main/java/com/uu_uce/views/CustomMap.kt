@@ -62,10 +62,10 @@ class CustomMap : ViewTouchParent {
     private val deviceLocEdgePaint  : Paint = Paint()
 
     // Pins
-    private var pins                    : MutableMap<Int, Pin>  = mutableMapOf()
-    private var pinStatuses             : MutableMap<Int, Int>  = mutableMapOf()
     private lateinit var pinViewModel   : PinViewModel
     private lateinit var lfOwner        : LifecycleOwner
+    private var pins                    : MutableMap<Int, Pin>  = mutableMapOf()
+    private var pinStatuses             : MutableMap<Int, Int>  = mutableMapOf()
     var activePopup                     : PopupWindow?          = null
     var pinSize                                                 = 60
 
@@ -390,7 +390,7 @@ class CustomMap : ViewTouchParent {
         smap.setzooms(camera.minZoom, camera.maxZoom)
     }
 
-    //turn a layer on or off
+    // Turn a layer on or off
     private fun toggleLayer(l: Int){
         smap.toggleLayer(l)
     }
