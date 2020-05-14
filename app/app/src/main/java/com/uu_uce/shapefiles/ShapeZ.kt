@@ -11,11 +11,10 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer
-import android.graphics.Canvas
 
 //abstract class for drawing shapes
 abstract class DrawInfo{
-    abstract fun draw(program: Int, scale: FloatArray, trans: FloatArray, paint: Paint)
+    abstract fun draw(program: Int, scale: FloatArray, trans: FloatArray, color: FloatArray)
     abstract fun finalize()
 }
 
@@ -40,9 +39,7 @@ class LineDrawInfo(nrPoints: Int, nrLines: Int): DrawInfo(){
 
     fun addVertex(item: Float){vertices[i++] = item}
 
-    override fun draw(program: Int, scale: FloatArray, trans: FloatArray, paint: Paint) {
-        val color = floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f)
-
+    override fun draw(program: Int, scale: FloatArray, trans: FloatArray, color: FloatArray) {
         GLES20.glUseProgram(program)
 
         // get handle to vertex shader's vPosition member
@@ -115,10 +112,7 @@ class PolygonDrawInfo(nrVertices: Int, nrIndices: Int): DrawInfo(){
         for(index in idcs) indices[i++]=index
     }
 
-    override fun draw(program: Int, scale: FloatArray, trans: FloatArray, paint: Paint) {
-        //canvas.drawVertices(Canvas.VertexMode.TRIANGLES, vertices.size, vertices, 0, null, 0, colors, 0, indices, 0,indices.size, paint)
-        val color = floatArrayOf(0.1f, 0.2f, 0.8f, 1.0f)
-
+    override fun draw(program: Int, scale: FloatArray, trans: FloatArray, color: FloatArray) {
         GLES20.glUseProgram(program)
 
         // get handle to vertex shader's vPosition member
@@ -176,13 +170,13 @@ class PolygonDrawInfo(nrVertices: Int, nrIndices: Int): DrawInfo(){
 }
 
 //generic shape
-abstract class ShapeZ(var bmin: p3, var bmax: p3){
+abstract class ShapeZ(){
     abstract fun initDrawInfo(drawInfo: DrawInfo)
     abstract val nrPoints: Int
 }
 
 //shape consisting of just lines on the same height
-class HeightShapeZ(private var points: List<p2>, bmi: p3, bma: p3): ShapeZ(bmi,bma) {
+class HeightShapeZ(private var points: List<p2>): ShapeZ() {
     override val nrPoints = points.size
 
     override fun initDrawInfo(
@@ -209,7 +203,7 @@ class PolyPoint(val point: p3, var reflex: Boolean, var ear: Boolean, val index:
 }
 
 //shape consisting of polygons that need to be colorized
-class PolygonZ(outerRings: List<List<p3>>, private var innerRings: List<List<p3>>, bmi: p3, bma:p3): ShapeZ(bmi,bma){
+class PolygonZ(outerRings: List<List<p3>>, private var innerRings: List<List<p3>>): ShapeZ(){
     lateinit var indices: MutableList<Short>
     private var vertices: List<p3>
     override val nrPoints: Int

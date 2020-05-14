@@ -11,8 +11,7 @@ see documentation at shapefile-linter for file specific information
 unsigned types are marked as experimental, but they are perfectly safe to use
  */
 abstract class ChunkGetter(
-    protected var dir: File,
-    protected val xoffset: Float){
+    protected var dir: File){
     abstract fun getChunk(cIndex: ChunkIndex):Chunk
     protected var xoff = 0.0
     protected var yoff = 0.0
@@ -37,7 +36,7 @@ abstract class ChunkGetter(
             reader.readULong().toInt()
         }
 
-        xoff = reader.readULong().toDouble() + xoffset
+        xoff = reader.readULong().toDouble()
         yoff = reader.readULong().toDouble()
         zoff = reader.readULong().toDouble()
         mult = reader.readULong().toDouble()
@@ -97,9 +96,8 @@ class FileReader{
 
 @ExperimentalUnsignedTypes
 class HeightLineReader(
-    dir: File,
-    xoffset: Float
-): ChunkGetter(dir, xoffset) {
+    dir: File
+): ChunkGetter(dir) {
     override fun getChunk(cIndex: ChunkIndex): Chunk {
         //find the correct file and read all information inside
         val time = System.currentTimeMillis()
@@ -125,11 +123,11 @@ class HeightLineReader(
             )
 
             val nrPoints = reader.readULong()
-            val points: List<p2> = List(nrPoints.toInt()) { j ->
+            val points: List<p2> = List(nrPoints.toInt()) {
                 p2(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff)
             }
 
-            HeightShapeZ(points, bb1, bb2)
+            HeightShapeZ(points)
         }
 
         val time1 = System.currentTimeMillis() - time
@@ -142,14 +140,13 @@ class HeightLineReader(
 //reader for polygon chunks
 @ExperimentalUnsignedTypes
 class PolygonReader(
-    dir: File,
-    xoffset: Float
-): ChunkGetter(dir, xoffset) {
+    dir: File
+): ChunkGetter(dir) {
     override fun getChunk(cIndex: ChunkIndex): Chunk {
         val file = File(dir, "river")
         val reader = FileReader(file)
 
-        val xoff = reader.readULong().toDouble() + xoffset
+        val xoff = reader.readULong().toDouble()
         val yoff = reader.readULong().toDouble()
         val zoff = reader.readULong().toDouble()
         val mult = reader.readULong().toDouble()
@@ -177,7 +174,7 @@ class PolygonReader(
                 }
             }
 
-            PolygonZ(outerRings, innerRings, bbmin, bbmax)
+            PolygonZ(outerRings, innerRings)
         }
 
         return Chunk(shapes, bmin, bmax, LayerType.Water)

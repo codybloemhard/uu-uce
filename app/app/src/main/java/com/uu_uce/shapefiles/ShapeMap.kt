@@ -1,6 +1,5 @@
 package com.uu_uce.shapefiles
 
-import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import com.uu_uce.misc.LogType
@@ -16,7 +15,6 @@ val p2Zero = Pair(0.0,0.0)
 val p2ZeroPair = Pair(p2Zero,p2Zero)
 val p3Min = Triple(Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE)
 val p3Zero = Triple(0.0,0.0,0.0)
-val p3Max = Triple(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE)
 val p3NaN = Triple(Double.NaN, Double.NaN, Double.NaN)
 
 //merge a list of bounding boxes in one big one containing them all
@@ -52,30 +50,31 @@ class ShapeMap(
     private var bMin = p3Zero
     private var bMax = p3Zero
 
-    private val layerPaints : List<Paint>
+    private val layerColors : List<FloatArray>
 
     private lateinit var camera: Camera
 
     init{
-        layerPaints = List(LayerType.values().size){ i ->
-            val p = Paint()
+        layerColors = List(LayerType.values().size){ i ->
             when(i){
                 LayerType.Water.value -> {
-                    p.color = Color.BLUE
+                    floatArrayOf(0.1f, 0.2f, 0.8f, 1.0f)
                 }
                 LayerType.Height.value -> {
-                    p.color = Color.BLACK
+                    floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f)
                 }
                 LayerType.Vegetation.value -> {
-                    p.color = Color.GREEN
+                    floatArrayOf(0.2f, 0.8f, 0.2f, 1.0f)
+                }
+                else ->{
+                    floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f)
                 }
             }
-            p
         }
     }
 
     fun setzooms(minzoom: Double, maxzoom: Double){
-        for((type,layer) in layers){
+        for((_,layer) in layers){
             layer.setzooms(minzoom,maxzoom)
         }
     }
@@ -100,7 +99,7 @@ class ShapeMap(
 
     fun addLayer(type: LayerType, chunkGetter: ChunkGetter, hasInfo: Boolean){
         val timeSave = measureTimeMillis {
-            layers.add(Pair(type,ShapeLayer(chunkGetter, this, hasInfo)))
+            layers.add(Pair(type,ShapeLayer(chunkGetter, hasInfo)))
         }
 
         Logger.log(LogType.Info,"ShapeMap", "Save: $timeSave")
@@ -129,7 +128,7 @@ class ShapeMap(
 
     private fun invalidate(){
         camera.forceChanged()
-        view.invalidate()
+        view.requestRender()
     }
 
     //update chunks of all layers
@@ -145,13 +144,11 @@ class ShapeMap(
     }
 
     //draw all layers
-    fun draw(program: Int, scale: FloatArray, trans: FloatArray, width: Int, height: Int, debug : Boolean){
-        val viewport = camera.getViewport()
-
+    fun draw(program: Int, scale: FloatArray, trans: FloatArray){
         for(i in layers.indices) {
             if(layerMask[i]) {
                 val (t,l) = layers[i]
-                l.draw(program, scale, trans, layerPaints[t.value], viewport, width, height, debug)
+                l.draw(program, scale, trans, layerColors[t.value])
             }
         }
     }

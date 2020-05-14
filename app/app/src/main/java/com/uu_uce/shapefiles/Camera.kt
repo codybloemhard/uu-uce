@@ -1,8 +1,5 @@
 package com.uu_uce.shapefiles
 
-import android.opengl.Matrix
-import com.uu_uce.misc.LogType
-import com.uu_uce.misc.Logger
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -34,7 +31,7 @@ class Camera(
     private var y: Double,
     private var zoom: Double,
     private val viewMin: p3,
-    private val viewMax: p3){
+    val viewMax: p3){
 
     private val mx = (viewMin.first + viewMax.first) / 2.0
     private val my = (viewMin.second + viewMax.second) / 2.0
@@ -126,13 +123,18 @@ class Camera(
         setXy(xvalue,yvalue)
     }
 
-    fun moveView(dx: Double, dy: Double){
+    fun moveCamera(dx: Double, dy: Double){
         if(isBusy()) return
+        setPos(x + (dx * lastWoff), y + (dy * lastHoff))
+
+        animType = AnimType.NONE
         velo = p2((dx * lastWoff), (dy * lastHoff))
         changed = true
-        animType = AnimType.SLIDE
         decline = p2(velo.first/declineLength,velo.second/declineLength)
-        //setPos(velo.first, velo.second)
+    }
+
+    fun flingCamera(){
+        animType = AnimType.SLIDE
     }
 
     fun getZoom(): Double{
@@ -252,7 +254,6 @@ class Camera(
             if(decline.second > 0) maxOf(0.0,velo.second - decline.second)
             else minOf(0.0,velo.second - decline.second)
         velo = p2(newXVel,newYVel)
-        Logger.log(LogType.Event, "Camera", "vel: (${velo.first},${velo.second})")
         if(velo == p2Zero) {
             animType = AnimType.NONE
         }

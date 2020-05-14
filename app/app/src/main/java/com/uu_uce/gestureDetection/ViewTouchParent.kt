@@ -5,11 +5,10 @@ import android.content.Context
 import android.opengl.GLSurfaceView
 import android.util.AttributeSet
 import android.view.MotionEvent
-import android.view.View
 
 
 interface TouchChild{
-    fun getOnTouchEvent(event: MotionEvent?)
+    fun getOnTouchEvent(event: MotionEvent)
 }
 /*
 Easy way to add a gesturedetector to a view without having to override all the methods
@@ -34,7 +33,7 @@ open class ViewTouchParent: GLSurfaceView {
         children.add(child)
     }
 
-    private fun updateChildren(event: MotionEvent?): Boolean {
+    private fun updateChildren(event: MotionEvent): Boolean {
         children.forEach { c -> c.getOnTouchEvent(event) }
         return super.onTouchEvent(event)
     }

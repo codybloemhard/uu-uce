@@ -1,6 +1,5 @@
 package com.uu_uce.shapefiles
 
-import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import com.uu_uce.misc.LogType
@@ -24,7 +23,6 @@ nrCuts: there are nrCuts.size different zoomlevels, where level i has nrCuts[i] 
 class ChunkManager(
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk>,
     private val chunkGetter: ChunkGetter,
-    private val map: ShapeMap,
     val bmin: p3,
     val bmax: p3,
     val nrCuts: List<Int>)
@@ -105,7 +103,7 @@ class ChunkManager(
         ymax = minOf(nrCuts[zoom]-1, ((viewport.second.second - bmin.second)/(bmax.second - bmin.second)*nrCuts[zoom]).toInt())
 
         //only update chunks if camera has been still for a while
-        if(chunksChanged(viewport,zoom)) {
+        if(chunksChanged(zoom)) {
             Logger.log(LogType.Event, "ChunkManager", "camera moved, not updating chunks")
             cancelCurrentLoading()
             upToDate = false
@@ -121,7 +119,7 @@ class ChunkManager(
         }
 
         if(!upToDate) {
-            val activeChunks = getActiveChunks(viewport, zoom)
+            val activeChunks = getActiveChunks(zoom)
             addChunks(activeChunks, zoom)
 
             for (index in activeChunks)
@@ -189,7 +187,7 @@ class ChunkManager(
     }
 
     //all chunks that should currently be active
-    private fun getActiveChunks(viewport: Pair<p2,p2>, zoom: Int): List<ChunkIndex>{
+    private fun getActiveChunks(zoom: Int): List<ChunkIndex>{
         val res:MutableList<ChunkIndex> = mutableListOf()
         for(x in xmin..xmax) for(y in ymin..ymax){
             res.add(ChunkIndex(x,y,zoom))
@@ -204,47 +202,24 @@ class ChunkManager(
     }
 
     //whether the chunks have changed since last upate call
-    private fun chunksChanged(viewport: Pair<p2,p2>, zoom: Int): Boolean{
-        val lastxmin = maxOf(0,((lastViewport.first.first - bmin.first)/(bmax.first - bmin.first)*nrCuts[zoom]).toInt())
-        val lastxmax = minOf(nrCuts[zoom]-1, ((lastViewport.second.first - bmin.first)/(bmax.first - bmin.first)*nrCuts[zoom]).toInt())
-        val lastymin = maxOf(0, ((lastViewport.first.second - bmin.second)/(bmax.second - bmin.second)*nrCuts[zoom]).toInt())
-        val lastymax = minOf(nrCuts[zoom]-1, ((lastViewport.second.second - bmin.second)/(bmax.second - bmin.second)*nrCuts[zoom]).toInt())
+    private fun chunksChanged( zoom: Int): Boolean {
+        val lastxmin = maxOf(
+            0,
+            ((lastViewport.first.first - bmin.first) / (bmax.first - bmin.first) * nrCuts[zoom]).toInt()
+        )
+        val lastxmax = minOf(
+            nrCuts[zoom] - 1,
+            ((lastViewport.second.first - bmin.first) / (bmax.first - bmin.first) * nrCuts[zoom]).toInt()
+        )
+        val lastymin = maxOf(
+            0,
+            ((lastViewport.first.second - bmin.second) / (bmax.second - bmin.second) * nrCuts[zoom]).toInt()
+        )
+        val lastymax = minOf(
+            nrCuts[zoom] - 1,
+            ((lastViewport.second.second - bmin.second) / (bmax.second - bmin.second) * nrCuts[zoom]).toInt()
+        )
 
         return zoom != lastZoom || xmin != lastxmin || xmax != lastxmax || ymin != lastymin || ymax != lastymax
-    }
-
-    //debug function for showing chunks explicitly
-    fun debug(viewport: Pair<p2,p2>, width: Int, height: Int){
-        synchronized(chunks) {
-            for ((index, chunk) in chunks) {
-                val (x, y, z) = index
-                val xstep = (bmax.first-bmin.first)/nrCuts[z]
-                val ystep = (bmax.second-bmin.second)/nrCuts[z]
-                /*canvas.drawRect(
-                    (((bmin.first + x * xstep) - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat(),
-                    (height - ((bmin.second + y * ystep) - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat(),
-                    (((bmin.first + (x + 1) * xstep) - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat(),
-                    (height - ((bmin.second + (y + 1) * ystep) - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat(),
-                    loadedChunkPaint
-                )*/
-            }
-        }
-
-        val xstep = (bmax.first-bmin.first)/nrCuts[zoom]
-        val ystep = (bmax.second-bmin.second)/nrCuts[zoom]
-        for(x in 0..nrCuts[zoom])for(y in 0..nrCuts[zoom]){
-            /*canvas.drawLine(
-                (((bmin.first + x*xstep) - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat(),
-                (height - ((bmin.second) - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat(),
-                (((bmin.first + x*xstep) - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat(),
-                (height - ((bmax.second) - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat(),
-                debugPaint)
-            canvas.drawLine(
-                (((bmin.first) - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat(),
-                (height - ((bmin.second + y*ystep) - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat(),
-                (((bmax.first) - viewport.first.first) / (viewport.second.first - viewport.first.first) * width).toFloat(),
-                (height - ((bmin.second + y*ystep) - viewport.first.second) / (viewport.second.second - viewport.first.second) * height).toFloat(),
-                debugPaint)*/
-        }
     }
 }

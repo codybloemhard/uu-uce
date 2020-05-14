@@ -20,7 +20,7 @@ const val defaultPinSize = 60
 class Settings : AppCompatActivity() {
     // private variables
     private val minPinSize = 10
-    private val maxPinSize = 100
+    private val maxPinSize = 200
 
     private val mapsName = "maps.zip"
     private lateinit var maps : List<String>
@@ -60,16 +60,6 @@ class Settings : AppCompatActivity() {
                 }
             }
         })
-
-        // Debug
-        val curDebug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
-        debug_switch.isChecked = curDebug
-        debug_switch.setOnClickListener{
-            with(sharedPref.edit()) {
-                putBoolean("com.uu_uce.DEBUG", debug_switch.isChecked)
-                apply()
-            }
-        }
 
         // Network downloading
         val curNetworkDownloading = sharedPref.getBoolean("com.uu_uce.NETWORK_DOWNLOADING", false)
@@ -122,16 +112,6 @@ class Settings : AppCompatActivity() {
                 },
                 { progress -> runOnUiThread { maps_downloading_progress.progress = progress }}
             )
-        }
-
-        // hardware acceleration
-        val curHardware = sharedPref.getBoolean("com.uu_uce.HARDWARE", false)
-        hardware_switch.isChecked = curHardware
-        hardware_switch.setOnClickListener{
-            with(sharedPref.edit()) {
-                putBoolean("com.uu_uce.HARDWARE", hardware_switch.isChecked)
-                apply()
-            }
         }
     }
 }

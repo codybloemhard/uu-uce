@@ -1,13 +1,8 @@
 package com.uu_uce.mapOverlay
 
-import android.opengl.GLES20
-import com.uu_uce.OpenGL.coordsPerVertex
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.shapefiles.p2
 import com.uu_uce.shapefiles.p3
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.FloatBuffer
 import kotlin.math.*
 
 /*

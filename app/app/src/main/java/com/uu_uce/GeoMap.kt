@@ -71,7 +71,6 @@ class GeoMap : AppCompatActivity() {
         sharedPref = getDefaultSharedPreferences(this)
 
         // Set settings
-        customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
         customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
 
         // TODO: Remove when releasing
@@ -147,7 +146,6 @@ class GeoMap : AppCompatActivity() {
     override fun onResume() {
         if(missingMaps) loadMap()
         if(started){
-            customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
             customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
             customMap.setPins(pinViewModel.allPinData)
             customMap.redrawMap()

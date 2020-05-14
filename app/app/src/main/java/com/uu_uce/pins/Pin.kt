@@ -1,13 +1,10 @@
 package com.uu_uce.pins
 
-import android.R.attr.bitmap
-import android.R.attr.opacity
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.opengl.GLES20
 import android.opengl.GLUtils
@@ -38,7 +35,7 @@ import kotlin.math.roundToInt
 
 class Pin(
     var id                      : Int = 0,
-    private var coordinate      : UTMCoordinate,
+    var coordinate      : UTMCoordinate,
     private var title           : String,
     private var content         : PinContent,
     private var background      : Bitmap,
@@ -56,7 +53,6 @@ class Pin(
 
     //opengl stuff
     private var backgroundHandle: Int = -1
-    private var iconHandle: Int = -1
     private lateinit var vertexBuffer: FloatBuffer
     private lateinit var indexBuffer: ShortBuffer
     private lateinit var cubeCoordsBuffer: FloatBuffer
@@ -220,21 +216,21 @@ class Pin(
         GLES20.glEnableVertexAttribArray(positionHandle)
         GLES20.glVertexAttribPointer(positionHandle, coordsPerVertex, GLES20.GL_FLOAT, false, vertexStride, vertexBuffer)
 
-        val pinScale = floatArrayOf(pinWidth / width, pinHeight / height)
-        val pinScaleHandle = GLES20.glGetUniformLocation(program, "pinScale")
-        GLES20.glUniform2fv(pinScaleHandle, 1, pinScale, 0)
-
-        val scaleHandle = GLES20.glGetUniformLocation(program, "scale")
-        GLES20.glUniform2fv(scaleHandle, 1, scale, 0)
-
         val localtrans = floatArrayOf(trans[0] + coordinate.east.toFloat(), trans[1] + coordinate.north.toFloat())
         val transHandle = GLES20.glGetUniformLocation(program, "trans")
         GLES20.glUniform2fv(transHandle, 1, localtrans, 0)
 
+        val scaleHandle = GLES20.glGetUniformLocation(program, "scale")
+        GLES20.glUniform2fv(scaleHandle, 1, scale, 0)
+
+        val pinScale = floatArrayOf(pinWidth / width * 2, pinHeight / height * 2)
+        val pinScaleHandle = GLES20.glGetUniformLocation(program, "pinScale")
+        GLES20.glUniform2fv(pinScaleHandle, 1, pinScale, 0)
+
         val colorHandle = GLES20.glGetUniformLocation(program, "vColor")
         GLES20.glUniform4fv(colorHandle, 1, color, 0)
 
-        val textureUniformHandle = GLES20.glGetAttribLocation(program, "u_Texture");
+        val textureUniformHandle = GLES20.glGetAttribLocation(program, "u_Texture")
         val textureCoordinateHandle = GLES20.glGetAttribLocation(program, "a_TexCoordinate")
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
@@ -248,7 +244,7 @@ class Pin(
 
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, drawOrder.size, GLES20.GL_UNSIGNED_SHORT, indexBuffer)
 
-        GLES20.glDisableVertexAttribArray(positionHandle);
+        GLES20.glDisableVertexAttribArray(positionHandle)
     }
 
     // Check if pin should be unlocked

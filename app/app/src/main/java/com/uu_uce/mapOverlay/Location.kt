@@ -1,7 +1,10 @@
 package com.uu_uce.mapOverlay
 
+import android.content.Context
 import android.opengl.GLES20
+import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.OpenGL.coordsPerVertex
+import com.uu_uce.R
 import com.uu_uce.services.UTMCoordinate
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -10,13 +13,30 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
-class Location(val utm: UTMCoordinate){
+class Location(var utm: UTMCoordinate, context: Context){
     private var innerVertexBuffer: FloatBuffer
     private var outerVertexBuffer: FloatBuffer
     private var vertexCount = 0
-    private var radius = 50f
     private val outerEdgePercent = 1.25f
+    private val color: FloatArray
+    private val outerColor: FloatArray
+
     init{
+        val col = ResourcesCompat.getColor(context.resources, R.color.HighBlue, null).toUInt()
+        color = floatArrayOf(
+            ((col and (255u shl 16)) shr 16).toFloat()/255,
+            ((col and (255u shl 8 )) shr 8 ).toFloat()/255,
+            ((col and (255u shl 0 )) shr 0 ).toFloat()/255,
+            ((col and (255u shl 24)) shr 24).toFloat()/255)
+
+        val outcol = ResourcesCompat.getColor(context.resources, R.color.BestWhite, null).toUInt()
+        outerColor = floatArrayOf(
+            ((outcol and (255u shl 16)) shr 16).toFloat()/255,
+            ((outcol and (255u shl 8 )) shr 8 ).toFloat()/255,
+            ((outcol and (255u shl 0 )) shr 0 ).toFloat()/255,
+            ((outcol and (255u shl 24)) shr 24).toFloat()/255)
+
+
         val nrSegments = 20
         val verticesMutable: MutableList<Float> = mutableListOf()
         verticesMutable.add(0f)
@@ -48,20 +68,20 @@ class Location(val utm: UTMCoordinate){
         vertexCount = innerVertices.size/ coordsPerVertex
     }
 
-    fun draw(program: Int, trans: FloatArray, width: Int, height: Int){
-        val scale = floatArrayOf(radius/width, radius / height)
-        val localTrans = floatArrayOf(trans[0] + utm.east.toFloat(), trans[1] + utm.north.toFloat())
-        val color = floatArrayOf(0.1f, 0.2f, 0.8f, 1.0f)
-        val outerColor = floatArrayOf(0.0f,0.0f,0.0f,1.0f)
-
+    fun draw(program: Int, scale: FloatArray, trans: FloatArray, radius: Float, width: Int, height: Int){
         GLES20.glUseProgram(program)
 
         //set different shader arguments
+        val localTrans = floatArrayOf(trans[0] + utm.east.toFloat(), trans[1] + utm.north.toFloat())
+        val transHandle = GLES20.glGetUniformLocation(program, "trans")
+        GLES20.glUniform2fv(transHandle, 1, localTrans, 0)
+
         val scaleHandle = GLES20.glGetUniformLocation(program, "scale")
         GLES20.glUniform2fv(scaleHandle, 1, scale, 0)
 
-        val transHandle = GLES20.glGetUniformLocation(program, "trans")
-        GLES20.glUniform2fv(transHandle, 1, localTrans, 0)
+        val pinScale = floatArrayOf(radius / width, radius / height)
+        val pinScaleHandle = GLES20.glGetUniformLocation(program, "locScale")
+        GLES20.glUniform2fv(pinScaleHandle, 1, pinScale, 0)
 
         val colorHandle = GLES20.glGetUniformLocation(program, "vColor")
 
