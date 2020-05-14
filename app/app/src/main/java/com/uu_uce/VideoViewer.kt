@@ -10,8 +10,6 @@ import android.widget.MediaController
 import android.widget.TextView
 import android.widget.VideoView
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.uu_uce.misc.LogType
-import com.uu_uce.misc.Logger
 
 //activity in which videos from video pins are shown
 class VideoViewer : Activity() {

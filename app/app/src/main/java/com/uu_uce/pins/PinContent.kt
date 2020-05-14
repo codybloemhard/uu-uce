@@ -11,8 +11,6 @@ import android.widget.*
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
-import com.github.chrisbanes.photoview.PhotoView
-import com.github.chrisbanes.photoview.PhotoViewAttacher
 import com.uu_uce.ImageViewer
 import com.uu_uce.R
 import com.uu_uce.VideoViewer
