@@ -37,11 +37,11 @@ It will call getFiles for all missing files.
  */
 fun updateFiles(requiredFilePaths : List<String>, activity : Activity, onCompleteAction : (() -> Unit)= {}, progressAction : (Int) -> Unit = {}) : Boolean {
     val missingFiles = findMissingFilePaths(requiredFilePaths)
-    return if(missingFiles.count() > 0){
+    return if (missingFiles.count() > 0) {
         getPermissions(activity, permissionsNeeded, EXTERNAL_FILES_REQUEST)
         getFiles(missingFiles, activity, onCompleteAction, progressAction)
     }
-    else{
+    else {
         GlobalScope.launch { onCompleteAction() }
         true
     }
@@ -56,7 +56,7 @@ fun findMissingFilePaths(requestedFilePaths : List<String>) : List<Pair<String, 
     val missingFilePaths : MutableList<Pair<String, String>> = mutableListOf()
     val adding : MutableMap<String, Boolean> = mutableMapOf()
     for(filePath in requestedFilePaths){
-        if(!File(filePath).exists() && !adding.containsKey(filePath)){
+        if((!File(filePath).exists() || !File(filePath).canRead()) && !adding.containsKey(filePath)){
             val fileName = filePath.split('/').last().split('.').first() // Because we use UUID4 names there can never be a / or . in the file name
             missingFilePaths.add(Pair(filePath, fileName))
             adding[fileName] = true

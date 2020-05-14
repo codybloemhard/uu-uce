@@ -343,6 +343,7 @@ class CustomMap : ViewTouchParent {
 
     //called when the screen is tapped at tapLocation
     private fun tapPin(tapLocation : p2, activity : Activity){
+        if(activePopup != null) return
         for((_,pin) in pins.toList().asReversed()){
             if(!pin.inScreen || pin.getStatus() < 1) continue
             if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, 0)){

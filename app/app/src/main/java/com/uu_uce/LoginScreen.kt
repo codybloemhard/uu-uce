@@ -63,4 +63,8 @@ class LoginScreen : AppCompatActivity() {
             }
         }
     }
+
+    override fun onBackPressed() {
+        moveTaskToBack(true)
+    }
 }
