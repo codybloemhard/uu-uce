@@ -212,6 +212,7 @@ class Camera(
         zoom = animBegin.third + (animTarget.third - animBegin.third) * t
         if(ct > animStartT + animDuration){
             animType = AnimType.NONE
+            zoom = maxZoom
             return
         }
     }
