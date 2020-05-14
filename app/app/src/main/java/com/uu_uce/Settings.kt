@@ -7,9 +7,14 @@ import android.view.View
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
+import com.uu_uce.allpins.PinViewModel
+import com.uu_uce.pins.PinContent
+import com.uu_uce.services.dirSize
 import com.uu_uce.services.unpackZip
 import com.uu_uce.services.updateFiles
+import com.uu_uce.services.writableSize
 import com.uu_uce.ui.createTopbar
 import kotlinx.android.synthetic.main.activity_settings.*
 import java.io.*
@@ -22,18 +27,29 @@ class Settings : AppCompatActivity() {
     private val minPinSize = 10
     private val maxPinSize = 200
 
+    // TODO: Remove temporary hardcoded map information
     private val mapsName = "maps.zip"
+    private val mapsFolderName = "Maps"
+    private val contentFolderName = "PinContent"
     private lateinit var maps : List<String>
+    private lateinit var mapsDir : String
+    private lateinit var contentDir : String
 
     private lateinit var sharedPref : SharedPreferences
+    private lateinit var pinViewModel: PinViewModel
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
+        mapsDir = getExternalFilesDir(null)?.path + File.separator + mapsFolderName
+        contentDir = getExternalFilesDir(null)?.path + File.separator + contentFolderName
+
         maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapsName)
 
         sharedPref = getDefaultSharedPreferences(this)
+        pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
 
         createTopbar(this, "Settings")
 
@@ -68,9 +84,9 @@ class Settings : AppCompatActivity() {
             if(networkdownload_switch.isChecked){
                 AlertDialog.Builder(this)
                     .setIcon(R.drawable.ic_sprite_warning)
-                    .setTitle("Enabling mobile data")
-                    .setMessage("Are you sure you want to enable downloading over mobile data? This may lead to significant amounts of data being used.")
-                    .setPositiveButton("Yes") { _, _ ->
+                    .setTitle(getString(R.string.settings_mobiledata_warning_head))
+                    .setMessage(getString(R.string.settings_mobiledata_warning_body))
+                    .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
                         with(sharedPref.edit()) {
                             putBoolean(
                                 "com.uu_uce.NETWORK_DOWNLOADING",
@@ -79,7 +95,7 @@ class Settings : AppCompatActivity() {
                             apply()
                         }
                     }
-                    .setNegativeButton("No") { _, _ -> networkdownload_switch.isChecked = false }
+                    .setNegativeButton(getString(R.string.negative_button_text)) { _, _ -> networkdownload_switch.isChecked = false }
                     .show()
             }
             else{
@@ -91,27 +107,151 @@ class Settings : AppCompatActivity() {
                     apply()
                 }
             }
+        }
 
+        // hardware acceleration
+        val curHardware = sharedPref.getBoolean("com.uu_uce.HARDWARE", false)
+        hardware_switch.isChecked = curHardware
+        hardware_switch.setOnClickListener{
+            with(sharedPref.edit()) {
+                putBoolean("com.uu_uce.HARDWARE", hardware_switch.isChecked)
+                apply()
+            }
         }
 
         // Download maps
-        download_maps_button.setOnClickListener{
+        fun downloadMaps(){
             maps_downloading_progress.visibility = View.VISIBLE
             updateFiles(
                 maps,
                 this,
                 {
-                    runOnUiThread{
-                        Toast.makeText(this, "Download completed, unpacking", Toast.LENGTH_LONG).show()
+                    runOnUiThread {
+                        Toast.makeText(this, getString(R.string.settings_zip_download_complete), Toast.LENGTH_LONG)
+                            .show()
                     }
-                    unpackZip(maps.first()) { progress -> runOnUiThread { maps_downloading_progress.progress = progress } }
-                    runOnUiThread{
-                        Toast.makeText(this, "Unpacking completed", Toast.LENGTH_LONG).show()
+                    val result = unpackZip(maps.first()) { progress ->
+                        runOnUiThread {
+                            maps_downloading_progress.progress = progress
+                        }
+                    }
+                    runOnUiThread {
+                        if(result) Toast.makeText(this, getString(R.string.settings_zip_unpacked), Toast.LENGTH_LONG).show()
+                        else Toast.makeText(this, getString(R.string.settings_zip_not_unpacked), Toast.LENGTH_LONG).show()
                         maps_downloading_progress.visibility = View.INVISIBLE
+                        needsReload.setValue(true)
+                        delete_maps_button.visibility = View.VISIBLE
+                        maps_storage_size.text = writableSize(dirSize(File(mapsDir)))
                     }
                 },
-                { progress -> runOnUiThread { maps_downloading_progress.progress = progress }}
+                { progress -> runOnUiThread { maps_downloading_progress.progress = progress } }
             )
+        }
+
+        download_maps_button.setOnClickListener{
+            if(!File(getExternalFilesDir(null)?.path + File.separator + "Maps").exists()) {
+                downloadMaps()
+            }
+            else{
+                AlertDialog.Builder(this)
+                    .setIcon(R.drawable.ic_sprite_question)
+                    .setTitle(getString(R.string.settings_redownload_map_head))
+                    .setMessage(getString(R.string.settings_redownload_map_body))
+                    .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
+                        downloadMaps()
+                    }
+                    .setNegativeButton(getString(R.string.negative_button_text), null)
+                    .show()
+            }
+        }
+
+        // Maps storage
+        delete_maps_button.visibility =
+            if(File(mapsDir).exists()){
+            View.VISIBLE
+        }
+        else{
+            View.INVISIBLE
+        }
+
+        maps_storage_size.text = writableSize(dirSize(File(mapsDir)))
+
+        delete_maps_button.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setIcon(R.drawable.ic_sprite_warning)
+                .setTitle(getString(R.string.settings_delete_maps_warning_head))
+                .setMessage(getString(R.string.settings_delete_maps_warning_body))
+                .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
+                    File(mapsDir).deleteRecursively()
+                    needsReload.setValue(true)
+                    delete_maps_button.visibility = View.INVISIBLE
+                    maps_storage_size.text = writableSize(dirSize(File(mapsDir)))
+                    Toast.makeText(this, getString(R.string.settings_map_deleted_text), Toast.LENGTH_LONG).show()
+                }
+                .setNegativeButton(getString(R.string.negative_button_text), null)
+                .show()
+        }
+
+        // Download pin content
+        download_content_button.setOnClickListener{
+            val list = mutableListOf<String>()
+
+            pinViewModel.getContent(list){
+                val pathList = mutableListOf<String>()
+
+                for (data in list){
+                    for (block in PinContent(data).contentBlocks){
+                        for (path in block.getFilePaths()){
+                            pathList.add(path)
+                        }
+                    }
+                }
+
+                content_downloading_progress.visibility = View.VISIBLE
+
+                updateFiles(
+                    pathList,
+                    this,
+                    {
+                        runOnUiThread {
+                            Toast.makeText(this, getString(R.string.settings_download_complete), Toast.LENGTH_LONG).show()
+                            content_downloading_progress.visibility = View.INVISIBLE
+                            content_storage_size.text = writableSize(dirSize(File(contentDir)))
+                            delete_content_button.visibility = View.VISIBLE
+                        }
+                    },
+                    {
+                            progress -> runOnUiThread { content_downloading_progress.progress = progress }
+                    }
+                )
+            }
+        }
+
+        // Content storage
+        delete_content_button.visibility =
+            if(File(contentDir).exists()){
+                View.VISIBLE
+            }
+            else{
+                View.INVISIBLE
+            }
+
+        content_storage_size.text = writableSize(dirSize(File(contentDir)))
+
+        delete_content_button.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setIcon(R.drawable.ic_sprite_warning)
+                .setTitle(getString(R.string.settings_delete_content_warning_head))
+                .setMessage(getString(R.string.settings_delete_content_warning_body))
+                .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
+                    File(contentDir).deleteRecursively()
+                    needsReload.setValue(true)
+                    delete_content_button.visibility = View.INVISIBLE
+                    content_storage_size.text = writableSize(dirSize(File(contentDir)))
+                    Toast.makeText(this, getString(R.string.settings_content_deleted_text), Toast.LENGTH_LONG).show()
+                }
+                .setNegativeButton(getString(R.string.negative_button_text), null)
+                .show()
         }
     }
 }

@@ -6,12 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
 
 class ProfileBadges : Fragment() {
     private lateinit var fragmentActivity : Activity
-    private lateinit var recyclerView : RecyclerView
+    //private lateinit var recyclerView : RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

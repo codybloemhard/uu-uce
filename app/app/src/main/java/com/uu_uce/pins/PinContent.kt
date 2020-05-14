@@ -11,8 +11,7 @@ import android.widget.*
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
-import com.github.chrisbanes.photoview.PhotoView
-import com.github.chrisbanes.photoview.PhotoViewAttacher
+import com.uu_uce.ImageViewer
 import com.uu_uce.R
 import com.uu_uce.VideoViewer
 import com.uu_uce.misc.LogType
@@ -122,7 +121,7 @@ class PinContent(private val contentString: String) {
                 return null
             }
             BlockTag.TEXT       -> TextContentBlock(textString)
-            BlockTag.IMAGE      -> ImageContentBlock(Uri.parse(filePath), thumbnailURI)
+            BlockTag.IMAGE      -> ImageContentBlock(Uri.parse(filePath), thumbnailURI, title)
             BlockTag.VIDEO      -> VideoContentBlock(Uri.parse(filePath), thumbnailURI, title)
             BlockTag.MCQUIZ     -> {
                 if(mcIncorrectOptions.count() < 1 && mcCorrectOptions.count() < 1) {
@@ -167,12 +166,12 @@ class TextContentBlock(private val textContent : String) : ContentBlockInterface
     }
 }
 
-class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Uri) : ContentBlockInterface{
+class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Uri, private val title : String? = null) : ContentBlockInterface{
     private val tag = BlockTag.IMAGE
     override val canCompleteBlock = false
 
     override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
-        val content = PhotoView(activity)
+        val content = ImageView(activity)
         try {
             content.setImageURI(imageURI)
             content.scaleType = ImageView.ScaleType.FIT_CENTER
@@ -187,7 +186,10 @@ class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Ur
         )
         content.layoutParams = imageLayoutParams
         content.id = R.id.image_block
-        PhotoViewAttacher(content)
+
+        content.setOnClickListener{
+            openImageView(imageURI, title, activity)
+        }
 
         layout.addView(content)
     }
@@ -200,6 +202,15 @@ class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Ur
         return "{${tagToJsonString(tag)}," +
                 "${fileToJsonString(imageURI)}," +
                 "${thumbnailToJsonString(thumbnailURI)}}"
+    }
+
+    private fun openImageView(imageURI: Uri, imageTitle : String?, activity : Activity){
+        val intent = Intent(activity, ImageViewer::class.java)
+
+        intent.putExtra("uri", imageURI)
+        if(imageTitle != null)
+            intent.putExtra("title", imageTitle)
+        activity.startActivity(intent)
     }
 
     fun getThumbnailURI() : Uri{
@@ -251,8 +262,8 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
     }
 
     override fun getFilePaths() : List<String>{
-        if(thumbnailURI == Uri.EMPTY) return listOf()
-        return listOf(thumbnailURI.toString())
+        if(thumbnailURI == Uri.EMPTY) return listOf(videoURI.toString())
+        return listOf(thumbnailURI.toString(), videoURI.toString())
     }
 
     override fun toString() : String {

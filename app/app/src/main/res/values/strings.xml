@@ -1,7 +1,22 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <!--General-->
     <string name="app_name">UCE</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="progress_popup_progress">Progress</string>
+    <string name="positive_button_text">Yes</string>
+    <string name="negative_button_text">No</string>
+
+    <!--GeoMap-->
+    <string name="geomap_download_warning_head">Streaming is unavailable</string>
+    <string name="geomap_download_warning_body">Streaming maps is currently unsupported, to use the maps supplied by your organization you will have to download them. Would you like to download the maps now?</string>
+    <string name="geomap_heightline_diff_text">%1$dm</string>
+    <string name="geomap_maps_download_instructions">Maps can be manually downloaded from settings</string>
+
+    <!--AllPins-->
     <string name="allpins_open">Open</string>
     <string name="allpins_checkmark_description">Checkmark displaying if a pin is done</string>
+
+    <!--Pins-->
     <string name="pin_close">Close</string>
     <string name="pin_finish">Finish</string>
     <string name="pin_title">Pin Title</string>
@@ -20,23 +35,26 @@
     <string name="pin_reward_text_placeholder">REWARD</string>
     <string name="pin_reward_string">+%1$d</string>
     <string name="pin_points_logo_description">Logo for points</string>
-    <string name="fieldbook_uploaded_image_field_description">Image field for displaying uploaded image</string>
+    <string name="pin_close_warning_head">Closing Pin</string>
+    <string name="pin_close_warning_body">Are you sure you want to close pin? All progress will be lost.</string>
+    <string name="pin_missing_answer_message">Some questions still lack answers</string>
+
+    <!--Fieldbook-->
     <string name="fieldbook_date_time_text"><![CDATA[Date & Time]]></string>
     <string name="fieldbook_add_button_text">add to my fieldbook</string>
     <string name="fieldbook_coordinates_text">Pin coordinates</string>
     <string name="fieldbook_pin_title_placeholder">Title</string>
-    <string name="fieldbook_image_preview">Picture Preview</string>
     <string name="fieldbook_title_hint">Enter your title here</string>
     <string name="fieldbook_main_title">Fieldbook</string>
     <string name="fieldbook_map_title">Pinmap</string>
     <string name="fieldbook_route_title">Route</string>
-    <string name="fieldbook_edit_text_hint">Insert text:</string>
-    <string name="fieldbook_image_field_hint">Upload your image here, by clicking on the area below:</string>
     <string name="fieldbook_empty">Hello blank fragment</string> <!-- to be removed -->
     <string name="fieldbook_text_image_description">Text</string>
     <string name="fieldbook_image_image_description">Image</string>
     <string name="fieldbook_video_image_description">Video</string>
     <string name="fieldbook_done_button_text">Done</string>
+
+    <!--Menu-->
     <string name="menu_bar_placeholder_text">Menu Item</string>
     <string name="menu_bar_backbutton_description">Back Button</string>
     <string name="menu_allpins_button_text">Pins</string>
@@ -44,22 +62,47 @@
     <string name="menu_button_description">Image showing what clicking the menu will do</string>
     <string name="menu_allpins_button_image">menu_allpins_button_image</string>
     <string name="menu_fieldbook_image_description">menu fieldbook image</string>
-    <string name="title_activity_settings">Settings</string>
+    <string name="menu_profile_button_text">Profile</string>
+    <string name="menu_settings_button_text">Settings</string>
+
+    <!--Settings-->
     <string name="settings_pin_size">Pin Size</string>
-    <string name="geomap_heightline_diff_text">%1$dm</string>
+    <string name="settings_debug">Debug</string>
     <string name="settings_networkdownload">Enable downloads on mobile data</string>
     <string name="settings_download_maps">Download maps</string>
     <string name="settings_download_button_text">Download</string>
+    <string name="settings_hardware">Hardware Accelerated</string>
+    <string name="settings_mobiledata_warning_head">Enabling mobile data</string>
+    <string name="settings_mobiledata_warning_body">Are you sure you want to enable downloading over mobile data? This may lead to significant amounts of data being used.</string>
+    <string name="settings_zip_download_complete">Download completed, unpacking</string>
+    <string name="settings_zip_unpacked">Unpacking completed</string>
+    <string name="settings_zip_not_unpacked">Unpacking failed</string>
+    <string name="settings_redownload_map_head">Maps already downloaded</string>
+    <string name="settings_redownload_map_body">Are you sure you want to download the maps again?</string>
+    <string name="settings_delete_maps_warning_head">Deleting maps</string>
+    <string name="settings_delete_maps_warning_body">Are you sure you want to delete the maps?</string>
+    <string name="settings_delete_content_warning_head">Deleting content</string>
+    <string name="settings_delete_content_warning_body">Are you sure you want to delete all downloaded content?</string>
+    <string name="settings_download_complete">Downloading completed</string>
+    <string name="settings_delete_maps_button_text">Delete</string>
+    <string name="settings_maps">Maps</string>
+    <string name="settings_content">Content</string>
+    <string name="settings_download_content_text">Download content</string>
+    <string name="settings_general">General</string>
+    <string name="settings_map_deleted_text">Maps deleted</string>
+    <string name="settings_content_deleted_text">Content deleted</string>
+    <string name="settings_maps_storage">Storage used for maps: </string>
+    <string name="settings_content_storage">Storage used for content: </string>
+
+    <!--Profile-->
     <string name="profile_user_name">User name</string>
     <string name="profile_orginization_image_description">The logo of the orginization that this person belongs to</string>
     <string name="profile_user_number">User number</string>
     <string name="profile_university_name">Organization name</string>
-    <string name="menu_profile_button_text">Profile</string>
-    <string name="menu_settings_button_text">Settings</string>
     <string name="profile_badges">Badges</string>
     <string name="profile_achievements">Achievements</string>
     <string name="profile_statistics">Statistics</string>
-    <string name="profile_badge_title">Badge Title</string>
-    <string name="profile_badge_description">Badge Description</string>
     <string name="profile_wip_image">wip image</string>
+    <string name="pin_image_title_placeholder">image title</string>
+
 </resources>

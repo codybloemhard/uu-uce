@@ -117,7 +117,7 @@ class CustomMap : ViewTouchParent {
         camera = smap.initialize()
     }
 
-    //add a new layer to the map, and generate a button to toggle it
+    // Add a new layer to the map, and generate a button to toggle it
     fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout, buttonSize: Int, hasInfo: Boolean){
         smap.addLayer(lt, chunkGetter, hasInfo)
         val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle)
@@ -132,6 +132,13 @@ class CustomMap : ViewTouchParent {
         scrollLayout.addView(btn)
 
         mods = smap.getMods()
+    }
+
+    // Remove all layers from map to avoid duplicates
+    fun removeLayers(scrollLayout: LinearLayout){
+        smap.removeLayers()
+        nrLayers = 0
+        scrollLayout.removeAllViewsInLayout()
     }
 
     fun onDrawFrame(standardProgram: Int, pinProgram: Int, locProgram: Int){
@@ -408,7 +415,7 @@ class CustomMap : ViewTouchParent {
         smap.setzooms(camera.minZoom, camera.maxZoom)
     }
 
-    //turn a layer on or off
+    // Turn a layer on or off
     private fun toggleLayer(l: Int){
         smap.toggleLayer(l)
     }
@@ -445,6 +452,9 @@ class CustomMap : ViewTouchParent {
         startActivity(context, i,null)
     }
 
+    fun getLayerCount() : Int{
+        return nrLayers
+    }
 
     val eps = 0.001
     //functions used for testing

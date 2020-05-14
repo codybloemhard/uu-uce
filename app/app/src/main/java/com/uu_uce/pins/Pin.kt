@@ -346,10 +346,10 @@ class Pin(
                         if(madeProgress){
                             AlertDialog.Builder(activity)
                                 .setIcon(R.drawable.ic_sprite_warning)
-                                .setTitle("Closing Pin")
-                                .setMessage("Are you sure you want to close pin? All progress will be lost.")
-                                .setPositiveButton("Yes") { _, _ -> popupWindow?.dismiss() }
-                                .setNegativeButton("No", null)
+                                .setTitle(activity.getString(R.string.pin_close_warning_head))
+                                .setMessage(activity.getString(R.string.pin_close_warning_body))
+                                .setPositiveButton(activity.getString(R.string.positive_button_text)) { _, _ -> popupWindow?.dismiss() }
+                                .setNegativeButton(activity.getString(R.string.negative_button_text), null)
                                 .show()
                         }
                         else{
@@ -463,7 +463,7 @@ class Pin(
         }
         else{
             // Questions left unanswered
-            Toast.makeText(activity, "Some questions still lack answers", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, activity.getString(R.string.pin_missing_answer_message), Toast.LENGTH_SHORT).show()
         }
     }
 
