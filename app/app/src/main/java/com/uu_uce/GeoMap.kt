@@ -43,6 +43,7 @@ class GeoMap : AppCompatActivity() {
     // Popup for showing download progress
     private var popupWindow: PopupWindow? = null
     private lateinit var progressBar : ProgressBar
+    private var downloadResult = false
 
     // TODO: Remove temporary hardcoded map information
     private val mapsName = "maps.zip"
@@ -74,19 +75,28 @@ class GeoMap : AppCompatActivity() {
                 .setMessage(getString(R.string.geomap_download_warning_body))
                 .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
                     openProgressPopup(window.decorView.rootView)
-                    updateFiles(
+                    downloadResult = updateFiles(
                         maps,
                         this,
                         {
-                            runOnUiThread{
-                                Toast.makeText(this, "Download completed, unpacking", Toast.LENGTH_LONG).show()
+                            if(downloadResult){
+                                runOnUiThread{
+                                    Toast.makeText(this, "Download completed, unpacking", Toast.LENGTH_LONG).show()
+                                }
+                                val unzipResult = unpackZip(maps.first()) { progress -> runOnUiThread { progressBar.progress = progress } }
+                                runOnUiThread{
+                                    if(unzipResult) Toast.makeText(this, "Unpacking completed", Toast.LENGTH_LONG).show()
+                                    else Toast.makeText(this, "Unpacking failed", Toast.LENGTH_LONG).show()
+                                    popupWindow?.dismiss()
+                                    start()
+                                }
                             }
-                            val result = unpackZip(maps.first()) { progress -> runOnUiThread { progressBar.progress = progress } }
-                            runOnUiThread{
-                                if(result) Toast.makeText(this, "Unpacking completed", Toast.LENGTH_LONG).show()
-                                else Toast.makeText(this, "Unpacking failed", Toast.LENGTH_LONG).show()
-                                popupWindow?.dismiss()
-                                start()
+                            else{
+                                runOnUiThread{
+                                    Toast.makeText(this, "Download failed", Toast.LENGTH_LONG).show()
+                                    popupWindow?.dismiss()
+                                    start()
+                                }
                             }
                         },
                         { progress -> runOnUiThread { progressBar.progress = progress } }
@@ -94,7 +104,7 @@ class GeoMap : AppCompatActivity() {
                 }
                 .setNegativeButton(getString(R.string.negative_button_text)) { _, _ ->
                     start()
-                    Toast.makeText(this, "Maps can be manually downloaded from settings", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, getString(R.string.geomap_maps_download_instructions), Toast.LENGTH_LONG).show()
                 }
                 .show()
         }

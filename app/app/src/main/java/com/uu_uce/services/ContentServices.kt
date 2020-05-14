@@ -21,7 +21,7 @@ import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 
 
-val permissionsNeeded = listOf(Manifest.permission.INTERNET, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+val permissionsNeeded = listOf(Manifest.permission.INTERNET)
 
 private const val serverURL = "http://131.211.31.176:8080" // TODO: This should be dependedent of the users orginization
 
@@ -34,14 +34,15 @@ activity: The activity from which this function is called.
 onCompleteAction : A function to be executed when all files are present.
 It will call getFiles for all missing files.
  */
-fun updateFiles(requiredFilePaths : List<String>, activity : Activity, onCompleteAction : (() -> Unit), progressAction : (Int) -> Unit){
+fun updateFiles(requiredFilePaths : List<String>, activity : Activity, onCompleteAction : (() -> Unit)= {}, progressAction : (Int) -> Unit = {}) : Boolean {
     val missingFiles = findMissingFilePaths(requiredFilePaths)
-    if(missingFiles.count() > 0){
+    return if(missingFiles.count() > 0){
         getPermissions(activity, permissionsNeeded, EXTERNAL_FILES_REQUEST)
         getFiles(missingFiles, activity, onCompleteAction, progressAction)
     }
     else{
         GlobalScope.launch { onCompleteAction() }
+        true
     }
 }
 
@@ -70,7 +71,7 @@ activity: The activity from which this function is called.
 onCompleteAction : A function to be executed when all files are present.
 It will download all files and start onCompleteAction.
  */
-fun getFiles(requiredFilePaths : List<Pair<String, String>>, activity: Activity, onCompleteAction : (() -> Unit), progressAction : (Int) -> Unit){
+fun getFiles (requiredFilePaths : List<Pair<String, String>>, activity: Activity, onCompleteAction : (() -> Unit) = {}, progressAction : (Int) -> Unit = {}) : Boolean {
     val jobList : MutableList<Job> = mutableListOf()
     val wifiManager = activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager?
     sharedPref = PreferenceManager.getDefaultSharedPreferences(activity)
@@ -78,7 +79,7 @@ fun getFiles(requiredFilePaths : List<Pair<String, String>>, activity: Activity,
     if (!wifiManager!!.isWifiEnabled && !networkDownloadAllowed){
         Toast.makeText(activity, "Enable wifi or allow network downloading", Toast.LENGTH_LONG).show()
         onCompleteAction()
-        return
+        return false
     }
     for(filePath in requiredFilePaths){
         jobList.add(GlobalScope.launch{
@@ -96,6 +97,8 @@ fun getFiles(requiredFilePaths : List<Pair<String, String>>, activity: Activity,
         }
         onCompleteAction()
     }
+
+    return true
 }
 
 /*
@@ -104,7 +107,7 @@ targetUrl: The URL from which a file needs to be downloaded
 fileDestination: The filepath to which the downloaded file will be downloaded.
 It will download the file.
  */
-fun downloadFile(targetUrl : URL, fileDestination : String, progressAction : (Int) -> Unit) {
+fun downloadFile(targetUrl : URL, fileDestination : String, progressAction : (Int) -> Unit = {}) {
     with(targetUrl.openConnection() as HttpURLConnection) {
         requestMethod = "GET"
 
@@ -136,7 +139,7 @@ fun downloadFile(targetUrl : URL, fileDestination : String, progressAction : (In
     }
 }
 
-fun unpackZip(zipPath: String, progressAction : (Int) -> Unit): Boolean {
+fun unpackZip(zipPath: String, progressAction : (Int) -> Unit = {}): Boolean {
     val splitPath = zipPath.split('/')
     val destinationPath = splitPath.take(splitPath.count() - 1).fold(splitPath.first()){s1, s2 -> "$s1${File.separator}$s2"}.drop(1)
 

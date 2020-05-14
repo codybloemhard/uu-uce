@@ -10,8 +10,6 @@ import android.widget.MediaController
 import android.widget.TextView
 import android.widget.VideoView
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.uu_uce.misc.LogType
-import com.uu_uce.misc.Logger
 
 //activity in which videos from video pins are shown
 class VideoViewer : Activity() {
@@ -23,7 +21,7 @@ class VideoViewer : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.video_viewer)
+        setContentView(R.layout.activity_video_viewer)
 
         // Set statusbar text color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -93,10 +91,5 @@ class VideoViewer : Activity() {
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putInt("prevVideoPos", prevVideoPos)
         super.onSaveInstanceState(outState)
-    }
-
-    override fun onBackPressed() {
-        Logger.log(LogType.Continuous, "VideoViewer", "test3")
-        finish()
     }
 }

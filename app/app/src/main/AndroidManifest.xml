@@ -27,7 +27,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="q">
-        <activity android:name=".LoginScreen"></activity>
+
+        <activity android:name=".LoginScreen"/>
+        <activity android:name=".ImageViewer"/>
         <activity android:name=".Profile" />
         <activity
             android:name=".Settings"
