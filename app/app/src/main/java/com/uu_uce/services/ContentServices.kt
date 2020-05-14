@@ -24,6 +24,7 @@ import java.util.zip.ZipInputStream
 val permissionsNeeded = listOf(Manifest.permission.INTERNET)
 
 private const val serverURL = "http://131.211.31.176:8080" // TODO: This should be dependedent of the users orginization
+private const val downloadURL = "/api/files/download/"
 
 private lateinit var sharedPref : SharedPreferences
 
@@ -87,7 +88,7 @@ fun getFiles (requiredFilePaths : List<Pair<String, String>>, activity: Activity
                 Toast.makeText(activity, "Downloading", Toast.LENGTH_SHORT).show()
             }
             downloadFile(
-                URL(serverURL + "/api/files/download/" + filePath.second), filePath.first, progressAction)
+                URL(serverURL + downloadURL + filePath.second), filePath.first, progressAction)
         })
     }
 

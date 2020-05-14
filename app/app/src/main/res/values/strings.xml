@@ -63,6 +63,7 @@
     <string name="menu_fieldbook_image_description">menu fieldbook image</string>
     <string name="menu_profile_button_text">Profile</string>
     <string name="menu_settings_button_text">Settings</string>
+    <string name="menu_logout_text">Logout</string>
 
     <!--Settings-->
     <string name="settings_pin_size">Pin Size</string>

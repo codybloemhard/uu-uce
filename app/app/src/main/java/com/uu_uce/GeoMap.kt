@@ -143,10 +143,18 @@ class GeoMap : AppCompatActivity() {
         }
 
         // Initialize menu
-        allpins_button.setOnClickListener{customMap.startAllPins()}
-        fieldbook_button.setOnClickListener{customMap.startFieldBook()}
-        settings_button.setOnClickListener{customMap.startSettings()}
-        profile_button.setOnClickListener{customMap.startProfile()}
+        allpins_button.setOnClickListener   { customMap.startAllPins() }
+        fieldbook_button.setOnClickListener { customMap.startFieldBook() }
+        settings_button.setOnClickListener  { customMap.startSettings() }
+        profile_button.setOnClickListener   { customMap.startProfile() }
+        logout_button.setOnClickListener    {
+            with(sharedPref.edit()) {
+                putString("com.uu_uce.USERNAME", "")
+                putString("com.uu_uce.PASSWORD", "")
+                apply()
+            }
+            customMap.startLogin()
+        }
 
         dragBar.clickAction      = {menu.dragButtonTap()}
         dragBar.dragAction       = { dx, dy -> menu.drag(dx,dy)}

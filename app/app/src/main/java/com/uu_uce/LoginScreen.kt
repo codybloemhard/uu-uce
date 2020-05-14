@@ -1,6 +1,7 @@
 package com.uu_uce
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -8,11 +9,16 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
+import androidx.preference.PreferenceManager
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
+import com.uu_uce.services.LoginResult
+import com.uu_uce.services.login
 import kotlinx.android.synthetic.main.activity_login_screen.*
 
 class LoginScreen : AppCompatActivity() {
+
+    private lateinit var sharedPref : SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,9 +32,18 @@ class LoginScreen : AppCompatActivity() {
             window.statusBarColor = Color.BLACK// set status background white
         }
 
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+
         signin_button.setOnClickListener {
-            when (singIn(username_field.text.toString(), password_field.text.toString())) {
+            val username = username_field.text.toString()
+            val password = password_field.text.toString()
+            when (login(username, password)) {
                 LoginResult.SUCCESS -> {
+                    with(sharedPref.edit()) {
+                        putString("com.uu_uce.USERNAME", username)
+                        putString("com.uu_uce.PASSWORD", password)
+                        apply()
+                    }
                     val intent = Intent(this, GeoMap::class.java)
                     startActivity(intent)
                 }
@@ -47,20 +62,5 @@ class LoginScreen : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    private fun singIn(username : String, password : String) : LoginResult {
-        // TODO: Connect to server and send credentials
-        if(username.count() < 1 && password.count() < 1) return LoginResult.NO_CREDENTIALS
-        else if(username.count() < 1) return LoginResult.NO_USERNAME
-        else if(password.count() < 1) return LoginResult.NO_PASSWORD
-        return LoginResult.SUCCESS
-    }
-
-    enum class LoginResult{
-        SUCCESS,
-        NO_CREDENTIALS,
-        NO_USERNAME,
-        NO_PASSWORD;
     }
 }

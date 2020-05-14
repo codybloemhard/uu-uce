@@ -427,6 +427,11 @@ class CustomMap : ViewTouchParent {
         startActivity(context, i,null)
     }
 
+    fun startLogin(){
+        val i = Intent(context, LoginScreen::class.java)
+        startActivity(context, i,null)
+    }
+
     fun getLayerCount() : Int{
         return nrLayers
     }
