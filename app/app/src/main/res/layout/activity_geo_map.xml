@@ -50,7 +50,7 @@
             android:background="@color/Flirtatious"
             android:clickable="true"
             android:focusable="true"
-            android:contentDescription="@string/allpins_open">
+            android:contentDescription="@string/allpins_menuimage_description">
 
             <ImageView
                 android:id="@+id/dragButton"

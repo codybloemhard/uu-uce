@@ -12,7 +12,7 @@
     <string name="geomap_heightline_diff_text">%1$dm</string>
 
     <!--AllPins-->
-    <string name="allpins_open">Open</string>
+    <string name="allpins_menuimage_description">Image for pins menu button</string>
     <string name="allpins_checkmark_description">Checkmark displaying if a pin is done</string>
 
     <!--Pins-->
