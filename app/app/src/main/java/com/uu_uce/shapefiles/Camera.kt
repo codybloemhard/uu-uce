@@ -82,7 +82,9 @@ class Camera(
     //retrieve the topleft and bottomright coordinates that are visible in the camera
     fun getViewport(): Pair<p2,p2>{
         //if camera is not initialized properly, return dummy value
-        if (viewMax.first < viewMin.first || viewMax.second < viewMin.second || viewMax.third < viewMin.third) return p2ZeroPair
+        if (viewMax.first < viewMin.first || viewMax.second < viewMin.second || viewMax.third < viewMin.third) {
+            return p2ZeroPair
+        }
 
         val w = viewMax.first - viewMin.first
         val h = viewMax.second - viewMin.second
@@ -117,7 +119,7 @@ class Camera(
 
     //set the x and y to new values, while not going out of bounds
     private fun setPos(newX: Double, newY: Double){
-        if(isBusy()) return
+        if(isBusy() || viewMin.first > viewMax.first || viewMin.second > viewMax.second) return
         val xvalue = newX.coerceIn(viewMin.first,viewMax.first)
         val yvalue = newY.coerceIn(viewMin.second,viewMax.second)
         setXy(xvalue,yvalue)
