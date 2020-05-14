@@ -47,7 +47,7 @@
     <string name="fieldbook_main_title">Fieldbook</string>
     <string name="fieldbook_map_title">Pinmap</string>
     <string name="fieldbook_route_title">Route</string>
-    <string name="fieldbook_empty">Hello blank fragment</string> <!-- to be removed -->
+    <string name="fieldbook_empty">Hello blank fragment</string> <!-- TODO: remove -->
     <string name="fieldbook_text_image_description">Text</string>
     <string name="fieldbook_image_image_description">Image</string>
     <string name="fieldbook_video_image_description">Video</string>
