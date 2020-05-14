@@ -66,6 +66,7 @@ class FieldbookHomeFragment : Fragment() {
     private lateinit var viewAdapter        : FieldbookAdapter
     private lateinit var fragmentActivity   : FragmentActivity
 
+
     private lateinit var content: MutableList<ContentBlockInterface>
 
     private lateinit var fragmentView   : View
@@ -409,8 +410,10 @@ class FieldbookHomeFragment : Fragment() {
     private fun addText() {
         latestBlockIndex++
         title.clearFocus()
-        EditTextBlock().also {
-            it.generateContent(blockID++,layout,fragmentActivity,customView,null)
+        EditTextBlock(
+            fragmentActivity
+        ).also {
+            it.generateContent(blockID++,layout,customView,null)
             content.add(it)
         }
         scrollToEnd()
@@ -424,9 +427,10 @@ class FieldbookHomeFragment : Fragment() {
         title.clearFocus()
         ImageContentBlock(
             image,
-            makeImageThumbnail(image)
+            makeImageThumbnail(image),
+            fragmentActivity
         ).also{
-            it.generateContent(blockID++, layout, fragmentActivity, customView, null)
+            it.generateContent(blockID++, layout, customView, null)
             content.add(it)
         }
         scrollToEnd()
@@ -437,9 +441,10 @@ class FieldbookHomeFragment : Fragment() {
         title.clearFocus()
         VideoContentBlock(
             video,
-            makeVideoThumbnail(video)
+            makeVideoThumbnail(video),
+            fragmentActivity
         ).also {
-            it.generateContent(blockID++, layout, fragmentActivity, customView, null)
+            it.generateContent(blockID++, layout, customView, null)
             content.add(it)
         }
         scrollToEnd()

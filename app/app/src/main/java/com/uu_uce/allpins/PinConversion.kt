@@ -31,7 +31,7 @@ class PinConversion(val context: Context){
     private val resource = context.resources
 
     private fun stringToPinContent(content: String): PinContent {
-        return PinContent(content)
+        return PinContent(content, context)
     }
 
     private fun difficultyToBackground(difficulty: Int): Drawable {

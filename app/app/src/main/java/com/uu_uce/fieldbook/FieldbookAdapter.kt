@@ -55,7 +55,7 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
             FrameLayout.LayoutParams.MATCH_PARENT
         )
 
-        val content = PinContent(entry.content)
+        val content = PinContent(entry.content, activity)
 
         var isThumbnail = false
         var thumbnailUri = Uri.EMPTY
@@ -115,7 +115,42 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
                     // Fill layout of popup
                     for(i in 0 until content.contentBlocks.count()) {
-                        content.contentBlocks[i].generateContent(i, layout, activity, customView, null)
+                        content.contentBlocks[i].apply {
+                            generateContent(i, layout, customView, null)
+                            this.content.setOnLongClickListener(
+                                View.OnLongClickListener(
+                                    fun(_) : Boolean {
+                                        val options = arrayOf("Edit", "Delete", "Cancel")
+
+                                        val dialog = AlertDialog.Builder(activity)
+                                        dialog.setTitle("Change content")
+
+                                        dialog.setItems(options) { dialogInterface, which ->
+                                            when (this) {
+                                                is TextContentBlock -> {
+                                                    when (which) {
+                                                        0 -> TODO()
+                                                        1 -> content.contentBlocks.remove(this)
+                                                        2 -> dialogInterface.dismiss()
+                                                    }
+                                                }
+                                                is ImageContentBlock -> {
+                                                    when (which) {
+                                                        0 -> TODO()
+                                                        1 -> content.contentBlocks.remove(this)
+                                                        2 -> dialogInterface.dismiss()
+                                                    }
+                                                }
+                                                is VideoContentBlock -> {
+
+                                                }
+                                            }
+                                        }
+                                        return true
+                                    }
+                                )
+                            )
+                        }
                     }
 
                     // Open popup

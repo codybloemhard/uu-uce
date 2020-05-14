@@ -5,7 +5,10 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.PopupWindow
+import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
@@ -88,7 +91,7 @@ class PinListAdapter internal constructor(
             if(newPin.status > 0){
                 // Pin is not unlocked yet
                 tempPins.add(newPin)
-                tempCanComplete.add(PinContent(newPin.content).canCompletePin)
+                tempCanComplete.add(PinContent(newPin.content,activity).canCompletePin)
             }
             else if (newPin.status == -1) {
                 // Pin needs recalculation
