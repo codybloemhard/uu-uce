@@ -136,6 +136,7 @@ class Camera(
     }
 
     fun flingCamera(){
+        if(isBusy()) return
         animType = AnimType.SLIDE
     }
 

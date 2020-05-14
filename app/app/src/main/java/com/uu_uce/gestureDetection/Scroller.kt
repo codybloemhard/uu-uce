@@ -10,19 +10,16 @@ import com.uu_uce.misc.Logger
 class Scroller(
     parent: Context,
     var action: (Float, Float) -> Unit,
-    var flingAction: (Float, Float) -> Unit = {_,_->})
+    var flingAction: () -> Unit = {})
     : TouchChild, GestureDetector.OnGestureListener{
     private var gestureDetector: GestureDetectorCompat = GestureDetectorCompat(parent, this)
 
     override fun getOnTouchEvent(event: MotionEvent) {
+        if(event.action == MotionEvent.ACTION_UP) flingAction()
         gestureDetector.onTouchEvent(event)
     }
 
-    override fun onFling(downEv: MotionEvent?, moveEv: MotionEvent?, velocityX: Float, velocityY: Float ): Boolean {
-        flingAction(velocityX, velocityY)
-        Logger.error("scroller", "x:$velocityX, y:$velocityY")
-        return false
-    }
+    override fun onFling(downEv: MotionEvent?, moveEv: MotionEvent?, velocityX: Float, velocityY: Float ): Boolean { return false }
     override fun onShowPress(e: MotionEvent?) {}
     override fun onSingleTapUp(e: MotionEvent?): Boolean { return false }
     override fun onDown(e: MotionEvent?): Boolean { return true }

@@ -71,7 +71,6 @@
     <string name="settings_networkdownload">Enable downloads on mobile data</string>
     <string name="settings_download_maps">Download maps</string>
     <string name="settings_download_button_text">Download</string>
-    <string name="settings_hardware">Hardware Accelerated</string>
     <string name="settings_mobiledata_warning_head">Enabling mobile data</string>
     <string name="settings_mobiledata_warning_body">Are you sure you want to enable downloading over mobile data? This may lead to significant amounts of data being used.</string>
     <string name="settings_zip_download_complete">Download completed, unpacking</string>

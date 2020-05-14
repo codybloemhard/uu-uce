@@ -278,7 +278,7 @@ class CustomMap : ViewTouchParent {
         requestRender()
     }
 
-    private fun flingMap(xv: Float, yv: Float){
+    private fun flingMap(){
         camera.flingCamera()
         requestRender()
     }
