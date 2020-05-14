@@ -103,4 +103,14 @@
     <string name="profile_statistics">Statistics</string>
     <string name="profile_wip_image">wip image</string>
 
+    <!--Login-->
+    <string name="login_app_name">Utrech \nCompanion to the Earth</string>
+    <string name="login_text">Please sign in to the app by using your SolisId and your password.</string>
+    <string name="login_username_hint">Username</string>
+    <string name="login_password_hint">Password</string>
+    <string name="login_app_logo_description">App logo</string>
+    <string name="login_nocredentials_message">Please enter a username and password</string>
+    <string name="login_nousername_message">Please enter a username</string>
+    <string name="login_nopassword_message">Please enter a password</string>
+
 </resources>

@@ -22,7 +22,7 @@ class MainActivity : TouchParent() {
             window.statusBarColor = Color.BLACK// set status background white
         }
 
-        val intent = Intent(this, GeoMap::class.java)
+        val intent = Intent(this, LoginScreen::class.java)
         startActivity(intent)
         Logger.setTypeEnabled(LogType.Continuous, true)
     }
