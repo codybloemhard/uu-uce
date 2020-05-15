@@ -212,8 +212,6 @@ class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Ur
         if(imageTitle != null)
             intent.putExtra("title", imageTitle)
         activity.startActivity(intent)
-
-        Log.d("test", "test")
     }
 
     fun getThumbnailURI() : Uri{
