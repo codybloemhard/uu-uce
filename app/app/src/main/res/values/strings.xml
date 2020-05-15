@@ -105,6 +105,7 @@
     <string name="profile_wip_image">wip image</string>
     <string name="pin_image_title_placeholder">image title</string>
     <string name="geomap_maps_download_instructions">Maps can be manually downloaded from settings</string>
+    <string name="profile_points_placeholder">POINTS</string>
 
     <!--Login-->
     <string name="login_app_name">Utrech \nCompanion to the Earth</string>
@@ -115,6 +116,6 @@
     <string name="login_nocredentials_message">Please enter a username and password</string>
     <string name="login_nousername_message">Please enter a username</string>
     <string name="login_nopassword_message">Please enter a password</string>
-    <string name="profile_points_placeholder">POINTS</string>
+    <string name="login_signin_button_text">Sign In</string>
 
 </resources>
