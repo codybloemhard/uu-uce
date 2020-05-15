@@ -115,5 +115,6 @@
     <string name="login_nocredentials_message">Please enter a username and password</string>
     <string name="login_nousername_message">Please enter a username</string>
     <string name="login_nopassword_message">Please enter a password</string>
+    <string name="profile_points_placeholder">POINTS</string>
 
 </resources>

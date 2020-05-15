@@ -202,14 +202,14 @@ class GeoMap : AppCompatActivity() {
 
     override fun onBackPressed() {
         //move the menu down when it's up, otherwise close the current popup
-        if(menu.dragStatus != DragStatus.Down){
+        if (menu.dragStatus != DragStatus.Down) {
             menu.down()
             return
         }
-        if(customMap.activePopup != null){
+        if (customMap.activePopup != null) {
             customMap.activePopup!!.dismiss()
         }
-        else{
+        else {
             moveTaskToBack(true)
         }
     }
