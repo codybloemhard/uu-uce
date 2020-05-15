@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipException
 import java.util.zip.ZipFile
@@ -56,7 +57,8 @@ fun findMissingFilePaths(requestedFilePaths : List<String>) : List<Pair<String, 
     val missingFilePaths : MutableList<Pair<String, String>> = mutableListOf()
     val adding : MutableMap<String, Boolean> = mutableMapOf()
     for(filePath in requestedFilePaths){
-        if((!File(filePath).exists() || !File(filePath).canRead()) && !adding.containsKey(filePath)){
+        val file = File(filePath)
+        if((!file.exists() || !file.canRead()) && !adding.containsKey(filePath)){
             val fileName = filePath.split('/').last().split('.').first() // Because we use UUID4 names there can never be a / or . in the file name
             missingFilePaths.add(Pair(filePath, fileName))
             adding[fileName] = true

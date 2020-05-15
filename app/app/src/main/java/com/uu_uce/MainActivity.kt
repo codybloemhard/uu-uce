@@ -36,7 +36,7 @@ class MainActivity : TouchParent() {
             startActivity(intent)
         }
         else{
-            val intent = Intent(this, LoginScreen::class.java)
+            val intent = Intent(this, Login::class.java)
             startActivity(intent)
             Logger.setTypeEnabled(LogType.Continuous, true)
         }

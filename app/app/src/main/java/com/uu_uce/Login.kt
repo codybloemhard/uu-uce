@@ -16,7 +16,7 @@ import com.uu_uce.services.LoginResult
 import com.uu_uce.services.login
 import kotlinx.android.synthetic.main.activity_login_screen.*
 
-class LoginScreen : AppCompatActivity() {
+class Login : AppCompatActivity() {
 
     private lateinit var sharedPref : SharedPreferences
 

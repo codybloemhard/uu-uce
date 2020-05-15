@@ -429,7 +429,7 @@ class CustomMap : ViewTouchParent {
     }
 
     fun startLogin(){
-        val i = Intent(context, LoginScreen::class.java)
+        val i = Intent(context, Login::class.java)
         startActivity(context, i,null)
     }
 
