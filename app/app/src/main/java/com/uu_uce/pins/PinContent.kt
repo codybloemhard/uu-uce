@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.util.JsonReader
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.*
@@ -211,6 +212,8 @@ class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Ur
         if(imageTitle != null)
             intent.putExtra("title", imageTitle)
         activity.startActivity(intent)
+
+        Log.d("test", "test")
     }
 
     fun getThumbnailURI() : Uri{

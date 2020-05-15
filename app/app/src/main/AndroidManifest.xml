@@ -29,7 +29,8 @@
         tools:targetApi="q">
 
         <activity android:name=".LoginScreen"/>
-        <activity android:name=".ImageViewer"/>
+        <activity android:name=".ImageViewer"
+            android:launchMode="singleInstance"/>
         <activity android:name=".Profile" />
         <activity
             android:name=".Settings"
@@ -63,7 +64,8 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".VideoViewer"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:launchMode="singleInstance"/>
 
         <meta-data
             android:name="preloaded_fonts"
