@@ -108,7 +108,7 @@
     <string name="profile_points_placeholder">POINTS</string>
 
     <!--Login-->
-    <string name="login_app_name">Utrech \nCompanion to the Earth</string>
+    <string name="login_app_name">Utrecht \nCompanion to the Earth</string>
     <string name="login_text">Please sign in to the app by using your SolisId and your password.</string>
     <string name="login_username_hint">Username</string>
     <string name="login_password_hint">Password</string>
