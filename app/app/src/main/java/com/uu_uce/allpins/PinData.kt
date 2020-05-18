@@ -5,6 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "pins")
 open class PinData(
+    @PrimaryKey
     var pinId          : Int,
     var location       : String,
     var difficulty     : Int,
@@ -14,6 +15,4 @@ open class PinData(
     var status         : Int,
     var predecessorIds : String,
     var followIds      : String
-){
-    @PrimaryKey(autoGenerate = true) var id : Int = 0
-}
+)
