@@ -32,11 +32,15 @@ class Login : AppCompatActivity() {
             window.statusBarColor = Color.BLACK// set status background white
         }
 
+        // Get preferences
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
 
         signin_button.setOnClickListener {
+            // Get credentials
             val username = username_field.text.toString()
             val password = password_field.text.toString()
+
+            // Try to log in
             when (login(username, password)) {
                 LoginResult.SUCCESS -> {
                     with(sharedPref.edit()) {
