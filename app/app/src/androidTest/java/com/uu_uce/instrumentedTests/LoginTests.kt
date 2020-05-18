@@ -1,8 +1,9 @@
 package com.uu_uce.instrumentedTests
 
+import android.view.KeyEvent
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.withDecorView
 import androidx.test.espresso.matcher.ViewMatchers.*
@@ -40,12 +41,59 @@ class LoginTests {
     }
 
     @Test
-    fun incorrectLogin(){
+    fun noCredentialsLogin(){
         onView(withId(R.id.signin_button))
             .perform(click())
 
         onView(withText(R.string.login_nocredentials_message))
             .inRoot(withDecorView(not(`is`(activityRule.activity.window.decorView))))
+            .check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun noPasswordLogin(){
+        onView(withId(R.id.username_field))
+            .perform(typeText("Username"), pressKey(KeyEvent.KEYCODE_ENTER))
+
+        onView(withId(R.id.password_field))
+            .perform(clearText(), pressKey(KeyEvent.KEYCODE_ENTER))
+
+        onView(withId(R.id.signin_button))
+            .perform(click())
+
+        onView(withText(R.string.login_nopassword_message))
+            .inRoot(withDecorView(not(`is`(activityRule.activity.window.decorView))))
+            .check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun noUsernameLogin(){
+        onView(withId(R.id.username_field))
+            .perform(clearText(), pressKey(KeyEvent.KEYCODE_ENTER))
+
+        onView(withId(R.id.password_field))
+            .perform(typeText("Password"), pressKey(KeyEvent.KEYCODE_ENTER))
+
+        onView(withId(R.id.signin_button))
+            .perform(click())
+
+        onView(withText(R.string.login_nousername_message))
+            .inRoot(withDecorView(not(`is`(activityRule.activity.window.decorView))))
+            .check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun successFullLogin(){
+        onView(withId(R.id.username_field))
+            .perform(typeText("Username"), pressKey(KeyEvent.KEYCODE_ENTER))
+
+        onView(withId(R.id.password_field))
+            .perform(typeText("Password"), pressKey(KeyEvent.KEYCODE_ENTER))
+
+        onView(withId(R.id.signin_button))
+            .perform(click())
+
+        onView(withId(R.id.customMap))
             .check(matches(isDisplayed()))
     }
 }

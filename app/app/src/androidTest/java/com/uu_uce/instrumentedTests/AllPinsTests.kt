@@ -191,7 +191,7 @@ class AllPinsTests {
             .perform(click())
 
         // Check if video player opened successfully
-        onView(withId(R.id.video_player))
+        onView(withId(R.id.video_title))
             .inRoot(not(isPlatformPopup()))
             .check(matches(isDisplayed()))
 
@@ -229,7 +229,8 @@ class AllPinsTests {
             .perform(click())
 
         // Check if video player opened successfully
-        onView(withId(R.id.video_player))
+        sleep(500)
+        onView(withId(R.id.video_title))
             .inRoot(not(isPlatformPopup()))
             .check(matches(isDisplayed()))
 
