@@ -24,4 +24,7 @@ interface FieldbookDao {
 
     @Query("SELECT * from fieldbook where LOWER(title) LIKE LOWER(:search)")
     suspend fun search(search : String) : List<FieldbookEntry>
+
+    @Query("UPDATE fieldbook SET content = :changedContent where id = :entryId")
+    suspend fun updateContent(changedContent : String, entryId : Int)
 }

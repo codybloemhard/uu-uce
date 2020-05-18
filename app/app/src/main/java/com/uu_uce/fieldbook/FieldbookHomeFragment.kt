@@ -30,21 +30,18 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.R
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.pins.ContentBlockInterface
-import com.uu_uce.pins.EditTextBlock
-import com.uu_uce.pins.ImageContentBlock
-import com.uu_uce.pins.VideoContentBlock
+import com.uu_uce.pins.*
 import com.uu_uce.services.*
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
-class FieldbookHomeFragment : Fragment() {
+class FieldbookHomeFragment(view: View) : Fragment() {
 
     companion object {
-        fun newInstance() =
-            FieldbookHomeFragment()
+        fun newInstance(view: View) =
+            FieldbookHomeFragment(view)
 
         val layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -66,10 +63,9 @@ class FieldbookHomeFragment : Fragment() {
     private lateinit var viewAdapter        : FieldbookAdapter
     private lateinit var fragmentActivity   : FragmentActivity
 
-
     private lateinit var content: MutableList<ContentBlockInterface>
 
-    private lateinit var fragmentView   : View
+    private val parentView              = view
     private lateinit var customView     : View
     private lateinit var scrollView     : ScrollView
     private lateinit var layout         : LinearLayout
@@ -105,7 +101,7 @@ class FieldbookHomeFragment : Fragment() {
             val recyclerView = view.findViewById<RecyclerView>(R.id.fieldbook_recyclerview)
             val addButton = view.findViewById<FloatingActionButton>(R.id.fieldbook_fab)
 
-            viewAdapter = FieldbookAdapter(fragmentActivity, viewModel)
+            viewAdapter = FieldbookAdapter(fragmentActivity, viewModel, parentView)
 
             viewModel.allFieldbookEntries.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
                 viewAdapter.setFieldbook(it)
@@ -167,9 +163,7 @@ class FieldbookHomeFragment : Fragment() {
         resetVariables()
         content = mutableListOf()
 
-        fragmentView = requireView()
-
-        customView = layoutInflater.inflate(R.layout.fieldbook_addpin_popup, fragmentView.parent as ViewGroup, false)
+        customView = layoutInflater.inflate(R.layout.fieldbook_addpin_popup, requireView() as ViewGroup, false)
         val popupWindow = PopupWindow(
             customView,
             ViewGroup.LayoutParams.MATCH_PARENT,
@@ -558,7 +552,7 @@ class FieldbookHomeFragment : Fragment() {
             title,
             utm,
             currentDate,
-            buildJSONContent(content).also{ jsonString ->
+            buildJSONContent(content, requireContext()).also{ jsonString ->
                 // added for debugging purposes
                 val myDir: File = File(requireContext().filesDir,"Content").also{
                     it.mkdirs()
@@ -569,22 +563,6 @@ class FieldbookHomeFragment : Fragment() {
             }
         ).also{
             viewModel.insert(it)
-        }
-    }
-
-    private fun buildJSONContent(content: List<ContentBlockInterface>): String {
-        return  content.joinToString(
-            prefix      = "[",
-            separator   = ",",
-            postfix     = "]"
-        ).also { jsonString ->
-            // added for debugging purposes
-            val myDir: File = File(requireContext().filesDir, "Content").also {
-                it.mkdirs()
-            }
-            val fileName = "TestContent.txt"
-            val file = File(myDir, fileName)
-            file.writeText(jsonString)
         }
     }
 
@@ -692,6 +670,4 @@ class FieldbookHomeFragment : Fragment() {
 
         imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
-
-
 }

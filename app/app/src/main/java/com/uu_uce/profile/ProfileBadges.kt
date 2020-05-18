@@ -6,12 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
 
 class ProfileBadges : Fragment() {
     private lateinit var fragmentActivity : Activity
-    private lateinit var recyclerView : RecyclerView
+    //private lateinit var recyclerView : RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,9 +23,9 @@ class ProfileBadges : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.profile_fragment_badges, container, false).also { view ->
+        return inflater.inflate(R.layout.profile_fragment_badges, container, false)//.also { view ->
             /*recyclerView = view.findViewById(R.id.badge_recyclerview)
             recyclerView.layoutManager = GridLayoutManager(fragmentActivity, 3)*/
-        }
+        //}
     }
 }

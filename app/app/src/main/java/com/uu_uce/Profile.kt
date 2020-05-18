@@ -79,4 +79,8 @@ class Profile : AppCompatActivity() {
         transaction.addToBackStack(null)
         transaction.commit()
     }
+
+    override fun onBackPressed() {
+        finish()
+    }
 }

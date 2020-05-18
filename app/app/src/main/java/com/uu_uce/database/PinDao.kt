@@ -13,6 +13,9 @@ interface PinDao {
     @Query("SELECT * from pins ORDER BY location DESC")
     fun getAllPins() : LiveData<List<PinData>>
 
+    @Query("SELECT content from pins")
+    suspend fun getContent() : List<String>
+
     @Query("SELECT status from pins where pinId = :pid")
     suspend fun getStatus(pid: Int) : Int
 

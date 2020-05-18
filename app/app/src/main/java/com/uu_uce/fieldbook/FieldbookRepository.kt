@@ -27,4 +27,8 @@ class FieldbookRepository(private val fieldbookDao: FieldbookDao) {
             action(allEntries.value)
         }
     }
+
+    suspend fun updateContent(content: String, entryId: Int) {
+        fieldbookDao.updateContent(content,entryId)
+    }
 }

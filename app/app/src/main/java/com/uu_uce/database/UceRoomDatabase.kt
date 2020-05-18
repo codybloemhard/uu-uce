@@ -50,7 +50,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
                     2,
                     "IMAGE",
                     "Test image",
-                    "[{\"tag\":\"IMAGE\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/images/test.png\"}]",
+                    "[{\"tag\":\"IMAGE\", \"file_path\":\"/sdcard/Android/data/com.uu_uce/files/PinContent/Images/test.png\"}]",
                     1,
                     "-1",
                     "-1"
@@ -63,7 +63,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
                     3,
                     "VIDEO",
                     "Test video",
-                    "[{\"tag\":\"VIDEO\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/videos/zoo.mp4\", \"thumbnail\":\"file:///data/data/com.uu_uce/files/pin_content/videos/thumbnails/zoothumbnail.png\", \"title\":\"zoo video\"}]",
+                    "[{\"tag\":\"VIDEO\", \"file_path\":\"/sdcard/Android/data/com.uu_uce/files/PinContent/Videos/zoo.mp4\", \"thumbnail\":\"/sdcard/Android/data/com.uu_uce/files/PinContent/Videos/Thumbnails/zoothumbnail.png\", \"title\":\"zoo video\"}]",
                     0,
                     "3",
                     "-1"

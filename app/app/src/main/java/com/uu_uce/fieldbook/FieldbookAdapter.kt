@@ -12,23 +12,24 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toFile
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
-import com.uu_uce.pins.ImageContentBlock
-import com.uu_uce.pins.PinContent
-import com.uu_uce.pins.TextContentBlock
-import com.uu_uce.pins.VideoContentBlock
+import com.uu_uce.pins.*
 
-class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookViewModel) : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>() {
-
+class FieldbookAdapter(
+    private val activity    : Activity,
+    private val viewModel   : FieldbookViewModel,
+    private val rootView    : View
+)
+    : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>()
+{
     private var fieldbook: List<FieldbookEntry> = emptyList()
     private lateinit var parentView : ViewGroup
 
-    class FieldbookViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val parentView = itemView
-        val titleFb: TextView = parentView.findViewById(R.id.title)
-        val numberFb: TextView = parentView.findViewById(R.id.number)
-        val locationFb: TextView = parentView.findViewById(R.id.pin_coordinates)
-        val datetimeFb: TextView = parentView.findViewById(R.id.datetime)
-        val frameFb: FrameLayout = parentView.findViewById(R.id.frame_layout)
+    class FieldbookViewHolder(val parentView: View) : RecyclerView.ViewHolder(parentView) {
+        val titleFb     : TextView      = itemView.findViewById(R.id.title)
+        val numberFb    : TextView      = itemView.findViewById(R.id.number)
+        val locationFb  : TextView      = itemView.findViewById(R.id.pin_coordinates)
+        val datetimeFb  : TextView      = itemView.findViewById(R.id.datetime)
+        val frameFb     : FrameLayout   = itemView.findViewById(R.id.frame_layout)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FieldbookViewHolder {
@@ -43,9 +44,10 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
     override fun onBindViewHolder(holder: FieldbookViewHolder, position: Int) {
         val entry : FieldbookEntry = fieldbook[position]
+        val index = entry.id
         holder.apply {
             titleFb.text = entry.title
-            numberFb.text = addLeadingZeros(entry.id)
+            numberFb.text = addLeadingZeros(index)
             locationFb.text = entry.location
             datetimeFb.text = entry.dateTime
         }
@@ -95,10 +97,11 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
         holder.parentView.setOnClickListener (
             View.OnClickListener(
                 fun (v) {
+                    val tempContent : MutableList<ContentBlockInterface> = content.contentBlocks
                     val layoutInflater = activity.layoutInflater
 
                     // Build an custom view (to be inflated on top of our current view & build it's popup window)
-                    val customView = layoutInflater.inflate(R.layout.pin_content_view, parentView, false)
+                    val customView = layoutInflater.inflate(R.layout.pin_content_view, rootView as ViewGroup, false)
 
                     val popupWindow = PopupWindow(
                         customView,
@@ -106,17 +109,21 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
                         ViewGroup.LayoutParams.MATCH_PARENT
                     )
 
-                    // Add the title for the popup window
-                    val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
-                    windowTitle.text = entry.title
+                    // Get elements
+                    val layout: LinearLayout =
+                        customView.findViewById(R.id.scrollLayout)
+                    val btnClosePopupWindow =
+                        customView.findViewById<Button>(R.id.popup_window_close_button)
+                    val windowTitle =
+                        customView.findViewById<TextView>(R.id.popup_window_title)
 
-                    // Add content to popup window
-                    val layout: LinearLayout = customView.findViewById(R.id.scrollLayout)
+                    // Add the title for the popup window
+                    windowTitle.text = entry.title
 
                     // Fill layout of popup
                     for(i in 0 until content.contentBlocks.count()) {
                         content.contentBlocks[i].apply {
-                            generateContent(i, layout, customView, null)
+                            generateContent(i, layout, rootView, null)
                             this.content.setOnLongClickListener(
                                 View.OnLongClickListener(
                                     fun(_) : Boolean {
@@ -126,26 +133,18 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
                                         dialog.setTitle("Change content")
 
                                         dialog.setItems(options) { dialogInterface, which ->
-                                            when (this) {
-                                                is TextContentBlock -> {
-                                                    when (which) {
-                                                        0 -> TODO()
-                                                        1 -> content.contentBlocks.remove(this)
-                                                        2 -> dialogInterface.dismiss()
-                                                    }
+                                            when(which) {
+                                                0 -> tempContent[i] = this.editContent(layout, i, rootView)
+                                                1 -> {
+                                                    this.removeContent(layout)
+                                                    tempContent.removeAt(i)
+                                                    val string = buildJSONContent(tempContent,activity)
+                                                    viewModel.updateContent(string,index)
                                                 }
-                                                is ImageContentBlock -> {
-                                                    when (which) {
-                                                        0 -> TODO()
-                                                        1 -> content.contentBlocks.remove(this)
-                                                        2 -> dialogInterface.dismiss()
-                                                    }
-                                                }
-                                                is VideoContentBlock -> {
-
-                                                }
+                                                2 -> dialogInterface.dismiss()
                                             }
                                         }
+                                        dialog.show()
                                         return true
                                     }
                                 )
@@ -155,10 +154,6 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
 
                     // Open popup
                     popupWindow.showAtLocation(v, Gravity.CENTER, 0, 0)
-
-                    // Get elements
-                    val btnClosePopupWindow =
-                        customView.findViewById<Button>(R.id.popup_window_close_button)
 
                     // Set onClickListeners
                     btnClosePopupWindow.setOnClickListener {

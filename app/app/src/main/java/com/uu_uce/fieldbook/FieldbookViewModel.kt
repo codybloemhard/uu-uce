@@ -34,4 +34,8 @@ class FieldbookViewModel(application: Application): AndroidViewModel(application
     fun search(searchText : String, action : ((List<FieldbookEntry>?) -> Unit)) = viewModelScope.launch {
         fieldbookRepository.search(searchText, action)
     }
+
+    fun updateContent(content: String, entryId: Int) = viewModelScope.launch {
+        fieldbookRepository.updateContent(content, entryId)
+    }
 }

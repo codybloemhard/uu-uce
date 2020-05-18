@@ -93,7 +93,6 @@
                             android:textColor="#9159FF" />
 
                         <ImageView
-                            android:id="@+id/imageView2"
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:layout_marginStart="5dp"

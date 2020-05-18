@@ -12,7 +12,7 @@ There are 4 different kinds of pin content blocks:
 2. Image content
     Use:		Displaying an image in the content of a pin.
     
-    Parameters: `tag`, `file_path`, `thumbnail(?)`
+    Parameters: `tag`, `file_path`, `thumbnail(?)`, `title(?)`
 3. Video content
     Use: 		Displaying a video in the content of a pin.
     

@@ -62,10 +62,11 @@ class CustomMap : ViewTouchParent {
     private val deviceLocEdgePaint  : Paint = Paint()
 
     // Pins
-    private var pins                    : MutableMap<Int, Pin>  = mutableMapOf()
-    private var pinStatuses             : MutableMap<Int, Int>  = mutableMapOf()
+    private lateinit var activity       : Activity
     private lateinit var pinViewModel   : PinViewModel
     private lateinit var lfOwner        : LifecycleOwner
+    private var pins                    : MutableMap<Int, Pin>  = mutableMapOf()
+    private var pinStatuses             : MutableMap<Int, Int>  = mutableMapOf()
     var activePopup                     : PopupWindow?          = null
     var pinSize                                                 = 60
 
@@ -102,12 +103,7 @@ class CustomMap : ViewTouchParent {
         //width and height are not set in the init{} yet
         //we delay calculations that use them by using post
         post{
-            camera.wAspect = width.toDouble()/height
-
-            val z = 1.0 / (camera.wAspect)
-            camera.maxZoom = maxOf(1.0,z)
-            camera.setZoom(z)
-            smap.setzooms(camera.minZoom, camera.maxZoom)
+            setCameraWAspect()
         }
     }
 
@@ -116,7 +112,7 @@ class CustomMap : ViewTouchParent {
         camera = smap.initialize()
     }
 
-    //add a new layer to the map, and generate a button to toggle it
+    // Add a new layer to the map, and generate a button to toggle it
     fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout, buttonSize: Int, hasInfo: Boolean){
         smap.addLayer(lt, chunkGetter, hasInfo)
         val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle)
@@ -131,6 +127,13 @@ class CustomMap : ViewTouchParent {
         scrollLayout.addView(btn)
 
         mods = smap.getMods()
+    }
+
+    // Remove all layers from map to avoid duplicates
+    fun removeLayers(scrollLayout: LinearLayout){
+        smap.removeLayers()
+        nrLayers = 0
+        scrollLayout.removeAllViewsInLayout()
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -155,14 +158,13 @@ class CustomMap : ViewTouchParent {
             // Draw map
             smap.draw(canvas, width, height, debug)
 
-            if(context is GeoMap){
+            if (context is GeoMap) {
                 val zoomLevel = smap.getZoomLevel()
-                if(zoomLevel >= 0 && mods.count() > 0){
+                if (zoomLevel >= 0 && mods.count() > 0) {
                     (context as GeoMap).heightline_diff_text.text = (context as Activity).getString(R.string.geomap_heightline_diff_text, mods[zoomLevel])
                 }
-                else{
-                    val standardValue = 0
-                    (context as GeoMap).heightline_diff_text.text = (context as Activity).getString(R.string.geomap_heightline_diff_text, standardValue)
+                else {
+                    (context as GeoMap).heightline_diff_text.text = ""
                 }
             }
 
@@ -173,7 +175,7 @@ class CustomMap : ViewTouchParent {
             val locInScreen =
                 deviceScreenLoc.first > 0 && deviceScreenLoc.first < width &&
                 deviceScreenLoc.second > 0 && deviceScreenLoc.second < height
-            if(locationAvailable && locInScreen){
+            if (locationAvailable && locInScreen) {
                 drawLocation(
                     deviceScreenLoc,
                     canvas,
@@ -185,7 +187,7 @@ class CustomMap : ViewTouchParent {
             }
 
             // Draw pins
-            pins.forEach{ entry ->
+            pins.forEach { entry ->
                 entry.value.draw(viewport, width, height,this, canvas)
             }
 
@@ -301,7 +303,7 @@ class CustomMap : ViewTouchParent {
             when {
                 pinStatuses[pin.pinId] == null -> {
                     // Pin was not yet present
-                    val newPin = PinConversion(context)
+                    val newPin = PinConversion(activity)
                         .pinDataToPin(pin, pinViewModel)
                     newPin.tryUnlock {
                         Logger.log(LogType.Info, "CustomMap", "Adding pin")
@@ -380,7 +382,16 @@ class CustomMap : ViewTouchParent {
         }
     }
 
-    //turn a layer on or off
+    fun setCameraWAspect(){
+        camera.wAspect = width.toDouble()/height
+
+        val z = 1.0 / (camera.wAspect)
+        camera.maxZoom = maxOf(1.0,z)
+        camera.setZoom(z)
+        smap.setzooms(camera.minZoom, camera.maxZoom)
+    }
+
+    // Turn a layer on or off
     private fun toggleLayer(l: Int){
         smap.toggleLayer(l)
     }
@@ -391,6 +402,10 @@ class CustomMap : ViewTouchParent {
 
     fun setLifeCycleOwner(lifecycleOwner: LifecycleOwner){
         lfOwner = lifecycleOwner
+    }
+
+    fun setActivity(activity: Activity){
+        this.activity = activity
     }
 
     //open the all pins activity
@@ -417,6 +432,9 @@ class CustomMap : ViewTouchParent {
         startActivity(context, i,null)
     }
 
+    fun getLayerCount() : Int{
+        return nrLayers
+    }
 
     //functions used for testing
     @TestOnly

@@ -109,6 +109,11 @@ class ShapeMap(
         layerMask.add(true)
     }
 
+    fun removeLayers(){
+        layers = mutableListOf()
+        layerMask = mutableListOf()
+    }
+
     //create a camera with the correct bounding box
     fun initialize(): Camera{
         val bminmax = mergeBBs(

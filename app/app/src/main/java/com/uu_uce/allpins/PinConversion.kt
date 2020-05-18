@@ -1,6 +1,6 @@
 package com.uu_uce.allpins
 
-import android.content.Context
+import android.app.Activity
 import android.graphics.BlendMode
 import android.graphics.BlendModeColorFilter
 import android.graphics.Color
@@ -14,7 +14,7 @@ import com.uu_uce.pins.Pin
 import com.uu_uce.pins.PinContent
 import com.uu_uce.services.UTMCoordinate
 
-class PinConversion(val context: Context){
+class PinConversion(val activity: Activity){
 
     companion object {
         fun stringToUtm(coord: String): UTMCoordinate {
@@ -28,19 +28,19 @@ class PinConversion(val context: Context){
         }
     }
 
-    private val resource = context.resources
+    private val resource = activity.resources
 
     private fun stringToPinContent(content: String): PinContent {
-        return PinContent(content, context)
+        return PinContent(content, activity)
     }
 
     private fun difficultyToBackground(difficulty: Int): Drawable {
         val color = when (difficulty) {
-            1 -> ContextCompat.getColor(context, R.color.ReptileGreen)
-            2 -> ContextCompat.getColor(context, R.color.OrangeHibiscus)
-            3 -> ContextCompat.getColor(context, R.color.Desire)
+            1 -> ContextCompat.getColor(activity, R.color.ReptileGreen)
+            2 -> ContextCompat.getColor(activity, R.color.OrangeHibiscus)
+            3 -> ContextCompat.getColor(activity, R.color.Desire)
             else -> {
-                ContextCompat.getColor(context, R.color.TextGrey)
+                ContextCompat.getColor(activity, R.color.TextGrey)
             }
         }
         var background =  ResourcesCompat.getDrawable(resource, R.drawable.ic_pin, null) ?: error ("Image not found")

@@ -19,6 +19,7 @@ import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import androidx.test.rule.GrantPermissionRule
 import com.uu_uce.Fieldbook
 import com.uu_uce.R
 import com.uu_uce.childAtPosition
@@ -39,6 +40,16 @@ class FieldbookTests {
     @get:Rule
     var intentsTestRule: IntentsTestRule<Fieldbook>
             = IntentsTestRule(Fieldbook::class.java)
+
+    @Rule
+    @JvmField
+    var mGrantPermissionRule: GrantPermissionRule =
+        GrantPermissionRule.grant(
+            "android.permission.ACCESS_FINE_LOCATION",
+            "android.permission.ACCESS_COARSE_LOCATION",
+            "android.permission.WRITE_EXTERNAL_STORAGE",
+            "android.permission.CAMERA"
+        )
 
     @Before
     fun init(){
