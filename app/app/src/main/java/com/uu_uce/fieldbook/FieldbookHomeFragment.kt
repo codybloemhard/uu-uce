@@ -116,7 +116,7 @@ class FieldbookHomeFragment(view: View) : Fragment() {
                 if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
                     //Perform Code
                     val search = searchBar.text.toString()
-                    searchPins(search)
+                    searchFieldbook(search)
                     return@OnKeyListener true
                 }
                 false
@@ -128,7 +128,7 @@ class FieldbookHomeFragment(view: View) : Fragment() {
         }
     }
 
-    private fun searchPins(search : String){
+    private fun searchFieldbook(search : String){
         viewModel.search(search){ fieldbook ->
             fieldbook?.let {
                 viewAdapter.setFieldbook(fieldbook)

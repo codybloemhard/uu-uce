@@ -43,6 +43,7 @@ class FieldbookAdapter(
     }
 
     override fun onBindViewHolder(holder: FieldbookViewHolder, position: Int) {
+        holder.frameFb.removeAllViews()
         val entry : FieldbookEntry = fieldbook[position]
         val index = entry.id
         holder.apply {
@@ -199,7 +200,7 @@ class FieldbookAdapter(
         notifyDataSetChanged()
     }
 
-    fun addLeadingZeros(id: Int) : String {
+    private fun addLeadingZeros(id: Int) : String {
         val s = id.toString()
         val zero : String = "0".repeat(3-s.length)
         return "#$zero$id"
