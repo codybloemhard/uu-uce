@@ -1,10 +1,8 @@
 package com.uu_uce.allpins
 
 import android.content.Context
-import android.graphics.BlendMode
-import android.graphics.BlendModeColorFilter
-import android.graphics.Color
-import android.graphics.PorterDuff
+import android.graphics.*
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.core.content.ContextCompat
@@ -14,8 +12,9 @@ import com.uu_uce.pins.Pin
 import com.uu_uce.pins.PinContent
 import com.uu_uce.services.UTMCoordinate
 
-class PinConversion(val context: Context){
 
+
+class PinConversion(val context: Context){
     companion object {
         fun stringToUtm(coord: String): UTMCoordinate {
             val regex = "(\\d+|[a-zA-Z])".toRegex()
@@ -34,7 +33,7 @@ class PinConversion(val context: Context){
         return PinContent(content)
     }
 
-    private fun difficultyToBackground(difficulty: Int): Drawable {
+    private fun difficultyToBackground(difficulty: Int): Bitmap {
         val color = when (difficulty) {
             1 -> ContextCompat.getColor(context, R.color.ReptileGreen)
             2 -> ContextCompat.getColor(context, R.color.OrangeHibiscus)
@@ -54,7 +53,7 @@ class PinConversion(val context: Context){
             @Suppress("DEPRECATION")
             background.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
         }
-        return background
+        return drawableToBitmap(background)
     }
 
     private fun typeToIcon(type: String): Drawable {
@@ -77,6 +76,31 @@ class PinConversion(val context: Context){
             image.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
         }
         return image
+    }
+
+    private fun drawableToBitmap(drawable: Drawable): Bitmap {
+        if (drawable is BitmapDrawable) {
+            if (drawable.bitmap != null) {
+                return drawable.bitmap
+            }
+        }
+        val bitmap: Bitmap = if (drawable.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {
+            Bitmap.createBitmap(
+                1,
+                1,
+                Bitmap.Config.ARGB_8888
+            ) // Single color bitmap will be created of 1x1 pixel
+        } else {
+            Bitmap.createBitmap(
+                drawable.intrinsicWidth,
+                drawable.intrinsicHeight,
+                Bitmap.Config.ARGB_8888
+            )
+        }
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
     }
 
     private fun stringToIds(ids : String) : List<Int>{

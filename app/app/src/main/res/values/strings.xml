@@ -10,6 +10,7 @@
     <string name="geomap_download_warning_head">Streaming is unavailable</string>
     <string name="geomap_download_warning_body">Streaming maps is currently unsupported, to use the maps supplied by your organization you will have to download them. Would you like to download the maps now?</string>
     <string name="geomap_heightline_diff_text">%1$dm</string>
+    <string name="geomap_maps_download_instructions">Maps can be manually downloaded from settings</string>
 
     <!--AllPins-->
     <string name="allpins_menuimage_description">Image for pins menu button</string>
@@ -37,6 +38,7 @@
     <string name="pin_close_warning_head">Closing Pin</string>
     <string name="pin_close_warning_body">Are you sure you want to close pin? All progress will be lost.</string>
     <string name="pin_missing_answer_message">Some questions still lack answers</string>
+    <string name="pin_image_title_placeholder">image title</string>
 
     <!--Fieldbook-->
     <string name="fieldbook_date_time_text"><![CDATA[Date & Time]]></string>
@@ -71,7 +73,6 @@
     <string name="settings_networkdownload">Enable downloads on mobile data</string>
     <string name="settings_download_maps">Download maps</string>
     <string name="settings_download_button_text">Download</string>
-    <string name="settings_hardware">Hardware Accelerated</string>
     <string name="settings_mobiledata_warning_head">Enabling mobile data</string>
     <string name="settings_mobiledata_warning_body">Are you sure you want to enable downloading over mobile data? This may lead to significant amounts of data being used.</string>
     <string name="settings_zip_download_complete">Download completed, unpacking</string>
@@ -103,8 +104,6 @@
     <string name="profile_achievements">Achievements</string>
     <string name="profile_statistics">Statistics</string>
     <string name="profile_wip_image">wip image</string>
-    <string name="pin_image_title_placeholder">image title</string>
-    <string name="geomap_maps_download_instructions">Maps can be manually downloaded from settings</string>
     <string name="profile_points_placeholder">POINTS</string>
 
     <!--Login-->

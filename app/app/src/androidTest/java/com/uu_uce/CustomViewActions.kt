@@ -51,7 +51,7 @@ fun tap(x: Float, y: Float): ViewAction? {
 
             // Send down event, pause, and send up
             val down = MotionEvents.sendDown(uiController, coordinates, precision).down
-            uiController.loopMainThreadForAtLeast(200)
+            uiController.loopMainThreadForAtLeast(10)
             MotionEvents.sendUp(uiController, down, coordinates)
         }
     }

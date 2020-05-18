@@ -123,11 +123,11 @@ class HeightLineReader(
             )
 
             val nrPoints = reader.readULong()
-            val points: List<p2> = List(nrPoints.toInt()) { j ->
+            val points: List<p2> = List(nrPoints.toInt()) {
                 p2(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff)
             }
 
-            HeightShapeZ(points, bb1, bb2)
+            HeightShapeZ(points)
         }
 
         val time1 = System.currentTimeMillis() - time
@@ -174,7 +174,7 @@ class PolygonReader(
                 }
             }
 
-            PolygonZ(outerRings, innerRings, bbmin, bbmax)
+            PolygonZ(outerRings, innerRings)
         }
 
         return Chunk(shapes, bmin, bmax, LayerType.Water)

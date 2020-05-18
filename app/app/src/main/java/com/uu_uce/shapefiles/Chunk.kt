@@ -1,8 +1,6 @@
 package com.uu_uce.shapefiles
 
-import android.graphics.Canvas
 import android.graphics.Paint
-import com.uu_uce.mapOverlay.aaBoundingBoxIntersect
 
 //chunkindex (x,y,z) is the x'th chunk from the left, the y'th
 //from the bottom, in zoomlevel z
@@ -18,15 +16,18 @@ bmin/bmax: the bounding box of all shapes
 type: what type of content is in this chunk
  */
 class Chunk(var shapes: List<ShapeZ>, var bmin: p3, var bmax: p3, val type: LayerType){
-    //display all chunks to the canvas
-    fun draw(canvas: Canvas, paint: Paint, viewport : Pair<p2,p2>, width: Int, height: Int){
-        val drawInfo = when(type){
+    private val drawInfo: DrawInfo
+
+    init{
+        drawInfo = when(type){
             LayerType.Height -> {
                 var nrPoints = 0
+                var nrLines = 0
                 for(shape in shapes){
                     nrPoints+=shape.nrPoints
+                    nrLines += shape.nrPoints - 1
                 }
-                LineDrawInfo(nrPoints)
+                LineDrawInfo(nrPoints, nrLines)
             }
             LayerType.Water -> {
                 var nrIndices = 0
@@ -40,9 +41,13 @@ class Chunk(var shapes: List<ShapeZ>, var bmin: p3, var bmax: p3, val type: Laye
             else -> throw Exception("chunk type not implemented")
         }
         for(shape in shapes) {
-            if (aaBoundingBoxIntersect(shape.bmin, shape.bmax, viewport.first, viewport.second))
-                shape.draw(drawInfo, viewport, width, height)
+            shape.initDrawInfo(drawInfo)
         }
-        drawInfo.draw(canvas,paint)
+        drawInfo.finalize()
+    }
+
+    //display all chunks to the canvas
+    fun draw(program: Int, scale: FloatArray, trans: FloatArray, color: FloatArray){
+        drawInfo.draw(program, scale, trans, color)
     }
 }

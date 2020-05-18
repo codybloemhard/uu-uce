@@ -16,6 +16,7 @@ import androidx.test.rule.ActivityTestRule
 import androidx.test.rule.GrantPermissionRule
 import com.uu_uce.*
 import com.uu_uce.allpins.PinData
+import kotlinx.coroutines.delay
 import org.hamcrest.Matchers.not
 import org.junit.Before
 import org.junit.Rule
@@ -232,7 +233,7 @@ class GeoMapTests {
     fun openPin(){
         // Tap pin on the map
         onView(withId(R.id.customMap))
-            .perform(tap(pinLocation.first, pinLocation.second))
+            .perform(tap(pinLocation.first, pinLocation.second - 5))
 
         // Check if popup opened successfully
         onView(withId(R.id.popup_window_view))
