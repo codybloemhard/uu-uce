@@ -19,6 +19,7 @@ import android.view.View.FOCUS_DOWN
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
@@ -32,6 +33,7 @@ import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.pins.*
 import com.uu_uce.services.*
+import com.uu_uce.ui.createTopbar
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -146,6 +148,7 @@ class FieldbookHomeFragment(view: View) : Fragment() {
          * Eventually switch to the MediaStore API. Doesn't need READ/WRITE permissions anymore -> only to be imported for API 28 and lower
          */
         getPermissions(fragmentActivity, listOf(Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE), PHOTOCAMERA_REQUEST)
+
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
             fragmentActivity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED ||
                     fragmentActivity.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
@@ -176,6 +179,12 @@ class FieldbookHomeFragment(view: View) : Fragment() {
             update()
         }
 
+        customView.findViewById<TextView>(R.id.toolbar_title).text = getString(R.string.fieldbook_add_pin_title)
+
+        customView.findViewById<ImageButton>(R.id.toolbar_back_button).setOnClickListener{
+            popupWindow.dismiss()
+        }
+
         layout      = customView.findViewById(R.id.fieldbook_content_container)
         scrollView  = customView.findViewById(R.id.fieldbook_scroll_view)
 
@@ -191,19 +200,19 @@ class FieldbookHomeFragment(view: View) : Fragment() {
             inputType = TYPE_TEXT_FLAG_NO_SUGGESTIONS
         }
 
-        customView.findViewById<ImageButton>(R.id.add_text_block).apply{
+        customView.findViewById<ConstraintLayout>(R.id.add_text_block).apply{
             setOnClickListener {
                 addText()
             }
         }
 
-        customView.findViewById<ImageButton>(R.id.add_image_block).apply{
+        customView.findViewById<ConstraintLayout>(R.id.add_image_block).apply{
             setOnClickListener {
                 selectImage()
             }
         }
 
-        customView.findViewById<ImageButton>(R.id.add_video_block).apply{
+        customView.findViewById<ConstraintLayout>(R.id.add_video_block).apply{
             setOnClickListener {
                 selectVideo()
             }
