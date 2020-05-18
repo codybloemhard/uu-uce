@@ -368,6 +368,7 @@ class CustomMap : ViewTouchParent {
 
     //called when the screen is tapped at tapLocation
     private fun tapPin(tapLocation : p2, activity : Activity){
+        if(activePopup != null) return
         for(pin in sortedPins.reversed()){
             if(!pin.inScreen || pin.getStatus() < 1) continue
             if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, 0)){
@@ -449,6 +450,11 @@ class CustomMap : ViewTouchParent {
     //open profile activity
     fun startProfile() {
         val i = Intent(context, Profile::class.java)
+        startActivity(context, i,null)
+    }
+
+    fun startLogin(){
+        val i = Intent(context, Login::class.java)
         startActivity(context, i,null)
     }
 

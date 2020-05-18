@@ -15,6 +15,7 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.res.ResourcesCompat
+import androidx.preference.PreferenceManager
 import com.uu_uce.OpenGL.coordsPerVertex
 import com.uu_uce.R
 import com.uu_uce.allpins.PinViewModel
@@ -397,7 +398,7 @@ class Pin(
                 sufficient = true
                 complete()
 
-                val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
+                val sharedPref =  PreferenceManager.getDefaultSharedPreferences(activity)
                 val prevPoints = sharedPref.getInt("com.uu_uce.USER_POINTS", 0)
                 with(sharedPref.edit()) {
                     putInt("com.uu_uce.USER_POINTS", prevPoints + reward)

@@ -141,10 +141,18 @@ class GeoMap : AppCompatActivity() {
         }
 
         // Initialize menu
-        allpins_button.setOnClickListener{customMap.startAllPins()}
-        fieldbook_button.setOnClickListener{customMap.startFieldBook()}
-        settings_button.setOnClickListener{customMap.startSettings()}
-        profile_button.setOnClickListener{customMap.startProfile()}
+        allpins_button.setOnClickListener   { customMap.startAllPins() }
+        fieldbook_button.setOnClickListener { customMap.startFieldBook() }
+        settings_button.setOnClickListener  { customMap.startSettings() }
+        profile_button.setOnClickListener   { customMap.startProfile() }
+        logout_button.setOnClickListener    {
+            with(sharedPref.edit()) {
+                putString("com.uu_uce.USERNAME", "")
+                putString("com.uu_uce.PASSWORD", "")
+                apply()
+            }
+            customMap.startLogin()
+        }
 
         dragBar.clickAction      = {menu.dragButtonTap()}
         dragBar.dragAction       = { dx, dy -> menu.drag(dx,dy)}
@@ -192,14 +200,14 @@ class GeoMap : AppCompatActivity() {
 
     override fun onBackPressed() {
         //move the menu down when it's up, otherwise close the current popup
-        if(menu.dragStatus != DragStatus.Down){
+        if (menu.dragStatus != DragStatus.Down) {
             menu.down()
             return
         }
-        if(customMap.activePopup != null){
+        if (customMap.activePopup != null) {
             customMap.activePopup!!.dismiss()
         }
-        else{
+        else {
             moveTaskToBack(true)
         }
     }

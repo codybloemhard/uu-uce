@@ -13,7 +13,7 @@
     <string name="geomap_maps_download_instructions">Maps can be manually downloaded from settings</string>
 
     <!--AllPins-->
-    <string name="allpins_open">Open</string>
+    <string name="allpins_menuimage_description">Image for pins menu button</string>
     <string name="allpins_checkmark_description">Checkmark displaying if a pin is done</string>
 
     <!--Pins-->
@@ -38,6 +38,7 @@
     <string name="pin_close_warning_head">Closing Pin</string>
     <string name="pin_close_warning_body">Are you sure you want to close pin? All progress will be lost.</string>
     <string name="pin_missing_answer_message">Some questions still lack answers</string>
+    <string name="pin_image_title_placeholder">image title</string>
 
     <!--Fieldbook-->
     <string name="fieldbook_date_time_text"><![CDATA[Date & Time]]></string>
@@ -48,7 +49,7 @@
     <string name="fieldbook_main_title">Fieldbook</string>
     <string name="fieldbook_map_title">Pinmap</string>
     <string name="fieldbook_route_title">Route</string>
-    <string name="fieldbook_empty">Hello blank fragment</string> <!-- to be removed -->
+    <string name="fieldbook_empty">Hello blank fragment</string> <!-- TODO: remove -->
     <string name="fieldbook_text_image_description">Text</string>
     <string name="fieldbook_image_image_description">Image</string>
     <string name="fieldbook_video_image_description">Video</string>
@@ -64,6 +65,7 @@
     <string name="menu_fieldbook_image_description">menu fieldbook image</string>
     <string name="menu_profile_button_text">Profile</string>
     <string name="menu_settings_button_text">Settings</string>
+    <string name="menu_logout_text">Logout</string>
 
     <!--Settings-->
     <string name="settings_pin_size">Pin Size</string>
@@ -102,6 +104,17 @@
     <string name="profile_achievements">Achievements</string>
     <string name="profile_statistics">Statistics</string>
     <string name="profile_wip_image">wip image</string>
-    <string name="pin_image_title_placeholder">image title</string>
+    <string name="profile_points_placeholder">POINTS</string>
+
+    <!--Login-->
+    <string name="login_app_name">Utrecht \nCompanion to the Earth</string>
+    <string name="login_text">Please sign in to the app by using your SolisId and your password.</string>
+    <string name="login_username_hint">Username</string>
+    <string name="login_password_hint">Password</string>
+    <string name="login_app_logo_description">App logo</string>
+    <string name="login_nocredentials_message">Please enter a username and password</string>
+    <string name="login_nousername_message">Please enter a username</string>
+    <string name="login_nopassword_message">Please enter a password</string>
+    <string name="login_signin_button_text">Sign In</string>
 
 </resources>
