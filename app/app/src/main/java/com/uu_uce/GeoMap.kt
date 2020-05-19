@@ -75,7 +75,7 @@ class GeoMap : AppCompatActivity() {
 
         // TODO: remove when streaming is implemented
         if(!File(getExternalFilesDir(null)?.path + File.separator + "Maps").exists()){
-            AlertDialog.Builder(this)
+            AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setIcon(R.drawable.ic_sprite_question)
                 .setTitle(getString(R.string.geomap_download_warning_head))
                 .setMessage(getString(R.string.geomap_download_warning_body))

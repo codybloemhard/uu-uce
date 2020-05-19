@@ -99,7 +99,7 @@ class Settings : AppCompatActivity() {
         networkdownload_switch.isChecked = curNetworkDownloading
         networkdownload_switch.setOnClickListener{
             if(networkdownload_switch.isChecked){
-                AlertDialog.Builder(this)
+                AlertDialog.Builder(this, R.style.AlertDialogStyle)
                     .setIcon(R.drawable.ic_sprite_warning)
                     .setTitle(getString(R.string.settings_mobiledata_warning_head))
                     .setMessage(getString(R.string.settings_mobiledata_warning_body))
@@ -175,11 +175,11 @@ class Settings : AppCompatActivity() {
         }
 
         download_maps_button.setOnClickListener{
-            if(!File(getExternalFilesDir(null)?.path + File.separator + "Maps").exists()) {
+            if (!File(getExternalFilesDir(null)?.path + File.separator + "Maps").exists()) {
                 downloadMaps()
             }
             else{
-                AlertDialog.Builder(this)
+                AlertDialog.Builder(this, R.style.AlertDialogStyle)
                     .setIcon(R.drawable.ic_sprite_question)
                     .setTitle(getString(R.string.settings_redownload_map_head))
                     .setMessage(getString(R.string.settings_redownload_map_body))
@@ -203,7 +203,7 @@ class Settings : AppCompatActivity() {
         maps_storage_size.text = writableSize(dirSize(File(mapsDir)))
 
         delete_maps_button.setOnClickListener {
-            AlertDialog.Builder(this)
+            AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setIcon(R.drawable.ic_sprite_warning)
                 .setTitle(getString(R.string.settings_delete_maps_warning_head))
                 .setMessage(getString(R.string.settings_delete_maps_warning_body))
@@ -265,7 +265,7 @@ class Settings : AppCompatActivity() {
         content_storage_size.text = writableSize(dirSize(File(contentDir)))
 
         delete_content_button.setOnClickListener {
-            AlertDialog.Builder(this)
+            AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setIcon(R.drawable.ic_sprite_warning)
                 .setTitle(getString(R.string.settings_delete_content_warning_head))
                 .setMessage(getString(R.string.settings_delete_content_warning_body))
