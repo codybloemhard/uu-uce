@@ -73,8 +73,9 @@ class Camera(
 
         val w = viewMax.first - viewMin.first
         val h = viewMax.second - viewMin.second
-        val width = (w * wAspect / 2 * zoom).toFloat()
-        val height = (h / 2 * zoom).toFloat()
+        val maxwh = maxOf(w,h)
+        val width = (maxwh * wAspect / 2.0 * zoom).toFloat()
+        val height = (maxwh / 2.0 * zoom).toFloat()
         val scale = floatArrayOf(1f/width, 1f/height)
         return Pair(scale, trans)
     }
@@ -88,8 +89,9 @@ class Camera(
 
         val w = viewMax.first - viewMin.first
         val h = viewMax.second - viewMin.second
-        val woff = w * wAspect / 2.0 * zoom
-        val hoff = h / 2.0 * zoom
+        val maxwh = maxOf(w,h)
+        val woff = maxwh * wAspect / 2.0 * zoom
+        val hoff = maxwh / 2.0 * zoom
         lastWoff = woff
         lastHoff = hoff
         val nmin = p2(x - woff, y - hoff)

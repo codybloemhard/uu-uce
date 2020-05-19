@@ -1,7 +1,5 @@
 package com.uu_uce.shapefiles
 
-import android.graphics.Paint
-
 //chunkindex (x,y,z) is the x'th chunk from the left, the y'th
 //from the bottom, in zoomlevel z
 typealias ChunkIndex = Triple<Int,Int,Int>
@@ -47,7 +45,7 @@ class Chunk(var shapes: List<ShapeZ>, var bmin: p3, var bmax: p3, val type: Laye
     }
 
     //display all chunks to the canvas
-    fun draw(program: Int, scale: FloatArray, trans: FloatArray, color: FloatArray){
-        drawInfo.draw(program, scale, trans, color)
+    fun draw(lineProgram: Int, polygonProgram: Int, scale: FloatArray, trans: FloatArray, color: FloatArray){
+        drawInfo.draw(lineProgram, polygonProgram, scale, trans, color)
     }
 }

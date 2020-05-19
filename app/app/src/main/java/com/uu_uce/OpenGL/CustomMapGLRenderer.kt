@@ -8,21 +8,40 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
 const val coordsPerVertex= 2
+const val colorsPerVertex = 3
 
 class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
-    private val vertexShaderCode =
+    private val lineVertexShaderCode =
                 "uniform vec2 trans;\n" +
                 "uniform vec2 scale;\n" +
                 "attribute vec4 vPosition;\n" +
                 "void main() {\n" +
-                "  gl_Position = vec4((trans.x + vPosition.x)*scale.x, (trans.y + vPosition.y) * scale.y, -1.0, 1.0);\n" +
+                "  gl_Position = vec4((trans.x + vPosition.x)*scale.x, (trans.y + vPosition.y) * scale.y, 0.0, 1.0);\n" +
                 "}\n"
 
-    private val fragmentShaderCode =
+    private val lineFragmentShaderCode =
                 "precision mediump float;\n" +
                 "uniform vec4 vColor;\n" +
                 "void main() {\n" +
                 "  gl_FragColor = vColor;\n" +
+                "}\n"
+
+    private val polygonVertexShaderCode =
+                "uniform vec2 trans;\n" +
+                "uniform vec2 scale;\n" +
+                "attribute vec4 vPosition;\n" +
+                "attribute vec3 inColor;\n" +
+                "varying vec3 vColor;\n" +
+                "void main() {\n" +
+                "  gl_Position = vec4((trans.x + vPosition.x)*scale.x, (trans.y + vPosition.y) * scale.y, 0.0, 1.0);\n" +
+                "  vColor = inColor;\n" +
+                "}\n"
+
+    private val polygonFragmentShaderCode =
+                "precision mediump float;\n" +
+                "varying vec3 vColor;\n" +
+                "void main() {\n" +
+                "  gl_FragColor = vec4(vColor,1.0);\n" +
                 "}\n"
 
     private val locVertexShaderCode =
@@ -47,17 +66,19 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
                 "}\n"
 
     private val pinFragmentShaderCode =
-            "precision mediump float;\n" +
-            "uniform vec4 vColor;\n" +
-            "uniform sampler2D u_Texture;\n" +
-            "varying vec2 v_TexCoordinate;\n" +
-            "void main() {\n" +
-            "    gl_FragColor = (vColor * texture2D(u_Texture, v_TexCoordinate));\n" +
-            "}\n"
+                "precision mediump float;\n" +
+                "uniform vec4 vColor;\n" +
+                "uniform sampler2D u_Texture;\n" +
+                "varying vec2 v_TexCoordinate;\n" +
+                "void main() {\n" +
+                "    gl_FragColor = (vColor * texture2D(u_Texture, v_TexCoordinate));\n" +
+                "}\n"
 
-    private var standardProgram: Int = 0
+    private var lineProgram: Int = 0
+    private var polygonProgram: Int = 0
     private var pinProgram: Int = 0
     private var locProgram: Int = 0
+
 
     var pinsChanged = true
 
@@ -70,56 +91,53 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
 
 
-        var vertexShader: Int = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode)
-        var fragmentShader: Int = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode)
+        var vertexShader: Int = loadShader(GLES20.GL_VERTEX_SHADER, lineVertexShaderCode)
+        var fragmentShader: Int = loadShader(GLES20.GL_FRAGMENT_SHADER, lineFragmentShaderCode)
 
-        // create empty OpenGL ES Program
-        standardProgram = GLES20.glCreateProgram().also {
-            // add the vertex shader to program
+        lineProgram = GLES20.glCreateProgram().also {
             GLES20.glAttachShader(it, vertexShader)
-            // add the fragment shader to program
             GLES20.glAttachShader(it, fragmentShader)
-            // creates OpenGL ES program executables
             GLES20.glLinkProgram(it)
         }
 
         vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, locVertexShaderCode)
-        fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode)
+        fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, lineFragmentShaderCode)
 
-        // create empty OpenGL ES Program
         locProgram = GLES20.glCreateProgram().also {
-            // add the vertex shader to program
             GLES20.glAttachShader(it, vertexShader)
-            // add the fragment shader to program
             GLES20.glAttachShader(it, fragmentShader)
-            // creates OpenGL ES program executables
+            GLES20.glLinkProgram(it)
+        }
+
+        vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, polygonVertexShaderCode)
+        fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, polygonFragmentShaderCode)
+
+        polygonProgram = GLES20.glCreateProgram().also {
+            GLES20.glAttachShader(it, vertexShader)
+            GLES20.glAttachShader(it, fragmentShader)
             GLES20.glLinkProgram(it)
         }
 
         vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, pinVertexShaderCode)
         fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, pinFragmentShaderCode)
 
-        // create empty OpenGL ES Program
         pinProgram = GLES20.glCreateProgram().also {
-            // add the vertex shader to program
             GLES20.glAttachShader(it, vertexShader)
-            // add the fragment shader to program
             GLES20.glAttachShader(it, fragmentShader)
-            // creates OpenGL ES program executables
             GLES20.glLinkProgram(it)
         }
         GLES20.glBindAttribLocation(pinProgram, 0, "a_TexCoordinate")
     }
 
     override fun onDrawFrame(gl: GL10?) {
-        GLES20.glUseProgram(standardProgram)
+        GLES20.glUseProgram(lineProgram)
 
         if(pinsChanged) {
             map.initPinsGL()
             pinsChanged = false
         }
 
-        map.onDrawFrame(standardProgram, pinProgram, locProgram)
+        map.onDrawFrame(lineProgram, polygonProgram, pinProgram, locProgram)
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {

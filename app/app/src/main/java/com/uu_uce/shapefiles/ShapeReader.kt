@@ -68,6 +68,10 @@ class FileReader{
         ubytes = us
     }
 
+    fun readUByte(): UByte{
+        return  ubytes[index++].toUInt().toUByte()
+    }
+
     fun readUShort(): UShort{
         return  ((ubytes[index++].toUInt() shl 8) +
                 (ubytes[index++].toUInt())).toUShort()
@@ -137,11 +141,14 @@ class HeightLineReader(
     }
 }
 
-//reader for polygon chunks
+class Style(val outline: Boolean, val color: FloatArray)
+
 @ExperimentalUnsignedTypes
 class PolygonReader(
-    dir: File
-): ChunkGetter(dir) {
+    dir: File,
+    var hasStyles: Boolean,
+    private val styles: List<Style>
+): ChunkGetter(dir){
     override fun getChunk(cIndex: ChunkIndex): Chunk {
         val file = File(dir, "river")
         val reader = FileReader(file)
@@ -150,31 +157,33 @@ class PolygonReader(
         val yoff = reader.readULong().toDouble()
         val zoff = reader.readULong().toDouble()
         val mult = reader.readULong().toDouble()
+
         val bmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
         val bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
 
         val nrShapes = reader.readULong()
         val shapes: List<PolygonZ> = List(nrShapes.toInt()) {
-            val bbmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult + zoff)
-            val bbmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult + zoff)
-
-            val nrOuter = reader.readULong()
-            val outerRings: List<List<p3>> = List(nrOuter.toInt()) {
-                val nrPoints = reader.readULong()
-                List(nrPoints.toInt()) {
-                    p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult + zoff)
-                }
+            val nrVertices = reader.readULong()
+            val vertices: List<p3> = List(nrVertices.toInt()) {
+                p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, 0.0)
             }
-
-            val nrInner = reader.readULong()
-            val innerRings: List<List<p3>> = List(nrInner.toInt()) {
-                val nrPoints = reader.readULong()
-                List(nrPoints.toInt()) {
-                    p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult + zoff)
-                }
+            val nrIndices = reader.readULong()
+            val indices: List<Short> = List(nrIndices.toInt()) {
+                reader.readUShort().toShort()
             }
+            PolygonZ(vertices, indices.toMutableList())
+        }
 
-            PolygonZ(outerRings, innerRings)
+        if(hasStyles) {
+            val nrStyles = reader.readULong()
+            for (i in 0 until nrStyles.toInt()) {
+                shapes[i].style = styles[reader.readUInt().toInt()]
+            }
+        }
+        else{
+            for (i in 0 until nrShapes.toInt()) {
+                shapes[i].style = Style(false, floatArrayOf(0.2f,0.2f,0.8f,1.0f))
+            }
         }
 
         return Chunk(shapes, bmin, bmax, LayerType.Water)

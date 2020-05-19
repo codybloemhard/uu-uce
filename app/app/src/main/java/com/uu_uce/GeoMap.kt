@@ -20,9 +20,7 @@ import com.uu_uce.misc.ListenableBoolean
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.services.*
-import com.uu_uce.shapefiles.HeightLineReader
-import com.uu_uce.shapefiles.LayerType
-import com.uu_uce.shapefiles.PolygonReader
+import com.uu_uce.shapefiles.*
 import com.uu_uce.views.DragStatus
 import kotlinx.android.synthetic.main.activity_geo_map.*
 import org.jetbrains.annotations.TestOnly
@@ -48,6 +46,8 @@ class GeoMap : AppCompatActivity() {
     // TODO: Remove temporary hardcoded map information
     private val mapsName = "maps.zip"
     private lateinit var maps : List<String>
+
+    private var styles: List<Style> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Logger.setTagEnabled("CustomMap", false)
@@ -252,6 +252,8 @@ class GeoMap : AppCompatActivity() {
         customMap.removeLayers(toggle_layer_layout)
 
         val mydir = File(getExternalFilesDir(null)?.path + "/Maps/")
+
+        readStyles(mydir)
         try {
             val heightlines = File(mydir, "Heightlines")
             customMap.addLayer(
@@ -269,7 +271,7 @@ class GeoMap : AppCompatActivity() {
             val polygons = File(mydir, "Polygons")
             customMap.addLayer(
                 LayerType.Water,
-                PolygonReader(polygons),
+                PolygonReader(polygons, false, styles),
                 toggle_layer_layout,
                 size,
                 false
@@ -290,6 +292,25 @@ class GeoMap : AppCompatActivity() {
         customMap.setCameraWAspect()
         needsReload.setValue(false)
         customMap.redrawMap()
+    }
+
+    private fun readStyles(dir: File){
+        val file = File(dir, "styles")
+        val reader = FileReader(file)
+
+        val nrStyles = reader.readULong()
+        styles = List(nrStyles.toInt()) {
+            val outline = reader.readUByte()
+            val r = reader.readUByte()
+            val g = reader.readUByte()
+            val b = reader.readUByte()
+
+            Style(outline.toInt() == 1, floatArrayOf(
+                r.toFloat()/255,
+                g.toFloat()/255,
+                b.toFloat()/255
+            ))
+        }
     }
 
     private fun openProgressPopup(currentView: View){

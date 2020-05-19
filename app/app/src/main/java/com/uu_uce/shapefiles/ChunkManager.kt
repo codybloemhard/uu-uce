@@ -27,6 +27,8 @@ class ChunkManager(
     val bmax: p3,
     val nrCuts: List<Int>)
 {
+    //render a little extra around the camera for smoothness
+    private val extraRenderFac = 0.2f
 
     private var lastViewport: Pair<p2,p2> = Pair(p2Zero,p2Zero)
     private var lastZoom: Int = -1
@@ -97,10 +99,12 @@ class ChunkManager(
 
         //calculate which indices should be loaded
         //xmin..xmax through ymin..ymax are in the viewport
-        xmin = maxOf(0,((viewport.first.first - bmin.first)/(bmax.first - bmin.first)*nrCuts[zoom]).toInt())
-        xmax = minOf(nrCuts[zoom]-1, ((viewport.second.first - bmin.first)/(bmax.first - bmin.first)*nrCuts[zoom]).toInt())
-        ymin = maxOf(0, ((viewport.first.second - bmin.second)/(bmax.second - bmin.second)*nrCuts[zoom]).toInt())
-        ymax = minOf(nrCuts[zoom]-1, ((viewport.second.second - bmin.second)/(bmax.second - bmin.second)*nrCuts[zoom]).toInt())
+        val width = viewport.second.first - viewport.first.first
+        val height = viewport.second.second - viewport.first.second
+        xmin = maxOf(0,((viewport.first.first - bmin.first - extraRenderFac * width)/(bmax.first - bmin.first)*nrCuts[zoom]).toInt())
+        xmax = minOf(nrCuts[zoom]-1, ((viewport.second.first - bmin.first + extraRenderFac * width)/(bmax.first - bmin.first)*nrCuts[zoom]).toInt())
+        ymin = maxOf(0, ((viewport.first.second - bmin.second - extraRenderFac * height)/(bmax.second - bmin.second)*nrCuts[zoom]).toInt())
+        ymax = minOf(nrCuts[zoom]-1, ((viewport.second.second - bmin.second + extraRenderFac * height)/(bmax.second - bmin.second)*nrCuts[zoom]).toInt())
 
         //only update chunks if camera has been still for a while
         if(chunksChanged(zoom)) {
@@ -203,22 +207,12 @@ class ChunkManager(
 
     //whether the chunks have changed since last upate call
     private fun chunksChanged( zoom: Int): Boolean {
-        val lastxmin = maxOf(
-            0,
-            ((lastViewport.first.first - bmin.first) / (bmax.first - bmin.first) * nrCuts[zoom]).toInt()
-        )
-        val lastxmax = minOf(
-            nrCuts[zoom] - 1,
-            ((lastViewport.second.first - bmin.first) / (bmax.first - bmin.first) * nrCuts[zoom]).toInt()
-        )
-        val lastymin = maxOf(
-            0,
-            ((lastViewport.first.second - bmin.second) / (bmax.second - bmin.second) * nrCuts[zoom]).toInt()
-        )
-        val lastymax = minOf(
-            nrCuts[zoom] - 1,
-            ((lastViewport.second.second - bmin.second) / (bmax.second - bmin.second) * nrCuts[zoom]).toInt()
-        )
+        val width = lastViewport.second.first - lastViewport.first.first
+        val height = lastViewport.second.second - lastViewport.first.second
+        val lastxmin = maxOf(0, ((lastViewport.first.first - bmin.first - extraRenderFac * width) / (bmax.first - bmin.first) * nrCuts[zoom]).toInt())
+        val lastxmax = minOf(nrCuts[zoom] - 1, ((lastViewport.second.first - bmin.first + extraRenderFac * width) / (bmax.first - bmin.first) * nrCuts[zoom]).toInt())
+        val lastymin = maxOf(0, ((lastViewport.first.second - bmin.second - extraRenderFac * height) / (bmax.second - bmin.second) * nrCuts[zoom]).toInt())
+        val lastymax = minOf(nrCuts[zoom] - 1, ((lastViewport.second.second - bmin.second + extraRenderFac * height) / (bmax.second - bmin.second) * nrCuts[zoom]).toInt())
 
         return zoom != lastZoom || xmin != lastxmin || xmax != lastxmax || ymin != lastymin || ymax != lastymax
     }

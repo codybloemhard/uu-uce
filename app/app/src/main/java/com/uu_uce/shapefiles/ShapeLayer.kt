@@ -1,7 +1,5 @@
 package com.uu_uce.shapefiles
 
-import android.graphics.Paint
-
 /*
 a layer to be displayed in the map, consisting of multiple shapes
 chunkGetter: means of getting chunks associated with this layer
@@ -54,13 +52,13 @@ class ShapeLayer(private val chunkGetter: ChunkGetter, hasInfo: Boolean){
     }
 
     //draw all chunks associated with this layer
-    fun draw(program: Int, scale: FloatArray, trans: FloatArray, color: FloatArray){
+    fun draw(lineProgram: Int, polygonProgram: Int, scale: FloatArray, trans: FloatArray, color: FloatArray){
 
         synchronized(chunks) {
             var nrShapes = 0
             var nrLines = 0
             for(chunk in chunks.values) {
-                chunk.draw(program, scale, trans, color)
+                chunk.draw(lineProgram, polygonProgram, scale, trans, color)
 
                 nrShapes += chunk.shapes.size
                 for(shape in chunk.shapes){

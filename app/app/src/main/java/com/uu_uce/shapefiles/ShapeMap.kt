@@ -1,7 +1,5 @@
 package com.uu_uce.shapefiles
 
-import android.graphics.Color
-import android.graphics.Paint
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.views.CustomMap
@@ -35,7 +33,7 @@ fun mergeBBs(mins: List<p3>,maxs: List<p3>): Pair<p3,p3>{
         bb
     })
     return Pair(Triple(bmin[0],bmin[1],bmin[2]),Triple(bmax[0],bmax[1],bmax[2]))
-    }
+}
 
 /*
 a map to be displayed in the app, consisting of multiple layers
@@ -149,11 +147,11 @@ class ShapeMap(
     }
 
     //draw all layers
-    fun draw(program: Int, scale: FloatArray, trans: FloatArray){
+    fun draw(lineProgram: Int, polygonProgram: Int, scale: FloatArray, trans: FloatArray){
         for(i in layers.indices) {
             if(layerMask[i]) {
                 val (t,l) = layers[i]
-                l.draw(program, scale, trans, layerColors[t.value])
+                l.draw(lineProgram, polygonProgram, scale, trans, layerColors[t.value])
             }
         }
     }

@@ -141,7 +141,7 @@ class CustomMap : ViewTouchParent {
         scrollLayout.removeAllViewsInLayout()
     }
 
-    fun onDrawFrame(standardProgram: Int, pinProgram: Int, locProgram: Int){
+    fun onDrawFrame(lineProgram: Int, polygonProgram: Int, pinProgram: Int, locProgram: Int){
         //if both the camera and the map have no updates, don't redraw
         val res = camera.update()
         val chunkRes = smap.updateChunks()
@@ -166,7 +166,7 @@ class CustomMap : ViewTouchParent {
 
         val timeDraw = measureTimeMillis {
             // Draw map
-            smap.draw(standardProgram, scale, trans)
+            smap.draw(lineProgram, polygonProgram, scale, trans)
 
             (context as GeoMap).runOnUiThread {
                 if (context is GeoMap) {
