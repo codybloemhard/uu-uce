@@ -49,5 +49,4 @@ class MainActivity : TouchParent() {
         )
         return result == LoginResult.SUCCESS
     }
-
 }

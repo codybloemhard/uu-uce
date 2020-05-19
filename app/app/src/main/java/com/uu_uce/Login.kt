@@ -4,21 +4,25 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.preference.PreferenceManager
-import com.uu_uce.misc.LogType
-import com.uu_uce.misc.Logger
 import com.uu_uce.services.LoginResult
 import com.uu_uce.services.login
 import kotlinx.android.synthetic.main.activity_login_screen.*
+import java.io.UnsupportedEncodingException
+import java.math.BigInteger
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
+
 
 class Login : AppCompatActivity() {
 
     private lateinit var sharedPref : SharedPreferences
+    private lateinit var digest : MessageDigest
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,7 +42,7 @@ class Login : AppCompatActivity() {
         signin_button.setOnClickListener {
             // Get credentials
             val username = username_field.text.toString()
-            val password = password_field.text.toString()
+            val password = bin2hex(getHash(password_field.text.toString()))
 
             // Try to log in
             when (login(username, password)) {
@@ -70,5 +74,21 @@ class Login : AppCompatActivity() {
 
     override fun onBackPressed() {
         moveTaskToBack(true)
+    }
+
+    private fun getHash(password: String): ByteArray {
+        var digest: MessageDigest? = null
+        try {
+            digest = MessageDigest.getInstance("SHA-256")
+        } catch (e1: NoSuchAlgorithmException) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace()
+        }
+        digest!!.reset()
+        return digest.digest(password.toByteArray())
+    }
+
+    private fun bin2hex(data: ByteArray): String {
+        return java.lang.String.format("%0" + data.size * 2 + "X", BigInteger(1, data))
     }
 }
