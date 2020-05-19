@@ -21,15 +21,18 @@ class MainActivity : TouchParent() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+        val darkMode = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
+        // Set desired theme
+        if(darkMode) setTheme(R.style.DarkTheme)
+
         // Set statusbar text color
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !darkMode) {
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
         }
-        else{
+        else if(!darkMode){
             window.statusBarColor = Color.BLACK// set status background white
         }
-
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
 
         if (checkLogin()) {
             val intent = Intent(this, GeoMap::class.java)

@@ -13,6 +13,7 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinViewModel
@@ -55,19 +56,18 @@ class GeoMap : AppCompatActivity() {
         Logger.setTagEnabled("Pin", false)
         Logger.setTagEnabled("DrawOverlay", false)
 
+        sharedPref = getDefaultSharedPreferences(this)
+        val darkMode = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
+        // Set desired theme
+        if(darkMode) setTheme(R.style.DarkTheme)
+
         // Set statusbar text color
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !darkMode) {
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
         }
-        else {
+        else if(!darkMode){
             window.statusBarColor = Color.BLACK// set status background white
         }
-
-        // Get preferences
-        sharedPref = getDefaultSharedPreferences(this)
-
-        // Get desired theme
-        if(sharedPref.getBoolean("com.uu_uce.DARKMODE", false)) setTheme(R.style.DarkTheme)
 
         super.onCreate(savedInstanceState)
 

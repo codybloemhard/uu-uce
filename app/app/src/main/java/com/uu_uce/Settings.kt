@@ -10,6 +10,7 @@ import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.pins.PinContent
@@ -45,22 +46,20 @@ class Settings : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         sharedPref = getDefaultSharedPreferences(this)
-
-        // Get desired theme
-        if(sharedPref.getBoolean("com.uu_uce.DARKMODE", false)) setTheme(R.style.DarkTheme)
-
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
+        val darkMode = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
+        // Set desired theme
+        if(darkMode) setTheme(R.style.DarkTheme)
 
         // Set statusbar text color
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !darkMode) {
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
         }
-        else{
+        else if(!darkMode){
             window.statusBarColor = Color.BLACK// set status background white
         }
 
-
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_settings)
 
         mapsDir = getExternalFilesDir(null)?.path + File.separator + mapsFolderName
         contentDir = getExternalFilesDir(null)?.path + File.separator + contentFolderName

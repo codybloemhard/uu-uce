@@ -30,21 +30,20 @@ class VideoViewer : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
-
-        // Get desired theme
-        if(sharedPref.getBoolean("com.uu_uce.DARKMODE", false)) setTheme(R.style.DarkTheme)
-
-        super.onCreate(savedInstanceState)
-
-        setContentView(R.layout.activity_video_viewer)
+        val darkMode = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
+        // Set desired theme
+        if(darkMode) setTheme(R.style.DarkTheme)
 
         // Set statusbar text color
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !darkMode) {
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
         }
-        else{
+        else if(!darkMode){
             window.statusBarColor = Color.BLACK// set status background white
         }
+
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_video_viewer)
 
         // Set title in bar
         val videoTitleText = findViewById<TextView>(R.id.video_title_text)

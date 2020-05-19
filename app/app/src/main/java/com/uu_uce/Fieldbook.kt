@@ -27,12 +27,18 @@ class Fieldbook : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+        val darkMode = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
+        // Set desired theme
+        if(darkMode) setTheme(R.style.DarkTheme)
 
-        // Get desired theme
-        if(sharedPref.getBoolean("com.uu_uce.DARKMODE", false)) setTheme(R.style.DarkTheme)
-
+        // Set statusbar text color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !darkMode) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
+        }
+        else if(!darkMode){
+            window.statusBarColor = Color.BLACK// set status background white
+        }
         super.onCreate(savedInstanceState)
-
         setContentView(R.layout.activity_fieldbook)
 
         // initiate views and layout
@@ -63,14 +69,6 @@ class Fieldbook : AppCompatActivity() {
                 }
             )
         )
-
-        // Set statusbar text color
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
-        }
-        else{
-            window.statusBarColor = Color.BLACK// set status background white
-        }
     }
 
     private fun openFragment(fragment: Fragment) {
