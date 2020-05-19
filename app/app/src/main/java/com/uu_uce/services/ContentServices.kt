@@ -108,7 +108,6 @@ fun getFiles (requiredFilePaths : List<Pair<String, String>>, activity: Activity
 Downloads specified file from URL.
 targetUrl: The URL from which a file needs to be downloaded
 fileDestination: The filepath to which the downloaded file will be downloaded.
-It will download the file.
  */
 fun downloadFile(targetUrl : URL, fileDestination : String, progressAction : (Int) -> Unit = {}) {
     with(targetUrl.openConnection() as HttpURLConnection) {
@@ -142,6 +141,11 @@ fun downloadFile(targetUrl : URL, fileDestination : String, progressAction : (In
     }
 }
 
+/*
+Unzips specified file in place.
+zipPath: The file path to the file that will be unzipped
+progressAction: The action that takes the progress of unzipping.
+ */
 fun unpackZip(zipPath: String, progressAction : (Int) -> Unit = {}): Boolean {
     val splitPath = zipPath.split('/')
     val destinationPath = splitPath.take(splitPath.count() - 1).fold(splitPath.first()){s1, s2 -> "$s1${File.separator}$s2"}.drop(1)
@@ -196,6 +200,10 @@ fun unpackZip(zipPath: String, progressAction : (Int) -> Unit = {}): Boolean {
     }
 }
 
+/*
+Recursively calculates the size of all files in a directory.
+dir: The filepath to the directory whichs size will be calculated.
+ */
 fun dirSize(dir: File): Long {
     if (dir.exists()) {
         var result: Long = 0
@@ -217,6 +225,10 @@ fun dirSize(dir: File): Long {
     return 0
 }
 
+/*
+Converts a number of bytes to a the largest appropriate unit with the unit attached.
+bytes: The amount of bytes that should be displayed.
+ */
 fun writableSize(bytes : Long) : String {
     val units = listOf("B", "KB", "MB", "GB")
 
@@ -229,4 +241,3 @@ fun writableSize(bytes : Long) : String {
 
     return String.format("%.2f", curSize) + " " + units[curUnit]
 }
-
