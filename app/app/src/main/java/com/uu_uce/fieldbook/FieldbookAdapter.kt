@@ -121,6 +121,8 @@ class FieldbookAdapter(
                     // Add the title for the popup window
                     windowTitle.text = entry.title
 
+                    var changed = false
+
                     // Fill layout of popup
                     for(i in 0 until content.contentBlocks.count()) {
                         content.contentBlocks[i].apply {
@@ -135,17 +137,30 @@ class FieldbookAdapter(
 
                                         dialog.setItems(options) { dialogInterface, which ->
                                             when(which) {
-                                                0 -> tempContent[i] = this.editContent(layout, i, rootView)
+                                                0 -> {
+                                                    changed = true
+                                                    tempContent[i] = this.editContent(layout, i, rootView)
+                                                }
                                                 1 -> {
+                                                    changed = true
                                                     this.removeContent(layout)
                                                     tempContent.removeAt(i)
-                                                    val string = buildJSONContent(tempContent,activity)
-                                                    viewModel.updateContent(string,index)
                                                 }
                                                 2 -> dialogInterface.dismiss()
                                             }
                                         }
                                         dialog.show()
+                                        btnClosePopupWindow.apply {
+                                            text = context.getString(R.string.fieldbook_edit_button_text)
+                                            setOnClickListener {
+                                                if (changed)
+                                                    viewModel.updateContent(
+                                                        buildJSONContent(tempContent,activity),
+                                                        index
+                                                    )
+                                                popupWindow.dismiss()
+                                            }
+                                        }
                                         return true
                                     }
                                 )

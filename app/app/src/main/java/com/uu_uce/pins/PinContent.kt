@@ -214,7 +214,7 @@ class TextContentBlock(
 
     override fun editContent(layout: LinearLayout, blockId: Int, view: View) : ContentBlockInterface {
         val editable = EditTextBlock(activity)
-        layout.removeView(content)
+        removeContent(layout)
         editable.generateContent(blockId,layout,view,null)
         editable.content.setText(content.text)
         return editable
@@ -284,7 +284,22 @@ class ImageContentBlock(
     }
 
     override fun removeContent(layout: LinearLayout) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        layout.removeView(content)
+        val toBeDeleted = File(thumbnailURI.path!!)
+        if(toBeDeleted.exists()) {
+            if (toBeDeleted.delete()) {
+                if (toBeDeleted.exists()) {
+                    toBeDeleted.canonicalFile.delete()
+                    if (toBeDeleted.exists())
+                        activity.deleteFile(toBeDeleted.name)
+                }
+                Logger.log(LogType.Event,"PinContent", "Thumbnail deleted $thumbnailURI")
+            } else {
+                Logger.log(LogType.Info,"PinContent", "Thumbnail not deleted $thumbnailURI")
+            }
+        } else {
+            Logger.log(LogType.Info,"PinContent","This thumbnail doesn't exist")
+        }
     }
 
     override fun getFilePath() : List<String>{
@@ -372,7 +387,22 @@ class VideoContentBlock(
     }
 
     override fun removeContent(layout: LinearLayout) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        layout.removeView(content)
+        val toBeDeleted = File(thumbnailURI.path!!)
+        if(toBeDeleted.exists()) {
+            if (toBeDeleted.delete()) {
+                if (toBeDeleted.exists()) {
+                    toBeDeleted.canonicalFile.delete()
+                    if (toBeDeleted.exists())
+                        activity.deleteFile(toBeDeleted.name)
+                }
+                Logger.log(LogType.Event,"PinContent", "Thumbnail deleted $thumbnailURI")
+            } else {
+                Logger.log(LogType.Info,"PinContent", "Thumbnail not deleted $thumbnailURI")
+            }
+        } else {
+            Logger.log(LogType.Info,"PinContent","This thumbnail doesn't exist")
+        }
     }
 
     override fun getFilePath() : List<String>{

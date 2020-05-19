@@ -52,6 +52,7 @@
     <string name="fieldbook_image_image_description">Image</string>
     <string name="fieldbook_video_image_description">Video</string>
     <string name="fieldbook_done_button_text">Done</string>
+    <string name="fieldbook_edit_button_text">Save changes</string>
 
     <!--Menu-->
     <string name="menu_bar_placeholder_text">Menu Item</string>
@@ -104,5 +105,4 @@
     <string name="profile_wip_image">wip image</string>
     <string name="pin_image_title_placeholder">image title</string>
     <string name="geomap_maps_download_instructions">Maps can be manually downloaded from settings</string>
-
 </resources>
