@@ -1,6 +1,8 @@
 package com.uu_uce
 
 import android.app.Activity
+import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -10,17 +12,24 @@ import android.widget.MediaController
 import android.widget.TextView
 import android.widget.VideoView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.preference.PreferenceManager
 
 //activity in which videos from video pins are shown
 class VideoViewer : Activity() {
-    private var uiVisible : Boolean = true
-    private lateinit var mediaController : MediaController
-    private lateinit var videoPlayer : VideoView
-
-    private var prevVideoPos : Int = 0
+    private var uiVisible                   : Boolean = true
+    private lateinit var mediaController    : MediaController
+    private lateinit var videoPlayer        : VideoView
+    private lateinit var sharedPref         : SharedPreferences
+    private var prevVideoPos                : Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+
+        // Get desired theme
+        if(sharedPref.getBoolean("com.uu_uce.DARKMODE", false)) setTheme(R.style.DarkTheme)
+
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_video_viewer)
 
         // Set statusbar text color

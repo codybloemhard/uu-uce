@@ -13,7 +13,6 @@ import androidx.preference.PreferenceManager
 import com.uu_uce.services.LoginResult
 import com.uu_uce.services.login
 import kotlinx.android.synthetic.main.activity_login_screen.*
-import java.io.UnsupportedEncodingException
 import java.math.BigInteger
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -22,10 +21,16 @@ import java.security.NoSuchAlgorithmException
 class Login : AppCompatActivity() {
 
     private lateinit var sharedPref : SharedPreferences
-    private lateinit var digest : MessageDigest
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Get preferences
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+
+        // Get desired theme
+        if(sharedPref.getBoolean("com.uu_uce.DARKMODE", false)) setTheme(R.style.DarkTheme)
+
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_login_screen)
 
         // Set statusbar text color
@@ -35,9 +40,6 @@ class Login : AppCompatActivity() {
         else{
             window.statusBarColor = Color.BLACK// set status background white
         }
-
-        // Get preferences
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
 
         signin_button.setOnClickListener {
             // Get credentials
@@ -81,7 +83,6 @@ class Login : AppCompatActivity() {
         try {
             digest = MessageDigest.getInstance("SHA-256")
         } catch (e1: NoSuchAlgorithmException) {
-            // TODO Auto-generated catch block
             e1.printStackTrace()
         }
         digest!!.reset()

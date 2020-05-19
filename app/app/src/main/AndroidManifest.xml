@@ -25,7 +25,7 @@
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
+        android:theme="@style/LightTheme"
         tools:targetApi="q">
 
         <activity android:name=".Login"/>
@@ -58,13 +58,13 @@
         <activity android:name=".gestureDetection.TouchParent" />
         <activity
             android:name=".GeoMap"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/LightTheme.NoActionBar" />
         <activity
             android:name=".AllPins"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/LightTheme.NoActionBar" />
         <activity
             android:name=".VideoViewer"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/LightTheme.NoActionBar"
             android:launchMode="singleInstance"/>
 
         <meta-data

@@ -1,5 +1,7 @@
 package com.uu_uce
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -7,13 +9,22 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import androidx.preference.PreferenceManager
 import com.github.chrisbanes.photoview.PhotoView
 import com.github.chrisbanes.photoview.PhotoViewAttacher
 
 class ImageViewer : AppCompatActivity() {
 
+    private lateinit var sharedPref : SharedPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+
+        // Get desired theme
+        if(sharedPref.getBoolean("com.uu_uce.DARKMODE", false)) setTheme(R.style.DarkTheme)
+
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_image_viewer)
 
         // Set statusbar text color

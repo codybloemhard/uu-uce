@@ -1,7 +1,12 @@
 package com.uu_uce.allpins
 
 import android.app.Activity
+import android.content.SharedPreferences
+import android.graphics.BlendMode
+import android.graphics.BlendModeColorFilter
 import android.graphics.Color
+import android.graphics.PorterDuff
+import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +14,7 @@ import android.widget.*
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mikhaellopez.circleview.CircleView
 import com.uu_uce.R
@@ -24,6 +30,7 @@ class PinListAdapter internal constructor(
     private var pinCanComplete = emptyList<Boolean>()
     private val pinViewModel: PinViewModel = ViewModelProvider(activity as ViewModelStoreOwner).get(PinViewModel::class.java)
     var activePopup: PopupWindow? = null
+    private lateinit var sharedPref : SharedPreferences
 
     inner class PinViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         val parentView : View = itemView
@@ -37,6 +44,7 @@ class PinListAdapter internal constructor(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PinViewHolder {
         val itemView = inflater.inflate(R.layout.allpins_recyclerview_item, parent, false)
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(activity)
         return PinViewHolder(itemView)
     }
 
@@ -68,16 +76,30 @@ class PinListAdapter internal constructor(
             else    -> holder.pinDiffC.circleColor = Color.parseColor("#686868")
         }
 
-        when(current.type){
-            "TEXT" -> holder.pinType.setImageDrawable(
-                ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_text, null) ?: error ("Image not found"))
-            "IMAGE" -> holder.pinType.setImageDrawable(
-            ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image, null) ?: error ("Image not found"))
-            "VIDEO" -> holder.pinType.setImageDrawable(
-            ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video, null) ?: error ("Image not found"))
-            "MCQUIZ" -> holder.pinType.setImageDrawable(
-                ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz, null) ?: error ("Image not found"))
+        val drawable = when(current.type){
+            "TEXT"      -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_text, null) ?: error ("Image not found")
+            "IMAGE"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image, null) ?: error ("Image not found")
+            "VIDEO"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video, null) ?: error ("Image not found")
+            "MCQUIZ"    -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz, null) ?: error ("Image not found")
+            else -> error("Missing drawable")
         }
+
+        val color =
+            if(sharedPref.getBoolean("com.uu_uce.DARKMODE", false))
+                ResourcesCompat.getColor(activity.resources, R.color.BestWhite, null)
+            else
+                ResourcesCompat.getColor(activity.resources, R.color.TextDarkGrey, null)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            drawable.colorFilter = BlendModeColorFilter(color, BlendMode.SRC_ATOP)
+        }
+        else{
+            // Older versions will use depricated function
+            @Suppress("DEPRECATION")
+            drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
+        }
+
+        holder.pinType.setImageDrawable(drawable)
     }
 
     internal fun setPins(newPinData: List<PinData>, viewModel: PinViewModel) {

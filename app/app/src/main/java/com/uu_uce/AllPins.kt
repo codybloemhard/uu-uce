@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -33,6 +34,11 @@ class AllPins : AppCompatActivity() {
     private var selectedOption          : Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+
+        // Get desired theme
+        if(sharedPref.getBoolean("com.uu_uce.DARKMODE", false)) setTheme(R.style.DarkTheme)
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_all_pins)
 
@@ -54,7 +60,7 @@ class AllPins : AppCompatActivity() {
         val filterButton : FloatingActionButton = findViewById(R.id.fab)
         registerForContextMenu(filterButton)
 
-        sharedPref = this.getPreferences(Context.MODE_PRIVATE)
+
 
         val searchBar = findViewById<EditText>(R.id.searchbar)
 

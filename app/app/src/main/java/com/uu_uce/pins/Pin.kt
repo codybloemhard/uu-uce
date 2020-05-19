@@ -322,6 +322,7 @@ class Pin(
                         val finishButton = Button(activity)
                         finishButton.id = R.id.finish_quiz_button
                         finishButton.text = activity.getString(R.string.pin_finish)
+                        finishButton.setTextColor(ResourcesCompat.getColor(activity.resources, R.color.TextDarkGrey, null))
                         finishButton.isAllCaps = false
                         finishButton.setBackgroundResource(R.drawable.custom_border_button)
                         val buttonLayout = LinearLayout.LayoutParams(
@@ -345,7 +346,7 @@ class Pin(
                     // Set onClickListeners
                     btnClosePopupWindow.setOnClickListener {
                         if(madeProgress){
-                            AlertDialog.Builder(activity)
+                            AlertDialog.Builder(activity, R.style.AlertDialogStyle)
                                 .setIcon(R.drawable.ic_sprite_warning)
                                 .setTitle(activity.getString(R.string.pin_close_warning_head))
                                 .setMessage(activity.getString(R.string.pin_close_warning_body))

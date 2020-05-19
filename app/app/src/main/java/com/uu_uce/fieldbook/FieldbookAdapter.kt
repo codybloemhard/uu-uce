@@ -2,13 +2,15 @@ package com.uu_uce.fieldbook
 
 import android.app.Activity
 import android.content.DialogInterface
-import android.graphics.Color.rgb
+import android.content.res.Resources
+import android.content.res.TypedArray
 import android.net.Uri
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.net.toFile
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
@@ -16,6 +18,7 @@ import com.uu_uce.pins.ImageContentBlock
 import com.uu_uce.pins.PinContent
 import com.uu_uce.pins.TextContentBlock
 import com.uu_uce.pins.VideoContentBlock
+
 
 class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookViewModel) : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>() {
 
@@ -33,6 +36,7 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FieldbookViewHolder {
         val itemView = activity.layoutInflater.inflate(R.layout.fieldbook_recyclerview_item, parent, false)
         parentView = parent
+
         return FieldbookViewHolder(itemView)
     }
 
@@ -71,7 +75,7 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
                 is TextContentBlock -> {
                     TextView(activity).apply {
                         textSize = 12f
-                        setTextColor(rgb(100, 100, 100))
+                        setTextColor(ResourcesCompat.getColor(activity.resources, R.color.TextGrey, null))
                         text = cB.getTextContent()
                         //Text direction?
                         //What to do when text goes over the edge?

@@ -63,6 +63,12 @@ class GeoMap : AppCompatActivity() {
             window.statusBarColor = Color.BLACK// set status background white
         }
 
+        // Get preferences
+        sharedPref = getDefaultSharedPreferences(this)
+
+        // Get desired theme
+        if(sharedPref.getBoolean("com.uu_uce.DARKMODE", false)) setTheme(R.style.DarkTheme)
+
         super.onCreate(savedInstanceState)
 
         maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapsName)
@@ -115,9 +121,6 @@ class GeoMap : AppCompatActivity() {
 
     private fun start(){
         setContentView(R.layout.activity_geo_map)
-
-        // Get preferences
-        sharedPref = getDefaultSharedPreferences(this)
 
         // Set settings
         customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
@@ -213,6 +216,14 @@ class GeoMap : AppCompatActivity() {
     }
 
     override fun onResume() {
+        // Get desired theme
+        if(needsRestart){
+            // Restart activity
+            val intent = intent
+            finish()
+            startActivity(intent)
+            needsRestart = false
+        }
         if(needsReload.getValue()) loadMap()
         if(started){
             customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)

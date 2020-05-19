@@ -2,6 +2,8 @@ package com.uu_uce
 
 import android.app.AlertDialog
 import android.content.SharedPreferences
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.SeekBar
@@ -17,10 +19,12 @@ import com.uu_uce.services.updateFiles
 import com.uu_uce.services.writableSize
 import com.uu_uce.ui.createTopbar
 import kotlinx.android.synthetic.main.activity_settings.*
-import java.io.*
+import java.io.File
+
 
 // Default settings
 const val defaultPinSize = 60
+var needsRestart = false
 
 class Settings : AppCompatActivity() {
     // private variables
@@ -40,15 +44,29 @@ class Settings : AppCompatActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        sharedPref = getDefaultSharedPreferences(this)
+
+        // Get desired theme
+        if(sharedPref.getBoolean("com.uu_uce.DARKMODE", false)) setTheme(R.style.DarkTheme)
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
+
+        // Set statusbar text color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
+        }
+        else{
+            window.statusBarColor = Color.BLACK// set status background white
+        }
+
+
 
         mapsDir = getExternalFilesDir(null)?.path + File.separator + mapsFolderName
         contentDir = getExternalFilesDir(null)?.path + File.separator + contentFolderName
 
         maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapsName)
 
-        sharedPref = getDefaultSharedPreferences(this)
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
 
         createTopbar(this, "Settings")
@@ -107,6 +125,25 @@ class Settings : AppCompatActivity() {
                     apply()
                 }
             }
+        }
+
+        // Darkmode switch
+        darktheme_switch.isChecked = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
+        darktheme_switch.setOnClickListener {
+            with(sharedPref.edit()) {
+                putBoolean(
+                    "com.uu_uce.DARKMODE",
+                    darktheme_switch.isChecked
+                )
+                apply()
+            }
+
+            needsRestart = !needsRestart
+
+            // Restart activity
+            val intent = intent
+            finish()
+            startActivity(intent)
         }
 
         // Download maps

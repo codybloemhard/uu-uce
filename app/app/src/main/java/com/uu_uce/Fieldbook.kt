@@ -1,5 +1,7 @@
 package com.uu_uce
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -7,6 +9,7 @@ import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.uu_uce.fieldbook.FieldbookHomeFragment
 import com.uu_uce.fieldbook.FieldbookPinmapFragment
@@ -17,11 +20,19 @@ import com.uu_uce.ui.createTopbar
 class Fieldbook : AppCompatActivity() {
 
     lateinit var text: EditText
+    private lateinit var sharedPref     : SharedPreferences
+
 
     companion object;
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+
+        // Get desired theme
+        if(sharedPref.getBoolean("com.uu_uce.DARKMODE", false)) setTheme(R.style.DarkTheme)
+
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_fieldbook)
 
         // initiate views and layout

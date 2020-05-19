@@ -1,6 +1,8 @@
 package com.uu_uce
 
 import android.content.SharedPreferences
+import android.graphics.Color
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -21,12 +23,24 @@ class Profile : AppCompatActivity() {
     private lateinit var sharedPref : SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Get preferences
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+
+        // Get desired theme
+        if(sharedPref.getBoolean("com.uu_uce.DARKMODE", false)) setTheme(R.style.DarkTheme)
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 
         createTopbar(this, "Profile")
 
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+        // Set statusbar text color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
+        }
+        else{
+            window.statusBarColor = Color.BLACK// set status background white
+        }
 
         selectedOptionText = badges_button_text
         selectedOptionBar = badges_button_bar
