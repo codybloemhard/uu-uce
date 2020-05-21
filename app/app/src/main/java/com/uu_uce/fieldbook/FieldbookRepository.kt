@@ -7,6 +7,10 @@ class FieldbookRepository(private val fieldbookDao: FieldbookDao) {
 
     val allEntries: LiveData<List<FieldbookEntry>> = fieldbookDao.getAll()
 
+    suspend fun getContent(entryId: Int, action: ((FieldbookEntry) -> Unit)) {
+        action(fieldbookDao.getContent(entryId))
+    }
+
     suspend fun insert(fieldbookEntry: FieldbookEntry) {
         fieldbookDao.insert(fieldbookEntry)
     }
@@ -28,7 +32,7 @@ class FieldbookRepository(private val fieldbookDao: FieldbookDao) {
         }
     }
 
-    suspend fun updateContent(content: String, entryId: Int) {
-        fieldbookDao.updateContent(content,entryId)
+    suspend fun update(title: String, content: String, entryId: Int) {
+        fieldbookDao.update(title, content, entryId)
     }
 }

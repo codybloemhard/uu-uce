@@ -19,6 +19,10 @@ class FieldbookViewModel(application: Application): AndroidViewModel(application
         allFieldbookEntries = fieldbookRepository.allEntries
     }
 
+    fun getContent (entryId: Int, action : ((FieldbookEntry) -> Unit)) = viewModelScope.launch {
+        fieldbookRepository.getContent(entryId, action)
+    }
+
     fun insert (fieldbookEntry: FieldbookEntry) = viewModelScope.launch {
         fieldbookRepository.insert(fieldbookEntry)
     }
@@ -35,7 +39,7 @@ class FieldbookViewModel(application: Application): AndroidViewModel(application
         fieldbookRepository.search(searchText, action)
     }
 
-    fun updateContent(content: String, entryId: Int) = viewModelScope.launch {
-        fieldbookRepository.updateContent(content, entryId)
+    fun update(title: String, content: String, entryId: Int) = viewModelScope.launch {
+        fieldbookRepository.update(title, content, entryId)
     }
 }

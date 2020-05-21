@@ -145,10 +145,18 @@ interface ContentBlockInterface {
     val content: View
     val tag : BlockTag
     val canCompleteBlock : Boolean
-    fun generateContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?)
-    fun editContent(layout : LinearLayout, blockId : Int, view : View) : ContentBlockInterface
-    fun removeContent(layout : LinearLayout)
-    fun getFilePath() : List<String>
+    fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?)
+    fun makeEditable(blockId : Int, layout : LinearLayout, view : View, action : ((ContentBlockInterface) -> Boolean)) : ContentBlockInterface {
+        showContent(blockId,layout,view,null)
+        content.setOnLongClickListener{
+            return@setOnLongClickListener action(this)
+        }
+        return this
+    }
+    fun removeContent(layout : LinearLayout) = layout.removeView(content)
+    fun getFilePath() : List<String> {
+        return listOf()
+    }
     override fun toString() : String
 }
 
@@ -160,7 +168,7 @@ class EditTextBlock(
     override var content = EditText(activity)
     override val tag = BlockTag.TEXT
     override val canCompleteBlock = false
-    override fun generateContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?) {
+    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?) {
         content = EditText(activity).apply {
             inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
             isSingleLine = false
@@ -169,22 +177,6 @@ class EditTextBlock(
         }.also{
             layout.addView(it,blockId)
         }
-    }
-
-    override fun editContent(
-        layout: LinearLayout,
-        blockId: Int,
-        view: View
-    ): ContentBlockInterface {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun removeContent(layout: LinearLayout) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun getFilePath() : List<String> {
-        return listOf()
     }
 
     override fun toString() : String {
@@ -202,7 +194,7 @@ class TextContentBlock(
     override var content = TextView(activity)
     override val tag = BlockTag.TEXT
     override val canCompleteBlock = false
-    override fun generateContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?){
+    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?){
         content = TextView(activity).apply {
             text = textContent
             setPadding(12, 12, 12, 20)
@@ -212,20 +204,16 @@ class TextContentBlock(
         }
     }
 
-    override fun editContent(layout: LinearLayout, blockId: Int, view: View) : ContentBlockInterface {
+    override fun makeEditable(
+        blockId: Int,
+        layout: LinearLayout,
+        view: View,
+        action: (ContentBlockInterface) -> Boolean
+    ): ContentBlockInterface {
         val editable = EditTextBlock(activity)
-        removeContent(layout)
-        editable.generateContent(blockId,layout,view,null)
-        editable.content.setText(content.text)
+        editable.makeEditable(blockId, layout, view, action)
+        editable.content.setText(textContent)
         return editable
-    }
-
-    override fun removeContent(layout : LinearLayout) {
-        layout.removeView(content)
-    }
-
-    override fun getFilePath() : List<String>{
-        return listOf()
     }
 
     override fun toString() : String {
@@ -249,7 +237,7 @@ class ImageContentBlock(
     override var content = ImageView(activity)
     override val tag = BlockTag.IMAGE
     override val canCompleteBlock = false
-    override fun generateContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?){
+    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?){
         content = ImageView(activity)
         try {
             content.apply {
@@ -272,34 +260,13 @@ class ImageContentBlock(
             openImageView(imageURI, title)
         }
 
-        layout.addView(content)
-    }
-
-    override fun editContent(
-        layout: LinearLayout,
-        blockId: Int,
-        view: View
-    ): ContentBlockInterface {
-        return this //TODO
+        layout.addView(content,blockId)
     }
 
     override fun removeContent(layout: LinearLayout) {
-        layout.removeView(content)
-        val toBeDeleted = File(thumbnailURI.path!!)
-        if(toBeDeleted.exists()) {
-            if (toBeDeleted.delete()) {
-                if (toBeDeleted.exists()) {
-                    toBeDeleted.canonicalFile.delete()
-                    if (toBeDeleted.exists())
-                        activity.deleteFile(toBeDeleted.name)
-                }
-                Logger.log(LogType.Event,"PinContent", "Thumbnail deleted $thumbnailURI")
-            } else {
-                Logger.log(LogType.Info,"PinContent", "Thumbnail not deleted $thumbnailURI")
-            }
-        } else {
-            Logger.log(LogType.Info,"PinContent","This thumbnail doesn't exist")
-        }
+        super.removeContent(layout)
+        //TODO: check if thumbnail isn't used elsewhere (or don't delete at all?)
+        totallyExterminateFileExistence(activity, thumbnailURI)
     }
 
     override fun getFilePath() : List<String>{
@@ -338,7 +305,7 @@ class VideoContentBlock(
     override val tag = BlockTag.VIDEO
     override val canCompleteBlock = false
 
-    override fun generateContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?){
+    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?){
         content = FrameLayout(activity)
 
         // Create thumbnail image
@@ -378,31 +345,10 @@ class VideoContentBlock(
         layout.addView(content)
     }
 
-    override fun editContent(
-        layout: LinearLayout,
-        blockId: Int,
-        view: View
-    ): ContentBlockInterface {
-        return this //TODO
-    }
-
     override fun removeContent(layout: LinearLayout) {
-        layout.removeView(content)
-        val toBeDeleted = File(thumbnailURI.path!!)
-        if(toBeDeleted.exists()) {
-            if (toBeDeleted.delete()) {
-                if (toBeDeleted.exists()) {
-                    toBeDeleted.canonicalFile.delete()
-                    if (toBeDeleted.exists())
-                        activity.deleteFile(toBeDeleted.name)
-                }
-                Logger.log(LogType.Event,"PinContent", "Thumbnail deleted $thumbnailURI")
-            } else {
-                Logger.log(LogType.Info,"PinContent", "Thumbnail not deleted $thumbnailURI")
-            }
-        } else {
-            Logger.log(LogType.Info,"PinContent","This thumbnail doesn't exist")
-        }
+        super.removeContent(layout)
+        //TODO: check if thumbnail isn't used elsewhere (or don't delete at all?)
+        totallyExterminateFileExistence(activity, thumbnailURI)
     }
 
     override fun getFilePath() : List<String>{
@@ -444,7 +390,7 @@ class MCContentBlock(
     private var selectedAnswer : Int = -1
     private lateinit var selectedBackground : CardView
 
-    override fun generateContent(blockId : Int, layout: LinearLayout, view : View, parent : Pin?) {
+    override fun showContent(blockId : Int, layout: LinearLayout, view : View, parent : Pin?) {
         content = TableLayout(activity)
 
         if(parent == null) {
@@ -535,20 +481,17 @@ class MCContentBlock(
         layout.addView(content)
     }
 
-    override fun editContent(
-        layout: LinearLayout,
+    override fun makeEditable(
         blockId: Int,
-        view: View
+        layout: LinearLayout,
+        view: View,
+        action: (ContentBlockInterface) -> Boolean
     ): ContentBlockInterface {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return this
     }
 
     override fun removeContent(layout: LinearLayout) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
-    override fun getFilePath(): List<String> {
-        return listOf()
     }
 
     override fun toString(): String {
@@ -604,6 +547,24 @@ fun fileToJsonString(filePath: Uri) : String {
 
 fun thumbnailToJsonString(thumbnail: Uri) : String {
     return "\"thumbnail\":\"$thumbnail\""
+}
+
+fun totallyExterminateFileExistence(activity : Activity, thumbnail : Uri) {
+    val toBeDeleted = File(thumbnail.path!!)
+    if(toBeDeleted.exists()) {
+        if (toBeDeleted.delete()) {
+            if (toBeDeleted.exists()) {
+                toBeDeleted.canonicalFile.delete()
+                if (toBeDeleted.exists())
+                    activity.deleteFile(toBeDeleted.name)
+            }
+            Logger.log(LogType.Event,"PinContent", "Thumbnail deleted $thumbnail")
+        } else {
+            Logger.log(LogType.Info,"PinContent", "Thumbnail not deleted $thumbnail")
+        }
+    } else {
+        Logger.log(LogType.Info,"PinContent","This thumbnail doesn't exist")
+    }
 }
 
 

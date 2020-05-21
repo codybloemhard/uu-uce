@@ -185,7 +185,7 @@ class Pin(
                     // Generate content
                     for(i in 0 until content.contentBlocks.count()){
                         val current = content.contentBlocks[i]
-                        current.generateContent(i, layout, parentView, this)
+                        current.showContent(i, layout, parentView, this)
                         if(current is MCContentBlock) containsQuiz = true
                     }
 

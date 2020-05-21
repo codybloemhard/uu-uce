@@ -13,6 +13,9 @@ interface FieldbookDao {
     @Query("SELECT * from fieldbook")
     fun getAll() : LiveData<List<FieldbookEntry>>
 
+    @Query("SELECT * from fieldbook where id= :entryId")
+    suspend fun getContent(entryId: Int) : FieldbookEntry
+
     @Insert
     suspend fun insert(entry: FieldbookEntry)
 
@@ -25,6 +28,6 @@ interface FieldbookDao {
     @Query("SELECT * from fieldbook where LOWER(title) LIKE LOWER(:search)")
     suspend fun search(search : String) : List<FieldbookEntry>
 
-    @Query("UPDATE fieldbook SET content = :changedContent where id = :entryId")
-    suspend fun updateContent(changedContent : String, entryId : Int)
+    @Query("UPDATE fieldbook SET title = :title, content = :content WHERE id = :entryId")
+    suspend fun update(title: String, content : String, entryId : Int)
 }

@@ -2,6 +2,7 @@ package com.uu_uce.fieldbook
 
 import android.app.Activity
 import android.content.DialogInterface
+import android.content.Intent
 import android.graphics.Color.rgb
 import android.net.Uri
 import android.view.Gravity
@@ -9,10 +10,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat.startActivity
 import androidx.core.net.toFile
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import com.uu_uce.FieldbookEditor
 import com.uu_uce.R
-import com.uu_uce.pins.*
+import com.uu_uce.pins.ImageContentBlock
+import com.uu_uce.pins.PinContent
+import com.uu_uce.pins.TextContentBlock
+import com.uu_uce.pins.VideoContentBlock
 
 class FieldbookAdapter(
     private val activity    : Activity,
@@ -58,12 +65,12 @@ class FieldbookAdapter(
             FrameLayout.LayoutParams.MATCH_PARENT
         )
 
-        val content = PinContent(entry.content, activity)
+        val content = PinContent(entry.content, activity).contentBlocks
 
         var isThumbnail = false
         var thumbnailUri = Uri.EMPTY
 
-        loop@ for (cB in content.contentBlocks) {
+        loop@ for (cB in content) {
             when (cB) {
                 is TextContentBlock -> {
                     TextView(activity).apply {
@@ -98,7 +105,6 @@ class FieldbookAdapter(
         holder.parentView.setOnClickListener (
             View.OnClickListener(
                 fun (v) {
-                    val tempContent : MutableList<ContentBlockInterface> = content.contentBlocks
                     val layoutInflater = activity.layoutInflater
 
                     // Build an custom view (to be inflated on top of our current view & build it's popup window)
@@ -117,54 +123,19 @@ class FieldbookAdapter(
                         customView.findViewById<Button>(R.id.popup_window_close_button)
                     val windowTitle =
                         customView.findViewById<TextView>(R.id.popup_window_title)
+                    val editButton =
+                        customView.findViewById<Button>(R.id.popup_window_edit_button).apply {
+                            isVisible   = true
+                            isClickable = true
+                        }
 
                     // Add the title for the popup window
                     windowTitle.text = entry.title
 
-                    var changed = false
-
                     // Fill layout of popup
-                    for(i in 0 until content.contentBlocks.count()) {
-                        content.contentBlocks[i].apply {
-                            generateContent(i, layout, rootView, null)
-                            this.content.setOnLongClickListener(
-                                View.OnLongClickListener(
-                                    fun(_) : Boolean {
-                                        val options = arrayOf("Edit", "Delete", "Cancel")
-
-                                        val dialog = AlertDialog.Builder(activity)
-                                        dialog.setTitle("Change content")
-
-                                        dialog.setItems(options) { dialogInterface, which ->
-                                            when(which) {
-                                                0 -> {
-                                                    changed = true
-                                                    tempContent[i] = this.editContent(layout, i, rootView)
-                                                }
-                                                1 -> {
-                                                    changed = true
-                                                    this.removeContent(layout)
-                                                    tempContent.removeAt(i)
-                                                }
-                                                2 -> dialogInterface.dismiss()
-                                            }
-                                        }
-                                        dialog.show()
-                                        btnClosePopupWindow.apply {
-                                            text = context.getString(R.string.fieldbook_edit_button_text)
-                                            setOnClickListener {
-                                                if (changed)
-                                                    viewModel.updateContent(
-                                                        buildJSONContent(tempContent,activity),
-                                                        index
-                                                    )
-                                                popupWindow.dismiss()
-                                            }
-                                        }
-                                        return true
-                                    }
-                                )
-                            )
+                    for(i in 0 until content.count()) {
+                        content[i].apply {
+                            showContent(i, layout, rootView, null)
                         }
                     }
 
@@ -174,6 +145,12 @@ class FieldbookAdapter(
                     // Set onClickListeners
                     btnClosePopupWindow.setOnClickListener {
                         popupWindow.dismiss()
+                    }
+
+                    editButton.setOnClickListener {
+                        val intent = Intent(activity, FieldbookEditor::class.java)
+                        intent.putExtra("fieldbook_index",entry.id)
+                        startActivity(activity, intent, null)
                     }
                 }
             )
@@ -187,7 +164,7 @@ class FieldbookAdapter(
                         .setMessage("Are you sure you want to delete this entry?")
                         .setPositiveButton("YES") { _: DialogInterface, _: Int ->
                             viewModel.delete(entry)
-                            for (cB in content.contentBlocks) {
+                            for (cB in content) {
                                 when (cB) {
                                     is ImageContentBlock ->
                                         cB.getThumbnailURI().apply {
