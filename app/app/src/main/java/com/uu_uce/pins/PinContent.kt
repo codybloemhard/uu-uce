@@ -199,7 +199,7 @@ class TextContentBlock(
             setPadding(12, 12, 12, 20)
             gravity = Gravity.CENTER_HORIZONTAL
         }.also{
-            layout.addView(it)
+            layout.addView(it,blockId)
         }
     }
 
@@ -251,7 +251,9 @@ class ImageContentBlock(
         val imageLayoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
-        )
+        ).apply {
+            setMargins(0, 0, 0, 10)
+        }
         content.layoutParams = imageLayoutParams
         content.id = R.id.image_block
 
@@ -340,8 +342,7 @@ class VideoContentBlock(
                 {}
             )
         }
-        content.id = R.id.start_video_button
-        layout.addView(content)
+        layout.addView(content,blockId)
     }
 
     override fun removeContent(layout: LinearLayout) {
@@ -477,7 +478,7 @@ class MCContentBlock(
         if(currentRow.childCount > 0){
             content.addView(currentRow)
         }
-        layout.addView(content)
+        layout.addView(content,blockId)
     }
 
     override fun makeEditable(
