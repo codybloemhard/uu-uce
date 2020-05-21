@@ -49,7 +49,7 @@ class GeoMapTests {
         val pinList: MutableList<PinData> = mutableListOf()
         pinList.add(
             PinData(
-                0,
+                "0",
                 "31N46777336N3149680E",
                 1,
                 "TEXT",
@@ -62,7 +62,7 @@ class GeoMapTests {
         )
         pinList.add(
             PinData(
-                1,
+                "1",
                 "31N46718336N3133680E",
                 2,
                 "IMAGE",
@@ -75,7 +75,7 @@ class GeoMapTests {
         )
         pinList.add(
             PinData(
-                2,
+                "2",
                 "31N46710000N3130000E",
                 3,
                 "VIDEO",
@@ -88,7 +88,7 @@ class GeoMapTests {
         )
         pinList.add(
             PinData(
-                3,
+                "3",
                 "31N46715335N3134680E",
                 3,
                 "MCQUIZ",
