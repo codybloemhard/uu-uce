@@ -159,7 +159,7 @@ interface ContentBlockInterface {
     override fun toString() : String
 }
 
-class EditTextBlock(
+class TextBlock(
     private val activity: Activity
 )
     : ContentBlockInterface
@@ -172,6 +172,7 @@ class EditTextBlock(
             inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
             isSingleLine = false
             imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION
+            background = ResourcesCompat.getDrawable(activity.resources, R.drawable.custom_border_edgy, null)
             id = R.id.text_field
         }.also{
             layout.addView(it,blockId)
@@ -209,7 +210,7 @@ class TextContentBlock(
         view: View,
         action: (ContentBlockInterface) -> Boolean
     ): ContentBlockInterface {
-        val editable = EditTextBlock(activity)
+        val editable = TextBlock(activity)
         editable.makeEditable(blockId, layout, view, action)
         editable.content.setText(textContent)
         return editable

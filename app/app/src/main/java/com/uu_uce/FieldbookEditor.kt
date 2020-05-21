@@ -25,6 +25,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModelProvider
+import androidx.preference.PreferenceManager
 import com.uu_uce.fieldbook.FieldbookEntry
 import com.uu_uce.fieldbook.FieldbookViewModel
 import com.uu_uce.misc.LogType
@@ -69,6 +70,18 @@ class FieldbookEditor: AppCompatActivity() {
     private var editing = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+        val darkMode = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
+        // Set desired theme
+        if(darkMode) setTheme(R.style.DarkTheme)
+
+        // Set statusbar text color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !darkMode) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
+        }
+        else if(!darkMode){
+            window.statusBarColor = Color.BLACK// set status background white
+        }
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_fieldbook_editor)
 
@@ -389,7 +402,7 @@ class FieldbookEditor: AppCompatActivity() {
 
     private fun addText() {
         title.clearFocus()
-        EditTextBlock(
+        TextBlock(
             this
         ).also {
             it.makeEditable(currentBlockIndex,layout,rootView,::onLongClick)
@@ -441,7 +454,7 @@ class FieldbookEditor: AppCompatActivity() {
 
         // Set options for this block
         val list = mutableListOf<String>().apply {
-            if (cbi !is EditTextBlock)
+            if (cbi !is TextBlock)
                 add(getString(R.string.editor_edit_block))
             add(getString(R.string.editor_delete_block))
             if (currentBlockIndex > 0)

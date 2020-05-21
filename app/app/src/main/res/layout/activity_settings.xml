@@ -55,7 +55,7 @@
                     android:id="@+id/pinsize_numberview"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/custom_border_login"
+                    android:background="@drawable/custom_border_edgy"
                     android:importantForAutofill="no"
                     android:inputType="number"
                     app:layout_constraintBottom_toBottomOf="parent"

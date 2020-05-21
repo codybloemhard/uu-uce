@@ -4,7 +4,6 @@
     android:id="@+id/fieldbook_pin_editor"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/BestWhite"
     android:clickable="true"
     android:focusable="true"
     android:focusableInTouchMode="true"
@@ -24,7 +23,7 @@
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
-        android:background="@drawable/custom_border_title"
+        android:background="@drawable/custom_border_edgy"
         android:ems="16"
         android:hint="@string/fieldbook_title_hint"
         android:importantForAutofill="no"
@@ -86,6 +85,7 @@
                 app:cv_border="true"
                 app:cv_border_color="#c4c4c4"
                 app:cv_border_width="6dp"
+                app:cv_color="?colorPrimaryDark"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -145,6 +145,7 @@
                 app:cv_border="true"
                 app:cv_border_color="#c4c4c4"
                 app:cv_border_width="5dp"
+                app:cv_color="?colorPrimaryDark"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -201,6 +202,7 @@
                 app:cv_border="true"
                 app:cv_border_color="#c4c4c4"
                 app:cv_border_width="6dp"
+                app:cv_color="?colorPrimaryDark"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
