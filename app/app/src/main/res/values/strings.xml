@@ -46,15 +46,11 @@
     <string name="fieldbook_coordinates_text">Pin coordinates</string>
     <string name="fieldbook_pin_title_placeholder">Title</string>
     <string name="fieldbook_title_hint">Title</string>
+    <string name="fieldbook_default_id">#000</string>
     <string name="fieldbook_main_title">Fieldbook</string>
     <string name="fieldbook_map_title">Pinmap</string>
     <string name="fieldbook_route_title">Route</string>
-    <string name="fieldbook_empty">Hello blank fragment</string> <!-- TODO: remove -->
-    <string name="fieldbook_text_image_description">Text</string>
-    <string name="fieldbook_image_image_description">Image</string>
-    <string name="fieldbook_video_image_description">Video</string>
-    <string name="fieldbook_done_button_text">Done</string>
-    <string name="fieldbook_edit_button_text">Save changes</string>
+    <string name="fieldbook_empty">Hello blank fragment</string>
     <string name="fieldbook_edit_content_button">Edit</string>
     <string name="fieldbook_add_video_description">Add video block to pin</string>
     <string name="fieldbook_video_button">Video</string>

@@ -69,7 +69,7 @@
             android:layout_height="wrap_content"
             android:padding="5dp"
             android:background="@drawable/custom_border"
-            android:text="#000"
+            android:text="@string/fieldbook_default_id"
             android:textStyle="bold"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"

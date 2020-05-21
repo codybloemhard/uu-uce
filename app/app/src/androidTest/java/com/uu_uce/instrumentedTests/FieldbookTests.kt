@@ -23,7 +23,7 @@ import androidx.test.rule.GrantPermissionRule
 import com.uu_uce.Fieldbook
 import com.uu_uce.R
 import com.uu_uce.childAtPosition
-import com.uu_uce.fieldbook.FieldbookHomeFragment.Companion.currentUri
+import com.uu_uce.FieldbookEditor.Companion.currentUri
 import com.uu_uce.fieldbook.FieldbookViewModel
 import org.junit.Before
 import org.junit.Rule
