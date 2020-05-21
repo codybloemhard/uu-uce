@@ -49,11 +49,11 @@ private fun parsePin(reader: JsonReader) : PinData? {
     }
     reader.endObject()
 
-    if(pinId == "" || location == "" || type == "" || content == ""){
+    return if(pinId == "" || location == "" || content == ""){
         Logger.error("PinParser", "Essential part of pin was missing")
-        return null
+        null
     }
     else{
-        return PinData(pinId, location, difficulty, type, title, content, status, predecessorIds, followIds)
+        PinData(pinId, location, difficulty, type, title, content, status, predecessorIds, followIds)
     }
 }

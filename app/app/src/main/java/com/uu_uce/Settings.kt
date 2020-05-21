@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
 import android.widget.SeekBar
 import android.widget.Toast
@@ -21,6 +22,8 @@ import com.uu_uce.services.writableSize
 import com.uu_uce.ui.createTopbar
 import kotlinx.android.synthetic.main.activity_settings.*
 import java.io.File
+import kotlin.math.max
+import kotlin.math.min
 
 
 // Default settings
@@ -74,12 +77,12 @@ class Settings : AppCompatActivity() {
         val curSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
         pinsize_seekbar.max = maxPinSize - minPinSize
         pinsize_seekbar.progress = curSize - minPinSize
-        pinsize_numberview.text = curSize.toString()
+        pinsize_numberview.setText(curSize.toString())
 
         pinsize_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
                 // Display the pinSize
-                pinsize_numberview.text = (seekBar.progress + minPinSize).toString()
+                pinsize_numberview.setText((seekBar.progress + minPinSize).toString())
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {
@@ -92,6 +95,21 @@ class Settings : AppCompatActivity() {
                     apply()
                 }
             }
+        })
+
+        pinsize_numberview.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+                //Perform Code
+                val progress = min(max(pinsize_numberview.text.toString().toInt(), minPinSize), maxPinSize)
+                pinsize_seekbar.progress = progress - minPinSize
+                pinsize_numberview.setText(progress.toString())
+                with(sharedPref.edit()) {
+                    putInt("com.uu_uce.PIN_SIZE", progress)
+                    apply()
+                }
+                return@OnKeyListener true
+            }
+            false
         })
 
         // Network downloading

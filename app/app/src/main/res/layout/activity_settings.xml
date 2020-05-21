@@ -50,11 +50,13 @@
                     app:layout_constraintStart_toEndOf="@+id/pinsize_text"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
+                <EditText
                     android:id="@+id/pinsize_numberview"
                     android:layout_width="50dp"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/custom_border_login"
                     android:importantForAutofill="no"
+                    android:inputType="number"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
