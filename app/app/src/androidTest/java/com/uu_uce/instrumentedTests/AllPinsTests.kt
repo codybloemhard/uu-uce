@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.view.KeyEvent
 import androidx.lifecycle.ViewModelProvider
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.*
@@ -100,7 +101,7 @@ class AllPinsTests {
         )
 
         // Set sorting by type
-        sharedPref = activityRule.activity.getPreferences(Context.MODE_PRIVATE)
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(activityRule.activity)
         with(sharedPref.edit()) {
             putInt("com.uu_uce.SORTMODE", 4)
             apply()
@@ -373,11 +374,11 @@ class AllPinsTests {
             .perform(click())
 
         // Check to see that warning pops up when progress is made
-        onView(withText("Closing Pin"))
+        onView(withText(activityRule.activity.getString(R.string.pin_close_warning_head)))
             .check(matches(isDisplayed()))
 
         // Stay in pin
-        onView(withText("No"))
+        onView(withText(activityRule.activity.getString(R.string.negative_button_text)))
             .perform(click())
 
         //Check to see that pin didn't close
@@ -394,7 +395,7 @@ class AllPinsTests {
             .perform(click())
 
         // Close pin
-        onView(withText("Yes"))
+        onView(withText(activityRule.activity.getString(R.string.positive_button_text)))
             .perform(click())
 
         // Check if pin closed
@@ -425,7 +426,7 @@ class AllPinsTests {
             .perform(click())
 
         // Check to see that warning doesn't pops up when no progress is made
-        onView(withText("Closing Pin"))
+        onView(withText(activityRule.activity.getString(R.string.pin_close_warning_head)))
             .check(doesNotExist())
 
         sleep(100)
@@ -442,7 +443,7 @@ class AllPinsTests {
             .perform(click())
 
         // Sort by title
-        onView(withText("Title a-z"))
+        onView(withText(activityRule.activity.getString(R.string.allpins_sorting_title_az)))
             .perform(click())
 
         // Check if sorting was successful
@@ -458,7 +459,7 @@ class AllPinsTests {
             .perform(click())
 
         // Sort by title reversed
-        onView(withText("Title z-a"))
+        onView(withText(activityRule.activity.getString(R.string.allpins_sorting_title_za)))
             .perform(click())
 
         // Check if sorting was successful
@@ -474,7 +475,7 @@ class AllPinsTests {
             .perform(click())
 
         // Sort by difficulty
-        onView(withText("Difficulty easy-hard"))
+        onView(withText(activityRule.activity.getString(R.string.allpins_sorting_difficulty_easyhard)))
             .perform(click())
 
         // Check if sorting was successful
@@ -490,7 +491,7 @@ class AllPinsTests {
             .perform(click())
 
         // Sort by difficulty reversed
-        onView(withText("Difficulty hard-easy"))
+        onView(withText(activityRule.activity.getString(R.string.allpins_sorting_difficulty_hardeasy)))
             .perform(click())
 
         // Check if sorting was successful
@@ -506,7 +507,7 @@ class AllPinsTests {
             .perform(click())
 
         // Sort by type
-        onView(withText("Type a-z"))
+        onView(withText(activityRule.activity.getString(R.string.allpins_sorting_type_az)))
             .perform(click())
 
         // Check if sorting was successful
@@ -522,7 +523,7 @@ class AllPinsTests {
             .perform(click())
 
         // Sort by type reversed
-        onView(withText("Type z-a"))
+        onView(withText(activityRule.activity.getString(R.string.allpins_sorting_type_za)))
             .perform(click())
 
         // Check if sorting was successful

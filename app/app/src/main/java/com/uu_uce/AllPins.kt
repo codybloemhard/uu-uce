@@ -105,32 +105,38 @@ class AllPins : AppCompatActivity() {
 
     fun openDialog(view : View) {
         val builder : AlertDialog.Builder = AlertDialog.Builder(this)
-        val filterOptions : Array<String> = arrayOf("Title a-z", "Title z-a", "Difficulty easy-hard", "Difficulty hard-easy", "Type a-z", "Type z-a")
+        val filterOptions : Array<String> = arrayOf(
+            getString(R.string.allpins_sorting_title_az),
+            getString(R.string.allpins_sorting_title_za),
+            getString(R.string.allpins_sorting_difficulty_easyhard),
+            getString(R.string.allpins_sorting_difficulty_hardeasy),
+            getString(R.string.allpins_sorting_type_az),
+            getString(R.string.allpins_sorting_type_za))
         builder
-            .setTitle("Filter by:")
+            .setTitle(getString(R.string.allpins_filer_popup_title))
             .setSingleChoiceItems(filterOptions, sharedPref.getInt("com.uu_uce.SORTMODE", 0)) { dialog, which ->
                 sortmode = which
                 dialog.dismiss()
-                sortList(sortmode)
                 with(sharedPref.edit()) {
                     putInt("com.uu_uce.SORTMODE", sortmode)
                     apply()
                 }
+                sortPins()
             }
         builder.show()
     }
 
-    private fun sortList(category: Int){
+    private fun sortPins(){
         viewAdapter = PinListAdapter(this)
         recyclerView.adapter = viewAdapter
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         pinViewModel.allPinData.observe(this, Observer { pins ->
-            pins?.let { viewAdapter.setPins(sortList(it, category), pinViewModel) }
+            pins?.let { viewAdapter.setPins(sortList(it, sharedPref.getInt("com.uu_uce.SORTMODE", 0)), pinViewModel) }
         })
     }
 
-    private fun sortList(pins : List<PinData>, id: Int) : List<PinData> {
-        return when(id) {
+    private fun sortList(pins : List<PinData>, sortmode: Int) : List<PinData> {
+        return when(sortmode) {
             0 -> pins.sortedWith(compareBy { it.title })
             1 -> pins.sortedWith(compareByDescending { it.title })
             2 -> pins.sortedWith(compareBy { it.difficulty })
