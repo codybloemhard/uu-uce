@@ -178,7 +178,7 @@ class AllPinsTests {
         )
 
         // Check if pin successfully opened
-        onView(withId(R.id.start_video_button))
+        onView(withId(R.id.video_block))
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
 
@@ -186,7 +186,7 @@ class AllPinsTests {
             .check(matches(not(hasFocus())))
 
         // Open video player
-        onView(withId(R.id.start_video_button))
+        onView(withId(R.id.video_block))
             .inRoot(isPlatformPopup())
             .perform(click())
 
@@ -201,7 +201,7 @@ class AllPinsTests {
             .perform(click())
 
         // Check if the player was closed successfully
-        onView(withId(R.id.start_video_button))
+        onView(withId(R.id.video_block))
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
     }
@@ -216,7 +216,7 @@ class AllPinsTests {
         )
 
         // Check if pin successfully opened
-        onView(withId(R.id.start_video_button))
+        onView(withId(R.id.video_block))
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
 
@@ -224,7 +224,7 @@ class AllPinsTests {
             .check(matches(not(hasFocus())))
 
         // Open video player
-        onView(withId(R.id.start_video_button))
+        onView(withId(R.id.video_block))
             .inRoot(isPlatformPopup())
             .perform(click())
 
@@ -237,7 +237,7 @@ class AllPinsTests {
         pressBack()
 
         // Check if the player was closed successfully
-        onView(withId(R.id.start_video_button))
+        onView(withId(R.id.video_block))
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
     }
