@@ -1,7 +1,6 @@
 package com.uu_uce.pins
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -517,20 +516,12 @@ fun blockTagFromString(tagString : String) : BlockTag{
     }
 }
 
-fun buildJSONContent(content: List<ContentBlockInterface>, context: Context): String {
+fun buildJSONContent(content: List<ContentBlockInterface>): String {
     return  content.joinToString(
         prefix      = "[",
         separator   = ",",
         postfix     = "]"
-    ).also { jsonString ->
-        // added for debugging purposes
-        val myDir: File = File(context.filesDir, "Content").also {
-            it.mkdirs()
-        }
-        val fileName = "TestContent.txt"
-        val file = File(myDir, fileName)
-        file.writeText(jsonString)
-    }
+    )
 }
 
 fun tagToJsonString(tag: BlockTag) : String {

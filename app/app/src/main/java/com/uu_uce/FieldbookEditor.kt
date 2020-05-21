@@ -171,7 +171,7 @@ class FieldbookEditor: AppCompatActivity() {
         val savePinButton = findViewById<Button>(R.id.add_fieldbook_pin)
         savePinButton.setOnClickListener{
             if (fieldbookIndex >= 0)
-                viewModel.update(title.text.toString(), buildJSONContent(content, this),fieldbookIndex)
+                viewModel.update(title.text.toString(), buildJSONContent(content),fieldbookIndex)
             else
                 saveFieldbookEntry(
                     title.text.toString(),
@@ -342,7 +342,8 @@ class FieldbookEditor: AppCompatActivity() {
     ) {
         super.onActivityResult(requestCode, resultCode, intent)
         if (resultCode == Activity.RESULT_OK) {
-            currentBlockIndex = latestBlockIndex++
+            if (!editing)
+                currentBlockIndex = latestBlockIndex++
             when (requestCode) {
                 REQUEST_IMAGE_UPLOAD -> {
                     if (intent != null) {
@@ -580,15 +581,7 @@ class FieldbookEditor: AppCompatActivity() {
             title,
             utm,
             currentDate,
-            buildJSONContent(content, this).also{ jsonString ->
-                // added for debugging purposes
-                val myDir: File = File(this.filesDir,"Content").also{
-                    it.mkdirs()
-                }
-                val fileName = "TestContent.txt"
-                val file = File(myDir,fileName)
-                file.writeText(jsonString)
-            }
+            buildJSONContent(content)
         ).also{
             viewModel.insert(it)
         }
