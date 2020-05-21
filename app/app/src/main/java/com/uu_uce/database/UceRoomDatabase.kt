@@ -12,7 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(entities = [PinData::class, FieldbookEntry::class], version = 2, exportSchema = false)
+@Database(entities = [PinData::class, FieldbookEntry::class], version = 3, exportSchema = false)
 abstract class UceRoomDatabase : RoomDatabase() {
 
     abstract fun pinDao(): PinDao
@@ -33,7 +33,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
             val pinList: MutableList<PinData> = mutableListOf()
             pinList.add(
                 PinData(
-                    0,
+                    "0",
                     "31N46777336N3149680E",
                     1,
                     "TEXT",
@@ -46,7 +46,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
             )
             pinList.add(
                 PinData(
-                    1,
+                    "1",
                     "31N46758336N3133680E",
                     2,
                     "IMAGE",
@@ -59,7 +59,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
             )
             pinList.add(
                 PinData(
-                    2,
+                    "2",
                     "31N46670000N3130000E",
                     3,
                     "VIDEO",
@@ -72,7 +72,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
             )
             pinList.add(
                 PinData(
-                    3,
+                    "3",
                     "31N46655335N3134680E",
                     3,
                     "MCQUIZ",
@@ -98,7 +98,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
                     UceRoomDatabase::class.java,
                     "uce_database"
                 )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .addCallback(UceDatabaseCallback(scope))
                     .build()
                 INSTANCE = instance
@@ -145,6 +145,49 @@ abstract class UceRoomDatabase : RoomDatabase() {
                             " FROM pins")
                             // Remove the old table
                             database.execSQL("DROP TABLE pins")
+                // Change the table name to the correct one
+                database.execSQL("ALTER TABLE pins_new RENAME TO pins")
+            }
+        }
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    "CREATE TABLE pins_new (" +
+                            "pinId TEXT NOT NULL, " +
+                            "location TEXT NOT NULL, " +
+                            "difficulty INTEGER NOT NULL," +
+                            "type TEXT NOT NULL," +
+                            "title TEXT NOT NULL," +
+                            "content TEXT NOT NULL," +
+                            "status INTEGER NOT NULL," +
+                            "predecessorIds TEXT NOT NULL," +
+                            "followIds TEXT NOT NULL," +
+                            "PRIMARY KEY(pinId))")
+                // Copy the data
+                database.execSQL(
+                    "INSERT INTO pins_new (" +
+                            "pinId, " +
+                            "location, " +
+                            "difficulty, " +
+                            "type, " +
+                            "title, " +
+                            "content, " +
+                            "status, " +
+                            "predecessorIds, " +
+                            "followIds) " +
+                            "SELECT " +
+                            "pinId, " +
+                            "location, " +
+                            "difficulty, " +
+                            "type, " +
+                            "title, " +
+                            "content, " +
+                            "status, " +
+                            "predecessorIds, " +
+                            "followIds " +
+                            " FROM pins")
+                // Remove the old table
+                database.execSQL("DROP TABLE pins")
                 // Change the table name to the correct one
                 database.execSQL("ALTER TABLE pins_new RENAME TO pins")
             }

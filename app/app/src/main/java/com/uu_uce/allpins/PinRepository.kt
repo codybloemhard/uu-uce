@@ -12,7 +12,7 @@ class PinRepository(private val pinDao : PinDao){
         pinDao.insert(pindata)
     }
 
-    suspend fun tryUnlock(pid : Int, predPids : List<Int>, action : (() -> Unit)){
+    suspend fun tryUnlock(pid : String, predPids : List<String>, action : (() -> Unit)){
         if(pinDao.getStatus(pid) > 0) {
             action()
             return
@@ -30,11 +30,11 @@ class PinRepository(private val pinDao : PinDao){
         action()
     }
 
-    suspend fun setStatus(pid : Int, value : Int){
+    suspend fun setStatus(pid : String, value : Int){
         pinDao.setStatus(pid, value)
     }
 
-    suspend fun setStatuses(pids : List<Int>, value : Int){
+    suspend fun setStatuses(pids : List<String>, value : Int){
         pinDao.setStatuses(pids, value)
     }
 

@@ -114,8 +114,8 @@ class PinListAdapter internal constructor(
             }
             else if (newPin.status == -1) {
                 // Pin needs recalculation
-                val predecessorIds = newPin.predecessorIds.split(',').map{id -> id.toInt()}
-                if (predecessorIds[0] != -1) {
+                val predecessorIds = newPin.predecessorIds.split(',')
+                if (predecessorIds[0] != "") {
                     viewModel.tryUnlock(newPin.pinId, predecessorIds) {}
                 }
             }

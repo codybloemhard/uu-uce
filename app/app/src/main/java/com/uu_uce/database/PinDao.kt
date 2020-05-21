@@ -17,19 +17,19 @@ interface PinDao {
     suspend fun getContent() : List<String>
 
     @Query("SELECT status from pins where pinId = :pid")
-    suspend fun getStatus(pid: Int) : Int
+    suspend fun getStatus(pid: String) : Int
 
     @Query("SELECT status from pins where pinId in (:pids)")
-    suspend fun getStatuses(pids: List<Int>) : List<Int>
+    suspend fun getStatuses(pids: List<String>) : List<Int>
 
     @Query("SELECT * from pins where LOWER(title) LIKE LOWER(:search)")
     suspend fun searchPins(search : String) : List<PinData>
 
     @Query("UPDATE pins SET status = :newStatus where pinId = :pid")
-    suspend fun setStatus(pid : Int, newStatus : Int)
+    suspend fun setStatus(pid : String, newStatus : Int)
 
     @Query("UPDATE pins SET status = :newStatus where pinId in (:pids)")
-    suspend fun setStatuses(pids : List<Int>, newStatus : Int)
+    suspend fun setStatuses(pids : List<String>, newStatus : Int)
 
     @Insert
     suspend fun insert(pin: PinData)

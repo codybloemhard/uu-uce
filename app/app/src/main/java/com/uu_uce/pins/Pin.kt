@@ -2,7 +2,6 @@ package com.uu_uce.pins
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
@@ -35,15 +34,15 @@ import kotlin.math.roundToInt
 
 
 class Pin(
-    var id                      : Int = 0,
-    var coordinate      : UTMCoordinate,
+    var id                      : String = "",
+    var coordinate              : UTMCoordinate,
     private var title           : String,
     private var content         : PinContent,
     private var background      : Bitmap,
     private var icon            : Drawable,
     private var status          : Int,              //-1 : recalculating, 0 : locked, 1 : unlocked, 2 : completed
-    private var predecessorIds  : List<Int>,
-    private var followIds       : List<Int>,
+    private var predecessorIds  : List<String>,
+    private var followIds       : List<String>,
     private val viewModel       : PinViewModel
 ) {
     // Used to determine if warning should show when closing pin
@@ -108,7 +107,7 @@ class Pin(
     private var questionRewards : Array<Int>    = Array(content.contentBlocks.count()) { 0 }
     private var totalReward                     = 0
 
-    var initialized = false
+    private var initialized = false
 
     fun initGL(){
         if(initialized) return
@@ -250,7 +249,7 @@ class Pin(
 
     // Check if pin should be unlocked
     fun tryUnlock(action : (() -> Unit)){
-        if(predecessorIds[0] != -1 && status < 1){
+        if(predecessorIds[0] != "" && status < 1){
             viewModel.tryUnlock(id, predecessorIds, action)
         }
         else{
@@ -366,7 +365,7 @@ class Pin(
 
     private fun complete() {
         status = 2
-        if (followIds[0] != -1)
+        if (followIds[0] != "")
             viewModel.completePin(id, followIds)
     }
 

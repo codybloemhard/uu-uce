@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "pins")
 open class PinData(
     @PrimaryKey
-    var pinId          : Int,
+    var pinId          : String,
     var location       : String,
     var difficulty     : Int,
     var type           : String,

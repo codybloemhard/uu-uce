@@ -62,9 +62,9 @@ class CustomMap : ViewTouchParent {
     private val deviceLocEdgePaint  : Paint = Paint()
 
     // Pins
-    private var pins                    : MutableMap<Int, Pin>  = mutableMapOf()
+    private var pins                    : MutableMap<String, Pin>  = mutableMapOf()
     private var sortedPins              : List<Pin>             = listOf()
-    private var pinStatuses             : MutableMap<Int, Int>  = mutableMapOf()
+    private var pinStatuses             : MutableMap<String, Int>  = mutableMapOf()
     private lateinit var pinViewModel   : PinViewModel
     private lateinit var lfOwner        : LifecycleOwner
     var activePopup                     : PopupWindow?          = null
@@ -466,7 +466,7 @@ class CustomMap : ViewTouchParent {
     //functions used for testing
     @TestOnly
     fun getPinLocation() : Pair<Float, Float>{
-        return pins[0]!!.getScreenLocation(camera.getViewport(), width, height)
+        return pins[pins.keys.first()]!!.getScreenLocation(camera.getViewport(), width, height)
     }
 
     @TestOnly

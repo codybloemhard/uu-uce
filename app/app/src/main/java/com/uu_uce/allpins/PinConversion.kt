@@ -103,8 +103,8 @@ class PinConversion(val context: Context){
         return bitmap
     }
 
-    private fun stringToIds(ids : String) : List<Int>{
-        return ids.split(',').map{s -> s.toInt()}
+    private fun stringToIds(ids : String) : List<String>{
+        return ids.split(',').map{s -> s}
     }
 
     fun pinDataToPin(pinData : PinData, viewModel : PinViewModel): Pin {
