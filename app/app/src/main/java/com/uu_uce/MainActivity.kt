@@ -10,7 +10,6 @@ import androidx.preference.PreferenceManager
 import com.uu_uce.gestureDetection.TouchParent
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.services.LoginResult
 import com.uu_uce.services.login
 
 //currently used only to switch to the GeoMap activity
@@ -45,11 +44,12 @@ class MainActivity : TouchParent() {
         }
     }
 
+    @Suppress("UnnecessaryVariable") // TODO: remove when result which is a webtoken
     private fun checkLogin() : Boolean{
         val result = login(
             sharedPref.getString("com.uu_uce.USERNAME", "").toString(),
             sharedPref.getString("com.uu_uce.PASSWORD", "").toString()
         )
-        return result == LoginResult.SUCCESS
+        return result
     }
 }
