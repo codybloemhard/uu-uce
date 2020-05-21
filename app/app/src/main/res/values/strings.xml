@@ -117,5 +117,6 @@
     <string name="login_nopassword_message">Please enter a password</string>
     <string name="login_signin_button_text">Sign In</string>
     <string name="settings_darkmode_switch_text">Dark mode</string>
+    <string name="allpins_topbar_title">Pins</string>
 
 </resources>

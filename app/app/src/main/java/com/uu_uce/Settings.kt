@@ -193,7 +193,7 @@ class Settings : AppCompatActivity() {
         }
 
         download_maps_button.setOnClickListener{
-            if (!File(getExternalFilesDir(null)?.path + File.separator + "Maps").exists()) {
+            if (!File(getExternalFilesDir(null)?.path + File.separator + mapsFolderName).exists()) {
                 downloadMaps()
             }
             else{

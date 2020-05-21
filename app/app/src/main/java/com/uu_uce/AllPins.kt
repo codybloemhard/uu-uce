@@ -1,7 +1,6 @@
 package com.uu_uce
 
 import android.app.Activity
-import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
@@ -31,7 +30,7 @@ class AllPins : AppCompatActivity() {
     private lateinit var pinViewModel   : PinViewModel
     private lateinit var sharedPref     : SharedPreferences
     private lateinit var viewAdapter    : PinListAdapter
-    private var selectedOption          : Int = 0
+    private var sortmode : Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
@@ -50,7 +49,7 @@ class AllPins : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_all_pins)
 
-        createTopbar(this, "Pins")
+        createTopbar(this, getString(R.string.allpins_topbar_title))
 
         viewManager = LinearLayoutManager(this)
 
@@ -62,7 +61,7 @@ class AllPins : AppCompatActivity() {
         }
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         pinViewModel.allPinData.observe(this, Observer { pins ->
-            pins?.let { viewAdapter.setPins(sortList(pins, sharedPref.getInt("selectedOption", 0)), pinViewModel) }
+            pins?.let { viewAdapter.setPins(sortList(pins, sharedPref.getInt("com.uu_uce.SORTMODE", 0)), pinViewModel) }
         })
 
         val filterButton : FloatingActionButton = findViewById(R.id.fab)
@@ -109,12 +108,12 @@ class AllPins : AppCompatActivity() {
         val filterOptions : Array<String> = arrayOf("Title a-z", "Title z-a", "Difficulty easy-hard", "Difficulty hard-easy", "Type a-z", "Type z-a")
         builder
             .setTitle("Filter by:")
-            .setSingleChoiceItems(filterOptions, sharedPref.getInt("selectedOption", 0)) { dialog, which ->
-                selectedOption = which
+            .setSingleChoiceItems(filterOptions, sharedPref.getInt("com.uu_uce.SORTMODE", 0)) { dialog, which ->
+                sortmode = which
                 dialog.dismiss()
-                sortList(selectedOption)
+                sortList(sortmode)
                 with(sharedPref.edit()) {
-                    putInt("selectedOption", selectedOption)
+                    putInt("com.uu_uce.SORTMODE", sortmode)
                     apply()
                 }
             }
@@ -147,7 +146,7 @@ class AllPins : AppCompatActivity() {
     private fun searchPins(search : String){
         pinViewModel.searchPins(search){ pins ->
             pins?.let {
-                viewAdapter.setPins(sortList(pins, sharedPref.getInt("selectedOption", 0)), pinViewModel)
+                viewAdapter.setPins(sortList(pins, sharedPref.getInt("com.uu_uce.SORTMODE", 0)), pinViewModel)
             }
             hideKeyboard(this)
         }

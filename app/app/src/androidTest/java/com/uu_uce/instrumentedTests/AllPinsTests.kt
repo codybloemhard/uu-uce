@@ -102,7 +102,7 @@ class AllPinsTests {
         // Set sorting by type
         sharedPref = activityRule.activity.getPreferences(Context.MODE_PRIVATE)
         with(sharedPref.edit()) {
-            putInt("selectedOption", 4)
+            putInt("com.uu_uce.SORTMODE", 4)
             apply()
         }
 
