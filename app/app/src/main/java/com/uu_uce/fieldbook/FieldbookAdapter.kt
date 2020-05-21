@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.DialogInterface
 import android.content.res.Resources
 import android.content.res.TypedArray
+import android.content.Intent
+import android.graphics.Color.rgb
 import android.net.Uri
 import android.view.Gravity
 import android.view.View
@@ -11,26 +13,33 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.content.ContextCompat.startActivity
 import androidx.core.net.toFile
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import com.uu_uce.FieldbookEditor
 import com.uu_uce.R
 import com.uu_uce.pins.ImageContentBlock
 import com.uu_uce.pins.PinContent
 import com.uu_uce.pins.TextContentBlock
 import com.uu_uce.pins.VideoContentBlock
 
-
-class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookViewModel) : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>() {
-
+class FieldbookAdapter(
+    private val activity    : Activity,
+    private val viewModel   : FieldbookViewModel,
+    private val rootView    : View
+)
+    : RecyclerView.Adapter<FieldbookAdapter.FieldbookViewHolder>()
+{
     private var fieldbook: List<FieldbookEntry> = emptyList()
     private lateinit var parentView : ViewGroup
 
-    class FieldbookViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val parentView = itemView
-        val numberFb: TextView = parentView.findViewById(R.id.title)
-        val locationFb: TextView = parentView.findViewById(R.id.pin_coordinates)
-        val datetimeFb: TextView = parentView.findViewById(R.id.datetime)
-        val frameFb: FrameLayout = parentView.findViewById(R.id.frame_layout)
+    class FieldbookViewHolder(val parentView: View) : RecyclerView.ViewHolder(parentView) {
+        val titleFb     : TextView      = itemView.findViewById(R.id.title)
+        val numberFb    : TextView      = itemView.findViewById(R.id.number)
+        val locationFb  : TextView      = itemView.findViewById(R.id.pin_coordinates)
+        val datetimeFb  : TextView      = itemView.findViewById(R.id.datetime)
+        val frameFb     : FrameLayout   = itemView.findViewById(R.id.frame_layout)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FieldbookViewHolder {
@@ -45,9 +54,12 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
     }
 
     override fun onBindViewHolder(holder: FieldbookViewHolder, position: Int) {
+        holder.frameFb.removeAllViews()
         val entry : FieldbookEntry = fieldbook[position]
+        val index = entry.id
         holder.apply {
-            numberFb.text = entry.title
+            titleFb.text = entry.title
+            numberFb.text = addLeadingZeros(index)
             locationFb.text = entry.location
             datetimeFb.text = entry.dateTime
         }
@@ -57,28 +69,18 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
             FrameLayout.LayoutParams.MATCH_PARENT
         )
 
-        val content = PinContent(entry.content)
+        val content = PinContent(entry.content, activity).contentBlocks
 
         var isThumbnail = false
         var thumbnailUri = Uri.EMPTY
 
-        //val textFb: TextView = parentView.findViewById(R.id.text_preview)
-        //val imageFb: ImageView = parentView.findViewById(R.id.image_preview)
-
-        //1x alles doorlopen, niet meer checken op dingen die we al gehad hebben...
-        //als er een textblock is, gebruiken we die...
-        //anders gebruiken we een afbeelding (sws thumbnail)
-        //anders gebruiken we een video thumbnail
-
-        loop@ for (cB in content.contentBlocks) {
+        loop@ for (cB in content) {
             when (cB) {
                 is TextContentBlock -> {
                     TextView(activity).apply {
                         textSize = 12f
                         setTextColor(ResourcesCompat.getColor(activity.resources, R.color.TextGrey, null))
                         text = cB.getTextContent()
-                        //Text direction?
-                        //What to do when text goes over the edge?
                     }.also {
                         holder.frameFb.addView(it, params)
                     }
@@ -110,7 +112,7 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
                     val layoutInflater = activity.layoutInflater
 
                     // Build an custom view (to be inflated on top of our current view & build it's popup window)
-                    val customView = layoutInflater.inflate(R.layout.pin_content_view, parentView, false)
+                    val customView = layoutInflater.inflate(R.layout.pin_content_view, rootView as ViewGroup, false)
 
                     val popupWindow = PopupWindow(
                         customView,
@@ -118,28 +120,42 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
                         ViewGroup.LayoutParams.MATCH_PARENT
                     )
 
+                    // Get elements
+                    val layout: LinearLayout =
+                        customView.findViewById(R.id.scrollLayout)
+                    val btnClosePopupWindow =
+                        customView.findViewById<Button>(R.id.popup_window_close_button)
+                    val windowTitle =
+                        customView.findViewById<TextView>(R.id.popup_window_title)
+                    val editButton =
+                        customView.findViewById<Button>(R.id.popup_window_edit_button).apply {
+                            isVisible   = true
+                            isClickable = true
+                        }
+
                     // Add the title for the popup window
-                    val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
                     windowTitle.text = entry.title
 
-                    // Add content to popup window
-                    val layout: LinearLayout = customView.findViewById(R.id.scrollLayout)
-
                     // Fill layout of popup
-                    for(i in 0 until content.contentBlocks.count()) {
-                        content.contentBlocks[i].generateContent(i, layout, activity, customView, null)
+                    for(i in 0 until content.count()) {
+                        content[i].apply {
+                            showContent(i, layout, rootView, null)
+                        }
                     }
 
                     // Open popup
                     popupWindow.showAtLocation(v, Gravity.CENTER, 0, 0)
 
-                    // Get elements
-                    val btnClosePopupWindow =
-                        customView.findViewById<Button>(R.id.popup_window_close_button)
-
                     // Set onClickListeners
                     btnClosePopupWindow.setOnClickListener {
                         popupWindow.dismiss()
+                    }
+
+                    editButton.setOnClickListener {
+                        popupWindow.dismiss()
+                        val intent = Intent(activity, FieldbookEditor::class.java)
+                        intent.putExtra("fieldbook_index",entry.id)
+                        startActivity(activity, intent, null)
                     }
                 }
             )
@@ -149,11 +165,11 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
             View.OnLongClickListener(
                 fun (_): Boolean {
                     AlertDialog.Builder(activity)
-                        .setTitle("Delete")
-                        .setMessage("Are you sure you want to delete this entry?")
-                        .setPositiveButton("YES") { _: DialogInterface, _: Int ->
+                        .setTitle(activity.getString(R.string.delete_popup_title))
+                        .setMessage(activity.getString(R.string.fieldbook_pindeletion_popup_text))
+                        .setPositiveButton(activity.getString(R.string.positive_button_text)) { _: DialogInterface, _: Int ->
                             viewModel.delete(entry)
-                            for (cB in content.contentBlocks) {
+                            for (cB in content) {
                                 when (cB) {
                                     is ImageContentBlock ->
                                         cB.getThumbnailURI().apply {
@@ -168,7 +184,7 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
                                 }
                             }
                         }
-                        .setNegativeButton("NO") { _: DialogInterface, _: Int -> }
+                        .setNegativeButton(activity.getString(R.string.negative_button_text)) { _: DialogInterface, _: Int -> }
                         .show()
                     return true
                 }
@@ -179,5 +195,11 @@ class FieldbookAdapter(val activity: Activity, private val viewModel: FieldbookV
     fun setFieldbook(fieldbook: List<FieldbookEntry>) {
         this.fieldbook = fieldbook
         notifyDataSetChanged()
+    }
+
+    private fun addLeadingZeros(id: Int) : String {
+        val s = id.toString()
+        val zero : String = "0".repeat(3-s.length)
+        return "#$zero$id"
     }
 }

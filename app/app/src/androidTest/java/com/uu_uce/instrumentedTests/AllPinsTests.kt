@@ -127,7 +127,7 @@ class AllPinsTests {
             )
 
         // Check if pin successfully opened
-        onView(withId(R.id.scrollLayout))
+        onView(withId(R.id.popup_window_view))
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
 
@@ -154,7 +154,7 @@ class AllPinsTests {
         )
 
         // Check if pin successfully opened
-        onView(withId(R.id.scrollLayout))
+        onView(withId(R.id.popup_window_view))
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
 
@@ -179,7 +179,7 @@ class AllPinsTests {
         )
 
         // Check if pin successfully opened
-        onView(withId(R.id.start_video_button))
+        onView(withId(R.id.video_block))
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
 
@@ -187,12 +187,12 @@ class AllPinsTests {
             .check(matches(not(hasFocus())))
 
         // Open video player
-        onView(withId(R.id.start_video_button))
+        onView(withId(R.id.video_block))
             .inRoot(isPlatformPopup())
             .perform(click())
 
         // Check if video player opened successfully
-        onView(withId(R.id.video_title))
+        onView(withId(R.id.video_viewer_layout))
             .inRoot(not(isPlatformPopup()))
             .check(matches(isDisplayed()))
 
@@ -202,7 +202,7 @@ class AllPinsTests {
             .perform(click())
 
         // Check if the player was closed successfully
-        onView(withId(R.id.start_video_button))
+        onView(withId(R.id.video_block))
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
     }
@@ -217,7 +217,7 @@ class AllPinsTests {
         )
 
         // Check if pin successfully opened
-        onView(withId(R.id.start_video_button))
+        onView(withId(R.id.video_block))
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
 
@@ -225,13 +225,12 @@ class AllPinsTests {
             .check(matches(not(hasFocus())))
 
         // Open video player
-        onView(withId(R.id.start_video_button))
+        onView(withId(R.id.video_block))
             .inRoot(isPlatformPopup())
             .perform(click())
 
         // Check if video player opened successfully
-        sleep(500)
-        onView(withId(R.id.video_title))
+        onView(withId(R.id.video_viewer_layout))
             .inRoot(not(isPlatformPopup()))
             .check(matches(isDisplayed()))
 
@@ -239,7 +238,7 @@ class AllPinsTests {
         pressBack()
 
         // Check if the player was closed successfully
-        onView(withId(R.id.start_video_button))
+        onView(withId(R.id.video_block))
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
     }
@@ -538,7 +537,7 @@ class AllPinsTests {
     @Test
     fun pinSearching(){
         // Search for D
-        onView(withId(R.id.searchbar))
+        onView(withId(R.id.pins_searchbar))
             .perform(typeText("D"), pressKey(KeyEvent.KEYCODE_ENTER))
 
         sleep(100)
@@ -552,7 +551,7 @@ class AllPinsTests {
         ).check(matches(withText("D")))
 
         // Press clear search to stop searching
-        onView(withId(R.id.searchbar))
+        onView(withId(R.id.pins_searchbar))
             .perform(clearText(), pressKey(KeyEvent.KEYCODE_ENTER))
 
         sleep(100)
@@ -566,7 +565,7 @@ class AllPinsTests {
         ).check(matches(withText("B")))
 
         // Search for C
-        onView(withId(R.id.searchbar))
+        onView(withId(R.id.pins_searchbar))
             .perform(typeText("C"), pressKey(KeyEvent.KEYCODE_ENTER))
 
         sleep(100)

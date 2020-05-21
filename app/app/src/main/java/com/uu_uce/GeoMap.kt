@@ -125,6 +125,8 @@ class GeoMap : AppCompatActivity() {
         // Set settings
         customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
 
+        customMap.setActivity(this)
+
         // TODO: Remove when releasing
         with(sharedPref.edit()) {
             putInt("com.uu_uce.USER_POINTS", 0)
@@ -173,7 +175,7 @@ class GeoMap : AppCompatActivity() {
                 customMap.setCenterPos()
             }
             else{
-                Toast.makeText(this, "Location not avaiable", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Location not available", Toast.LENGTH_LONG).show()
                 getPermissions(this, LocationServices.permissionsNeeded, LOCATION_REQUEST)
             }
         }

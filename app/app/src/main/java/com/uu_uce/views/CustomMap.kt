@@ -62,11 +62,13 @@ class CustomMap : ViewTouchParent {
     private val deviceLocEdgePaint  : Paint = Paint()
 
     // Pins
-    private var pins                    : MutableMap<String, Pin>  = mutableMapOf()
-    private var sortedPins              : List<Pin>             = listOf()
-    private var pinStatuses             : MutableMap<String, Int>  = mutableMapOf()
+    private lateinit var activity       : Activity
     private lateinit var pinViewModel   : PinViewModel
     private lateinit var lfOwner        : LifecycleOwner
+    private var pins                    : MutableMap<String, Pin>   = mutableMapOf()
+    private var sortedPins              : List<Pin>                 = listOf()
+    private var pinStatuses             : MutableMap<String, Int>   = mutableMapOf()
+
     var activePopup                     : PopupWindow?          = null
     var pinSize: Int
     var locSizeFactor = 0.5f
@@ -325,7 +327,7 @@ class CustomMap : ViewTouchParent {
             when {
                 pinStatuses[pin.pinId] == null -> {
                     // Pin was not yet present
-                    val newPin = PinConversion(context)
+                    val newPin = PinConversion(activity)
                         .pinDataToPin(pin, pinViewModel)
                     newPin.tryUnlock {
                         Logger.log(LogType.Info, "CustomMap", "Adding pin")
@@ -427,6 +429,10 @@ class CustomMap : ViewTouchParent {
 
     fun setLifeCycleOwner(lifecycleOwner: LifecycleOwner){
         lfOwner = lifecycleOwner
+    }
+
+    fun setActivity(activity: Activity){
+        this.activity = activity
     }
 
     //open the all pins activity

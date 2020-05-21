@@ -4,4 +4,8 @@
     <item name="multiple_choice_table" type="id" />
     <item name="finish_quiz_button" type="id" />
     <item name="image_block" type="id" />
+    <item name="video_block" type="id" />
+
+    <item name="text_field" type="id" />
+    <item name="close_text_field" type="id" />
 </resources>

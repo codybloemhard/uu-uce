@@ -11,7 +11,6 @@ import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.pins.PinContent
@@ -24,7 +23,6 @@ import kotlinx.android.synthetic.main.activity_settings.*
 import java.io.File
 import kotlin.math.max
 import kotlin.math.min
-
 
 // Default settings
 const val defaultPinSize = 60
@@ -244,8 +242,8 @@ class Settings : AppCompatActivity() {
                 val pathList = mutableListOf<String>()
 
                 for (data in list){
-                    for (block in PinContent(data).contentBlocks){
-                        for (path in block.getFilePaths()){
+                    for (block in PinContent(data, this).contentBlocks){
+                        for (path in block.getFilePath()){
                             pathList.add(path)
                         }
                     }

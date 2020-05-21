@@ -43,9 +43,9 @@ class Fieldbook : AppCompatActivity() {
 
         // initiate views and layout
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.fieldbook_bottom_navigation)
-        createTopbar(this, "My Fieldbook")
+        createTopbar(this, getString(R.string.fieldbook_topbar_title))
 
-        openFragment(FieldbookHomeFragment.newInstance())
+        openFragment(FieldbookHomeFragment.newInstance(window.decorView.rootView))
 
         // set listeners
         bottomNavigation.setOnNavigationItemSelectedListener(
@@ -53,7 +53,7 @@ class Fieldbook : AppCompatActivity() {
                 fun(m): Boolean {
                     when (m.itemId) {
                         R.id.fieldbook_navigation_home -> {
-                            openFragment(FieldbookHomeFragment.newInstance())
+                            openFragment(FieldbookHomeFragment.newInstance(window.decorView.rootView))
                             return true
                         }
                         R.id.fieldbook_navigation_pinmap -> {

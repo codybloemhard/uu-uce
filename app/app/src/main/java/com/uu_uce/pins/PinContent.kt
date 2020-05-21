@@ -4,10 +4,11 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.text.InputType
 import android.util.JsonReader
-import android.util.Log
 import android.view.Gravity
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
@@ -18,10 +19,14 @@ import com.uu_uce.VideoViewer
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.services.updateFiles
+import java.io.File
 import java.io.StringReader
 
-class PinContent(private val contentString: String) {
-    val contentBlocks : List<ContentBlockInterface>
+class PinContent(
+    private val contentString: String,
+    private val activity: Activity
+) {
+    val contentBlocks : MutableList<ContentBlockInterface>
     var canCompletePin = false
 
     lateinit var parent : Pin
@@ -30,13 +35,13 @@ class PinContent(private val contentString: String) {
     }
 
 
-    private fun getContent() : List<ContentBlockInterface>{
+    private fun getContent() : MutableList<ContentBlockInterface>{
             val reader = JsonReader(StringReader(contentString))
 
             return readContentBlocks(reader)
         }
 
-    private fun readContentBlocks(reader: JsonReader) :  List<ContentBlockInterface>{
+    private fun readContentBlocks(reader: JsonReader) :  MutableList<ContentBlockInterface>{
         val contentBlocks : MutableList<ContentBlockInterface> = mutableListOf()
 
         reader.beginArray()
@@ -121,40 +126,93 @@ class PinContent(private val contentString: String) {
                 Logger.error("PinContent", "No BlockTag specified")
                 return null
             }
-            BlockTag.TEXT       -> TextContentBlock(textString)
-            BlockTag.IMAGE      -> ImageContentBlock(Uri.parse(filePath), thumbnailURI, title)
-            BlockTag.VIDEO      -> VideoContentBlock(Uri.parse(filePath), thumbnailURI, title)
+            BlockTag.TEXT       -> TextContentBlock(textString, activity)
+            BlockTag.IMAGE      -> ImageContentBlock(Uri.parse(filePath), thumbnailURI, activity, title)
+            BlockTag.VIDEO      -> VideoContentBlock(Uri.parse(filePath), thumbnailURI, activity, title)
             BlockTag.MCQUIZ     -> {
                 if(mcIncorrectOptions.count() < 1 && mcCorrectOptions.count() < 1) {
                     Logger.error("PinContent", "Mutliple choice questions require at least one correct and one incorrect answer")
                     return null
                 }
-                MCContentBlock( mcCorrectOptions, mcIncorrectOptions, reward)
+                MCContentBlock( mcCorrectOptions, mcIncorrectOptions, reward, activity)
             }
         }
     }
 }
 
-interface ContentBlockInterface{
+interface ContentBlockInterface {
+    val content: View
+    val tag : BlockTag
     val canCompleteBlock : Boolean
-    fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?)
-    fun getFilePaths() : List<String>
+    fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?)
+    fun makeEditable(blockId : Int, layout : LinearLayout, view : View, action : ((ContentBlockInterface) -> Boolean)) : ContentBlockInterface {
+        showContent(blockId,layout,view,null)
+        content.setOnLongClickListener{
+            return@setOnLongClickListener action(this)
+        }
+        return this
+    }
+    fun removeContent(layout : LinearLayout) = layout.removeView(content)
+    fun getFilePath() : List<String> {
+        return listOf()
+    }
     override fun toString() : String
 }
 
-class TextContentBlock(private val textContent : String) : ContentBlockInterface{
-    private val tag = BlockTag.TEXT
+class EditTextBlock(
+    private val activity: Activity
+)
+    : ContentBlockInterface
+{
+    override var content = EditText(activity)
+    override val tag = BlockTag.TEXT
     override val canCompleteBlock = false
-    override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
-        val content = TextView(activity)
-        content.text = textContent
-        content.setPadding(12,12,12,20)
-        content.gravity = Gravity.CENTER_HORIZONTAL
-        layout.addView(content)
+    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?) {
+        content = EditText(activity).apply {
+            inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            isSingleLine = false
+            imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION
+            id = R.id.text_field
+        }.also{
+            layout.addView(it,blockId)
+        }
     }
 
-    override fun getFilePaths() : List<String>{
-        return listOf()
+    override fun toString() : String {
+        return "{${tagToJsonString(tag)}," +
+                "${textToJsonString(content.text.toString())}}"
+    }
+}
+
+class TextContentBlock(
+    private val textContent : String,
+    private val activity: Activity
+)
+    : ContentBlockInterface
+{
+    override var content = TextView(activity)
+    override val tag = BlockTag.TEXT
+    override val canCompleteBlock = false
+    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?){
+        content = TextView(activity).apply {
+            text = textContent
+            setPadding(12, 12, 12, 20)
+            gravity = Gravity.CENTER_HORIZONTAL
+        }.also{
+            layout.addView(it,blockId)
+        }
+    }
+
+    override fun makeEditable(
+        blockId: Int,
+        layout: LinearLayout,
+        view: View,
+        action: (ContentBlockInterface) -> Boolean
+    ): ContentBlockInterface {
+        val editable = EditTextBlock(activity)
+        editable.makeEditable(blockId, layout, view, action)
+        editable.content.setText(textContent)
+        return editable
     }
 
     override fun toString() : String {
@@ -167,16 +225,25 @@ class TextContentBlock(private val textContent : String) : ContentBlockInterface
     }
 }
 
-class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Uri, private val title : String? = null) : ContentBlockInterface{
-    private val tag = BlockTag.IMAGE
+class ImageContentBlock(
+    private val imageURI : Uri,
+    private val thumbnailURI: Uri,
+    private val activity: Activity,
+    private val title: String? = null
+)
+    : ContentBlockInterface
+{
+    override var content = ImageView(activity)
+    override val tag = BlockTag.IMAGE
     override val canCompleteBlock = false
-
-    override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
-        val content = ImageView(activity)
+    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?){
+        content = ImageView(activity)
         try {
-            content.setImageURI(imageURI)
-            content.scaleType = ImageView.ScaleType.FIT_CENTER
-            content.adjustViewBounds = true
+            content.apply {
+                setImageURI(imageURI)
+                scaleType = ImageView.ScaleType.FIT_CENTER
+                adjustViewBounds = true
+            }
         } catch (e: Exception) {
             Logger.error("PinContent","Couldn't load $imageURI, so loaded the thumbnail $thumbnailURI instead")
             content.setImageURI(thumbnailURI)
@@ -184,18 +251,26 @@ class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Ur
         val imageLayoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
-        )
+        ).apply {
+            setMargins(0, 0, 0, 10)
+        }
         content.layoutParams = imageLayoutParams
         content.id = R.id.image_block
 
         content.setOnClickListener{
-            openImageView(imageURI, title, activity)
+            openImageView(imageURI, title)
         }
 
-        layout.addView(content)
+        layout.addView(content,blockId)
     }
 
-    override fun getFilePaths() : List<String>{
+    override fun removeContent(layout: LinearLayout) {
+        super.removeContent(layout)
+        //TODO: check if thumbnail isn't used elsewhere (or don't delete at all?)
+        totallyExterminateFileExistence(activity, thumbnailURI)
+    }
+
+    override fun getFilePath() : List<String>{
         return listOf(imageURI.toString())
     }
 
@@ -205,7 +280,7 @@ class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Ur
                 "${thumbnailToJsonString(thumbnailURI)}}"
     }
 
-    private fun openImageView(imageURI: Uri, imageTitle : String?, activity : Activity){
+    private fun openImageView(imageURI: Uri, imageTitle : String?){
         val intent = Intent(activity, ImageViewer::class.java)
 
         intent.putExtra("uri", imageURI)
@@ -219,26 +294,35 @@ class ImageContentBlock(private val imageURI : Uri, private val thumbnailURI: Ur
     }
 }
 
-class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : Uri, private val title : String? = null) : ContentBlockInterface{
-    private val tag = BlockTag.VIDEO
+class VideoContentBlock(
+    private val videoURI : Uri,
+    private val thumbnailURI : Uri,
+    private val activity: Activity,
+    private val title : String? = null
+)
+    : ContentBlockInterface
+{
+    override var content = FrameLayout(activity)
+    override val tag = BlockTag.VIDEO
     override val canCompleteBlock = false
 
-    override fun generateContent(blockId : Int, layout : LinearLayout, activity : Activity, view : View, parent : Pin?){
-        val frameLayout = FrameLayout(activity)
+    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?){
+        content = FrameLayout(activity)
 
         // Create thumbnail image
         if(thumbnailURI == Uri.EMPTY){
-            frameLayout.setBackgroundColor(Color.BLACK)
+            content.setBackgroundColor(Color.BLACK)
         }
         else{
             val thumbnail = ImageView(activity)
             thumbnail.setImageURI(thumbnailURI)
             thumbnail.scaleType = ImageView.ScaleType.FIT_CENTER
             thumbnail.adjustViewBounds = true
-            frameLayout.addView(thumbnail)
+            content.addView(thumbnail)
         }
 
-        frameLayout.layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
+        content.layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
+        content.id = R.id.video_block
 
         // Create play button
         val playButton = ImageView(activity)
@@ -249,20 +333,25 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
         playButton.layoutParams = buttonLayout
 
         // Add thumbnail and button
-        frameLayout.addView(playButton)
-        frameLayout.setOnClickListener{
+        content.addView(playButton)
+        content.setOnClickListener{
             updateFiles(
                 listOf(videoURI.toString()),
                 activity,
-                { openVideoView(videoURI, title, activity) },
+                { openVideoView(videoURI, title) },
                 {}
             )
         }
-        frameLayout.id = R.id.start_video_button
-        layout.addView(frameLayout)
+        layout.addView(content,blockId)
     }
 
-    override fun getFilePaths() : List<String>{
+    override fun removeContent(layout: LinearLayout) {
+        super.removeContent(layout)
+        //TODO: check if thumbnail isn't used elsewhere (or don't delete at all?)
+        totallyExterminateFileExistence(activity, thumbnailURI)
+    }
+
+    override fun getFilePath() : List<String>{
         if(thumbnailURI == Uri.EMPTY) return listOf(videoURI.toString())
         return listOf(thumbnailURI.toString(), videoURI.toString())
     }
@@ -273,7 +362,7 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
                 "${thumbnailToJsonString(thumbnailURI)}}"
     }
 
-    private fun openVideoView(videoURI: Uri, videoTitle : String?, activity : Activity){
+    private fun openVideoView(videoURI: Uri, videoTitle : String?){
         val intent = Intent(activity, VideoViewer::class.java)
 
         intent.putExtra("uri", videoURI)
@@ -287,13 +376,23 @@ class VideoContentBlock(private val videoURI : Uri, private val thumbnailURI : U
     }
 }
 
-class MCContentBlock(private val correctAnswers : List<String>, private val incorrectAnswers : List<String>, private val reward : Int) : ContentBlockInterface{
-    private val tag = BlockTag.MCQUIZ
+class MCContentBlock(
+    private val correctAnswers : List<String>,
+    private val incorrectAnswers : List<String>,
+    private val reward : Int,
+    private val activity : Activity
+)
+    : ContentBlockInterface
+{
+    override var content = TableLayout(activity)
+    override val tag = BlockTag.MCQUIZ
     override val canCompleteBlock = true
     private var selectedAnswer : Int = -1
     private lateinit var selectedBackground : CardView
 
-    override fun generateContent(blockId : Int, layout: LinearLayout, activity: Activity, view : View, parent : Pin?) {
+    override fun showContent(blockId : Int, layout: LinearLayout, view : View, parent : Pin?) {
+        content = TableLayout(activity)
+
         if(parent == null) {
             Logger.error("PinContent","Mutliple choice quizzes can't be generated without a parent pin")
             return
@@ -309,8 +408,7 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
         val shuffledAnswers = answers.shuffled()
 
         // Create tableLayout with first row
-        val table = TableLayout(activity)
-        table.id = R.id.multiple_choice_table
+        content.id = R.id.multiple_choice_table
         var currentRow = TableRow(activity)
         currentRow.gravity = Gravity.CENTER_HORIZONTAL
 
@@ -372,19 +470,28 @@ class MCContentBlock(private val correctAnswers : List<String>, private val inco
             }
 
             if(i % 2 == 1){
-                table.addView(currentRow)
+                content.addView(currentRow)
                 currentRow = TableRow(activity)
                 currentRow.gravity = Gravity.CENTER_HORIZONTAL
             }
         }
         if(currentRow.childCount > 0){
-            table.addView(currentRow)
+            content.addView(currentRow)
         }
-        layout.addView(table)
+        layout.addView(content,blockId)
     }
 
-    override fun getFilePaths(): List<String> {
-        return listOf()
+    override fun makeEditable(
+        blockId: Int,
+        layout: LinearLayout,
+        view: View,
+        action: (ContentBlockInterface) -> Boolean
+    ): ContentBlockInterface {
+        return this
+    }
+
+    override fun removeContent(layout: LinearLayout) {
+
     }
 
     override fun toString(): String {
@@ -410,6 +517,14 @@ fun blockTagFromString(tagString : String) : BlockTag{
     }
 }
 
+fun buildJSONContent(content: List<ContentBlockInterface>): String {
+    return  content.joinToString(
+        prefix      = "[",
+        separator   = ",",
+        postfix     = "]"
+    )
+}
+
 fun tagToJsonString(tag: BlockTag) : String {
     return "\"tag\":\"$tag\""
 }
@@ -424,6 +539,24 @@ fun fileToJsonString(filePath: Uri) : String {
 
 fun thumbnailToJsonString(thumbnail: Uri) : String {
     return "\"thumbnail\":\"$thumbnail\""
+}
+
+fun totallyExterminateFileExistence(activity : Activity, thumbnail : Uri) {
+    val toBeDeleted = File(thumbnail.path!!)
+    if(toBeDeleted.exists()) {
+        if (toBeDeleted.delete()) {
+            if (toBeDeleted.exists()) {
+                toBeDeleted.canonicalFile.delete()
+                if (toBeDeleted.exists())
+                    activity.deleteFile(toBeDeleted.name)
+            }
+            Logger.log(LogType.Event,"PinContent", "Thumbnail deleted $thumbnail")
+        } else {
+            Logger.log(LogType.Info,"PinContent", "Thumbnail not deleted $thumbnail")
+        }
+    } else {
+        Logger.log(LogType.Info,"PinContent","This thumbnail doesn't exist")
+    }
 }
 
 

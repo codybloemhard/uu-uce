@@ -27,7 +27,7 @@
         android:supportsRtl="true"
         android:theme="@style/LightTheme"
         tools:targetApi="q">
-
+        <activity android:name=".FieldbookEditor"/>
         <activity android:name=".Login"/>
         <activity android:name=".ImageViewer"
             android:launchMode="singleInstance"/>

@@ -298,7 +298,7 @@ class Pin(
         // Get necessary files
         val fileList = mutableListOf<String>()
         for(block in content.contentBlocks){
-            for(path in block.getFilePaths()){
+            for(path in block.getFilePath()){
                 fileList.add(path)
             }
         }
@@ -312,7 +312,7 @@ class Pin(
                     // Generate content
                     for(i in 0 until content.contentBlocks.count()){
                         val current = content.contentBlocks[i]
-                        current.generateContent(i, layout, activity, parentView, this)
+                        current.showContent(i, layout, parentView, this)
                         if(current is MCContentBlock) containsQuiz = true
                     }
 
