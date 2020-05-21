@@ -148,6 +148,7 @@ class FieldbookAdapter(
                     }
 
                     editButton.setOnClickListener {
+                        popupWindow.dismiss()
                         val intent = Intent(activity, FieldbookEditor::class.java)
                         intent.putExtra("fieldbook_index",entry.id)
                         startActivity(activity, intent, null)

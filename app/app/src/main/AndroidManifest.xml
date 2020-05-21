@@ -12,9 +12,9 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="true" />
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
+
+    <uses-feature android:glEsVersion="0x00020000" android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -27,8 +27,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="q">
-        <activity android:name=".FieldbookEditor"></activity>
-        <activity android:name=".ImageViewer" />
+        <activity android:name=".FieldbookEditor"/>
+        <activity android:name=".Login"/>
+        <activity android:name=".ImageViewer"
+            android:launchMode="singleInstance"/>
         <activity android:name=".Profile" />
         <activity
             android:name=".Settings"
@@ -62,7 +64,8 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".VideoViewer"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:launchMode="singleInstance"/>
 
         <meta-data
             android:name="preloaded_fonts"

@@ -275,6 +275,7 @@ class AllPinsTests {
             .perform(scrollTo(), click())
 
         // Check to see if popup was correct
+        sleep(500)
         onView(withId(R.id.quiz_result_text))
             .inRoot(isPlatformPopup())
             .check(matches(withText(R.string.pin_quiz_success_head)))
@@ -323,6 +324,7 @@ class AllPinsTests {
             .perform(scrollTo(), click())
 
         // Check to see if popup was correct
+        sleep(500)
         onView(withId(R.id.quiz_result_text))
             .inRoot(isPlatformPopup())
             .check(matches(withText(R.string.pin_quiz_fail_head)))

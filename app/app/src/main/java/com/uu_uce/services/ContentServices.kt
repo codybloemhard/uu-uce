@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipException
 import java.util.zip.ZipFile
@@ -24,6 +25,7 @@ import java.util.zip.ZipInputStream
 val permissionsNeeded = listOf(Manifest.permission.INTERNET)
 
 private const val serverURL = "http://131.211.31.176:8080" // TODO: This should be dependedent of the users orginization
+private const val downloadURL = "/api/files/download/"
 
 private lateinit var sharedPref : SharedPreferences
 
@@ -36,11 +38,11 @@ It will call getFiles for all missing files.
  */
 fun updateFiles(requiredFilePaths : List<String>, activity : Activity, onCompleteAction : (() -> Unit)= {}, progressAction : (Int) -> Unit = {}) : Boolean {
     val missingFiles = findMissingFilePaths(requiredFilePaths)
-    return if(missingFiles.count() > 0){
+    return if (missingFiles.count() > 0) {
         getPermissions(activity, permissionsNeeded, EXTERNAL_FILES_REQUEST)
         getFiles(missingFiles, activity, onCompleteAction, progressAction)
     }
-    else{
+    else {
         GlobalScope.launch { onCompleteAction() }
         true
     }
@@ -55,7 +57,8 @@ fun findMissingFilePaths(requestedFilePaths : List<String>) : List<Pair<String, 
     val missingFilePaths : MutableList<Pair<String, String>> = mutableListOf()
     val adding : MutableMap<String, Boolean> = mutableMapOf()
     for(filePath in requestedFilePaths){
-        if(!File(filePath).exists() && !adding.containsKey(filePath)){
+        val file = File(filePath)
+        if((!file.exists() || !file.canRead()) && !adding.containsKey(filePath)){
             val fileName = filePath.split('/').last().split('.').first() // Because we use UUID4 names there can never be a / or . in the file name
             missingFilePaths.add(Pair(filePath, fileName))
             adding[fileName] = true
@@ -87,7 +90,7 @@ fun getFiles (requiredFilePaths : List<Pair<String, String>>, activity: Activity
                 Toast.makeText(activity, "Downloading", Toast.LENGTH_SHORT).show()
             }
             downloadFile(
-                URL(serverURL + "/api/files/download/" + filePath.second), filePath.first, progressAction)
+                URL(serverURL + downloadURL + filePath.second), filePath.first, progressAction)
         })
     }
 

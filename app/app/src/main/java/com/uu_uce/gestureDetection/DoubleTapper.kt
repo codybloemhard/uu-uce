@@ -19,7 +19,7 @@ class DoubleTapper(
         gestureDetector?.setOnDoubleTapListener(this)
     }
 
-    override fun getOnTouchEvent(event: MotionEvent?) {
+    override fun getOnTouchEvent(event: MotionEvent) {
         gestureDetector?.onTouchEvent(event)
     }
 

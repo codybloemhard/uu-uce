@@ -1,11 +1,13 @@
 package com.uu_uce
 
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import com.uu_uce.profile.ProfileAchievements
 import com.uu_uce.profile.ProfileBadges
 import com.uu_uce.profile.ProfileStatistics
@@ -16,6 +18,7 @@ class Profile : AppCompatActivity() {
 
     private lateinit var selectedOptionText : TextView
     private lateinit var selectedOptionBar : View
+    private lateinit var sharedPref : SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,9 +26,13 @@ class Profile : AppCompatActivity() {
 
         createTopbar(this, "Profile")
 
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+
         selectedOptionText = badges_button_text
         selectedOptionBar = badges_button_bar
         openFragment(ProfileBadges())
+
+        score_text.text = sharedPref.getInt("com.uu_uce.USER_POINTS", 0).toString()
 
         badges_button.setOnClickListener{
             if(selectedOptionBar != badges_button_bar){

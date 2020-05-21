@@ -12,7 +12,7 @@ open class TouchParent: AppCompatActivity(){
         children.add(child)
     }
 
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
+    override fun onTouchEvent(event: MotionEvent): Boolean {
         children.forEach { c -> c.getOnTouchEvent(event) }
         return super.onTouchEvent(event)
     }

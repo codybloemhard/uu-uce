@@ -1,7 +1,5 @@
 package com.uu_uce.shapefiles
 
-import com.uu_uce.misc.LogType
-import com.uu_uce.misc.Logger
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -33,7 +31,7 @@ class Camera(
     private var y: Double,
     private var zoom: Double,
     private val viewMin: p3,
-    private val viewMax: p3){
+    val viewMax: p3){
 
     private val mx = (viewMin.first + viewMax.first) / 2.0
     private val my = (viewMin.second + viewMax.second) / 2.0
@@ -41,7 +39,7 @@ class Camera(
     private var velo = p2Zero
 
     var maxZoom = 1.0
-    set(value) {minZoom = value/500; field = value}
+        set(value) {minZoom = value/500; field = value}
     var minZoom = 0.01
 
     private var lastWoff = 0.0
@@ -69,10 +67,24 @@ class Camera(
 
     var wAspect = 0.0
 
+    //get matrix for drawing lines
+    fun getScaleTrans(): Pair<FloatArray,FloatArray>{
+        val trans = floatArrayOf(-x.toFloat(), -y.toFloat())
+
+        val w = viewMax.first - viewMin.first
+        val h = viewMax.second - viewMin.second
+        val width = (w * wAspect / 2 * zoom).toFloat()
+        val height = (h / 2 * zoom).toFloat()
+        val scale = floatArrayOf(1f/width, 1f/height)
+        return Pair(scale, trans)
+    }
+
     //retrieve the topleft and bottomright coordinates that are visible in the camera
     fun getViewport(): Pair<p2,p2>{
         //if camera is not initialized properly, return dummy value
-        if (viewMax.first < viewMin.first || viewMax.second < viewMin.second || viewMax.third < viewMin.third) return p2ZeroPair
+        if (viewMax.first < viewMin.first || viewMax.second < viewMin.second || viewMax.third < viewMin.third) {
+            return p2ZeroPair
+        }
 
         val w = viewMax.first - viewMin.first
         val h = viewMax.second - viewMin.second
@@ -107,19 +119,25 @@ class Camera(
 
     //set the x and y to new values, while not going out of bounds
     private fun setPos(newX: Double, newY: Double){
-        if(isBusy()) return
+        if(isBusy() || viewMin.first > viewMax.first || viewMin.second > viewMax.second) return
         val xvalue = newX.coerceIn(viewMin.first,viewMax.first)
         val yvalue = newY.coerceIn(viewMin.second,viewMax.second)
         setXy(xvalue,yvalue)
     }
 
-    fun moveView(dx: Double, dy: Double){
+    fun moveCamera(dx: Double, dy: Double){
         if(isBusy()) return
+        setPos(x + (dx * lastWoff), y + (dy * lastHoff))
+
+        animType = AnimType.NONE
         velo = p2((dx * lastWoff), (dy * lastHoff))
         changed = true
-        animType = AnimType.SLIDE
         decline = p2(velo.first/declineLength,velo.second/declineLength)
-        //setPos(velo.first, velo.second)
+    }
+
+    fun flingCamera(){
+        if(isBusy()) return
+        animType = AnimType.SLIDE
     }
 
     fun getZoom(): Double{
@@ -195,6 +213,7 @@ class Camera(
         zoom = animBegin.third + (animTarget.third - animBegin.third) * t
         if(ct > animStartT + animDuration){
             animType = AnimType.NONE
+            zoom = maxZoom
             return
         }
     }
@@ -239,7 +258,6 @@ class Camera(
             if(decline.second > 0) maxOf(0.0,velo.second - decline.second)
             else minOf(0.0,velo.second - decline.second)
         velo = p2(newXVel,newYVel)
-        Logger.log(LogType.Event, "Camera", "vel: (${velo.first},${velo.second})")
         if(velo == p2Zero) {
             animType = AnimType.NONE
         }

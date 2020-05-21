@@ -120,9 +120,7 @@ class GeoMap : AppCompatActivity() {
         sharedPref = getDefaultSharedPreferences(this)
 
         // Set settings
-        customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
         customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
-        customMap.hardwareAccelerated = sharedPref.getBoolean("com.uu_uce.HARDWARE", false)
 
         customMap.setActivity(this)
 
@@ -145,10 +143,18 @@ class GeoMap : AppCompatActivity() {
         }
 
         // Initialize menu
-        allpins_button.setOnClickListener{customMap.startAllPins()}
-        fieldbook_button.setOnClickListener{customMap.startFieldBook()}
-        settings_button.setOnClickListener{customMap.startSettings()}
-        profile_button.setOnClickListener{customMap.startProfile()}
+        allpins_button.setOnClickListener   { customMap.startAllPins() }
+        fieldbook_button.setOnClickListener { customMap.startFieldBook() }
+        settings_button.setOnClickListener  { customMap.startSettings() }
+        profile_button.setOnClickListener   { customMap.startProfile() }
+        logout_button.setOnClickListener    {
+            with(sharedPref.edit()) {
+                putString("com.uu_uce.USERNAME", "")
+                putString("com.uu_uce.PASSWORD", "")
+                apply()
+            }
+            customMap.startLogin()
+        }
 
         dragBar.clickAction      = {menu.dragButtonTap()}
         dragBar.dragAction       = { dx, dy -> menu.drag(dx,dy)}
@@ -196,14 +202,14 @@ class GeoMap : AppCompatActivity() {
 
     override fun onBackPressed() {
         //move the menu down when it's up, otherwise close the current popup
-        if(menu.dragStatus != DragStatus.Down){
+        if (menu.dragStatus != DragStatus.Down) {
             menu.down()
             return
         }
-        if(customMap.activePopup != null){
+        if (customMap.activePopup != null) {
             customMap.activePopup!!.dismiss()
         }
-        else{
+        else {
             moveTaskToBack(true)
         }
     }
@@ -211,10 +217,7 @@ class GeoMap : AppCompatActivity() {
     override fun onResume() {
         if(needsReload.getValue()) loadMap()
         if(started){
-            super.onResume()
-            customMap.debug = sharedPref.getBoolean("com.uu_uce.DEBUG", false)
             customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
-            customMap.hardwareAccelerated = sharedPref.getBoolean("com.uu_uce.HARDWARE", false)
             customMap.setPins(pinViewModel.allPinData)
             customMap.redrawMap()
         }

@@ -9,14 +9,10 @@ class Zoomer(
     parent: Context,
     var action: (Float) -> Unit)
     : TouchChild, ScaleGestureDetector.SimpleOnScaleGestureListener() {
-    private var scaleGestureDetector: ScaleGestureDetector? = null
+    private var scaleGestureDetector: ScaleGestureDetector = ScaleGestureDetector(parent, this)
 
-    init{
-        scaleGestureDetector = ScaleGestureDetector(parent, this)
-    }
-
-    override fun getOnTouchEvent(event: MotionEvent?) {
-        scaleGestureDetector?.onTouchEvent(event)
+    override fun getOnTouchEvent(event: MotionEvent) {
+        scaleGestureDetector.onTouchEvent(event)
     }
 
     override fun onScaleBegin(detector: ScaleGestureDetector?): Boolean {
@@ -25,7 +21,7 @@ class Zoomer(
     }
 
     override fun onScale(detector: ScaleGestureDetector?): Boolean {
-        val d = scaleGestureDetector?.scaleFactor ?: 0.0f
+        val d = scaleGestureDetector.scaleFactor ?: 0.0f
         if(d == 0.0f)
             return false
         action(d)

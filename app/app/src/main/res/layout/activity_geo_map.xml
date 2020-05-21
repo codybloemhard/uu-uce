@@ -50,7 +50,7 @@
             android:background="@color/Flirtatious"
             android:clickable="true"
             android:focusable="true"
-            android:contentDescription="@string/allpins_open">
+            android:contentDescription="@string/allpins_menuimage_description">
 
             <ImageView
                 android:id="@+id/dragButton"
@@ -246,6 +246,43 @@
                     android:textSize="20sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/settings_image"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/logout_button"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp">
+
+                <ImageView
+                    android:id="@+id/logout_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:adjustViewBounds="false"
+                    android:contentDescription="@string/menu_fieldbook_image_description"
+                    android:cropToPadding="false"
+                    android:scaleType="fitEnd"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/logout_button_text"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_sprite_logout" />
+
+                <TextView
+                    android:id="@+id/logout_button_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:background="#F3F3F3"
+                    android:fontFamily="@font/roboto_bold"
+                    android:text="@string/menu_logout_text"
+                    android:textAllCaps="false"
+                    android:textColor="#767676"
+                    android:textSize="20sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/logout_image"
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
