@@ -395,7 +395,7 @@ class FieldbookEditor: AppCompatActivity() {
             it.makeEditable(currentBlockIndex,layout,rootView,::onLongClick)
             content.add(it)
         }
-        scrollToEnd()
+        scrollToView(currentBlockIndex)
     }
 
     private fun addImage(image: Uri, thumbnail: Uri) {
@@ -414,7 +414,7 @@ class FieldbookEditor: AppCompatActivity() {
             it.makeEditable(currentBlockIndex,layout,rootView,::onLongClick)
         }
         editing = false
-        scrollToEnd()
+        scrollToView(currentBlockIndex)
     }
 
     private fun addVideo(video: Uri, thumbnail: Uri) {
@@ -433,12 +433,13 @@ class FieldbookEditor: AppCompatActivity() {
             it.makeEditable(currentBlockIndex,layout,rootView,::onLongClick)
         }
         editing = false
-        scrollToEnd()
+        scrollToView(currentBlockIndex)
     }
 
     private fun onLongClick(cbi: ContentBlockInterface) : Boolean {
         currentBlockIndex = content.indexOf(cbi)
 
+        // Set options for this block
         val list = mutableListOf<String>().apply {
             if (cbi !is EditTextBlock)
                 add(getString(R.string.editor_edit_block))
@@ -461,6 +462,8 @@ class FieldbookEditor: AppCompatActivity() {
                     cbi.removeContent(layout)
                     content.remove(cbi)
                     latestBlockIndex--
+                    if (currentBlockIndex > 0)
+                        scrollToView(currentBlockIndex-1)
                 }
                 getString(R.string.editor_edit_block)   -> {
                     editing = true
@@ -470,30 +473,30 @@ class FieldbookEditor: AppCompatActivity() {
                     }
                 }
                 getString(R.string.editor_moveup)       -> {
-                    layout.apply {
-                        removeViewAt(currentBlockIndex)
-                        addView(cbi.content, currentBlockIndex - 1)
-                    }
-                    content.apply {
-                        removeAt(currentBlockIndex)
-                        add(currentBlockIndex - 1, cbi)
-                    }
+                    val newIndex = currentBlockIndex - 1
+                    moveView(newIndex, cbi)
                 }
                 getString(R.string.editor_movedown)     -> {
-                        layout.apply {
-                            removeViewAt(currentBlockIndex)
-                            addView(cbi.content, currentBlockIndex + 1)
-                        }
-                        content.apply {
-                            removeAt(currentBlockIndex)
-                            add(currentBlockIndex + 1, cbi)
-                        }
-                    }
+                    val newIndex = currentBlockIndex + 1
+                    moveView(newIndex, cbi)
+                }
                 getString(R.string.editor_cancel_edit)  -> dialogInterface.dismiss()
             }
         }
         dialog.show()
         return true
+    }
+
+    private fun moveView (newIndex: Int, cbi: ContentBlockInterface) {
+        layout.apply {
+            removeViewAt(currentBlockIndex)
+            addView(cbi.content, newIndex)
+        }
+        content.apply {
+            removeAt(currentBlockIndex)
+            add(newIndex, cbi)
+        }
+        scrollToView(newIndex)
     }
 
     private fun imageLocation(): File {
@@ -693,9 +696,9 @@ class FieldbookEditor: AppCompatActivity() {
         }
     }
 
-    private fun scrollToEnd() {
+    private fun scrollToView(index: Int) {
         scrollView.post {
-            scrollView.fullScroll(View.FOCUS_DOWN)
+            scrollView.smoothScrollTo(0,layout.getChildAt(index).top)
         }
     }
 
