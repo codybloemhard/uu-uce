@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/fieldbook_pin_editor"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/BestWhite"
@@ -110,12 +110,12 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_margin="10dp"
+                android:contentDescription="@string/fieldbook_add_video_description"
                 app:layout_constraintBottom_toBottomOf="@+id/video_button_core"
                 app:layout_constraintEnd_toEndOf="@+id/video_button_core"
                 app:layout_constraintStart_toStartOf="@+id/video_button_core"
                 app:layout_constraintTop_toTopOf="@+id/video_button_core"
-                app:srcCompat="@drawable/ic_symbol_video"
-                android:contentDescription="@string/fieldbook_add_video_description" />
+                app:srcCompat="@drawable/ic_symbol_video" />
 
             <TextView
                 android:id="@+id/textView3"
@@ -166,12 +166,12 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_margin="10dp"
+                android:contentDescription="@string/fieldbook_add_text_description"
                 app:layout_constraintBottom_toBottomOf="@+id/text_button_core"
                 app:layout_constraintEnd_toEndOf="@+id/text_button_core"
                 app:layout_constraintStart_toStartOf="@+id/text_button_core"
                 app:layout_constraintTop_toTopOf="@+id/text_button_core"
-                app:srcCompat="@drawable/ic_symbol_text"
-                android:contentDescription="@string/fieldbook_add_text_description" />
+                app:srcCompat="@drawable/ic_symbol_text" />
 
             <TextView
                 android:id="@+id/textView"
@@ -225,13 +225,13 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_margin="10dp"
+                android:contentDescription="@string/fieldbook_add_image_description"
                 android:scaleType="fitCenter"
                 app:layout_constraintBottom_toBottomOf="@+id/image_button_core"
                 app:layout_constraintEnd_toEndOf="@+id/image_button_core"
                 app:layout_constraintStart_toStartOf="@+id/image_button_core"
                 app:layout_constraintTop_toTopOf="@+id/image_button_core"
-                app:srcCompat="@drawable/ic_symbol_image"
-                android:contentDescription="@string/fieldbook_add_image_description" />
+                app:srcCompat="@drawable/ic_symbol_image" />
 
             <TextView
                 android:id="@+id/textView2"

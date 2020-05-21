@@ -58,9 +58,9 @@ class FieldbookTests {
 
         intending(hasAction(Intent.ACTION_PICK)).respondWith(getFileURIResult())
         intending(hasAction(MediaStore.ACTION_IMAGE_CAPTURE))
-            .respondWith(setFile(Uri.parse("file:///data/data/com.uu_uce/files/pin_content/images/test.png")))
+            .respondWith(setFile(Uri.parse("/sdcard/Android/data/com.uu_uce/files/PinContent/Images/test.png")))
         intending(hasAction(MediaStore.ACTION_VIDEO_CAPTURE))
-            .respondWith(setFile(Uri.parse("file:///data/data/com.uu_uce/files/pin_content/videos/zoo.mp4")))
+            .respondWith(setFile(Uri.parse("/sdcard/Android/data/com.uu_uce/files/PinContent/Videos/zoo.mp4")))
     }
 
     @Test
@@ -79,8 +79,7 @@ class FieldbookTests {
             .perform(click())
 
         // Check if popup opened up
-        onView(withId(R.id.add_fieldbook_pin_popup))
-            .inRoot(isPlatformPopup())
+        onView(withId(R.id.fieldbook_pin_editor))
             .check(matches(isDisplayed()))
 
         // Type title
@@ -89,11 +88,10 @@ class FieldbookTests {
 
         // Finish pin
         onView(withId(R.id.add_fieldbook_pin))
-            .inRoot(isPlatformPopup())
             .perform(click())
 
         // Check to see that popup disappeared
-        onView(withId(R.id.add_fieldbook_pin_popup))
+        onView(withId(R.id.fieldbook_pin_editor))
             .check(doesNotExist())
 
         // Check to see that pin was created
@@ -134,11 +132,11 @@ class FieldbookTests {
         )
 
         // Check to see if delete dialog popped up
-        onView(withText("Delete"))
+        onView(withText(intentsTestRule.activity.getString(R.string.delete_popup_title)))
             .check(matches(isDisplayed()))
 
         // Cancel deletion
-        onView(withText("NO"))
+        onView(withText(intentsTestRule.activity.getString(R.string.negative_button_text)))
             .perform(click())
 
         // Check if pin is still there
@@ -153,7 +151,7 @@ class FieldbookTests {
         )
 
         // Confirm deletion
-        onView(withText("YES"))
+        onView(withText(intentsTestRule.activity.getString(R.string.positive_button_text)))
             .perform(click())
 
         // Check if pin has been deleted
@@ -169,32 +167,23 @@ class FieldbookTests {
             .perform(click())
 
         // Check if popup opened up
-        onView(withId(R.id.add_fieldbook_pin_popup))
-            .inRoot(isPlatformPopup())
+        onView(withId(R.id.fieldbook_pin_editor))
             .check(matches(isDisplayed()))
 
         // Add text block
         onView(withId(R.id.add_text_block))
-            .inRoot(isPlatformPopup())
             .perform(click())
 
         // Type text
         onView(withId(R.id.text_field))
-            .inRoot(isPlatformPopup())
             .perform(typeText(testText), closeSoftKeyboard())
-
-        // Close text block
-        onView(withId(R.id.close_text_field))
-            .inRoot(isPlatformPopup())
-            .perform(click())
 
         // Finish pin
         onView(withId(R.id.add_fieldbook_pin))
-            .inRoot(isPlatformPopup())
             .perform(click())
 
         // Check to see that popup disappeared
-        onView(withId(R.id.add_fieldbook_pin_popup))
+        onView(withId(R.id.fieldbook_pin_editor))
             .check(doesNotExist())
 
         // Check to see that pin was created
@@ -235,11 +224,11 @@ class FieldbookTests {
         )
 
         // Check to see if delete dialog popped up
-        onView(withText("Delete"))
+        onView(withText(intentsTestRule.activity.getString(R.string.delete_popup_title)))
             .check(matches(isDisplayed()))
 
         // Cancel deletion
-        onView(withText("NO"))
+        onView(withText(intentsTestRule.activity.getString(R.string.negative_button_text)))
             .perform(click())
 
         // Check if pin is still there
@@ -254,7 +243,7 @@ class FieldbookTests {
         )
 
         // Confirm deletion
-        onView(withText("YES"))
+        onView(withText(intentsTestRule.activity.getString(R.string.positive_button_text)))
             .perform(click())
 
         // Check if pin has been deleted
@@ -269,25 +258,22 @@ class FieldbookTests {
             .perform(click())
 
         // Check if popup opened up
-        onView(withId(R.id.add_fieldbook_pin_popup))
-            .inRoot(isPlatformPopup())
+        onView(withId(R.id.fieldbook_pin_editor))
             .check(matches(isDisplayed()))
 
         // Upload image
         onView(withId(R.id.add_image_block))
-            .inRoot(isPlatformPopup())
             .perform(click())
 
-        onView(withText("Choose from gallery"))
+        onView(withText(intentsTestRule.activity.getString(R.string.editor_imageselection_gallery)))
             .perform(click())
 
         // Finish pin
         onView(withId(R.id.add_fieldbook_pin))
-            .inRoot(isPlatformPopup())
             .perform(click())
 
         // Check to see that popup disappeared
-        onView(withId(R.id.add_fieldbook_pin_popup))
+        onView(withId(R.id.fieldbook_pin_editor))
             .check(doesNotExist())
 
         // Check to see that pin was created
@@ -302,7 +288,7 @@ class FieldbookTests {
         )
 
         // Check to see if pin opened successfully
-        onView(withId(R.id.scrollLayout))
+        onView(withId(R.id.popup_window_view))
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
 
@@ -328,11 +314,11 @@ class FieldbookTests {
         )
 
         // Check to see if delete dialog popped up
-        onView(withText("Delete"))
+        onView(withText(intentsTestRule.activity.getString(R.string.delete_popup_title)))
             .check(matches(isDisplayed()))
 
         // Cancel deletion
-        onView(withText("NO"))
+        onView(withText(intentsTestRule.activity.getString(R.string.negative_button_text)))
             .perform(click())
 
         // Check if pin is still there
@@ -347,7 +333,7 @@ class FieldbookTests {
         )
 
         // Confirm deletion
-        onView(withText("YES"))
+        onView(withText(intentsTestRule.activity.getString(R.string.positive_button_text)))
             .perform(click())
 
         // Check if pin has been deleted
@@ -362,25 +348,22 @@ class FieldbookTests {
             .perform(click())
 
         // Check if popup opened up
-        onView(withId(R.id.add_fieldbook_pin_popup))
-            .inRoot(isPlatformPopup())
+        onView(withId(R.id.fieldbook_pin_editor))
             .check(matches(isDisplayed()))
 
         // Upload image
         onView(withId(R.id.add_image_block))
-            .inRoot(isPlatformPopup())
             .perform(click())
 
-        onView(withText("Take Photo"))
+        onView(withText(intentsTestRule.activity.getString(R.string.editor_imageselection_camera)))
             .perform(click())
 
         // Finish pin
         onView(withId(R.id.add_fieldbook_pin))
-            .inRoot(isPlatformPopup())
             .perform(click())
 
         // Check to see that popup disappeared
-        onView(withId(R.id.add_fieldbook_pin_popup))
+        onView(withId(R.id.fieldbook_pin_editor))
             .check(doesNotExist())
 
         // Check to see that pin was created
@@ -421,11 +404,11 @@ class FieldbookTests {
         )
 
         // Check to see if delete dialog popped up
-        onView(withText("Delete"))
+        onView(withText(intentsTestRule.activity.getString(R.string.delete_popup_title)))
             .check(matches(isDisplayed()))
 
         // Cancel deletion
-        onView(withText("NO"))
+        onView(withText(intentsTestRule.activity.getString(R.string.negative_button_text)))
             .perform(click())
 
         // Check if pin is still there
@@ -440,7 +423,7 @@ class FieldbookTests {
         )
 
         // Confirm deletion
-        onView(withText("YES"))
+        onView(withText(intentsTestRule.activity.getString(R.string.positive_button_text)))
             .perform(click())
 
         // Check if pin has been deleted
@@ -455,25 +438,22 @@ class FieldbookTests {
             .perform(click())
 
         // Check if popup opened up
-        onView(withId(R.id.add_fieldbook_pin_popup))
-            .inRoot(isPlatformPopup())
+        onView(withId(R.id.fieldbook_pin_editor))
             .check(matches(isDisplayed()))
 
         // Upload image
         onView(withId(R.id.add_video_block))
-            .inRoot(isPlatformPopup())
             .perform(click())
 
-        onView(withText("Record Video"))
+        onView(withText(intentsTestRule.activity.getString(R.string.editor_videoselection_camera)))
             .perform(click())
 
         // Finish pin
         onView(withId(R.id.add_fieldbook_pin))
-            .inRoot(isPlatformPopup())
             .perform(click())
 
         // Check to see that popup disappeared
-        onView(withId(R.id.add_fieldbook_pin_popup))
+        onView(withId(R.id.fieldbook_pin_editor))
             .check(doesNotExist())
 
         // Check to see that pin was created
@@ -514,11 +494,11 @@ class FieldbookTests {
         )
 
         // Check to see if delete dialog popped up
-        onView(withText("Delete"))
+        onView(withText(intentsTestRule.activity.getString(R.string.delete_popup_title)))
             .check(matches(isDisplayed()))
 
         // Cancel deletion
-        onView(withText("NO"))
+        onView(withText(intentsTestRule.activity.getString(R.string.negative_button_text)))
             .perform(click())
 
         // Check if pin is still there
@@ -533,7 +513,7 @@ class FieldbookTests {
         )
 
         // Confirm deletion
-        onView(withText("YES"))
+        onView(withText(intentsTestRule.activity.getString(R.string.positive_button_text)))
             .perform(click())
 
         // Check if pin has been deleted

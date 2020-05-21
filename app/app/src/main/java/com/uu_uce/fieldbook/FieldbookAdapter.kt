@@ -161,9 +161,9 @@ class FieldbookAdapter(
             View.OnLongClickListener(
                 fun (_): Boolean {
                     AlertDialog.Builder(activity)
-                        .setTitle("Delete")
-                        .setMessage("Are you sure you want to delete this entry?")
-                        .setPositiveButton("YES") { _: DialogInterface, _: Int ->
+                        .setTitle(activity.getString(R.string.delete_popup_title))
+                        .setMessage(activity.getString(R.string.fieldbook_pindeletion_popup_text))
+                        .setPositiveButton(activity.getString(R.string.positive_button_text)) { _: DialogInterface, _: Int ->
                             viewModel.delete(entry)
                             for (cB in content) {
                                 when (cB) {
@@ -180,7 +180,7 @@ class FieldbookAdapter(
                                 }
                             }
                         }
-                        .setNegativeButton("NO") { _: DialogInterface, _: Int -> }
+                        .setNegativeButton(activity.getString(R.string.negative_button_text)) { _: DialogInterface, _: Int -> }
                         .show()
                     return true
                 }

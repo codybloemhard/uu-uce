@@ -40,7 +40,6 @@ import java.util.*
 class FieldbookEditor: AppCompatActivity() {
 
     companion object {
-        //TODO: add checks on availability of storage et cetera
         lateinit var fieldbookDir : File
 
         const val REQUEST_IMAGE_UPLOAD  = 0
@@ -78,32 +77,10 @@ class FieldbookEditor: AppCompatActivity() {
         if (bundle != null)
             fieldbookIndex = bundle.getInt("fieldbook_index")
 
-        createTopbar(this,"Edit pins")
+        createTopbar(this,getString(R.string.pineditor_topbar_title))
 
         viewModel = this.run {
             ViewModelProvider(this)[FieldbookViewModel::class.java]
-        }
-
-        /**
-         * TODO: used function is deprecated from API 29 and onwards. Can still be used, because android:requestLegacyExternalStorage="true" in the manifest
-         * Eventually switch to the MediaStore API. Doesn't need READ/WRITE permissions anymore -> only to be imported for API 28 and lower
-         */
-        getPermissions(this, listOf(
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE), PHOTOCAMERA_REQUEST
-        )
-
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
-            this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED ||
-            this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-        ) {
-            fieldbookDir =
-                File(
-                    Environment.getExternalStorageDirectory(),
-                    "UU-UCE/Fieldbook"
-                ).also {
-                    it.mkdirs()
-                }
         }
 
         resetVariables()
@@ -181,7 +158,6 @@ class FieldbookEditor: AppCompatActivity() {
                 )
             finish()
         }
-
         // Set statusbar text color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
@@ -200,24 +176,18 @@ class FieldbookEditor: AppCompatActivity() {
     private fun selectImage() {
         resetVariables()
 
-        val options = arrayOf("Choose from gallery", "Take Photo", " Cancel")
+        val options = arrayOf(
+            getString(R.string.editor_imageselection_gallery),
+            getString(R.string.editor_imageselection_camera),
+            getString(R.string.cancel_button))
 
         val dialog = AlertDialog.Builder(this)
-        dialog.setTitle("Upload an image")
+        dialog.setTitle(getString(R.string.editor_imageselection_popup_title))
 
         dialog.setItems(options) { dialogInterface, which ->
 
             when (which) {
                 0 -> { // Choose (picture) from gallery
-                    getPermissions(
-                        this,
-                        listOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                        PHOTOCAMERA_REQUEST
-                    )
-                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || this.checkSelfPermission(
-                            Manifest.permission.READ_EXTERNAL_STORAGE
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
                         startActivityForResult(
                             Intent(
                                 Intent.ACTION_PICK,
@@ -227,17 +197,26 @@ class FieldbookEditor: AppCompatActivity() {
                             REQUEST_IMAGE_UPLOAD
                         )
                     }
-                }
                 1 -> { // Take photo
                     getPermissions(
                         this,
-                        listOf(Manifest.permission.CAMERA),
-                        PHOTOCAMERA_REQUEST
+                        listOf(
+                            Manifest.permission.CAMERA,
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        ),
+                        PHOTOSTORAGE_REQUEST
                     )
-                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M || this.checkSelfPermission(
-                            Manifest.permission.CAMERA
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
+                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+                        (
+                            this.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
+                            this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                            this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                        )) {
+                        fieldbookDir = File(
+                            Environment.getExternalStorageDirectory(),
+                            "UU-UCE/Fieldbook").also { it.mkdirs() }
+
                         startActivityForResult(
                             Intent(
                                 MediaStore.ACTION_IMAGE_CAPTURE
@@ -267,10 +246,13 @@ class FieldbookEditor: AppCompatActivity() {
     private fun selectVideo() {
         resetVariables()
 
-        val options = arrayOf("Choose from gallery", "Record Video", " Cancel")
+        val options = arrayOf(
+            getString(R.string.editor_videoselection_gallery),
+            getString(R.string.editor_videoselection_camera),
+            getString(R.string.cancel_button))
 
         val dialog = AlertDialog.Builder(this)
-        dialog.setTitle("Upload a video")
+        dialog.setTitle(getString(R.string.editor_videoselection_popup_title))
 
         dialog.setItems(options) { dialogInterface, which ->
 
@@ -298,13 +280,22 @@ class FieldbookEditor: AppCompatActivity() {
                 1 -> { // Record video
                     getPermissions(
                         this,
-                        listOf(Manifest.permission.CAMERA),
-                        VIDEOCAMERA_REQUEST
+                        listOf(
+                            Manifest.permission.CAMERA,
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        ),
+                        VIDEOSTORAGE_REQUEST
                     )
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M || this.checkSelfPermission(
-                            Manifest.permission.CAMERA
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
+                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+                        (this.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
+                            this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                            this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED))
+                    {
+                        fieldbookDir = File(
+                            Environment.getExternalStorageDirectory(),
+                            "UU-UCE/Fieldbook").also { it.mkdirs() }
+
                         startActivityForResult(
                             Intent(
                                 MediaStore.ACTION_VIDEO_CAPTURE
@@ -446,33 +437,59 @@ class FieldbookEditor: AppCompatActivity() {
     }
 
     private fun onLongClick(cbi: ContentBlockInterface) : Boolean {
-        val options = when (cbi) {
-            is EditTextBlock -> arrayOf("Delete", "Cancel")
-            else -> arrayOf("Delete", "Edit", "Cancel")
-        }
-
         currentBlockIndex = content.indexOf(cbi)
 
+        val list = mutableListOf<String>().apply {
+            if (cbi !is EditTextBlock)
+                add(getString(R.string.editor_edit_block))
+            add(getString(R.string.editor_delete_block))
+            if (currentBlockIndex > 0)
+                add(getString(R.string.editor_moveup))
+            if (currentBlockIndex < latestBlockIndex - 1)
+                add(getString(R.string.editor_movedown))
+            add(getString(R.string.editor_cancel_edit))
+        }
+
+        val options = list.toTypedArray()
+
         val dialog = AlertDialog.Builder(this)
-        dialog.setTitle("Change content")
+        dialog.setTitle(getString(R.string.editor_edit_popup_title))
 
         dialog.setItems(options) { dialogInterface, which ->
             when(options[which]) {
-                "Delete"    -> {
+                getString(R.string.editor_delete_block) -> {
                     cbi.removeContent(layout)
                     content.remove(cbi)
                     latestBlockIndex--
                 }
-                "Edit"      -> {
+                getString(R.string.editor_edit_block)   -> {
                     editing = true
                     when (cbi) {
                         is ImageContentBlock -> selectImage()
                         is VideoContentBlock -> selectVideo()
                     }
                 }
-                "Move up"   -> TODO()
-                "Move down" -> TODO()
-                "Cancel"    -> dialogInterface.dismiss()
+                getString(R.string.editor_moveup)       -> {
+                    layout.apply {
+                        removeViewAt(currentBlockIndex)
+                        addView(cbi.content, currentBlockIndex - 1)
+                    }
+                    content.apply {
+                        removeAt(currentBlockIndex)
+                        add(currentBlockIndex - 1, cbi)
+                    }
+                }
+                getString(R.string.editor_movedown)     -> {
+                        layout.apply {
+                            removeViewAt(currentBlockIndex)
+                            addView(cbi.content, currentBlockIndex + 1)
+                        }
+                        content.apply {
+                            removeAt(currentBlockIndex)
+                            add(currentBlockIndex + 1, cbi)
+                        }
+                    }
+                getString(R.string.editor_cancel_edit)  -> dialogInterface.dismiss()
             }
         }
         dialog.show()
@@ -524,7 +541,12 @@ class FieldbookEditor: AppCompatActivity() {
 
     private fun makeVideoThumbnail(uri: Uri) : Uri {
         val retriever = MediaMetadataRetriever().apply {
-            setDataSource(this@FieldbookEditor,uri)
+            try{
+                setDataSource(this@FieldbookEditor,uri)
+            }
+            catch(e : java.lang.Exception){
+                return Uri.EMPTY
+            }
         }
 
         return saveThumbnail (
@@ -612,8 +634,12 @@ class FieldbookEditor: AppCompatActivity() {
         grantResults: IntArray
     ) {
         when (requestCode) {
-            PHOTOCAMERA_REQUEST -> {
-                if(grantResults[0] == 0) {
+            PHOTOSTORAGE_REQUEST -> {
+                if(grantResults.all { x -> x == 0 }) {
+                    fieldbookDir = File(
+                        Environment.getExternalStorageDirectory(),
+                        "UU-UCE/Fieldbook").also { it.mkdirs() }
+
                     startActivityForResult(
                         Intent(
                             MediaStore.ACTION_IMAGE_CAPTURE
@@ -634,8 +660,12 @@ class FieldbookEditor: AppCompatActivity() {
                     )
                 }
             }
-            VIDEOCAMERA_REQUEST -> {
-                if(grantResults[0] == 0) {
+            VIDEOSTORAGE_REQUEST -> {
+                if(grantResults.all { x -> x == 0 }) {
+                    fieldbookDir = File(
+                        Environment.getExternalStorageDirectory(),
+                        "UU-UCE/Fieldbook").also { it.mkdirs() }
+
                     startActivityForResult(
                         Intent(
                             MediaStore.ACTION_VIDEO_CAPTURE
@@ -657,18 +687,6 @@ class FieldbookEditor: AppCompatActivity() {
                             )
                         },
                         REQUEST_VIDEO_CAPTURE
-                    )
-                }
-            }
-            EXTERNAL_FILES_REQUEST -> {
-                if(grantResults[0] == 0){
-                    startActivityForResult(
-                        Intent(
-                            Intent.ACTION_PICK,
-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                        )
-                        ,
-                        REQUEST_IMAGE_UPLOAD
                     )
                 }
             }

@@ -26,7 +26,7 @@ class Fieldbook : AppCompatActivity() {
 
         // initiate views and layout
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.fieldbook_bottom_navigation)
-        createTopbar(this, "My Fieldbook")
+        createTopbar(this, getString(R.string.fieldbook_topbar_title))
 
         openFragment(FieldbookHomeFragment.newInstance(window.decorView.rootView))
 
