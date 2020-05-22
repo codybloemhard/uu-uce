@@ -27,16 +27,15 @@ import kotlin.math.min
 // Default settings
 const val defaultPinSize = 60
 var needsRestart = false
+const val mapsName = "maps.zip"
+const val mapsFolderName = "Maps"
+const val contentFolderName = "PinContent"
 
 class Settings : AppCompatActivity() {
     // private variables
     private val minPinSize = 10
     private val maxPinSize = 200
 
-    // TODO: Remove temporary hardcoded map information
-    private val mapsName = "maps.zip"
-    private val mapsFolderName = "Maps"
-    private val contentFolderName = "PinContent"
     private lateinit var maps : List<String>
     private lateinit var mapsDir : String
     private lateinit var contentDir : String
@@ -242,7 +241,7 @@ class Settings : AppCompatActivity() {
                 val pathList = mutableListOf<String>()
 
                 for (data in list){
-                    for (block in PinContent(data, this).contentBlocks){
+                    for (block in PinContent(data, this, false).contentBlocks){
                         for (path in block.getFilePath()){
                             pathList.add(path)
                         }

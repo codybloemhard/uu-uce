@@ -21,7 +21,6 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mikhaellopez.circleview.CircleView
 import com.uu_uce.R
-import com.uu_uce.pins.PinContent
 
 class PinListAdapter internal constructor(
     private val activity: Activity
@@ -30,7 +29,6 @@ class PinListAdapter internal constructor(
     private val resource = activity.resources
     private val inflater: LayoutInflater = LayoutInflater.from(activity)
     private var pinDataList = emptyList<PinData>()
-    private var pinCanComplete = emptyList<Boolean>()
     private val pinViewModel: PinViewModel = ViewModelProvider(activity as ViewModelStoreOwner).get(PinViewModel::class.java)
     var activePopup: PopupWindow? = null
     private lateinit var sharedPref : SharedPreferences
@@ -57,7 +55,7 @@ class PinListAdapter internal constructor(
         holder.pinCoord.text = current.location
 
         // Set completed marker
-        if(pinCanComplete[position] && current.status == 2){
+        if(current.status == 2){
             holder.pinStatus.visibility = View.VISIBLE
         }
         else{
@@ -107,13 +105,11 @@ class PinListAdapter internal constructor(
 
     internal fun setPins(newPinData: List<PinData>, viewModel: PinViewModel) {
         val tempPins : MutableList<PinData> = mutableListOf()
-        val tempCanComplete : MutableList<Boolean> = mutableListOf()
         // Update pins from new data
         for(newPin in newPinData) {
             if(newPin.status > 0){
                 // Pin is not unlocked yet
                 tempPins.add(newPin)
-                tempCanComplete.add(PinContent(newPin.content,activity).canCompletePin)
             }
             else if (newPin.status == -1) {
                 // Pin needs recalculation
@@ -124,7 +120,6 @@ class PinListAdapter internal constructor(
             }
         }
         pinDataList = tempPins
-        pinCanComplete = tempCanComplete
         notifyDataSetChanged()
     }
 

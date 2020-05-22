@@ -33,7 +33,7 @@ class PinConversion(val activity: Activity){
     private val resource = activity.resources
 
     private fun stringToPinContent(content: String): PinContent {
-        return PinContent(content, activity)
+        return PinContent(content, activity, false)
     }
 
     private fun difficultyToBackground(difficulty: Int): Bitmap {

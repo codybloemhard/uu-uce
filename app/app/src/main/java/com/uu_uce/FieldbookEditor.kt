@@ -123,7 +123,7 @@ class FieldbookEditor: AppCompatActivity() {
         if (fieldbookIndex >= 0) {
             viewModel.getContent(fieldbookIndex) {
                 title.setText(it.title)
-                content = PinContent(it.content,this).contentBlocks
+                content = PinContent(it.content,this, true).contentBlocks
                 for (c in content)
                     content[content.indexOf(c)] =
                         c.makeEditable(latestBlockIndex++,layout,rootView,::onLongClick)
