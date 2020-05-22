@@ -45,6 +45,7 @@ private fun parsePin(reader: JsonReader) : PinData? {
             "pred_id"       -> predecessorIds   = reader.nextString()
             "succ_id"       -> followIds        = reader.nextString()
             "content"       -> content          = reader.nextString()
+            else            -> reader.nextString() 
         }
     }
     reader.endObject()

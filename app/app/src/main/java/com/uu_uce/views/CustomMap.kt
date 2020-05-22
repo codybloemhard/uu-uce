@@ -436,7 +436,7 @@ class CustomMap : ViewTouchParent {
     }
 
     //open the all pins activity
-    fun startAllPins(){
+    fun startAllPins() {
         val i = Intent(context, AllPins::class.java)
         startActivity(context, i, null)
     }

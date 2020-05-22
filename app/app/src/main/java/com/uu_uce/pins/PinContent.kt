@@ -106,7 +106,7 @@ class PinContent(
                     title = reader.nextString()
                 }
                 "thumbnail" -> {
-                    thumbnailURI = thumbnailURI.append(reader.nextString())
+                    thumbnailURI.append(reader.nextString())
                 }
                 "mc_correct_option" -> {
                     mcCorrectOptions.add(reader.nextString())

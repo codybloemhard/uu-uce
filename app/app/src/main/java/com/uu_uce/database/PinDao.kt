@@ -1,17 +1,17 @@
 package com.uu_uce.database
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Transaction
+import androidx.room.*
 import com.uu_uce.allpins.PinData
 
 @Dao
 interface PinDao {
 
-    @Query("SELECT * from pins ORDER BY location DESC")
-    fun getAllPins() : LiveData<List<PinData>>
+    @Query("SELECT * from pins")
+    fun getAllLivePins() : LiveData<List<PinData>>
+
+    @Query("SELECT * from pins")
+    suspend fun getAllPins() : List<PinData>
 
     @Query("SELECT content from pins")
     suspend fun getContent() : List<String>
@@ -34,11 +34,17 @@ interface PinDao {
     @Insert
     suspend fun insert(pin: PinData)
 
+    @Update
+    suspend fun updatePins(pins : List<PinData>)
+
     @Insert
     suspend fun insertAll(pins: List<PinData>)
 
     @Query("DELETE from pins")
     suspend fun deleteAllPins()
+
+    @Query("DELETE from pins WHERE pinId IN (:pinIds)")
+    suspend fun deletePins(pinIds : List<String>)
 
     @Transaction
     suspend fun updateData(pins: List<PinData>) {

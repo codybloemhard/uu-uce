@@ -45,6 +45,10 @@ class PinViewModel(application: Application) : AndroidViewModel(application) {
         pinRepository.getContent(list, action)
     }
 
+    fun updatePins(pinList : List<PinData>) = viewModelScope.launch {
+        pinRepository.updatePins(pinList)
+    }
+
     @TestOnly
     fun setPins(newData : List<PinData>) = viewModelScope.launch {
         pinRepository.setPins(newData)
