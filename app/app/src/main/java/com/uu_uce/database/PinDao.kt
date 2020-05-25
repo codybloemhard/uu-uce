@@ -3,6 +3,7 @@ package com.uu_uce.database
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.uu_uce.allpins.PinData
+import com.uu_uce.views.pinsUpdated
 
 @Dao
 interface PinDao {
@@ -50,5 +51,6 @@ interface PinDao {
     suspend fun updateData(pins: List<PinData>) {
         deleteAllPins()
         insertAll(pins)
+        pinsUpdated.setValue(true)
     }
 }

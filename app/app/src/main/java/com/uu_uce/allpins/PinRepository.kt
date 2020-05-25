@@ -56,11 +56,11 @@ class PinRepository(private val pinDao : PinDao){
     }
 
     // Updates old pins to match the new data and removes pins that are not in the new data
-    suspend fun updatePins(newPinData : List<PinData>){
+    suspend fun updatePins(newPinData : List<PinData>, onCompleteAction : (() -> Unit)){
         fun pinNeedsUpdate(oldPin : PinData, newPin : PinData) : Boolean{
             if(oldPin.title != newPin.title) return true
             if(oldPin.type != newPin.type) return true
-            if(oldPin.status > newPin.status) return true
+            if(oldPin.status < newPin.status) return true
             if(oldPin.difficulty != newPin.difficulty) return true
             if(oldPin.location != newPin.location) return true
             if(oldPin.predecessorIds != newPin.predecessorIds) return true
@@ -80,6 +80,7 @@ class PinRepository(private val pinDao : PinDao){
 
         val pinsMap = mutableMapOf<String, PinData>()
         val pinsDeleted = mutableMapOf<String, Boolean>()
+        val newPins = mutableListOf<PinData>()
         for (pin in pins) {
             // Insert old pins
             pinsMap[pin.pinId] = pin
@@ -102,11 +103,17 @@ class PinRepository(private val pinDao : PinDao){
             }
             else {
                 // Insert new pin
-                pinsMap[newPin.pinId] = newPin
+                newPins.add(newPin)
             }
         }
         pinDao.deletePins(pinsDeleted.toList().filter{ (_,v) -> v }.map{ (k,_) -> k })
         pinDao.updatePins(pinsMap.toList().map{ (_,v) -> v })
+        pinDao.insertAll(newPins)
+        onCompleteAction()
+    }
+
+    suspend fun reloadPins(action : ((List<PinData>) -> (Unit))){
+        action(pinDao.getAllPins())
     }
 
     @TestOnly

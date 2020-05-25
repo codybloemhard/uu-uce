@@ -112,15 +112,15 @@ class PinConversion(val activity: Activity){
 
     fun pinDataToPin(pinData : PinData, viewModel : PinViewModel): Pin {
         val pin = Pin(
-            pinData.pinId                           ,
-            stringToUtm(pinData.location)           , //location
-            pinData.title                           ,
-            stringToPinContent(pinData.content)     ,
+            pinData.pinId,
+            stringToUtm(pinData.location), //location
+            pinData.title,
+            stringToPinContent(pinData.content),
             difficultyToBackground(pinData.difficulty),
-            typeToIcon(pinData.type)                ,
-            pinData.status                          ,
-            stringToIds(pinData.predecessorIds)     ,
-            stringToIds(pinData.followIds)          ,
+            typeToIcon(pinData.type),
+            pinData.status,
+            stringToIds(pinData.predecessorIds),
+            stringToIds(pinData.followIds),
             viewModel
         )
         pin.getContent().parent = pin

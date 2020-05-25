@@ -20,6 +20,7 @@ import com.uu_uce.services.unpackZip
 import com.uu_uce.services.updateFiles
 import com.uu_uce.services.writableSize
 import com.uu_uce.ui.createTopbar
+import com.uu_uce.views.pinsUpdated
 import kotlinx.android.synthetic.main.activity_settings.*
 import java.io.File
 import kotlin.math.max
@@ -297,7 +298,15 @@ class Settings : AppCompatActivity() {
         }
 
         databasetest.setOnClickListener{
-            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + "database.json")))
+            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + "database.json"))){
+                pinsUpdated.setValue(true)
+            }
+        }
+
+        databasetest2.setOnClickListener{
+            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + "database (1).json"))){
+                pinsUpdated.setValue(true)
+            }
         }
     }
 }

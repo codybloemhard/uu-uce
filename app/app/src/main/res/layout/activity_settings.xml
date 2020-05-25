@@ -276,7 +276,13 @@
                 android:id="@+id/databasetest"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Button" />
+                android:text="Test1" />
+
+            <Button
+                android:id="@+id/databasetest2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Test2" />
 
         </LinearLayout>
     </ScrollView>

@@ -340,12 +340,7 @@ class VideoContentBlock(
         // Add thumbnail and button
         content.addView(playButton)
         content.setOnClickListener{
-            updateFiles(
-                listOf(videoURI.toString()),
-                activity,
-                { openVideoView(videoURI, title) },
-                {}
-            )
+            openVideoView(videoURI, title)
         }
         layout.addView(content,blockId)
     }
