@@ -288,7 +288,7 @@ class AllPinsTests {
         // Reopen popup
         onView(withId(R.id.reopen_button))
             .inRoot(isPlatformPopup())
-            .perform(click())
+            .perform(scrollTo(), click())
 
         // Check if pin is completed
         onView(withId(R.id.completed_marker))
@@ -337,7 +337,7 @@ class AllPinsTests {
         // Reopen popup
         onView(withId(R.id.reopen_button))
             .inRoot(isPlatformPopup())
-            .perform(click())
+            .perform(scrollTo(), click())
 
         // Check if pin is completed
         onView(withId(R.id.completed_marker))
