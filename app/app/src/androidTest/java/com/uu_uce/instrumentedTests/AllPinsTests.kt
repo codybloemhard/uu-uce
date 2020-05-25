@@ -503,7 +503,7 @@ class AllPinsTests {
                 isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),
                 withId(R.id.allpins_recyclerview_item_title)
             )
-        ).check(matches(withText("D")))
+        ).check(matches(withText("C")))
 
         // Open sorting popup
         onView(withId(R.id.fab))
