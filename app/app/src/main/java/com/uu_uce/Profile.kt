@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.uu_uce.profile.ProfileAchievements
@@ -27,6 +28,8 @@ class Profile : AppCompatActivity() {
         createTopbar(this, "Profile")
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+
+        user_name_text.text = sharedPref.getString("com.uu_uce.USERNAME", getString(R.string.profile_user_name))
 
         selectedOptionText = badges_button_text
         selectedOptionBar = badges_button_bar
