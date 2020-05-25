@@ -120,6 +120,7 @@ class PolygonDrawInfo(nrVertices: Int, nrIndices: Int): DrawInfo(){
         indexOffset += verts.size
         for ((x,y,_) in verts) {
             addVertex(x.toFloat())
+
             addVertex(y.toFloat())
         }
     }
@@ -163,6 +164,7 @@ class PolygonDrawInfo(nrVertices: Int, nrIndices: Int): DrawInfo(){
 
         GLES20.glDisableVertexAttribArray(positionHandle)
         GLES20.glDisableVertexAttribArray(colorHandle)
+        //GLES20.glDisableVertexAttribArray(stripeHandle)
     }
 
     override fun finalize() {
@@ -204,14 +206,13 @@ class PolygonDrawInfo(nrVertices: Int, nrIndices: Int): DrawInfo(){
 }
 
 //generic shape
-abstract class ShapeZ(){
+abstract class ShapeZ(val style: Style){
     abstract fun initDrawInfo(drawInfo: DrawInfo)
     abstract val nrPoints: Int
-    var style: Style = Style(false, floatArrayOf(0f,0f,0f,1f))
 }
 
 //shape consisting of just lines on the same height
-class HeightShapeZ(private var points: List<p2>): ShapeZ() {
+class HeightShapeZ(private var points: List<p2>, style: Style): ShapeZ(style) {
     override val nrPoints = points.size
 
     override fun initDrawInfo(
@@ -231,7 +232,7 @@ class HeightShapeZ(private var points: List<p2>): ShapeZ() {
 }
 
 //shape consisting of polygons that need to be colorized
-class PolygonZ(private var vertices: List<p3>, var indices: MutableList<Short>): ShapeZ(){
+class PolygonZ(private var vertices: List<p3>, var indices: MutableList<Short>, style: Style): ShapeZ(style){
     override val nrPoints: Int = vertices.size
 
     override fun initDrawInfo(

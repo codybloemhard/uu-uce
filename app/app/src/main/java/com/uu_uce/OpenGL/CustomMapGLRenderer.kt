@@ -44,15 +44,6 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
                 "  gl_FragColor = vec4(vColor,1.0);\n" +
                 "}\n"
 
-    private val locVertexShaderCode =
-                "uniform vec2 trans;\n" +
-                "uniform vec2 scale;\n" +
-                "uniform vec2 locScale;\n" +
-                "attribute vec4 vPosition;\n" +
-                "void main() {\n" +
-                "    gl_Position = vec4(trans.x * scale.x + vPosition.x*locScale.x, trans.y * scale.y + vPosition.y*locScale.y, 0.0, 1.0);\n" +
-                "}\n"
-
     private val pinVertexShaderCode =
                 "attribute vec2 a_TexCoordinate;\n" +
                 "varying vec2 v_TexCoordinate;\n" +
@@ -72,6 +63,15 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
                 "varying vec2 v_TexCoordinate;\n" +
                 "void main() {\n" +
                 "    gl_FragColor = (vColor * texture2D(u_Texture, v_TexCoordinate));\n" +
+                "}\n"
+
+    private val locVertexShaderCode =
+                "uniform vec2 trans;\n" +
+                "uniform vec2 scale;\n" +
+                "uniform vec2 locScale;\n" +
+                "attribute vec4 vPosition;\n" +
+                "void main() {\n" +
+                "    gl_Position = vec4(trans.x * scale.x + vPosition.x*locScale.x, trans.y * scale.y + vPosition.y*locScale.y, 0.0, 1.0);\n" +
                 "}\n"
 
     private var lineProgram: Int = 0

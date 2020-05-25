@@ -4,6 +4,7 @@ import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import java.io.File
 import java.io.FileInputStream
+import kotlin.random.Random
 
 /*
 a way of getting chunks, possibly from storage or a server
@@ -131,7 +132,9 @@ class HeightLineReader(
                 p2(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff)
             }
 
-            HeightShapeZ(points)
+            val style = Style(false, floatArrayOf(0.0f,0.0f,0.0f))
+
+            HeightShapeZ(points, style)
         }
 
         val time1 = System.currentTimeMillis() - time
@@ -171,19 +174,14 @@ class PolygonReader(
             val indices: List<Short> = List(nrIndices.toInt()) {
                 reader.readUShort().toShort()
             }
-            PolygonZ(vertices, indices.toMutableList())
-        }
+            val style  =
+                if(hasStyles) {
+                    val styleIndex = reader.readULong().toInt()
+                    styles[styleIndex]
+                }
+                else Style(false, floatArrayOf(0.2f,0.2f,0.8f))
 
-        if(hasStyles) {
-            val nrStyles = reader.readULong()
-            for (i in 0 until nrStyles.toInt()) {
-                shapes[i].style = styles[reader.readUInt().toInt()]
-            }
-        }
-        else{
-            for (i in 0 until nrShapes.toInt()) {
-                shapes[i].style = Style(false, floatArrayOf(0.2f,0.2f,0.8f,1.0f))
-            }
+            PolygonZ(vertices, indices.toMutableList(), style)
         }
 
         return Chunk(shapes, bmin, bmax, LayerType.Water)

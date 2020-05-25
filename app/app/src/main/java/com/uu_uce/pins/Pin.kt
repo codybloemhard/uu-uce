@@ -57,7 +57,7 @@ class Pin(
     private lateinit var indexBuffer: ShortBuffer
     private lateinit var cubeCoordsBuffer: FloatBuffer
 
-    var spriteCoords = floatArrayOf(
+    private var spriteCoords = floatArrayOf(
         - 0.5f, + 1.0f,
         - 0.5f, - 0.0f,
         + 0.5f, - 0.0f,
@@ -230,17 +230,15 @@ class Pin(
         val colorHandle = GLES20.glGetUniformLocation(program, "vColor")
         GLES20.glUniform4fv(colorHandle, 1, color, 0)
 
-        val textureUniformHandle = GLES20.glGetAttribLocation(program, "u_Texture")
         val textureCoordinateHandle = GLES20.glGetAttribLocation(program, "a_TexCoordinate")
+        GLES20.glVertexAttribPointer(textureCoordinateHandle, 2, GLES20.GL_FLOAT, false, 0, cubeCoordsBuffer)
+        GLES20.glEnableVertexAttribArray(textureCoordinateHandle)
 
+        val textureUniformHandle = GLES20.glGetAttribLocation(program, "u_Texture")
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
-
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, backgroundHandle)
         GLES20.glUniform1i(textureUniformHandle, 0)
 
-        cubeCoordsBuffer.position(0)
-        GLES20.glVertexAttribPointer(textureCoordinateHandle, 2, GLES20.GL_FLOAT, false, 0, cubeCoordsBuffer)
-        GLES20.glEnableVertexAttribArray(textureCoordinateHandle)
 
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, drawOrder.size, GLES20.GL_UNSIGNED_SHORT, indexBuffer)
 

@@ -253,7 +253,8 @@ class GeoMap : AppCompatActivity() {
 
         val mydir = File(getExternalFilesDir(null)?.path + "/Maps/")
 
-        readStyles(mydir)
+        try{readStyles(mydir)}
+        catch(e: Exception){Logger.error("GeoMap", "no style file available: "+ e.message)}
         try {
             val heightlines = File(mydir, "Heightlines")
             customMap.addLayer(
@@ -267,19 +268,19 @@ class GeoMap : AppCompatActivity() {
         }catch(e: Exception){
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
-        try {
+        //try {
             val polygons = File(mydir, "Polygons")
             customMap.addLayer(
                 LayerType.Water,
-                PolygonReader(polygons, false, styles),
+                PolygonReader(polygons, true, styles),
                 toggle_layer_layout,
                 size,
                 false
             )
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
-        }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
-        }
+        //}catch(e: Exception){
+        //    Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
+        //}
 
         //create camera based on layers
         customMap.initializeCamera()
@@ -301,9 +302,9 @@ class GeoMap : AppCompatActivity() {
         val nrStyles = reader.readULong()
         styles = List(nrStyles.toInt()) {
             val outline = reader.readUByte()
-            val r = reader.readUByte()
-            val g = reader.readUByte()
             val b = reader.readUByte()
+            val g = reader.readUByte()
+            val r = reader.readUByte()
 
             Style(outline.toInt() == 1, floatArrayOf(
                 r.toFloat()/255,
