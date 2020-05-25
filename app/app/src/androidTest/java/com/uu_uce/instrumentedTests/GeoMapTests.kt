@@ -56,6 +56,7 @@ class GeoMapTests {
                 "A",
                 "[{\"tag\":\"TEXT\", \"text\":\"test\"}]",
                 1,
+                1,
                 "-1",
                 "-1"
             )
@@ -68,6 +69,7 @@ class GeoMapTests {
                 "IMAGE",
                 "B",
                 "[{\"tag\":\"IMAGE\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/images/test.png\"}]",
+                1,
                 1,
                 "-1",
                 "-1"
@@ -82,6 +84,7 @@ class GeoMapTests {
                 "C",
                 "[{\"tag\":\"VIDEO\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/videos/zoo.mp4\", \"thumbnail\":\"file:///data/data/com.uu_uce/files/pin_content/videos/thumbnails/zoothumbnail.png\", \"title\":\"zoo video\"}]",
                 1,
+                1,
                 "-1",
                 "-1"
             )
@@ -94,6 +97,7 @@ class GeoMapTests {
                 "MCQUIZ",
                 "D",
                 "[{\"tag\":\"TEXT\", \"text\":\"Press right or also right\"}, {\"tag\":\"MCQUIZ\", \"mc_correct_option\" : \"Right\", \"mc_incorrect_option\" : \"Wrong\" , \"mc_correct_option\" : \"Also right\", \"mc_incorrect_option\" : \"Also wrong\", \"reward\" : 50}]",
+                1,
                 1,
                 "-1",
                 "-1"

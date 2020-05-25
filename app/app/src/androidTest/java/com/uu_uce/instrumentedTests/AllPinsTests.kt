@@ -56,6 +56,7 @@ class AllPinsTests {
                 "A",
                 "[{\"tag\":\"TEXT\", \"text\":\"test\"}]",
                 1,
+                1,
                 "-1",
                 "-1"
             )
@@ -68,6 +69,7 @@ class AllPinsTests {
                 "IMAGE",
                 "B",
                 "[{\"tag\":\"IMAGE\", \"file_path\":\"/sdcard/Android/data/com.uu_uce/files/PinContent/Images/test.png\"}]",
+                1,
                 1,
                 "-1",
                 "-1"
@@ -82,6 +84,7 @@ class AllPinsTests {
                 "C",
                 "[{\"tag\":\"VIDEO\", \"file_path\":\"/sdcard/Android/data/com.uu_uce/files/PinContent/Videos/zoo.mp4\", \"thumbnail\":\"/sdcard/Android/data/com.uu_uce/files/PinContent/Videos/Thumbnails/zoothumbnail.png\", \"title\":\"zoo video\"}]",
                 1,
+                1,
                 "-1",
                 "-1"
             )
@@ -94,6 +97,7 @@ class AllPinsTests {
                 "MCQUIZ",
                 "D",
                 "[{\"tag\":\"TEXT\", \"text\":\"Press right or also right\"}, {\"tag\":\"MCQUIZ\", \"mc_correct_option\" : \"Right\", \"mc_incorrect_option\" : \"Wrong\" , \"mc_correct_option\" : \"Also right\", \"mc_incorrect_option\" : \"Also wrong\", \"reward\" : 50}]",
+                1,
                 1,
                 "-1",
                 "-1"
