@@ -1,7 +1,5 @@
 package com.uu_uce.shapefiles
 
-import android.graphics.Paint
-
 /*
 a layer to be displayed in the map, consisting of multiple shapes
 chunkGetter: means of getting chunks associated with this layer

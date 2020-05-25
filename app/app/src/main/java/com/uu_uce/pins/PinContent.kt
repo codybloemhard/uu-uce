@@ -19,10 +19,8 @@ import com.uu_uce.VideoViewer
 import com.uu_uce.contentFolderName
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.services.updateFiles
 import java.io.File
 import java.io.StringReader
-import java.lang.StringBuilder
 
 class PinContent(
     private val contentString: String,

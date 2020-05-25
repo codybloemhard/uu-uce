@@ -1,7 +1,6 @@
 package com.uu_uce
 
 import android.app.Activity
-import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.BlendMode
 import android.graphics.BlendModeColorFilter
@@ -17,8 +16,6 @@ import android.widget.VideoView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.preference.PreferenceManager
-import kotlinx.android.synthetic.main.activity_image_viewer.*
-import kotlinx.android.synthetic.main.activity_login_screen.view.*
 
 //activity in which videos from video pins are shown
 class VideoViewer : Activity() {

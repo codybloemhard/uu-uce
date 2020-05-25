@@ -8,10 +8,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.uu_uce.allpins.PinData
 import com.uu_uce.fieldbook.FieldbookEntry
-import com.uu_uce.views.pinsUpdated
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @Database(entities = [PinData::class, FieldbookEntry::class], version = 4, exportSchema = false)
 abstract class UceRoomDatabase : RoomDatabase() {

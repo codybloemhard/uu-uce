@@ -1,23 +1,20 @@
 package com.uu_uce
 
-import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.BlendMode
 import android.graphics.BlendModeColorFilter
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.preference.PreferenceManager
 import com.github.chrisbanes.photoview.PhotoView
 import com.github.chrisbanes.photoview.PhotoViewAttacher
-import kotlinx.android.synthetic.main.activity_image_viewer.*
-import kotlinx.android.synthetic.main.activity_login_screen.view.*
 
 class ImageViewer : AppCompatActivity() {
 

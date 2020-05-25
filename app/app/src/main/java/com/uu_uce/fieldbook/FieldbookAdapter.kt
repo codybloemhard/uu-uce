@@ -2,18 +2,15 @@ package com.uu_uce.fieldbook
 
 import android.app.Activity
 import android.content.DialogInterface
-import android.content.res.Resources
-import android.content.res.TypedArray
 import android.content.Intent
-import android.graphics.Color.rgb
 import android.net.Uri
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.res.ResourcesCompat
 import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.net.toFile
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
