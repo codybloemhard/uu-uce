@@ -13,7 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(entities = [PinData::class, FieldbookEntry::class], version = 3, exportSchema = false)
+@Database(entities = [PinData::class, FieldbookEntry::class], version = 4, exportSchema = false)
 abstract class UceRoomDatabase : RoomDatabase() {
 
     abstract fun pinDao(): PinDao
@@ -31,7 +31,8 @@ abstract class UceRoomDatabase : RoomDatabase() {
                     UceRoomDatabase::class.java,
                     "uce_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance
@@ -122,6 +123,12 @@ abstract class UceRoomDatabase : RoomDatabase() {
                 database.execSQL("DROP TABLE pins")
                 // Change the table name to the correct one
                 database.execSQL("ALTER TABLE pins_new RENAME TO pins")
+            }
+        }
+
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL( "ALTER TABLE pins ADD COLUMN startStatus INTEGER NOT NULL DEFAULT 0")
             }
         }
     }

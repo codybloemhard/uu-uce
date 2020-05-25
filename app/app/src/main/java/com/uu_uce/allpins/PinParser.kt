@@ -55,6 +55,6 @@ private fun parsePin(reader: JsonReader) : PinData? {
         null
     }
     else{
-        PinData(pinId, location, difficulty, type, title, content, status, predecessorIds, followIds)
+        PinData(pinId, location, difficulty, type, title, content, status, status, predecessorIds, followIds)
     }
 }

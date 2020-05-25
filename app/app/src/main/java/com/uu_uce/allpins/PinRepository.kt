@@ -61,6 +61,7 @@ class PinRepository(private val pinDao : PinDao){
             if(oldPin.title != newPin.title) return true
             if(oldPin.type != newPin.type) return true
             if(oldPin.status < newPin.status) return true
+            if(oldPin.startStatus != newPin.startStatus) return true
             if(oldPin.difficulty != newPin.difficulty) return true
             if(oldPin.location != newPin.location) return true
             if(oldPin.predecessorIds != newPin.predecessorIds) return true
@@ -93,9 +94,15 @@ class PinRepository(private val pinDao : PinDao){
                 pinsDeleted[newPin.pinId] = false
 
                 if(pinNeedsUpdate(oldPin!!, newPin)){
-                    val oldStatus = oldPin.status
+                    val oldStatus = if(oldPin.startStatus == oldPin.status){
+                        newPin.startStatus
+                    }
+                    else{
+                        max(oldPin.status, newPin.status)
+                    }
+
                     pinsMap[newPin.pinId] = newPin
-                    pinsMap[newPin.pinId]!!.status = max(oldStatus, newPin.status)
+                    pinsMap[newPin.pinId]!!.status = oldStatus
                 }
                 else{
                     pinsMap.remove(newPin.pinId)

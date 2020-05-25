@@ -342,6 +342,7 @@ class CustomMap : ViewTouchParent {
                         pinStatuses[newPin.id] = pin.status
                     }
                     newPin.resize(pinSize)
+                    renderer.pinsChanged = true
                 }
                 pinStatuses[pin.pinId] == 0 -> {
                     // Pin was present and locked (status = 0)

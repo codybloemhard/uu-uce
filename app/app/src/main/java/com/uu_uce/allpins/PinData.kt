@@ -13,6 +13,7 @@ open class PinData(
     var title          : String,
     var content        : String,
     var status         : Int,
+    var startStatus    : Int,
     var predecessorIds : String,
     var followIds      : String
 )
