@@ -2,8 +2,10 @@ package com.uu_uce
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -13,6 +15,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.text.InputType
 import android.view.KeyEvent
@@ -201,14 +204,32 @@ class FieldbookEditor: AppCompatActivity() {
 
             when (which) {
                 0 -> { // Choose (picture) from gallery
-                        startActivityForResult(
-                            Intent(
-                                Intent.ACTION_PICK,
+                        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+                            (
+                                    this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                                    this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                            )
+                        ) {
+                            val intent = Intent(
+                                Intent.ACTION_GET_CONTENT,
                                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI
                             )
-                            ,
-                            REQUEST_IMAGE_UPLOAD
-                        )
+                            intent.type = "image/*"
+                            startActivityForResult(
+                                intent,
+                                REQUEST_IMAGE_UPLOAD
+                            )
+                        }
+                        else{
+                            getPermissions(
+                                this,
+                                listOf(
+                                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                                ),
+                                EXTERNAL_PHOTO_REQUEST
+                            )
+                        }
                     }
                 1 -> { // Take photo
                     getPermissions(
@@ -270,26 +291,35 @@ class FieldbookEditor: AppCompatActivity() {
         dialog.setItems(options) { dialogInterface, which ->
 
             when (which) {
-                /*0 -> { // Choose (video) from gallery
-                    getPermissions(
-                        fragmentActivity,
-                        listOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                        CAMERA_REQUEST
-                    )
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M || fragmentActivity.checkSelfPermission(
-                            Manifest.permission.READ_EXTERNAL_STORAGE
-                        ) == PackageManager.PERMISSION_GRANTED
+                0 -> { // Choose (video) from gallery
+                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+                        (
+                                this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                                this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                        )
                     ) {
+                        val intent = Intent(
+                            Intent.ACTION_GET_CONTENT,
+                            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                        )
+                        intent.type = "video/*"
                         startActivityForResult(
-                            Intent(
-                                Intent.ACTION_PICK,
-                                MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-                            ),
+                            intent,
                             REQUEST_VIDEO_UPLOAD
                         )
                     }
+                    else{
+                        getPermissions(
+                            this,
+                            listOf(
+                                Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            ),
+                            EXTERNAL_VIDEO_REQUEST
+                        )
+                    }
                 }
-                 */
+
                 1 -> { // Record video
                     getPermissions(
                         this,
@@ -351,21 +381,20 @@ class FieldbookEditor: AppCompatActivity() {
             when (requestCode) {
                 REQUEST_IMAGE_UPLOAD -> {
                     if (intent != null) {
-                        val uri = intent.data
-                        if (uri != null) {
-                            val cr = contentResolver
-                            cr.query(uri, null, null, null, null)?.use {
-                                val nameIndex =
-                                    it.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME)
-                                it.moveToFirst()
-                                currentName = File(it.getString(nameIndex)).nameWithoutExtension
-                            }
-                            currentUri = uri
-                            addImage(
-                                image = currentUri,
-                                thumbnail = makeImageThumbnail(currentUri)
-                            )
+                        val uri =  intent.data
+                        val path = getImagePathFromURI(this, uri)
+                        val cr = contentResolver
+                        cr.query(path, null, null, null, null)?.use {
+                            val nameIndex =
+                                it.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME)
+                            it.moveToFirst()
+                            currentName = File(it.getString(nameIndex)).nameWithoutExtension
                         }
+                        currentUri = path
+                        addImage(
+                            image = currentUri,
+                            thumbnail = makeImageThumbnail(uri)
+                        )
                     }
                 }
                 REQUEST_IMAGE_CAPTURE -> {
@@ -378,19 +407,25 @@ class FieldbookEditor: AppCompatActivity() {
                 REQUEST_VIDEO_UPLOAD -> {
                     if (intent != null) {
                         val uri = intent.data
-                        if (uri != null) {
-                            currentUri = uri
-                            addVideo(
-                                video = currentUri,
-                                thumbnail = makeVideoThumbnail(currentUri)
-                            )
+                        val path = getVideoPathFromURI(this, uri)
+                        val cr = contentResolver
+                        cr.query(path, null, null, null, null)?.use {
+                            val nameIndex =
+                                it.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME)
+                            it.moveToFirst()
+                            currentName = File(it.getString(nameIndex)).nameWithoutExtension
                         }
+                        currentUri = path
+                        addVideo(
+                            currentUri,
+                            makeVideoThumbnail(uri)
+                        )
                     }
                 }
                 REQUEST_VIDEO_CAPTURE -> {
                     addVideo(
-                        video = currentUri,
-                        thumbnail = makeVideoThumbnail(currentUri)
+                        currentUri,
+                        makeVideoThumbnail(currentUri)
                     )
                     addToGallery(currentPath)
                 }
@@ -398,6 +433,54 @@ class FieldbookEditor: AppCompatActivity() {
         } else if (resultCode == Activity.RESULT_CANCELED) {
             Toast.makeText(this,"Failed to select media",Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun getImagePathFromURI(context: Context, uri: Uri?): Uri {
+        var filePath = ""
+        val wholeID: String = DocumentsContract.getDocumentId(uri)
+
+        // Split at colon, use second item in the array
+        val id = wholeID.split(":").toTypedArray()[1]
+        val column = arrayOf(MediaStore.Images.Media.DATA)
+
+        // where id is equal to
+        val sel = MediaStore.Images.Media._ID + "=?"
+        val cursor: Cursor? = context.contentResolver.query(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            column, sel, arrayOf(id), null
+        )
+        if(cursor != null){
+            val columnIndex: Int = cursor.getColumnIndex(column[0])
+            if (cursor.moveToFirst()) {
+                filePath = cursor.getString(columnIndex)
+            }
+            cursor.close()
+        }
+        return Uri.parse(filePath)
+    }
+
+    private fun getVideoPathFromURI(context: Context, uri: Uri?): Uri {
+        var filePath = ""
+        val wholeID: String = DocumentsContract.getDocumentId(uri)
+
+        // Split at colon, use second item in the array
+        val id = wholeID.split(":").toTypedArray()[1]
+        val column = arrayOf(MediaStore.Video.Media.DATA)
+
+        // where id is equal to
+        val sel = MediaStore.Video.Media._ID + "=?"
+        val cursor: Cursor? = context.contentResolver.query(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            column, sel, arrayOf(id), null
+        )
+        if(cursor != null){
+            val columnIndex: Int = cursor.getColumnIndex(column[0])
+            if (cursor.moveToFirst()) {
+                filePath = cursor.getString(columnIndex)
+            }
+            cursor.close()
+        }
+        return Uri.parse(filePath)
     }
 
     private fun addText() {
@@ -541,10 +624,10 @@ class FieldbookEditor: AppCompatActivity() {
         }
     }
 
-    private fun makeImageThumbnail(uri: Uri) : Uri {
+    private fun makeImageThumbnail(uri: Uri?) : Uri {
         return try {
             saveThumbnail(
-                contentResolver.openInputStream(uri).let {
+                contentResolver.openInputStream(uri!!).let {
                     BitmapFactory.decodeStream(it)
                 }
             )
@@ -553,7 +636,7 @@ class FieldbookEditor: AppCompatActivity() {
         }
     }
 
-    private fun makeVideoThumbnail(uri: Uri) : Uri {
+    private fun makeVideoThumbnail(uri: Uri?) : Uri {
         val retriever = MediaMetadataRetriever().apply {
             try{
                 setDataSource(this@FieldbookEditor,uri)
@@ -701,6 +784,34 @@ class FieldbookEditor: AppCompatActivity() {
                             )
                         },
                         REQUEST_VIDEO_CAPTURE
+                    )
+                }
+            }
+
+            EXTERNAL_PHOTO_REQUEST -> {
+                if(grantResults.all { x -> x == 0 }){
+                    val intent = Intent(
+                        Intent.ACTION_GET_CONTENT,
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    )
+                    intent.type = "image/*"
+                    startActivityForResult(
+                        intent,
+                        REQUEST_IMAGE_UPLOAD
+                    )
+                }
+            }
+
+            EXTERNAL_VIDEO_REQUEST -> {
+                if(grantResults.all { x -> x == 0 }){
+                    val intent = Intent(
+                        Intent.ACTION_GET_CONTENT,
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    )
+                    intent.type = "video/*"
+                    startActivityForResult(
+                        intent,
+                        REQUEST_VIDEO_UPLOAD
                     )
                 }
             }
