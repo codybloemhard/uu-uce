@@ -42,10 +42,15 @@
     </style>
 
     <style name="AlertDialogStyle" parent="Theme.AppCompat.Light.Dialog">
-        <item name="android:colorAccent">?colorAccent</item>
+        <item name="android:colorAccent">?colorAccentRef</item>
+        <item name="colorAccent">?colorAccentRef</item>
+        <item name="android:colorActivatedHighlight">?colorAccentRef</item>
         <item name="android:textColor">?textColorDarkRef</item>
         <item name="android:textColorPrimary">@color/TextGrey</item>
+        <item name="android:textColorAlertDialogListItem">@color/TextGrey</item>
+        <item name="textColorAlertDialogListItem">@color/TextGrey</item>
         <item name="android:background">?colorPrimaryDarkRef</item>
+
     </style>
 
 </resources>

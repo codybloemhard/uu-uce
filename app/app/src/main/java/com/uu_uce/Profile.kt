@@ -41,7 +41,7 @@ class Profile : AppCompatActivity() {
         setContentView(R.layout.activity_profile)
 
         createTopbar(this, "Profile")
-        
+
         user_name_text.text = sharedPref.getString("com.uu_uce.USERNAME", getString(R.string.profile_user_name))
 
         selectedOptionText = badges_button_text

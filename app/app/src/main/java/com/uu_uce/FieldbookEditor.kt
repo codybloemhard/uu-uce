@@ -194,7 +194,7 @@ class FieldbookEditor: AppCompatActivity() {
             getString(R.string.editor_imageselection_camera),
             getString(R.string.cancel_button))
 
-        val dialog = AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this, R.style.AlertDialogStyle)
         dialog.setTitle(getString(R.string.editor_imageselection_popup_title))
 
         dialog.setItems(options) { dialogInterface, which ->
@@ -264,7 +264,7 @@ class FieldbookEditor: AppCompatActivity() {
             getString(R.string.editor_videoselection_camera),
             getString(R.string.cancel_button))
 
-        val dialog = AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this, R.style.AlertDialogStyle)
         dialog.setTitle(getString(R.string.editor_videoselection_popup_title))
 
         dialog.setItems(options) { dialogInterface, which ->
@@ -466,10 +466,9 @@ class FieldbookEditor: AppCompatActivity() {
 
         val options = list.toTypedArray()
 
-        val dialog = AlertDialog.Builder(this)
-        dialog.setTitle(getString(R.string.editor_edit_popup_title))
-
-        dialog.setItems(options) { dialogInterface, which ->
+        AlertDialog.Builder(this, R.style.AlertDialogStyle)
+            .setTitle(getString(R.string.editor_edit_popup_title))
+            .setItems(options) { dialogInterface, which ->
             when(options[which]) {
                 getString(R.string.editor_delete_block) -> {
                     cbi.removeContent(layout)
@@ -495,8 +494,7 @@ class FieldbookEditor: AppCompatActivity() {
                 }
                 getString(R.string.editor_cancel_edit)  -> dialogInterface.dismiss()
             }
-        }
-        dialog.show()
+        }.show()
         return true
     }
 
