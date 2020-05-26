@@ -57,7 +57,7 @@ class Pin(
     private lateinit var indexBuffer: ShortBuffer
     private lateinit var cubeCoordsBuffer: FloatBuffer
 
-    var spriteCoords = floatArrayOf(
+    private var spriteCoords = floatArrayOf(
         - 0.5f, + 1.0f,
         - 0.5f, - 0.0f,
         + 0.5f, - 0.0f,
@@ -182,7 +182,7 @@ class Pin(
         val screenLocation: Pair<Float, Float> = coordToScreen(coordinate, viewport, view.width, view.height)
 
         if(screenLocation.first.isNaN() || screenLocation.second.isNaN())
-            return //TODO: Should not be called with NaN*/
+            return //TODO: Should not be called with NaN
 
         // Calculate pin bounds on canvas
         val minX = (screenLocation.first - pinWidth / 2).roundToInt()

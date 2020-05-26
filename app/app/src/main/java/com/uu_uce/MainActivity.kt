@@ -44,7 +44,7 @@ class MainActivity : TouchParent() {
         }
     }
 
-    @Suppress("UnnecessaryVariable") // TODO: remove when result which is a webtoken
+    @Suppress("UnnecessaryVariable") // TODO: remove when result is received which is a webtoken
     private fun checkLogin() : Boolean{
         val result = login(
             sharedPref.getString("com.uu_uce.USERNAME", "").toString(),

@@ -127,12 +127,6 @@ class GeoMap : AppCompatActivity() {
 
         customMap.setActivity(this)
 
-        // TODO: Remove when releasing
-        with(sharedPref.edit()) {
-            putInt("com.uu_uce.USER_POINTS", 0)
-            apply()
-        }
-
         // Start database and get pins from database
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         this.customMap.setPinViewModel(pinViewModel)

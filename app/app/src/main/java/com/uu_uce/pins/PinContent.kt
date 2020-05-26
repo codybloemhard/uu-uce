@@ -87,7 +87,6 @@ class PinContent(
                             Logger.error("PinContent", "Tag needs to be specified before file_path")
                         }
                         BlockTag.TEXT       -> {
-                            //TODO: Add reading text from file?
                             Logger.log(LogType.NotImplemented, "PinContent", "file reading not implemented")
                             reader.nextString()
                         }
