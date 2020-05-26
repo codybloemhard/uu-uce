@@ -27,13 +27,13 @@ class PinViewModel(application: Application) : AndroidViewModel(application) {
         pinRepository.insert(pin)
     }
 
-    fun tryUnlock(pid : Int, predPids : List<Int>, action : (() -> Unit)) = viewModelScope.launch {
+    fun tryUnlock(pid : String, predPids : List<String>, action : (() -> Unit)) = viewModelScope.launch {
         pinRepository.tryUnlock(pid, predPids, action)
     }
 
-    fun completePin(pid : Int, followPids : List<Int>) = viewModelScope.launch {
+    fun completePin(pid : String, followPids : List<String>) = viewModelScope.launch {
         pinRepository.setStatus(pid, 2)
-        if(followPids[0] != -1)
+        if(followPids[0] != "")
             pinRepository.setStatuses(followPids, -1)
     }
 
@@ -43,6 +43,14 @@ class PinViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getContent(list : MutableList<String>, action : (() -> Unit))= viewModelScope.launch {
         pinRepository.getContent(list, action)
+    }
+
+    fun updatePins(pinList : List<PinData>, onCompleteAction : (() -> Unit)) = viewModelScope.launch {
+        pinRepository.updatePins(pinList, onCompleteAction)
+    }
+
+    fun reloadPins(action : ((List<PinData>) -> (Unit))) = viewModelScope.launch {
+        pinRepository.reloadPins(action)
     }
 
     @TestOnly

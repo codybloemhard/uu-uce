@@ -27,6 +27,7 @@ import com.uu_uce.fieldbook.FullRoute
 import com.uu_uce.fieldbook.Route
 import com.uu_uce.gestureDetection.*
 import com.uu_uce.mapOverlay.*
+import com.uu_uce.misc.ListenableBoolean
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.pins.Pin
@@ -41,6 +42,7 @@ import kotlin.system.measureTimeMillis
 /*
 the view displayed in the app that holds the map
  */
+var pinsUpdated = ListenableBoolean()
 class CustomMap : ViewTouchParent {
 
     constructor(context: Context): super(context)
@@ -65,10 +67,10 @@ class CustomMap : ViewTouchParent {
     private lateinit var activity       : Activity
     private lateinit var pinViewModel   : PinViewModel
     private lateinit var lfOwner        : LifecycleOwner
+    private var pins                    : MutableMap<String, Pin>   = mutableMapOf()
+    private var sortedPins              : List<Pin>                 = listOf()
+    private var pinStatuses             : MutableMap<String, Int>   = mutableMapOf()
 
-    private var pins                    : MutableMap<Int, Pin>  = mutableMapOf()
-    private var sortedPins              : List<Pin>             = listOf()
-    private var pinStatuses             : MutableMap<Int, Int>  = mutableMapOf()
     var activePopup                     : PopupWindow?          = null
     var pinSize: Int
     var locSizeFactor = 0.5f
@@ -107,6 +109,13 @@ class CustomMap : ViewTouchParent {
         deviceLocPaint.color = Color.BLUE
         deviceLocEdgePaint.color = Color.WHITE
 
+        pinsUpdated.setListener(object : ListenableBoolean.ChangeListener {
+            override fun onChange() {
+                if(pinsUpdated.getValue()){
+                    updatePins()
+                }
+            }
+        })
         //width and height are not set in the init{} yet
         //we delay calculations that use them by using post
         post{
@@ -307,11 +316,10 @@ class CustomMap : ViewTouchParent {
 
     fun setPins(table: LiveData<List<PinData>>){
         // Set observer on pin database
+        table.removeObservers(lfOwner)
         table.observe(lfOwner, Observer { pins ->
             // Update the cached copy of the words in the adapter.
-            pins?.let { newData ->
-                updatePinStatuses(newData)
-            }
+            pins?.let { newData -> updatePinStatuses(newData) }
             renderer.pinsChanged = true
         })
     }
@@ -327,17 +335,14 @@ class CustomMap : ViewTouchParent {
             when {
                 pinStatuses[pin.pinId] == null -> {
                     // Pin was not yet present
-                    val newPin = PinConversion(activity)
-                        .pinDataToPin(pin, pinViewModel)
+                    val newPin = PinConversion(activity).pinDataToPin(pin, pinViewModel)
                     newPin.tryUnlock {
                         Logger.log(LogType.Info, "CustomMap", "Adding pin")
-                        synchronized(pins) {
-                            pins[pin.pinId] = newPin
-                        }
+                        pins[pin.pinId] = newPin
                         pinStatuses[newPin.id] = pin.status
-                        pins[pin.pinId]!!.resize(pinSize)
-                        redrawMap()
                     }
+                    newPin.resize(pinSize)
+                    renderer.pinsChanged = true
                 }
                 pinStatuses[pin.pinId] == 0 -> {
                     // Pin was present and locked (status = 0)
@@ -346,25 +351,35 @@ class CustomMap : ViewTouchParent {
                     changedPin?.tryUnlock {
                         changedPin.setStatus(1)
                         pinStatuses[changedPin.id] = 1
-                        pins[pin.pinId]!!.resize(pinSize)
-                        redrawMap()
                     }
                 }
                 else -> {
-                    // Pin was present and unlocked (status = 1)
+                    // Pin was present and unlocked (status >= 1)
                     val changedPin = pins[pin.pinId]
 
                     if (changedPin != null) {
                         changedPin.setStatus(pin.status)
                         pinStatuses[changedPin.id] = pin.status
-                        pins[pin.pinId]!!.resize(pinSize)
-                        redrawMap()
                     }
                 }
             }
         }
         synchronized(sortedPins) {
             sortedPins = pins.values.sortedByDescending { pin -> pin.coordinate.north }
+        }
+        redrawMap()
+    }
+
+    private fun updatePins(){
+        pins = mutableMapOf()
+        pinStatuses = mutableMapOf()
+        pinViewModel.reloadPins { newPinData -> updatePinStatuses(newPinData) }
+        pinsUpdated.setValue(false)
+    }
+
+    fun resizePins(){
+        for(pin in pins.values){
+            pin.resize(pinSize)
         }
     }
 
@@ -436,7 +451,7 @@ class CustomMap : ViewTouchParent {
     }
 
     //open the all pins activity
-    fun startAllPins(){
+    fun startAllPins() {
         val i = Intent(context, AllPins::class.java)
         startActivity(context, i, null)
     }
@@ -472,7 +487,7 @@ class CustomMap : ViewTouchParent {
     //functions used for testing
     @TestOnly
     fun getPinLocation() : Pair<Float, Float>{
-        return pins[0]!!.getScreenLocation(camera.getViewport(), width, height)
+        return pins[pins.keys.first()]!!.getScreenLocation(camera.getViewport(), width, height)
     }
 
     @TestOnly

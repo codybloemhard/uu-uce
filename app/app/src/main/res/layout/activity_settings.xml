@@ -1,5 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -50,14 +51,17 @@
                     app:layout_constraintStart_toEndOf="@+id/pinsize_text"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
+                <EditText
                     android:id="@+id/pinsize_numberview"
                     android:layout_width="50dp"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/custom_border_edgy"
                     android:importantForAutofill="no"
+                    android:inputType="number"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="LabelFor" />
 
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -77,6 +81,29 @@
 
                 <Switch
                     android:id="@+id/networkdownload_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_darkmode_switch_text"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Switch
+                    android:id="@+id/darktheme_switch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -244,6 +271,18 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <Button
+                android:id="@+id/databasetest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Test1" />
+
+            <Button
+                android:id="@+id/databasetest2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Test2" />
 
         </LinearLayout>
     </ScrollView>

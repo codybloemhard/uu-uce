@@ -33,7 +33,7 @@ class PinConversion(val activity: Activity){
     private val resource = activity.resources
 
     private fun stringToPinContent(content: String): PinContent {
-        return PinContent(content, activity)
+        return PinContent(content, activity, false)
     }
 
     private fun difficultyToBackground(difficulty: Int): Bitmap {
@@ -106,21 +106,21 @@ class PinConversion(val activity: Activity){
         return bitmap
     }
 
-    private fun stringToIds(ids : String) : List<Int>{
-        return ids.split(',').map{s -> s.toInt()}
+    private fun stringToIds(ids : String) : List<String>{
+        return ids.split(',').map{s -> s}
     }
 
     fun pinDataToPin(pinData : PinData, viewModel : PinViewModel): Pin {
         val pin = Pin(
-            pinData.pinId                           ,
-            stringToUtm(pinData.location)           , //location
-            pinData.title                           ,
-            stringToPinContent(pinData.content)     ,
+            pinData.pinId,
+            stringToUtm(pinData.location), //location
+            pinData.title,
+            stringToPinContent(pinData.content),
             difficultyToBackground(pinData.difficulty),
-            typeToIcon(pinData.type)                ,
-            pinData.status                          ,
-            stringToIds(pinData.predecessorIds)     ,
-            stringToIds(pinData.followIds)          ,
+            typeToIcon(pinData.type),
+            pinData.status,
+            stringToIds(pinData.predecessorIds),
+            stringToIds(pinData.followIds),
             viewModel
         )
         pin.getContent().parent = pin

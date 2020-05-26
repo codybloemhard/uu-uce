@@ -3,7 +3,6 @@ package com.uu_uce.fieldbook
 import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
-import android.graphics.Color.rgb
 import android.net.Uri
 import android.view.Gravity
 import android.view.View
@@ -11,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.net.toFile
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
@@ -42,6 +42,7 @@ class FieldbookAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FieldbookViewHolder {
         val itemView = activity.layoutInflater.inflate(R.layout.fieldbook_recyclerview_item, parent, false)
         parentView = parent
+
         return FieldbookViewHolder(itemView)
     }
 
@@ -65,7 +66,7 @@ class FieldbookAdapter(
             FrameLayout.LayoutParams.MATCH_PARENT
         )
 
-        val content = PinContent(entry.content, activity).contentBlocks
+        val content = PinContent(entry.content, activity, true).contentBlocks
 
         var isThumbnail = false
         var thumbnailUri = Uri.EMPTY
@@ -75,7 +76,7 @@ class FieldbookAdapter(
                 is TextContentBlock -> {
                     TextView(activity).apply {
                         textSize = 12f
-                        setTextColor(rgb(100, 100, 100))
+                        setTextColor(ResourcesCompat.getColor(activity.resources, R.color.TextGrey, null))
                         text = cB.getTextContent()
                     }.also {
                         holder.frameFb.addView(it, params)
@@ -102,60 +103,57 @@ class FieldbookAdapter(
                 holder.frameFb.addView(it, params)
             }
 
-        holder.parentView.setOnClickListener (
-            View.OnClickListener(
-                fun (v) {
-                    val layoutInflater = activity.layoutInflater
+        holder.parentView.setOnClickListener { v ->
+                val layoutInflater = activity.layoutInflater
 
-                    // Build an custom view (to be inflated on top of our current view & build it's popup window)
-                    val customView = layoutInflater.inflate(R.layout.pin_content_view, rootView as ViewGroup, false)
+                // Build an custom view (to be inflated on top of our current view & build it's popup window)
+                val customView =
+                    layoutInflater.inflate(R.layout.pin_content_view, rootView as ViewGroup, false)
 
-                    val popupWindow = PopupWindow(
-                        customView,
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    )
+                val popupWindow = PopupWindow(
+                    customView,
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
 
-                    // Get elements
-                    val layout: LinearLayout =
-                        customView.findViewById(R.id.scrollLayout)
-                    val btnClosePopupWindow =
-                        customView.findViewById<Button>(R.id.popup_window_close_button)
-                    val windowTitle =
-                        customView.findViewById<TextView>(R.id.popup_window_title)
-                    val editButton =
-                        customView.findViewById<Button>(R.id.popup_window_edit_button).apply {
-                            isVisible   = true
-                            isClickable = true
-                        }
-
-                    // Add the title for the popup window
-                    windowTitle.text = entry.title
-
-                    // Fill layout of popup
-                    for(i in 0 until content.count()) {
-                        content[i].apply {
-                            showContent(i, layout, rootView, null)
-                        }
+                // Get elements
+                val layout: LinearLayout =
+                    customView.findViewById(R.id.scrollLayout)
+                val btnClosePopupWindow =
+                    customView.findViewById<Button>(R.id.popup_window_close_button)
+                val windowTitle =
+                    customView.findViewById<TextView>(R.id.popup_window_title)
+                val editButton =
+                    customView.findViewById<Button>(R.id.popup_window_edit_button).apply {
+                        isVisible = true
+                        isClickable = true
                     }
 
-                    // Open popup
-                    popupWindow.showAtLocation(v, Gravity.CENTER, 0, 0)
+                // Add the title for the popup window
+                windowTitle.text = entry.title
 
-                    // Set onClickListeners
-                    btnClosePopupWindow.setOnClickListener {
-                        popupWindow.dismiss()
-                    }
-
-                    editButton.setOnClickListener {
-                        popupWindow.dismiss()
-                        val intent = Intent(activity, FieldbookEditor::class.java)
-                        intent.putExtra("fieldbook_index",entry.id)
-                        startActivity(activity, intent, null)
+                // Fill layout of popup
+                for (i in 0 until content.count()) {
+                    content[i].apply {
+                        showContent(i, layout, rootView, null)
                     }
                 }
-            )
-        )
+
+                // Open popup
+                popupWindow.showAtLocation(v, Gravity.CENTER, 0, 0)
+
+                // Set onClickListeners
+                btnClosePopupWindow.setOnClickListener {
+                    popupWindow.dismiss()
+                }
+
+                editButton.setOnClickListener {
+                    popupWindow.dismiss()
+                    val intent = Intent(activity, FieldbookEditor::class.java)
+                    intent.putExtra("fieldbook_index", entry.id)
+                    startActivity(activity, intent, null)
+            }
+        }
 
         holder.parentView.setOnLongClickListener(
             View.OnLongClickListener(

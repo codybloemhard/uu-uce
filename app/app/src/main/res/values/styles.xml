@@ -1,16 +1,29 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+    <style name="LightTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/Flirtatious</item>
+        <item name="colorPrimaryDark">@color/BestWhite</item>
+        <item name="colorAccent">@color/BeniukonBronze</item>
+        <item name="colorPrimaryRef">@color/Flirtatious</item>
+        <item name="colorPrimaryDarkRef">@color/BestWhite</item>
+        <item name="colorAccentRef">@color/BeniukonBronze</item>
+        <item name="textColorDarkRef">@color/TextDarkGrey</item>
     </style>
 
-    <style name="AppTheme.NoActionBar">
+    <style name="LightTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="DarkTheme" parent="ThemeOverlay.AppCompat.Dark">
+        <item name="colorPrimary">@color/Flirtatious</item>
+        <item name="colorPrimaryDark">@color/DarkModeBlack</item>
+        <item name="colorAccent">@color/BeniukonBronze</item>
+        <item name="colorPrimaryRef">@color/Flirtatious</item>
+        <item name="colorPrimaryDarkRef">@color/DarkModeBlack</item>
+        <item name="colorAccentRef">@color/BeniukonBronze</item>
+        <item name="textColorDarkRef">@color/BestWhite</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" tools:keep="@style/AppTheme_AppBarOverlay" />
@@ -26,6 +39,13 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:paddingLeft">8dp</item>
         <item name="android:textAppearance">@android:style/TextAppearance.Large</item>
+    </style>
+
+    <style name="AlertDialogStyle" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:colorAccent">?colorAccent</item>
+        <item name="android:textColor">?textColorDarkRef</item>
+        <item name="android:textColorPrimary">@color/TextGrey</item>
+        <item name="android:background">?colorPrimaryDarkRef</item>
     </style>
 
 </resources>

@@ -16,15 +16,16 @@ import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.ImageViewer
 import com.uu_uce.R
 import com.uu_uce.VideoViewer
+import com.uu_uce.contentFolderName
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.services.updateFiles
 import java.io.File
 import java.io.StringReader
 
 class PinContent(
     private val contentString: String,
-    private val activity: Activity
+    private val activity: Activity,
+    private val fieldbookPin : Boolean
 ) {
     val contentBlocks : MutableList<ContentBlockInterface>
     var canCompletePin = false
@@ -33,7 +34,6 @@ class PinContent(
     init{
         contentBlocks = getContent()
     }
-
 
     private fun getContent() : MutableList<ContentBlockInterface>{
             val reader = JsonReader(StringReader(contentString))
@@ -60,12 +60,17 @@ class PinContent(
     private fun readBlock(reader: JsonReader): ContentBlockInterface? {
         var blockTag                                    = BlockTag.UNDEFINED
         var textString                                  = ""
-        var filePath                                    = ""
+        val filePath                                    = StringBuilder()
         var title                                       = ""
-        var thumbnailURI                                = Uri.EMPTY
+        val thumbnailURI                                = StringBuilder()
         val mcCorrectOptions : MutableList<String>      = mutableListOf()
         val mcIncorrectOptions : MutableList<String>    = mutableListOf()
         var reward                                      = 0
+
+        if(!fieldbookPin){
+            filePath.append(activity.getExternalFilesDir(null)?.path + File.separator + contentFolderName + File.separator)
+            thumbnailURI.append(activity.getExternalFilesDir(null)?.path + File.separator + contentFolderName + File.separator)
+        }
 
         reader.beginObject()
         while (reader.hasNext()) {
@@ -77,23 +82,20 @@ class PinContent(
                     textString = reader.nextString()
                 }
                 "file_path" -> {
-                    filePath = when(blockTag) {
+                    when(blockTag) {
                         BlockTag.UNDEFINED  -> {
                             Logger.error("PinContent", "Tag needs to be specified before file_path")
-                            ""
                         }
                         BlockTag.TEXT       -> {
                             //TODO: Add reading text from file?
                             Logger.log(LogType.NotImplemented, "PinContent", "file reading not implemented")
                             reader.nextString()
-                            ""
                         }
-                        BlockTag.IMAGE      -> reader.nextString()
-                        BlockTag.VIDEO      -> reader.nextString()
+                        BlockTag.IMAGE      -> filePath.append(reader.nextString()).toString()
+                        BlockTag.VIDEO      -> filePath.append(reader.nextString()).toString()
                         BlockTag.MCQUIZ     -> {
                             Logger.error("PinContent", "multiple choice quiz can not be read from file")
                             reader.nextString()
-                            ""
                         }
                     }
                 }
@@ -102,7 +104,7 @@ class PinContent(
                     title = reader.nextString()
                 }
                 "thumbnail" -> {
-                    thumbnailURI = Uri.parse(reader.nextString())
+                    thumbnailURI.append(reader.nextString())
                 }
                 "mc_correct_option" -> {
                     mcCorrectOptions.add(reader.nextString())
@@ -127,8 +129,8 @@ class PinContent(
                 return null
             }
             BlockTag.TEXT       -> TextContentBlock(textString, activity)
-            BlockTag.IMAGE      -> ImageContentBlock(Uri.parse(filePath), thumbnailURI, activity, title)
-            BlockTag.VIDEO      -> VideoContentBlock(Uri.parse(filePath), thumbnailURI, activity, title)
+            BlockTag.IMAGE      -> ImageContentBlock(Uri.parse(filePath.toString()), Uri.parse(thumbnailURI.toString()), activity, title)
+            BlockTag.VIDEO      -> VideoContentBlock(Uri.parse(filePath.toString()), Uri.parse(thumbnailURI.toString()), activity, title)
             BlockTag.MCQUIZ     -> {
                 if(mcIncorrectOptions.count() < 1 && mcCorrectOptions.count() < 1) {
                     Logger.error("PinContent", "Mutliple choice questions require at least one correct and one incorrect answer")
@@ -159,7 +161,7 @@ interface ContentBlockInterface {
     override fun toString() : String
 }
 
-class EditTextBlock(
+class TextBlock(
     private val activity: Activity
 )
     : ContentBlockInterface
@@ -172,6 +174,7 @@ class EditTextBlock(
             inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
             isSingleLine = false
             imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION
+            background = ResourcesCompat.getDrawable(activity.resources, R.drawable.custom_border_edgy, null)
             id = R.id.text_field
         }.also{
             layout.addView(it,blockId)
@@ -209,7 +212,7 @@ class TextContentBlock(
         view: View,
         action: (ContentBlockInterface) -> Boolean
     ): ContentBlockInterface {
-        val editable = EditTextBlock(activity)
+        val editable = TextBlock(activity)
         editable.makeEditable(blockId, layout, view, action)
         editable.content.setText(textContent)
         return editable
@@ -337,12 +340,7 @@ class VideoContentBlock(
         // Add thumbnail and button
         content.addView(playButton)
         content.setOnClickListener{
-            updateFiles(
-                listOf(videoURI.toString()),
-                activity,
-                { openVideoView(videoURI, title) },
-                {}
-            )
+            openVideoView(videoURI, title)
         }
         layout.addView(content,blockId)
     }

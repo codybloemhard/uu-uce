@@ -32,7 +32,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:text="@string/fieldbook_pin_title_placeholder"
-                android:textColor="#000000"
+                android:textColor="?textColorDarkRef"
                 android:textStyle="bold"
                 android:textSize="18sp" />
 
@@ -41,7 +41,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/fieldbook_date_time_text"
-                android:textColor="#323232"
+                android:textColor="@color/TextGrey"
                 android:textSize="14sp" />
 
             <TextView
@@ -49,7 +49,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/fieldbook_coordinates_text"
-                android:textColor="#323232"
+                android:textColor="@color/TextGrey"
                 android:textSize="14sp" />
         </LinearLayout>
 

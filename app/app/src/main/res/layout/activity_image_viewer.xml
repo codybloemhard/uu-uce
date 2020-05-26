@@ -11,7 +11,7 @@
         android:id="@+id/image_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
+        android:background="?colorPrimaryDarkRef"
         android:visibility="visible">
 
         <TextView
@@ -20,6 +20,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/pin_image_title_placeholder"
+            android:textColor="?textColorDarkRef"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -29,9 +30,9 @@
             android:id="@+id/close_image_viewer"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginStart="3dp"
-            android:layout_marginTop="3dp"
-            android:layout_marginBottom="3dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             android:background="@drawable/ic_sprite_exit"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"

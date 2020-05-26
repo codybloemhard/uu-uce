@@ -1,6 +1,8 @@
 package com.uu_uce
 
 import android.content.SharedPreferences
+import android.graphics.Color
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -22,13 +24,24 @@ class Profile : AppCompatActivity() {
     private lateinit var sharedPref : SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+        val darkMode = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
+        // Set desired theme
+        if(darkMode) setTheme(R.style.DarkTheme)
+
+        // Set statusbar text color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !darkMode) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
+        }
+        else if(!darkMode){
+            window.statusBarColor = Color.BLACK// set status background white
+        }
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 
         createTopbar(this, "Profile")
-
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
-
+        
         user_name_text.text = sharedPref.getString("com.uu_uce.USERNAME", getString(R.string.profile_user_name))
 
         selectedOptionText = badges_button_text
