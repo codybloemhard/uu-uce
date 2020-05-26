@@ -241,11 +241,17 @@ class ImageContentBlock(
         try {
             content.apply {
                 setImageURI(imageURI)
+                content.setOnClickListener{
+                    openImageView(imageURI, title)
+                }
                 scaleType = ImageView.ScaleType.FIT_CENTER
                 adjustViewBounds = true
             }
         } catch (e: Exception) {
             Logger.error("PinContent","Couldn't load $imageURI, so loaded the thumbnail $thumbnailURI instead")
+            content.setOnClickListener{
+                openImageView(thumbnailURI, title)
+            }
             content.setImageURI(thumbnailURI)
         }
         val imageLayoutParams = LinearLayout.LayoutParams(
@@ -256,10 +262,6 @@ class ImageContentBlock(
         }
         content.layoutParams = imageLayoutParams
         content.id = R.id.image_block
-
-        content.setOnClickListener{
-            openImageView(imageURI, title)
-        }
 
         layout.addView(content,blockId)
     }
