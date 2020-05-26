@@ -271,7 +271,6 @@ class ImageContentBlock(
 
     override fun removeContent(layout: LinearLayout) {
         super.removeContent(layout)
-        //TODO: check if thumbnail isn't used elsewhere (or don't delete at all?)
         totallyExterminateFileExistence(activity, thumbnailURI)
     }
 
@@ -347,7 +346,6 @@ class VideoContentBlock(
 
     override fun removeContent(layout: LinearLayout) {
         super.removeContent(layout)
-        //TODO: check if thumbnail isn't used elsewhere (or don't delete at all?)
         totallyExterminateFileExistence(activity, thumbnailURI)
     }
 

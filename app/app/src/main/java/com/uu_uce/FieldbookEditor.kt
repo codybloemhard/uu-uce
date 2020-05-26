@@ -659,7 +659,7 @@ class FieldbookEditor: AppCompatActivity() {
             mkdirs()
         }
 
-        val file = File(dir,"$currentName.jpg")
+        val file = File(dir,"thumbnail_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}.jpg")
 
         FileOutputStream(file).also{
             bitmap.compress(Bitmap.CompressFormat.JPEG,10,it)
