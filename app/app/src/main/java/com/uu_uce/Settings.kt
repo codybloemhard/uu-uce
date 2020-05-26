@@ -297,7 +297,7 @@ class Settings : AppCompatActivity() {
                 .show()
         }
 
-        databasetest.setOnClickListener{
+        /*databasetest.setOnClickListener{
             pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + "database.json"))){
                 pinsUpdated.setValue(true)
             }
@@ -307,6 +307,6 @@ class Settings : AppCompatActivity() {
             pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + "database (1).json"))){
                 pinsUpdated.setValue(true)
             }
-        }
+        }*/
     }
 }

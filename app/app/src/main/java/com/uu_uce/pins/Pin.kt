@@ -502,7 +502,7 @@ class Pin(
         return status
     }
 
-    fun loadTexture(bitmap: Bitmap): Int {
+    private fun loadTexture(bitmap: Bitmap): Int {
         val textureHandle = IntArray(1)
         GLES20.glGenTextures(1, textureHandle, 0)
         if (textureHandle[0] != 0) {

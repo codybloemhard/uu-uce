@@ -18,7 +18,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="5dp">
+            android:padding="5dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true">
 
             <TextView
                 android:layout_width="match_parent"
@@ -272,7 +274,7 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <Button
+            <!--<Button
                 android:id="@+id/databasetest"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -282,7 +284,7 @@
                 android:id="@+id/databasetest2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Test2" />
+                android:text="Test2" />-->
 
         </LinearLayout>
     </ScrollView>

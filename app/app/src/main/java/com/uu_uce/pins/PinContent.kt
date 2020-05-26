@@ -28,7 +28,7 @@ class PinContent(
     private val fieldbookPin : Boolean
 ) {
     val contentBlocks : MutableList<ContentBlockInterface>
-    var canCompletePin = false
+    private var canCompletePin = false
 
     lateinit var parent : Pin
     init{

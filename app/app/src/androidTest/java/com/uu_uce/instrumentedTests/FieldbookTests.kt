@@ -56,7 +56,7 @@ class FieldbookTests {
         fieldbookViewmodel = ViewModelProvider(intentsTestRule.activity).get(FieldbookViewModel::class.java)
         fieldbookViewmodel.deleteAll()
 
-        intending(hasAction(Intent.ACTION_PICK)).respondWith(getFileURIResult())
+        intending(hasAction(Intent.ACTION_GET_CONTENT)).respondWith(getFileURIResult())
         intending(hasAction(MediaStore.ACTION_IMAGE_CAPTURE))
             .respondWith(setFile(Uri.parse("/sdcard/Android/data/com.uu_uce/files/PinContent/Images/test.png")))
         intending(hasAction(MediaStore.ACTION_VIDEO_CAPTURE))

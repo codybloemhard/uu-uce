@@ -73,7 +73,7 @@ class CustomMap : ViewTouchParent {
 
     var activePopup                     : PopupWindow?          = null
     var pinSize: Int
-    var locSizeFactor = 0.5f
+    private var locSizeFactor = 0.5f
 
     // Map
     private var smap = ShapeMap(this)
@@ -483,7 +483,7 @@ class CustomMap : ViewTouchParent {
         return nrLayers
     }
 
-    val eps = 0.001
+    private val eps = 0.001
     //functions used for testing
     @TestOnly
     fun getPinLocation() : Pair<Float, Float>{

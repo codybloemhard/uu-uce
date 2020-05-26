@@ -31,10 +31,7 @@ class FieldbookHomeFragment(view: View) : Fragment() {
     private lateinit var viewAdapter        : FieldbookAdapter
     private lateinit var fragmentActivity   : FragmentActivity
 
-    private lateinit var content: MutableList<ContentBlockInterface>
-
     private val parentView              = view
-    private lateinit var layout         : LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

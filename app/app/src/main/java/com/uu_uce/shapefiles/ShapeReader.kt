@@ -15,7 +15,7 @@ abstract class ChunkGetter(
     abstract fun getChunk(cIndex: ChunkIndex):Chunk
     protected var xoff = 0.0
     protected var yoff = 0.0
-    protected var zoff = 0.0
+    private var zoff = 0.0
     protected var mult = 0.0
     protected var bmin = p3NaN
     protected var bmax = p3NaN

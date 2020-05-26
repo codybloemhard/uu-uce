@@ -23,9 +23,9 @@ nrCuts: there are nrCuts.size different zoomlevels, where level i has nrCuts[i] 
 class ChunkManager(
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk>,
     private val chunkGetter: ChunkGetter,
-    val bmin: p3,
-    val bmax: p3,
-    val nrCuts: List<Int>)
+    private val bmin: p3,
+    private val bmax: p3,
+    private val nrCuts: List<Int>)
 {
 
     private var lastViewport: Pair<p2,p2> = Pair(p2Zero,p2Zero)
@@ -37,19 +37,19 @@ class ChunkManager(
     private var loading = false
     private var upToDate = false
     private var changed = false
-    var factor = 0.0
+    private var factor = 0.0
 
     private val debugPaint = Paint()
     private val loadedChunkPaint = Paint()
 
-    var xmin = 0
-    var xmax = 0
-    var ymin = 0
-    var ymax = 0
+    private var xmin = 0
+    private var xmax = 0
+    private var ymin = 0
+    private var ymax = 0
 
-    var maxzoom = 0.0
+    private var maxzoom = 0.0
 
-    var zoom = nrOfLODs-1
+    private var zoom = nrOfLODs-1
 
     init{
         debugPaint.color = Color.RED
