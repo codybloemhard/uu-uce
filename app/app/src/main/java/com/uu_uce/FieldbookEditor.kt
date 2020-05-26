@@ -93,7 +93,10 @@ class FieldbookEditor: AppCompatActivity() {
         if (bundle != null)
             fieldbookIndex = bundle.getInt("fieldbook_index")
 
-        createTopbar(this,getString(R.string.pineditor_topbar_title))
+        createTopbar(this,getString(R.string.pineditor_topbar_title)){
+            deleteTemps()
+            finish()
+        }
 
         viewModel = this.run {
             ViewModelProvider(this)[FieldbookViewModel::class.java]
@@ -180,6 +183,17 @@ class FieldbookEditor: AppCompatActivity() {
         }
         else{
             window.statusBarColor = Color.BLACK// set status background white
+        }
+    }
+
+    override fun onBackPressed() {
+        deleteTemps()
+        super.onBackPressed()
+    }
+
+    private fun deleteTemps(){
+        for(block in content){
+            block.removeContent(layout)
         }
     }
 
