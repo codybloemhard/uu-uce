@@ -520,6 +520,7 @@ class FieldbookEditor: AppCompatActivity() {
             it.mkdirs()
         }
         val fileName = "VID_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}_UCE_"
+
         return createTempFile(
             fileName,
             ".mp4",

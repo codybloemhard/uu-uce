@@ -18,15 +18,20 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.uu_uce.*
-import com.uu_uce.OpenGL.CustomMapGLRenderer
 import com.uu_uce.Fieldbook
+import com.uu_uce.OpenGL.CustomMapGLRenderer
 import com.uu_uce.allpins.PinConversion
 import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinViewModel
+import com.uu_uce.fieldbook.FieldbookEntry
+import com.uu_uce.fieldbook.FieldbookViewModel
 import com.uu_uce.fieldbook.FullRoute
 import com.uu_uce.fieldbook.Route
 import com.uu_uce.gestureDetection.*
-import com.uu_uce.mapOverlay.*
+import com.uu_uce.mapOverlay.Location
+import com.uu_uce.mapOverlay.coordToScreen
+import com.uu_uce.mapOverlay.pointDistance
+import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.pins.Pin
@@ -61,15 +66,16 @@ class CustomMap : ViewTouchParent {
     private val deviceLocPaint      : Paint = Paint()
     private val deviceLocEdgePaint  : Paint = Paint()
 
-    // Pins
-    private lateinit var activity       : Activity
-    private lateinit var pinViewModel   : PinViewModel
-    private lateinit var lfOwner        : LifecycleOwner
+    private lateinit var activity           : Activity
+    private lateinit var pinViewModel       : PinViewModel
+    private lateinit var fieldbookViewModel : FieldbookViewModel
+    private lateinit var lfOwner            : LifecycleOwner
 
-    private var pins                    : MutableMap<Int, Pin>  = mutableMapOf()
-    private var sortedPins              : List<Pin>             = listOf()
-    private var pinStatuses             : MutableMap<Int, Int>  = mutableMapOf()
-    var activePopup                     : PopupWindow?          = null
+    private var pins                        : MutableMap<Int, Pin>  = mutableMapOf()
+    private var fieldbook                   : List<FieldbookEntry>  = listOf()
+    private var sortedPins                  : List<Pin>             = listOf()
+    private var pinStatuses                 : MutableMap<Int, Int>  = mutableMapOf()
+    var activePopup                         : PopupWindow?          = null
     var pinSize: Int
     var locSizeFactor = 0.5f
 
@@ -368,6 +374,13 @@ class CustomMap : ViewTouchParent {
         }
     }
 
+    fun setFieldbook (fieldbook: LiveData<List<FieldbookEntry>>) {
+        // Set observer on pin database
+        fieldbook.observe(lfOwner, Observer {
+            this.fieldbook = it
+        })
+    }
+
     //called when the screen is tapped at tapLocation
     private fun tapPin(tapLocation : p2, activity : Activity){
         if(activePopup != null) return
@@ -425,6 +438,10 @@ class CustomMap : ViewTouchParent {
 
     fun setPinViewModel(vm: PinViewModel){
         pinViewModel = vm
+    }
+
+    fun setFieldbookViewModel(vm: FieldbookViewModel){
+        fieldbookViewModel = vm
     }
 
     fun setLifeCycleOwner(lifecycleOwner: LifecycleOwner){
