@@ -94,8 +94,13 @@ class FieldbookEditor: AppCompatActivity() {
             fieldbookIndex = bundle.getInt("fieldbook_index")
 
         createTopbar(this,getString(R.string.pineditor_topbar_title)){
-            deleteTemps()
-            finish()
+            if(fieldbookIndex >= 0){
+                finish()
+            }
+            else{
+                deleteTemps()
+                finish()
+            }
         }
 
         viewModel = this.run {
@@ -187,7 +192,9 @@ class FieldbookEditor: AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        deleteTemps()
+        if(fieldbookIndex < 0){
+            deleteTemps()
+        }
         super.onBackPressed()
     }
 
