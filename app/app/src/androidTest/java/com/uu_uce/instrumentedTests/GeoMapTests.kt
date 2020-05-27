@@ -151,7 +151,7 @@ class GeoMapTests {
             .perform(click())
 
         // Check if profile successfully loaded
-        onView(withId(R.id.user_name_text))
+        onView(withId(R.id.profile_layout))
             .check(matches(isDisplayed()))
 
         // Switch back to geomap
