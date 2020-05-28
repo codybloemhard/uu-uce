@@ -1,10 +1,6 @@
 package com.uu_uce.allpins
 
 import android.app.Activity
-import android.graphics.BlendMode
-import android.graphics.BlendModeColorFilter
-import android.graphics.Color
-import android.graphics.PorterDuff
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -12,6 +8,8 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
+import com.uu_uce.fieldbook.FieldbookEntry
+import com.uu_uce.fieldbook.FieldbookViewModel
 import com.uu_uce.pins.Pin
 import com.uu_uce.pins.PinContent
 import com.uu_uce.services.UTMCoordinate
@@ -26,7 +24,9 @@ class PinConversion(val activity: Activity){
                 s.elementAt(0).value.toInt(),
                 s.elementAt(1).value.first(),
                 s.elementAt(4).value.toDouble()/10,
-                s.elementAt(2).value.toDouble()/10)
+                s.elementAt(2).value.toDouble()/10).also{
+                println(it)
+            }
         }
     }
 
@@ -38,6 +38,7 @@ class PinConversion(val activity: Activity){
 
     private fun difficultyToBackground(difficulty: Int): Bitmap {
         val color = when (difficulty) {
+            0 -> ContextCompat.getColor(activity, R.color.HighBlue) //Neutral
             1 -> ContextCompat.getColor(activity, R.color.ReptileGreen)
             2 -> ContextCompat.getColor(activity, R.color.OrangeHibiscus)
             3 -> ContextCompat.getColor(activity, R.color.Desire)
@@ -125,5 +126,22 @@ class PinConversion(val activity: Activity){
         )
         pin.getContent().parent = pin
         return pin
+    }
+
+    fun fieldbookEntryToPin(entry: FieldbookEntry, viewModel: FieldbookViewModel) : Pin {
+        return Pin(
+            entry.id,
+            stringToUtm(entry.location),
+            entry.title,
+            stringToPinContent(entry.content),
+            difficultyToBackground(0),
+            typeToIcon(""),
+            2,
+            listOf(),
+            listOf(),
+            viewModel
+        ).apply {
+            getContent().parent = this
+        }
     }
 }

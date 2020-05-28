@@ -2,7 +2,6 @@ package com.uu_uce.pins
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
@@ -15,6 +14,7 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.ViewModel
 import androidx.preference.PreferenceManager
 import com.uu_uce.OpenGL.coordsPerVertex
 import com.uu_uce.R
@@ -36,7 +36,7 @@ import kotlin.math.roundToInt
 
 class Pin(
     var id                      : Int = 0,
-    var coordinate      : UTMCoordinate,
+    var coordinate              : UTMCoordinate,
     private var title           : String,
     private var content         : PinContent,
     private var background      : Bitmap,
@@ -44,7 +44,7 @@ class Pin(
     private var status          : Int,              //-1 : recalculating, 0 : locked, 1 : unlocked, 2 : completed
     private var predecessorIds  : List<Int>,
     private var followIds       : List<Int>,
-    private val viewModel       : PinViewModel
+    private val viewModel       : ViewModel
 ) {
     // Used to determine if warning should show when closing pin
     private var madeProgress = false
@@ -251,7 +251,7 @@ class Pin(
     // Check if pin should be unlocked
     fun tryUnlock(action : (() -> Unit)){
         if(predecessorIds[0] != -1 && status < 1){
-            viewModel.tryUnlock(id, predecessorIds, action)
+            (viewModel as PinViewModel).tryUnlock(id, predecessorIds, action)
         }
         else{
             action()
@@ -366,7 +366,7 @@ class Pin(
     private fun complete() {
         status = 2
         if (followIds[0] != -1)
-            viewModel.completePin(id, followIds)
+            (viewModel as PinViewModel).completePin(id, followIds)
     }
 
     fun addQuestion(questionId : Int, reward: Int){

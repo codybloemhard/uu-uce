@@ -268,8 +268,8 @@ class GeoMap : AppCompatActivity() {
                 LayerType.Height,
                 HeightLineReader(heightlines),
                 toggle_layer_layout,
-                size,
-                true
+                true,
+                size
             )
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
         }catch(e: Exception){
@@ -281,8 +281,8 @@ class GeoMap : AppCompatActivity() {
                 LayerType.Water,
                 PolygonReader(polygons),
                 toggle_layer_layout,
-                size,
-                false
+                false,
+                size
             )
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
         }catch(e: Exception){

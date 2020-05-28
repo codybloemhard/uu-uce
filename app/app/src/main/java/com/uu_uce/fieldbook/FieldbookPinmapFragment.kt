@@ -20,11 +20,15 @@ import com.uu_uce.misc.ListenableBoolean
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.needsReload
-import com.uu_uce.services.*
+import com.uu_uce.services.LOCATION_REQUEST
+import com.uu_uce.services.unpackZip
+import com.uu_uce.services.updateFiles
 import com.uu_uce.shapefiles.HeightLineReader
 import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.PolygonReader
 import kotlinx.android.synthetic.main.activity_geo_map.*
+import kotlinx.android.synthetic.main.activity_geo_map.customMap
+import kotlinx.android.synthetic.main.fieldbook_fragment_pinmap.*
 import java.io.File
 
 /**
@@ -82,50 +86,54 @@ class FieldbookPinmapFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fieldbook_fragment_pinmap, container, false).also {
-            if(!File(frActivity.getExternalFilesDir(null)?.path + File.separator + "Maps").exists()){
-                AlertDialog.Builder(frContext)
-                    .setIcon(R.drawable.ic_sprite_question)
-                    .setTitle(getString(R.string.geomap_download_warning_head))
-                    .setMessage(getString(R.string.geomap_download_warning_body))
-                    .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
-                        openProgressPopup(window.decorView.rootView)
-                        downloadResult = updateFiles(
-                            maps,
-                            frActivity,
-                            {
-                                if(downloadResult){
-                                    frActivity.runOnUiThread{
-                                        Toast.makeText(frContext, "Download completed, unpacking", Toast.LENGTH_LONG).show()
-                                    }
-                                    val unzipResult = unpackZip(maps.first()) { progress -> frActivity.runOnUiThread { progressBar.progress = progress } }
-                                    frActivity.runOnUiThread{
-                                        if(unzipResult) Toast.makeText(frContext, "Unpacking completed", Toast.LENGTH_LONG).show()
-                                        else Toast.makeText(frContext, "Unpacking failed", Toast.LENGTH_LONG).show()
-                                        popupWindow?.dismiss()
-                                        start()
-                                    }
+        return inflater.inflate(R.layout.fieldbook_fragment_pinmap, container, false)
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        if(!File(frActivity.getExternalFilesDir(null)?.path + File.separator + "Maps").exists()){
+            AlertDialog.Builder(frContext)
+                .setIcon(R.drawable.ic_sprite_question)
+                .setTitle(getString(R.string.geomap_download_warning_head))
+                .setMessage(getString(R.string.geomap_download_warning_body))
+                .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
+                    openProgressPopup(window.decorView.rootView)
+                    downloadResult = updateFiles(
+                        maps,
+                        frActivity,
+                        {
+                            if(downloadResult){
+                                frActivity.runOnUiThread{
+                                    Toast.makeText(frContext, "Download completed, unpacking", Toast.LENGTH_LONG).show()
                                 }
-                                else{
-                                    frActivity.runOnUiThread{
-                                        Toast.makeText(frContext, "Download failed", Toast.LENGTH_LONG).show()
-                                        popupWindow?.dismiss()
-                                        start()
-                                    }
+                                val unzipResult = unpackZip(maps.first()) { progress -> frActivity.runOnUiThread { progressBar.progress = progress } }
+                                frActivity.runOnUiThread{
+                                    if(unzipResult) Toast.makeText(frContext, "Unpacking completed", Toast.LENGTH_LONG).show()
+                                    else Toast.makeText(frContext, "Unpacking failed", Toast.LENGTH_LONG).show()
+                                    popupWindow?.dismiss()
+                                    start()
                                 }
-                            },
-                            { progress -> frActivity.runOnUiThread { progressBar.progress = progress } }
-                        )
-                    }
-                    .setNegativeButton(getString(R.string.negative_button_text)) { _, _ ->
-                        start()
-                        Toast.makeText(frContext, getString(R.string.geomap_maps_download_instructions), Toast.LENGTH_LONG).show()
-                    }
-                    .show()
-            }
-            else{
-                start()
-            }
+                            }
+                            else{
+                                frActivity.runOnUiThread{
+                                    Toast.makeText(frContext, "Download failed", Toast.LENGTH_LONG).show()
+                                    popupWindow?.dismiss()
+                                    start()
+                                }
+                            }
+                        },
+                        { progress -> frActivity.runOnUiThread { progressBar.progress = progress } }
+                    )
+                }
+                .setNegativeButton(getString(R.string.negative_button_text)) { _, _ ->
+                    start()
+                    Toast.makeText(frContext, getString(R.string.geomap_maps_download_instructions), Toast.LENGTH_LONG).show()
+                }
+                .show()
+        }
+        else{
+            start()
         }
     }
 
@@ -147,7 +155,10 @@ class FieldbookPinmapFragment : Fragment() {
         // Start database and get pins from database
         this.customMap.setFieldbookViewModel(viewModel)
         this.customMap.setLifeCycleOwner(this)
-        this.customMap.setFieldbook(viewModel.allFieldbookEntries)
+
+        viewModel.allFieldbookEntries.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+            this.customMap.setFieldbook(it)
+        })
 
         // Get statusbar height
         resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
@@ -161,7 +172,7 @@ class FieldbookPinmapFragment : Fragment() {
         //customMap.tryStartLocServices(this)
 
         // Set center on location button functionality
-        center_button.setOnClickListener{
+        /*center_button.setOnClickListener{
             if(customMap.locationAvailable){
                 customMap.zoomToDevice()
                 customMap.setCenterPos()
@@ -170,7 +181,7 @@ class FieldbookPinmapFragment : Fragment() {
                 Toast.makeText(frContext, "Location not available", Toast.LENGTH_LONG).show()
                 getPermissions(frActivity, LocationServices.permissionsNeeded, LOCATION_REQUEST)
             }
-        }
+        }*/
 
         needsReload.setListener(object : ListenableBoolean.ChangeListener {
             override fun onChange() {
@@ -205,12 +216,6 @@ class FieldbookPinmapFragment : Fragment() {
     }
 
     private fun loadMap(){
-        (Display::getSize)(frActivity.windowManager.defaultDisplay, screenDim)
-        val longest = maxOf(screenDim.x, screenDim.y)
-        val size = (longest*menu.buttonPercent).toInt()
-
-        customMap.removeLayers(toggle_layer_layout)
-
         val mydir = File(frContext.getExternalFilesDir(null)?.path + "/Maps/")
         try {
             val heightlines = File(mydir, "Heightlines")
@@ -218,7 +223,6 @@ class FieldbookPinmapFragment : Fragment() {
                 LayerType.Height,
                 HeightLineReader(heightlines),
                 toggle_layer_layout,
-                size,
                 true
             )
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
@@ -231,7 +235,6 @@ class FieldbookPinmapFragment : Fragment() {
                 LayerType.Water,
                 PolygonReader(polygons),
                 toggle_layer_layout,
-                size,
                 false
             )
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")

@@ -126,18 +126,22 @@ class CustomMap : ViewTouchParent {
     }
 
     // Add a new layer to the map, and generate a button to toggle it
-    fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout, buttonSize: Int, hasInfo: Boolean){
+    fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout?, hasInfo: Boolean, buttonSize: Int = 0){
         smap.addLayer(lt, chunkGetter, hasInfo)
-        val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle)
-        btn.setImageResource(R.drawable.ic_sprite_toggle_layer)
         val curLayers = nrLayers
-        btn.setOnClickListener{
-            toggleLayer(curLayers)
-        }
         nrLayers++
 
-        btn.layoutParams = ViewGroup.LayoutParams(buttonSize, buttonSize)
-        scrollLayout.addView(btn)
+        if (buttonSize > 0) {
+            val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle).apply {
+                setImageResource(R.drawable.ic_sprite_toggle_layer)
+                setOnClickListener {
+                    toggleLayer(curLayers)
+                }
+                layoutParams = ViewGroup.LayoutParams(buttonSize, buttonSize)
+            }
+
+            scrollLayout!!.addView(btn)
+        }
 
         mods = smap.getMods()
     }
@@ -176,17 +180,23 @@ class CustomMap : ViewTouchParent {
             // Draw map
             smap.draw(standardProgram, scale, trans)
 
-            (context as GeoMap).runOnUiThread {
-                if (context is GeoMap) {
+            if (context is GeoMap) {
+                (context as GeoMap).runOnUiThread {
                     val zoomLevel = smap.getZoomLevel()
                     if (zoomLevel >= 0 && mods.count() > 0) {
                         (context as GeoMap).heightline_diff_text.text =
-                            (context as Activity).getString(R.string.geomap_heightline_diff_text, mods[zoomLevel])
+                            (context as Activity).getString(
+                                R.string.geomap_heightline_diff_text,
+                                mods[zoomLevel]
+                            )
 
                     } else {
                         val standardValue = 0
                         (context as GeoMap).heightline_diff_text.text =
-                            (context as Activity).getString(R.string.geomap_heightline_diff_text, standardValue)
+                            (context as Activity).getString(
+                                R.string.geomap_heightline_diff_text,
+                                standardValue
+                            )
                     }
                 }
             }
@@ -374,11 +384,16 @@ class CustomMap : ViewTouchParent {
         }
     }
 
-    fun setFieldbook (fieldbook: LiveData<List<FieldbookEntry>>) {
-        // Set observer on pin database
-        fieldbook.observe(lfOwner, Observer {
-            this.fieldbook = it
-        })
+    fun setFieldbook (fieldbook: List<FieldbookEntry>) {
+        for (entry in fieldbook) {
+            val pin = PinConversion(activity).fieldbookEntryToPin(entry,fieldbookViewModel)
+            pins[pin.id] = pin.apply{
+                resize(pinSize)
+            }
+        }
+        synchronized(sortedPins) {
+            sortedPins = pins.values.sortedByDescending { pin -> pin.coordinate.north }
+        }
     }
 
     //called when the screen is tapped at tapLocation
@@ -402,15 +417,15 @@ class CustomMap : ViewTouchParent {
                 FullRoute(
                     "[\n" +
                             "    {\n" +
-                            "        \"coordinate\": \"31N3149680N46777336E\",\n" +
+                            "        \"coordinate\": \"31N46758336N3133680E\",\n" +
                             "        \"localtime\": \"10:19:16\"\n" +
                             "    },\n" +
                             "    {\n" +
-                            "        \"coordinate\": \"31N3133680N46718336E\",\n" +
+                            "        \"coordinate\": \"31N46670000N3130000E\",\n" +
                             "        \"localtime\": \"15:13:42\"\n" +
                             "    },\n" +
                             "    {\n" +
-                            "        \"coordinate\": \"31N3130000N46710000E\",\n" +
+                            "        \"coordinate\": \"31N46655335N3134680E\",\n" +
                             "        \"localtime\": \"18:00:57\"\n" +
                             "    }\n" +
                             "]"
