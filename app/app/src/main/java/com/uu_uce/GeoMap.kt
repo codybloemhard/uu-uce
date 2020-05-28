@@ -48,17 +48,18 @@ class GeoMap : AppCompatActivity() {
     private lateinit var maps : List<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Set logger settings
         Logger.setTagEnabled("CustomMap", false)
         Logger.setTagEnabled("LocationServices", false)
         Logger.setTagEnabled("Pin", false)
         Logger.setTagEnabled("DrawOverlay", false)
 
         sharedPref = getDefaultSharedPreferences(this)
-        val darkMode = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
-        // Set desired theme
-        if(darkMode) setTheme(R.style.DarkTheme)
 
-        // Set statusbar text color
+        // Set desired theme
+        val darkMode = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
+        if (darkMode) setTheme(R.style.DarkTheme)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !darkMode) {
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
         }
@@ -70,7 +71,7 @@ class GeoMap : AppCompatActivity() {
 
         maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapsName)
 
-        // TODO: remove when streaming is implemented
+        // Alert that notifies the user that maps need to be downloaded TODO: remove when streaming is implemented
         if(!File(getExternalFilesDir(null)?.path + File.separator + "Maps").exists()){
             AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setIcon(R.drawable.ic_sprite_question)
@@ -84,19 +85,19 @@ class GeoMap : AppCompatActivity() {
                         {
                             if(downloadResult){
                                 runOnUiThread{
-                                    Toast.makeText(this, "Download completed, unpacking", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(this, getString(R.string.zip_download_completed), Toast.LENGTH_LONG).show()
                                 }
                                 val unzipResult = unpackZip(maps.first()) { progress -> runOnUiThread { progressBar.progress = progress } }
                                 runOnUiThread{
-                                    if(unzipResult) Toast.makeText(this, "Unpacking completed", Toast.LENGTH_LONG).show()
-                                    else Toast.makeText(this, "Unpacking failed", Toast.LENGTH_LONG).show()
+                                    if(unzipResult) Toast.makeText(this, getString(R.string.zip_unpack_completed), Toast.LENGTH_LONG).show()
+                                    else Toast.makeText(this, getString(R.string.zip_unpacking_failed), Toast.LENGTH_LONG).show()
                                     popupWindow?.dismiss()
                                     start()
                                 }
                             }
                             else{
                                 runOnUiThread{
-                                    Toast.makeText(this, "Download failed", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG).show()
                                     popupWindow?.dismiss()
                                     start()
                                 }
@@ -118,12 +119,11 @@ class GeoMap : AppCompatActivity() {
 
     private fun start(){
         setContentView(R.layout.activity_geo_map)
+        customMap.setActivity(this)
 
         // Set settings
         customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
         customMap.resizePins()
-
-        customMap.setActivity(this)
 
         // Start database and get pins from database
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
@@ -151,11 +151,12 @@ class GeoMap : AppCompatActivity() {
             customMap.startLogin()
         }
 
+        // Set menu controls
         dragBar.clickAction      = {menu.dragButtonTap()}
         dragBar.dragAction       = { dx, dy -> menu.drag(dx,dy)}
         dragBar.dragEndAction    = { dx, dy -> menu.snap(dx, dy)}
 
-        //add layers to map
+        // Add layers to map
         loadMap()
 
         customMap.tryStartLocServices(this)
@@ -167,7 +168,7 @@ class GeoMap : AppCompatActivity() {
                 customMap.setCenterPos()
             }
             else{
-                Toast.makeText(this, "Location not available", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.location_unavailable), Toast.LENGTH_LONG).show()
                 getPermissions(this, LocationServices.permissionsNeeded, LOCATION_REQUEST)
             }
         }

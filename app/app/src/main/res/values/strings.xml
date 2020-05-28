@@ -7,6 +7,11 @@
     <string name="negative_button_text">No</string>
     <string name="cancel_button">Cancel</string>
     <string name="delete_popup_title">Delete</string>
+    <string name="zip_download_completed">Download completed, unpacking</string>
+    <string name="zip_unpack_completed">Unpacking completed</string>
+    <string name="zip_unpacking_failed">Unpacking failed</string>
+    <string name="download_failed">Download failed</string>
+    <string name="location_unavailable">Location not available</string>
 
     <!--GeoMap-->
     <string name="geomap_download_warning_head">Streaming is unavailable</string>
@@ -148,5 +153,5 @@
     <string name="login_nousername_message">Please enter a username</string>
     <string name="login_nopassword_message">Please enter a password</string>
     <string name="login_signin_button_text">Sign In</string>
-    
+
 </resources>
