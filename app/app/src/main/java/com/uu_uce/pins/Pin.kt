@@ -18,6 +18,7 @@ import androidx.preference.PreferenceManager
 import com.uu_uce.OpenGL.coordsPerVertex
 import com.uu_uce.R
 import com.uu_uce.allpins.PinViewModel
+import com.uu_uce.defaultPinSize
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
@@ -48,8 +49,8 @@ class Pin(
     // Used to determine if warning should show when closing pin
     private var madeProgress = false
 
-    // Set default pin size TODO: Get this from settings
-    private var pinWidth = 60f
+    // Set default pin size
+    private var pinWidth = defaultPinSize.toFloat()
 
     //opengl stuff
     private var backgroundHandle: Int = -1
@@ -181,8 +182,10 @@ class Pin(
 
         val screenLocation: Pair<Float, Float> = coordToScreen(coordinate, viewport, view.width, view.height)
 
-        if(screenLocation.first.isNaN() || screenLocation.second.isNaN())
-            return //TODO: Should not be called with NaN
+        if(screenLocation.first.isNaN() || screenLocation.second.isNaN()){
+            Logger.error("Pin", "Pin draw called with NaN location")
+            return
+        }
 
         // Calculate pin bounds on canvas
         val minX = (screenLocation.first - pinWidth / 2).roundToInt()

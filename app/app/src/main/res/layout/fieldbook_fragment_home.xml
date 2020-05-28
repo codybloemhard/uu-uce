@@ -12,41 +12,48 @@
         android:focusable="true"
         android:focusableInTouchMode="true">
 
-    <EditText
-        android:id="@+id/fieldbook_searchbar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/custom_border_search"
-        android:drawableStart="@drawable/ic_sprite_search"
-        android:ems="10"
-        android:hint="@android:string/search_go"
-        android:importantForAutofill="no"
-        android:inputType="textPersonName"
-        android:textColorHint="@color/HighBlue"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <EditText
+            android:id="@+id/fieldbook_searchbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:background="@drawable/custom_border_search"
+            android:drawableStart="@drawable/ic_sprite_search"
+            android:ems="10"
+            android:hint="@android:string/search_go"
+            android:importantForAutofill="no"
+            android:inputType="textPersonName"
+            android:textColorHint="@color/HighBlue"
+            app:layout_constraintBottom_toBottomOf="@+id/fieldbook_addpin"
+            app:layout_constraintEnd_toStartOf="@+id/fieldbook_addpin"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/fieldbook_addpin" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/fieldbook_recyclerview"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        tools:listitem="@layout/fieldbook_recyclerview_item"
-        app:layout_constraintTop_toBottomOf="@id/fieldbook_searchbar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/fieldbook_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="15dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/fieldbook_addpin"
+            tools:listitem="@layout/fieldbook_recyclerview_item" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fieldbook_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="16dp"
-        android:backgroundTint="?colorAccentRef"
-        android:src="@drawable/ic_sprite_add"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        <ImageView
+            android:id="@+id/fieldbook_addpin"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="15dp"
+            android:background="@drawable/ic_sprite_fieldbook_addpin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="@string/fieldbook_addpin_button_description" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -25,12 +25,10 @@ import com.uu_uce.R
 import com.uu_uce.childAtPosition
 import com.uu_uce.FieldbookEditor.Companion.currentUri
 import com.uu_uce.fieldbook.FieldbookViewModel
-import org.hamcrest.CoreMatchers.not
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.File
 
 
 @RunWith(AndroidJUnit4::class)
@@ -77,7 +75,7 @@ class FieldbookTests {
         val testTitle = "This is a dummy title"
 
         //Open add popup
-        onView(withId(R.id.fieldbook_fab))
+        onView(withId(R.id.fieldbook_addpin))
             .perform(click())
 
         // Check if popup opened up
@@ -165,7 +163,7 @@ class FieldbookTests {
     fun textPin(){
         val testText = "Lorem ipsum dolor sit amet"
         //Open add popup
-        onView(withId(R.id.fieldbook_fab))
+        onView(withId(R.id.fieldbook_addpin))
             .perform(click())
 
         // Check if popup opened up
@@ -256,7 +254,7 @@ class FieldbookTests {
     @Test
     fun galleryImagePin(){
         //Open add popup
-        onView(withId(R.id.fieldbook_fab))
+        onView(withId(R.id.fieldbook_addpin))
             .perform(click())
 
         // Check if popup opened up
@@ -346,7 +344,7 @@ class FieldbookTests {
     @Test
     fun cameraImagePin(){
         //Open add popup
-        onView(withId(R.id.fieldbook_fab))
+        onView(withId(R.id.fieldbook_addpin))
             .perform(click())
 
         // Check if popup opened up
@@ -436,7 +434,7 @@ class FieldbookTests {
     @Test
     fun cameraVideoPin(){
         //Open add popup
-        onView(withId(R.id.fieldbook_fab))
+        onView(withId(R.id.fieldbook_addpin))
             .perform(click())
 
         // Check if popup opened up
@@ -526,7 +524,7 @@ class FieldbookTests {
     @Test
     fun openEditor(){
         //Open add popup
-        onView(withId(R.id.fieldbook_fab))
+        onView(withId(R.id.fieldbook_addpin))
             .perform(click())
 
         // Check if popup opened up
@@ -570,7 +568,7 @@ class FieldbookTests {
     fun removeBlock(){
         val stringToBeTyped = "Test text content block"
         //Open add popup
-        onView(withId(R.id.fieldbook_fab))
+        onView(withId(R.id.fieldbook_addpin))
             .perform(click())
 
         // Check if popup opened up
@@ -638,7 +636,7 @@ class FieldbookTests {
         val secondString = "Start at the bottom"
 
         //Open add popup
-        onView(withId(R.id.fieldbook_fab))
+        onView(withId(R.id.fieldbook_addpin))
             .perform(click())
 
         // Check if popup opened up

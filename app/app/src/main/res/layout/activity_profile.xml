@@ -86,7 +86,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:fontFamily="@font/roboto_bold"
-        android:text="@string/profile_university_name"
+        android:text="@string/profile_organization_name"
         android:textColor="@color/TextGrey"
         android:textSize="15sp"
         app:layout_constraintEnd_toEndOf="parent"

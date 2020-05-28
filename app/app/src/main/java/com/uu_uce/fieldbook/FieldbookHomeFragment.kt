@@ -9,16 +9,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
-import android.widget.LinearLayout
+import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.FieldbookEditor
 import com.uu_uce.R
-import com.uu_uce.pins.ContentBlockInterface
 
 class FieldbookHomeFragment(view: View) : Fragment() {
 
@@ -49,7 +47,7 @@ class FieldbookHomeFragment(view: View) : Fragment() {
     ): View? {
         return inflater.inflate(R.layout.fieldbook_fragment_home, container, false).also { view ->
             val recyclerView = view.findViewById<RecyclerView>(R.id.fieldbook_recyclerview)
-            val addButton = view.findViewById<FloatingActionButton>(R.id.fieldbook_fab)
+            val addButton = view.findViewById<ImageView>(R.id.fieldbook_addpin)
 
             viewAdapter = FieldbookAdapter(fragmentActivity, viewModel, parentView)
 

@@ -40,7 +40,7 @@ class Login : AppCompatActivity() {
         setContentView(R.layout.activity_login_screen)
 
         //TODO: Get this information from server
-        val orgToIp = mutableMapOf<String, String>(Pair("Utrecht University", "http://131.211.31.176:8080"))
+        val orgToIp = mutableMapOf(Pair("Utrecht University", "http://131.211.31.176:8080"))
         val orgList = orgToIp.map{ (k, _) -> k }
 
 

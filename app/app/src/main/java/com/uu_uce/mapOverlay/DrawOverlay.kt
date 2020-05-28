@@ -62,10 +62,6 @@ fun aaBoundingBoxContains(bb1Min: p2, bb1Max: p2, bb2Min: p2, bb2Max: p2) : Bool
             )
 }
 
-fun aaBoundingBoxIntersect(bb1Min: p3, bb1Max: p3, bb2Min: p2, bb2Max: p2) : Boolean{
-    return aaBoundingBoxContains(p2(bb1Min.first, bb1Min.second), p2(bb1Max.first, bb1Max.second), bb2Min, bb2Max)
-}
-
 /*
 Calculates if a point is inside of a boundingbox.
 bb1Min: The top-left coordinate of the first bounding box.

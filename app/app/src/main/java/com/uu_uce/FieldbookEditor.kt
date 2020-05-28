@@ -93,7 +93,7 @@ class FieldbookEditor: AppCompatActivity() {
         if (bundle != null)
             fieldbookIndex = bundle.getInt("fieldbook_index")
 
-        createTopbar(this,getString(R.string.pineditor_topbar_title)){
+        createTopbar(this,getString(R.string.editor_topbar_title)){
             if(fieldbookIndex >= 0){
                 finish()
             }

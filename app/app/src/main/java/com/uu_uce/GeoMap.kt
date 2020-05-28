@@ -45,8 +45,6 @@ class GeoMap : AppCompatActivity() {
     private lateinit var progressBar : ProgressBar
     private var downloadResult = false
 
-    // TODO: Remove temporary hardcoded map information
-    private val mapsName = "maps.zip"
     private lateinit var maps : List<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {

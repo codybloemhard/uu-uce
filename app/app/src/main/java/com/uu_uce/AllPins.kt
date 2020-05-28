@@ -113,7 +113,7 @@ class AllPins : AppCompatActivity() {
             getString(R.string.allpins_sorting_type_za))
 
         AlertDialog.Builder(this, R.style.AlertDialogStyle)
-            .setTitle(getString(R.string.allpins_filer_popup_title))
+            .setTitle(getString(R.string.allpins_sort_popup_title))
             .setSingleChoiceItems(filterOptions, sharedPref.getInt("com.uu_uce.SORTMODE", 0)) { dialog, which ->
                 sortmode = which
                 dialog.dismiss()
