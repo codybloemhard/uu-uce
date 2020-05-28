@@ -44,7 +44,7 @@ class Login : AppCompatActivity() {
         val orgList = orgToIp.map{ (k, _) -> k }
 
 
-        val adapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, orgList)
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, orgList)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         orgselector.adapter = adapter
 
@@ -83,6 +83,7 @@ class Login : AppCompatActivity() {
                         }
                         val intent = Intent(this, GeoMap::class.java)
                         startActivity(intent)
+                        finish()
                     }
                 }
             }
