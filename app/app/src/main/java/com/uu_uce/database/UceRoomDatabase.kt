@@ -8,6 +8,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.uu_uce.allpins.PinData
 import com.uu_uce.fieldbook.FieldbookEntry
+import com.uu_uce.views.pinsUpdated
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -69,7 +70,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
                     "[{\"tag\":\"VIDEO\", \"file_path\":\"Videos/zoo.mp4\", \"thumbnail\":\"Videos/Thumbnails/zoothumbnail.png\", \"title\":\"zoo video\"}]",
                     0,
                     0,
-                    "3",
+                    "539272be-a3c3-4102-ae2f-9c740c1aa1b4",
                     ""
                 )
             )
@@ -84,10 +85,11 @@ abstract class UceRoomDatabase : RoomDatabase() {
                     1,
                     1,
                     "",
-                    "2"
+                    "f0e7638e-9eaa-4c9e-be45-cdafabae3ad5"
                 )
             )
             pinDao.updateData(pinList)
+            pinsUpdated.setValue(true)
         }
     }
 
