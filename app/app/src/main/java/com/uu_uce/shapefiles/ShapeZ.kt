@@ -4,7 +4,9 @@ package com.uu_uce.shapefiles
 import android.opengl.GLES20
 import com.uu_uce.OpenGL.colorsPerVertex
 import com.uu_uce.OpenGL.coordsPerVertex
+import com.uu_uce.linewidth
 import com.uu_uce.misc.Logger
+import com.uu_uce.outlinewidth
 import java.nio.*
 import kotlin.random.Random
 
@@ -97,41 +99,46 @@ class LineDrawInfo(nrPoints: Int, nrLines: Int): DrawInfo(){
 }
 
 //information for drawing a polygon
-class PolygonDrawInfo(nrVertices: Int, nrIndices: Int): DrawInfo(){
+class PolygonDrawInfo(nrVertices: Int, nrIndices: Int, outlineLength: Int): DrawInfo(){
     private var vertices = FloatArray(nrVertices* coordsPerVertex)
     private var v = 0
     private var colors = FloatArray(nrVertices*3)
     private var indices = IntArray(nrIndices)
     private var i = 0
+    private var outlineIndices = IntArray(outlineLength)
+    private var j = 0
     private var indexOffset = 0
     private lateinit var vertexBuffer: FloatBuffer
     private lateinit var indexBuffer: IntBuffer
+    private lateinit var outlineBuffer: IntBuffer
     private lateinit var colorBuffer: FloatBuffer
     private var nrIndices = 0
+    private var nrOutlineIndices = 0
 
     private fun addVertex(item: Float) {vertices[v++]=item}
-    //addVertices must be called after addIndices
-    fun addVertices(verts: List<p3>, style: Style){
-        for(i in verts.indices){
-            colors[(indexOffset + i) * 3 + 0] = style.color[0]
-            colors[(indexOffset + i) * 3 + 1] = style.color[1]
-            colors[(indexOffset + i) * 3 + 2] = style.color[2]
-        }
-        indexOffset += verts.size
-        for ((x,y,_) in verts) {
-            addVertex(x.toFloat())
 
+    fun addPolygon(polygon: PolygonZ){
+        for(index in polygon.indices) indices[i++] = indexOffset + index
+        if(polygon.style.outline) for(index in polygon.outlineIndices) outlineIndices[j++] = indexOffset + index
+
+        for(i in polygon.vertices.indices){
+            colors[(indexOffset + i) * 3 + 0] = polygon.style.color[0]
+            colors[(indexOffset + i) * 3 + 1] = polygon.style.color[1]
+            colors[(indexOffset + i) * 3 + 2] = polygon.style.color[2]
+        }
+
+        for ((x,y,_) in polygon.vertices) {
+            addVertex(x.toFloat())
             addVertex(y.toFloat())
         }
-    }
-    fun addIndices(idcs: MutableList<Short>){
-        for(index in idcs) indices[i++] = indexOffset + index
+
+        indexOffset += polygon.vertices.size
     }
 
     override fun draw(lineProgram: Int, polygonProgram: Int, scale: FloatArray, trans: FloatArray, color: FloatArray) {
         GLES20.glUseProgram(polygonProgram)
 
-        val positionHandle = GLES20.glGetAttribLocation(polygonProgram, "vPosition")
+        var positionHandle = GLES20.glGetAttribLocation(polygonProgram, "vPosition")
         GLES20.glEnableVertexAttribArray(positionHandle)
         GLES20.glVertexAttribPointer(
             positionHandle,
@@ -142,7 +149,7 @@ class PolygonDrawInfo(nrVertices: Int, nrIndices: Int): DrawInfo(){
             vertexBuffer
         )
 
-        val colorHandle = GLES20.glGetAttribLocation(polygonProgram, "inColor")
+        var colorHandle = GLES20.glGetAttribLocation(polygonProgram, "inColor")
         GLES20.glEnableVertexAttribArray(colorHandle)
         GLES20.glVertexAttribPointer(
             colorHandle,
@@ -153,18 +160,49 @@ class PolygonDrawInfo(nrVertices: Int, nrIndices: Int): DrawInfo(){
             colorBuffer
         )
 
-        val scaleHandle = GLES20.glGetUniformLocation(lineProgram, "scale")
+        var scaleHandle = GLES20.glGetUniformLocation(lineProgram, "scale")
         GLES20.glUniform2fv(scaleHandle, 1, scale, 0)
 
-        val transHandle = GLES20.glGetUniformLocation(lineProgram, "trans")
+        var transHandle = GLES20.glGetUniformLocation(lineProgram, "trans")
         GLES20.glUniform2fv(transHandle, 1, trans, 0)
 
         // Draw the triangle
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, nrIndices, GLES20.GL_UNSIGNED_INT, indexBuffer)
 
+
+        //draw outline
+        GLES20.glUseProgram(lineProgram)
+
+        // get handle to vertex shader's vPosition member
+        positionHandle = GLES20.glGetAttribLocation(lineProgram, "vPosition")
+
+        GLES20.glEnableVertexAttribArray(positionHandle)
+
+        GLES20.glVertexAttribPointer(
+            positionHandle,
+            coordsPerVertex,
+            GLES20.GL_FLOAT,
+            false,
+            coordsPerVertex*4,
+            vertexBuffer
+        )
+
+        val outlineColor = floatArrayOf(0f,0f,0f,1f)
+        colorHandle = GLES20.glGetUniformLocation(lineProgram, "vColor")
+        GLES20.glUniform4fv(colorHandle, 1, outlineColor, 0)
+
+        scaleHandle = GLES20.glGetUniformLocation(lineProgram, "scale")
+        GLES20.glUniform2fv(scaleHandle, 1, scale, 0)
+
+        transHandle = GLES20.glGetUniformLocation(lineProgram, "trans")
+        GLES20.glUniform2fv(transHandle, 1, trans, 0)
+
+        GLES20.glLineWidth(outlinewidth)
+        GLES20.glDrawElements(GLES20.GL_LINES, nrOutlineIndices, GLES20.GL_UNSIGNED_INT, outlineBuffer)
+        GLES20.glLineWidth(linewidth)
+
         GLES20.glDisableVertexAttribArray(positionHandle)
         GLES20.glDisableVertexAttribArray(colorHandle)
-        //GLES20.glDisableVertexAttribArray(stripeHandle)
     }
 
     override fun finalize() {
@@ -197,11 +235,23 @@ class PolygonDrawInfo(nrVertices: Int, nrIndices: Int): DrawInfo(){
                 }
             }
 
+        outlineBuffer =
+                // (# of coordinate values * 4 bytes per int)
+            ByteBuffer.allocateDirect(outlineIndices.size * 4).run {
+                order(ByteOrder.nativeOrder())
+                asIntBuffer().apply {
+                    put(outlineIndices)
+                    position(0)
+                }
+            }
+
         nrIndices = indices.size
+        nrOutlineIndices = outlineIndices.size
 
         vertices = floatArrayOf()
         colors = floatArrayOf()
         indices = intArrayOf()
+        outlineIndices = intArrayOf()
     }
 }
 
@@ -232,15 +282,14 @@ class HeightShapeZ(private var points: List<p2>, style: Style): ShapeZ(style) {
 }
 
 //shape consisting of polygons that need to be colorized
-class PolygonZ(private var vertices: List<p3>, var indices: MutableList<Short>, style: Style): ShapeZ(style){
+class PolygonZ(var vertices: List<p3>, var indices: MutableList<Short>, var outlineIndices: List<Short>, style: Style): ShapeZ(style){
     override val nrPoints: Int = vertices.size
 
     override fun initDrawInfo(
         drawInfo: DrawInfo
     ) {
         if (drawInfo is PolygonDrawInfo) {
-            drawInfo.addIndices(indices)
-            drawInfo.addVertices(vertices, style)
+            drawInfo.addPolygon(this)
         } else Logger.error("ShapeZ", "wrong draw information for polygon shape")
     }
 }

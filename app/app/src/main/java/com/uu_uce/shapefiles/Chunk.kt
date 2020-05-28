@@ -30,11 +30,13 @@ class Chunk(var shapes: List<ShapeZ>, var bmin: p3, var bmax: p3, val type: Laye
             LayerType.Water -> {
                 var nrIndices = 0
                 var nrPoints = 0
+                var nrOutlineIndices = 0
                 for(shape in shapes){
                     nrIndices+=(shape as PolygonZ).indices.size
                     nrPoints+=shape.nrPoints
+                    if(shape.style.outline) nrOutlineIndices += shape.outlineIndices.size
                 }
-                PolygonDrawInfo(nrPoints, nrIndices)
+                PolygonDrawInfo(nrPoints, nrIndices, nrOutlineIndices)
             }
             else -> throw Exception("chunk type not implemented")
         }

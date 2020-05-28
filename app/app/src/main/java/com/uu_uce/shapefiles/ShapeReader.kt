@@ -153,7 +153,7 @@ class PolygonReader(
     private val styles: List<Style>
 ): ChunkGetter(dir){
     override fun getChunk(cIndex: ChunkIndex): Chunk {
-        val file = File(dir, "river")
+        val file = File(dir, "geoboi")
         val reader = FileReader(file)
 
         val xoff = reader.readULong().toDouble()
@@ -166,7 +166,7 @@ class PolygonReader(
 
         val nrShapes = reader.readULong()
         val shapes: List<PolygonZ> = List(nrShapes.toInt()) {
-            val nrVertices = reader.readULong()
+            var nrVertices = reader.readULong()
             val vertices: List<p3> = List(nrVertices.toInt()) {
                 p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, 0.0)
             }
@@ -174,6 +174,20 @@ class PolygonReader(
             val indices: List<Short> = List(nrIndices.toInt()) {
                 reader.readUShort().toShort()
             }
+
+            val nrOutlineIndices = reader.readULong()
+            var outlineIndexPairs = List(nrOutlineIndices.toInt()) {
+                Pair(reader.readUShort().toShort(),reader.readUShort().toShort())
+            }
+
+            val outlineIndices: MutableList<Short> = mutableListOf()
+            for((start,end) in outlineIndexPairs){
+                for(i in start until end){
+                    outlineIndices.add(i.toShort())
+                    outlineIndices.add(((i + 1)%nrVertices.toInt()).toShort())
+                }
+            }
+
             val style  =
                 if(hasStyles) {
                     val styleIndex = reader.readULong().toInt()
@@ -181,7 +195,7 @@ class PolygonReader(
                 }
                 else Style(false, floatArrayOf(0.2f,0.2f,0.8f))
 
-            PolygonZ(vertices, indices.toMutableList(), style)
+            PolygonZ(vertices, indices.toMutableList(), outlineIndices.toList(), style)
         }
 
         return Chunk(shapes, bmin, bmax, LayerType.Water)

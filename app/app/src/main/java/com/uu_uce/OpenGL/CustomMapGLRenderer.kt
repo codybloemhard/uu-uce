@@ -83,7 +83,7 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
     var pinsChanged = true
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        GLES20.glClearColor(0.9f, 0.9f, 0.9f, 1.0f)
+        GLES20.glClearColor(0.0f, 0.0f, 1.0f, 1.0f)
 
         //opacity stuff
         GLES20.glDisable(GLES20.GL_DEPTH_TEST)
@@ -99,6 +99,8 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
             GLES20.glAttachShader(it, fragmentShader)
             GLES20.glLinkProgram(it)
         }
+
+
 
         vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, locVertexShaderCode)
         fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, lineFragmentShaderCode)
