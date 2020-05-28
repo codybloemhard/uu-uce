@@ -354,6 +354,7 @@ class CustomMap : ViewTouchParent {
                         pins[pin.pinId]!!.resize(pinSize)
                         redrawMap()
                     }
+                    newPin.tapAction = {activity: Activity -> (newPin::openContent)(this,activity) {activePopup = null}}
                 }
                 pinStatuses[pin.pinId] == 0 -> {
                     // Pin was present and locked (status = 0)
@@ -389,6 +390,7 @@ class CustomMap : ViewTouchParent {
             val pin = PinConversion(activity).fieldbookEntryToPin(entry,fieldbookViewModel)
             pins[pin.id] = pin.apply{
                 resize(pinSize)
+                tapAction = {activity: Activity ->  (::openFieldbookPopup)(activity,rootView,entry,pin.getContent().contentBlocks) }
             }
         }
         synchronized(sortedPins) {
@@ -401,8 +403,10 @@ class CustomMap : ViewTouchParent {
         if(activePopup != null) return
         for(pin in sortedPins.reversed()){
             if(!pin.inScreen || pin.getStatus() < 1) continue
-            if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, 0)){
-                pin.openContent(this, activity) {activePopup = null}
+            if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, 0)) {
+                pin.run{
+                    tapAction(activity)
+                }
                 activePopup = pin.popupWindow
                 Logger.log(LogType.Info, "CustomMap", "${pin.getTitle()}: I have been tapped.")
                 return

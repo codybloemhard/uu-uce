@@ -49,7 +49,7 @@ class Pin(
     // Used to determine if warning should show when closing pin
     private var madeProgress = false
 
-    // Set default pin size TODO: Get this from settings
+    // Set default pin size
     private var pinWidth = 60f
 
     //opengl stuff
@@ -102,6 +102,8 @@ class Pin(
     var boundingBox: Pair<p2, p2> = Pair(p2Zero, p2Zero)
 
     var popupWindow: PopupWindow? = null
+
+    var tapAction : ((Activity) -> Unit) = {}
 
     // Quiz
     private var answered : Array<Boolean>       = Array(content.contentBlocks.count()) { true }

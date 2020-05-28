@@ -5,7 +5,6 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.graphics.Point
 import android.os.Bundle
 import android.view.*
 import android.widget.PopupWindow
@@ -27,8 +26,6 @@ import com.uu_uce.shapefiles.HeightLineReader
 import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.PolygonReader
 import kotlinx.android.synthetic.main.activity_geo_map.*
-import kotlinx.android.synthetic.main.activity_geo_map.customMap
-import kotlinx.android.synthetic.main.fieldbook_fragment_pinmap.*
 import java.io.File
 
 /**
@@ -48,7 +45,6 @@ class FieldbookPinmapFragment : Fragment() {
     private lateinit var frContext  : Context
     private lateinit var window     : Window
 
-    private var screenDim = Point(0,0)
     private var statusBarHeight = 0
     private var resourceId = 0
     private var started = false
@@ -76,9 +72,6 @@ class FieldbookPinmapFragment : Fragment() {
         window     = frActivity.window
 
         maps = listOf(frActivity.getExternalFilesDir(null)?.path + File.separator + mapsName)
-
-        // TODO: remove when streaming is implemented
-
     }
 
     override fun onCreateView(
@@ -137,6 +130,20 @@ class FieldbookPinmapFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        if(started){
+            customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
+            viewModel.allFieldbookEntries.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+                this.customMap.setFieldbook(it)
+            })
+            customMap.redrawMap()
+        }
+
+        super.onResume()
+
+
+    }
+
     private fun start(){
         // Get preferences
         sharedPref = PreferenceManager.getDefaultSharedPreferences(frContext)
@@ -155,10 +162,6 @@ class FieldbookPinmapFragment : Fragment() {
         // Start database and get pins from database
         this.customMap.setFieldbookViewModel(viewModel)
         this.customMap.setLifeCycleOwner(this)
-
-        viewModel.allFieldbookEntries.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
-            this.customMap.setFieldbook(it)
-        })
 
         // Get statusbar height
         resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")

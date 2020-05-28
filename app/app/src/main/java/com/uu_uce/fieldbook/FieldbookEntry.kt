@@ -11,5 +11,4 @@ class FieldbookEntry(
     var content        : String
 ) {
     @PrimaryKey(autoGenerate = true) var id: Int = 0
-    var size: Int = 60
 }
