@@ -57,7 +57,8 @@ class FieldbookTests {
         fieldbookViewmodel = ViewModelProvider(intentsTestRule.activity).get(FieldbookViewModel::class.java)
         fieldbookViewmodel.deleteAll()
 
-        intending(hasAction(Intent.ACTION_GET_CONTENT)).respondWith(getFileURIResult())
+        intending(hasAction(Intent.ACTION_GET_CONTENT))
+            .respondWith(setFile(Uri.parse("/sdcard/Android/data/com.uu_uce/files/PinContent/Images/test.png")))
         intending(hasAction(MediaStore.ACTION_IMAGE_CAPTURE))
             .respondWith(setFile(Uri.parse("/sdcard/Android/data/com.uu_uce/files/PinContent/Images/test.png")))
         intending(hasAction(MediaStore.ACTION_VIDEO_CAPTURE))
@@ -705,17 +706,9 @@ class FieldbookTests {
             .check(matches(withText(secondString)))
     }
 
-    private fun getFileURIResult(): Instrumentation.ActivityResult? {
-        val resultData = Intent()
-        val dir: File? = intentsTestRule.activity.getExternalFilesDir(null)
-        val file = File(dir?.path, "PinContent/Images/test.png")
-        val uri: Uri = Uri.fromFile(file)
-        resultData.data = uri
-        return Instrumentation.ActivityResult(Activity.RESULT_OK, resultData)
-    }
-
     private fun setFile(uri: Uri) : Instrumentation.ActivityResult? {
         val resultData = Intent()
+        resultData.data = uri
         currentUri = uri
         return Instrumentation.ActivityResult(Activity.RESULT_OK, resultData)
     }

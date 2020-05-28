@@ -458,7 +458,14 @@ class FieldbookEditor: AppCompatActivity() {
 
     private fun getImagePathFromURI(context: Context, uri: Uri?): Uri {
         var filePath = ""
-        val wholeID: String = DocumentsContract.getDocumentId(uri)
+        val wholeID : String
+
+        try{
+            wholeID = DocumentsContract.getDocumentId(uri)
+        }
+        catch(e : java.lang.Exception){
+            return Uri.EMPTY
+        }
 
         // Split at colon, use second item in the array
         val id = wholeID.split(":").toTypedArray()[1]
