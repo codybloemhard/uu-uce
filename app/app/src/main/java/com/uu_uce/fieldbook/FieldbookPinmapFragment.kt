@@ -162,20 +162,6 @@ class FieldbookPinmapFragment : Fragment() {
         //add layers to map
         loadMap()
 
-        //customMap.tryStartLocServices(this)
-
-        // Set center on location button functionality
-        /*center_button.setOnClickListener{
-            if(customMap.locationAvailable){
-                customMap.zoomToDevice()
-                customMap.setCenterPos()
-            }
-            else{
-                Toast.makeText(frContext, "Location not available", Toast.LENGTH_LONG).show()
-                getPermissions(frActivity, LocationServices.permissionsNeeded, LOCATION_REQUEST)
-            }
-        }*/
-
         needsReload.setListener(object : ListenableBoolean.ChangeListener {
             override fun onChange() {
                 if(needsReload.getValue()){
