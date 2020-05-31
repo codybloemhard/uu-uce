@@ -83,7 +83,7 @@ class Camera(
     //retrieve the topleft and bottomright coordinates that are visible in the camera
     fun getViewport(): Pair<p2,p2>{
         //if camera is not initialized properly, return dummy value
-        if (viewMax.first < viewMin.first || viewMax.second < viewMin.second || viewMax.third < viewMin.third) {
+        if (viewMax.first < viewMin.first || viewMax.second < viewMin.second) {
             return p2ZeroPair
         }
 
