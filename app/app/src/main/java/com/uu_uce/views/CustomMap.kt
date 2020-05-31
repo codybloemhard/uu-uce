@@ -396,6 +396,8 @@ class CustomMap : ViewTouchParent {
         synchronized(sortedPins) {
             sortedPins = pins.values.sortedByDescending { pin -> pin.coordinate.north }
         }
+
+        redrawMap()
     }
 
     //called when the screen is tapped at tapLocation

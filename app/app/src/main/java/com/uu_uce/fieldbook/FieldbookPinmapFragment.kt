@@ -130,28 +130,15 @@ class FieldbookPinmapFragment : Fragment() {
         }
     }
 
-    override fun onResume() {
-        if(started){
-            customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
-            viewModel.allFieldbookEntries.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
-                this.customMap.setFieldbook(it)
-            })
-            customMap.redrawMap()
-        }
-
-        super.onResume()
-
-
-    }
 
     private fun start(){
         // Get preferences
         sharedPref = PreferenceManager.getDefaultSharedPreferences(frContext)
 
         // Set settings
-        customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
+        this.customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
 
-        customMap.setActivity(frActivity)
+        this.customMap.setActivity(frActivity)
 
         // TODO: Remove when releasing
         with(sharedPref.edit()) {
@@ -162,6 +149,9 @@ class FieldbookPinmapFragment : Fragment() {
         // Start database and get pins from database
         this.customMap.setFieldbookViewModel(viewModel)
         this.customMap.setLifeCycleOwner(this)
+        viewModel.allFieldbookEntries.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+            this.customMap.setFieldbook(it)
+        })
 
         // Get statusbar height
         resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")

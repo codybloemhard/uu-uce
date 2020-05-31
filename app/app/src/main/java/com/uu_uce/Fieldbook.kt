@@ -70,6 +70,12 @@ class Fieldbook : AppCompatActivity() {
         }
     }
 
+    override fun onResumeFragments() {
+        super.onResumeFragments()
+        val current = supportFragmentManager.findFragmentById(R.id.fieldbook_container) as Fragment
+        supportFragmentManager.beginTransaction().detach(current).attach(current).commit()
+    }
+
     private fun openFragment(fragment: Fragment) {
         val transaction = supportFragmentManager.beginTransaction()
         transaction.replace(R.id.fieldbook_container, fragment)
