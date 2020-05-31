@@ -2,8 +2,8 @@ package com.uu_uce.mapOverlay
 
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.shapefiles.p2
-import com.uu_uce.shapefiles.p3
-import kotlin.math.*
+import kotlin.math.abs
+import kotlin.math.pow
 
 /*
 Calculates where on the screen a coordinate is.
