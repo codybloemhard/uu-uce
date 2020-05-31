@@ -52,12 +52,13 @@ The following example will generate a block of text followed by an image and fin
     },
     {
         "tag" 			: "IMAGE",
-        "file_path"	    : "file:///data/data/com.uu_uce/files/designated_directory/images/your_image_name.png"
+        "file_path"	    : "Images/your_image_name.png",
+        "title"			: "Put image title here"
     },
     {
         "tag" 			: "VIDEO",
-        "file_path"	    : "file:///data/data/com.uu_uce/files/designated_directory/videos/your_video_name.mp4",
-        "thumbnail"     : "file:///data/data/com.uu_uce/files/designated_directory/videos/thumbnails/your_thumbnail_name.png",
+        "file_path"	    : "Videos/your_video_name.mp4",
+        "thumbnail"     : "Videos/thumbnails/your_thumbnail_name.png",
         "title"			: "Put video title here"
     },
 	{
@@ -82,9 +83,9 @@ The entire file path (formated as Uri) is saved in the JSON file, for the thumbn
 Pins are created by the teacher. All content for the pins is stored to
 ```file:///data/data/com.uu_uce/files/pin_content/```. It's not available in the gallery or any other way
 Additional file path is determined depending on the kind of file:
-- Images are stored in the: `images/` folder
-- Videos are stored in the: `videos/` folder
-- Thumbnails are stored in the: `videos/thumbnails` folder
+- Images are stored in the: `Images/` folder
+- Videos are stored in the: `Videos/` folder
+- Thumbnails are stored in the: `Videos/Thumbnails` folder
 
 #### Fieldbook
 The fieldbook also makes use of PinContent. The pictures and images in the fieldbook are made by the users and should always be available to them (through the gallery). Content that's created outside of the UCE environment isn't moved and the file_path will reference its location in the camera directory, through a content uri.

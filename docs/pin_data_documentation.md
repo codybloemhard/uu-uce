@@ -1,7 +1,7 @@
 # Pin data 
 Pin data is the class of data that is stored within the app database, it has 9 parameters:
 
-## pinId : Int
+## pinId : String
 This is the id of the pin, this id must be unique.
 The pinId is used to refer to the pin by predecessors and following pins.
 
@@ -36,13 +36,13 @@ The starting status of the pin, this represents if the pin is locked unlocked or
 	2:	Pin is completed 	
 
 ## predecessorIds : String
-The id's of all pins that should be completed for this pin to unlock, -1 if no predecessors exist.
+The id's of all pins that should be completed for this pin to unlock, ("") if no predecessors exist.
 The list of predecessor pins should be given sepparated by commas (,).
 ### Example:
 `"0,1,2"`
 
 ## followIds : String
-The id's of all pins that are waiting for this pin (and maybe others) to unlock, -1 if no predecessors exist.
+The id's of all pins that are waiting for this pin (and maybe others) to unlock, ("") if no predecessors exist.
 The list of following pins should be given sepparated by commas (,).
 ### Example:
 `"0,1,2"`

@@ -2,7 +2,10 @@ package com.uu_uce
 
 import android.app.AlertDialog
 import android.content.SharedPreferences
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
 import android.widget.SeekBar
 import android.widget.Toast
@@ -10,27 +13,31 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.allpins.PinViewModel
+import com.uu_uce.allpins.parsePins
 import com.uu_uce.pins.PinContent
 import com.uu_uce.services.dirSize
 import com.uu_uce.services.unpackZip
 import com.uu_uce.services.updateFiles
 import com.uu_uce.services.writableSize
 import com.uu_uce.ui.createTopbar
+import com.uu_uce.views.pinsUpdated
 import kotlinx.android.synthetic.main.activity_settings.*
 import java.io.File
+import kotlin.math.max
+import kotlin.math.min
 
 // Default settings
 const val defaultPinSize = 60
+var needsRestart = false
+const val mapsName = "maps.zip"
+const val mapsFolderName = "Maps"
+const val contentFolderName = "PinContent"
 
 class Settings : AppCompatActivity() {
     // private variables
     private val minPinSize = 10
     private val maxPinSize = 200
 
-    // TODO: Remove temporary hardcoded map information
-    private val mapsName = "maps.zip"
-    private val mapsFolderName = "Maps"
-    private val contentFolderName = "PinContent"
     private lateinit var maps : List<String>
     private lateinit var mapsDir : String
     private lateinit var contentDir : String
@@ -40,6 +47,19 @@ class Settings : AppCompatActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        sharedPref = getDefaultSharedPreferences(this)
+        val darkMode = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
+        // Set desired theme
+        if(darkMode) setTheme(R.style.DarkTheme)
+
+        // Set statusbar text color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !darkMode) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
+        }
+        else if(!darkMode){
+            window.statusBarColor = Color.BLACK// set status background white
+        }
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
@@ -48,7 +68,6 @@ class Settings : AppCompatActivity() {
 
         maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapsName)
 
-        sharedPref = getDefaultSharedPreferences(this)
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
 
         createTopbar(this, "Settings")
@@ -57,12 +76,12 @@ class Settings : AppCompatActivity() {
         val curSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
         pinsize_seekbar.max = maxPinSize - minPinSize
         pinsize_seekbar.progress = curSize - minPinSize
-        pinsize_numberview.text = curSize.toString()
+        pinsize_numberview.setText(curSize.toString())
 
         pinsize_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
                 // Display the pinSize
-                pinsize_numberview.text = (seekBar.progress + minPinSize).toString()
+                pinsize_numberview.setText((seekBar.progress + minPinSize).toString())
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {
@@ -77,12 +96,27 @@ class Settings : AppCompatActivity() {
             }
         })
 
+        pinsize_numberview.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+                //Perform Code
+                val progress = min(max(pinsize_numberview.text.toString().toInt(), minPinSize), maxPinSize)
+                pinsize_seekbar.progress = progress - minPinSize
+                pinsize_numberview.setText(progress.toString())
+                with(sharedPref.edit()) {
+                    putInt("com.uu_uce.PIN_SIZE", progress)
+                    apply()
+                }
+                return@OnKeyListener true
+            }
+            false
+        })
+
         // Network downloading
         val curNetworkDownloading = sharedPref.getBoolean("com.uu_uce.NETWORK_DOWNLOADING", false)
         networkdownload_switch.isChecked = curNetworkDownloading
         networkdownload_switch.setOnClickListener{
             if(networkdownload_switch.isChecked){
-                AlertDialog.Builder(this)
+                AlertDialog.Builder(this, R.style.AlertDialogStyle)
                     .setIcon(R.drawable.ic_sprite_warning)
                     .setTitle(getString(R.string.settings_mobiledata_warning_head))
                     .setMessage(getString(R.string.settings_mobiledata_warning_body))
@@ -107,6 +141,25 @@ class Settings : AppCompatActivity() {
                     apply()
                 }
             }
+        }
+
+        // Darkmode switch
+        darktheme_switch.isChecked = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
+        darktheme_switch.setOnClickListener {
+            with(sharedPref.edit()) {
+                putBoolean(
+                    "com.uu_uce.DARKMODE",
+                    darktheme_switch.isChecked
+                )
+                apply()
+            }
+
+            needsRestart = !needsRestart
+
+            // Restart activity
+            val intent = intent
+            finish()
+            startActivity(intent)
         }
 
         // Download maps
@@ -139,11 +192,11 @@ class Settings : AppCompatActivity() {
         }
 
         download_maps_button.setOnClickListener{
-            if(!File(getExternalFilesDir(null)?.path + File.separator + "Maps").exists()) {
+            if (!File(getExternalFilesDir(null)?.path + File.separator + mapsFolderName).exists()) {
                 downloadMaps()
             }
             else{
-                AlertDialog.Builder(this)
+                AlertDialog.Builder(this, R.style.AlertDialogStyle)
                     .setIcon(R.drawable.ic_sprite_question)
                     .setTitle(getString(R.string.settings_redownload_map_head))
                     .setMessage(getString(R.string.settings_redownload_map_body))
@@ -167,7 +220,7 @@ class Settings : AppCompatActivity() {
         maps_storage_size.text = writableSize(dirSize(File(mapsDir)))
 
         delete_maps_button.setOnClickListener {
-            AlertDialog.Builder(this)
+            AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setIcon(R.drawable.ic_sprite_warning)
                 .setTitle(getString(R.string.settings_delete_maps_warning_head))
                 .setMessage(getString(R.string.settings_delete_maps_warning_body))
@@ -190,7 +243,7 @@ class Settings : AppCompatActivity() {
                 val pathList = mutableListOf<String>()
 
                 for (data in list){
-                    for (block in PinContent(data, this).contentBlocks){
+                    for (block in PinContent(data, this, false).contentBlocks){
                         for (path in block.getFilePath()){
                             pathList.add(path)
                         }
@@ -229,7 +282,7 @@ class Settings : AppCompatActivity() {
         content_storage_size.text = writableSize(dirSize(File(contentDir)))
 
         delete_content_button.setOnClickListener {
-            AlertDialog.Builder(this)
+            AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setIcon(R.drawable.ic_sprite_warning)
                 .setTitle(getString(R.string.settings_delete_content_warning_head))
                 .setMessage(getString(R.string.settings_delete_content_warning_body))
@@ -242,6 +295,18 @@ class Settings : AppCompatActivity() {
                 }
                 .setNegativeButton(getString(R.string.negative_button_text), null)
                 .show()
+        }
+
+        databasetest.setOnClickListener{
+            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + "database.json"))){
+                pinsUpdated.setValue(true)
+            }
+        }
+
+        databasetest2.setOnClickListener{
+            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + "database (1).json"))){
+                pinsUpdated.setValue(true)
+            }
         }
     }
 }

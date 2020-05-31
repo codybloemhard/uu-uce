@@ -1,7 +1,6 @@
 package com.uu_uce.fieldbook
 
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -9,7 +8,6 @@ import android.os.Bundle
 import android.view.*
 import android.widget.PopupWindow
 import android.widget.ProgressBar
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
@@ -20,8 +18,6 @@ import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.needsReload
 import com.uu_uce.services.LOCATION_REQUEST
-import com.uu_uce.services.unpackZip
-import com.uu_uce.services.updateFiles
 import com.uu_uce.shapefiles.HeightLineReader
 import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.PolygonReader
@@ -85,49 +81,7 @@ class FieldbookPinmapFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        if(!File(frActivity.getExternalFilesDir(null)?.path + File.separator + "Maps").exists()){
-            AlertDialog.Builder(frContext)
-                .setIcon(R.drawable.ic_sprite_question)
-                .setTitle(getString(R.string.geomap_download_warning_head))
-                .setMessage(getString(R.string.geomap_download_warning_body))
-                .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
-                    openProgressPopup(window.decorView.rootView)
-                    downloadResult = updateFiles(
-                        maps,
-                        frActivity,
-                        {
-                            if(downloadResult){
-                                frActivity.runOnUiThread{
-                                    Toast.makeText(frContext, "Download completed, unpacking", Toast.LENGTH_LONG).show()
-                                }
-                                val unzipResult = unpackZip(maps.first()) { progress -> frActivity.runOnUiThread { progressBar.progress = progress } }
-                                frActivity.runOnUiThread{
-                                    if(unzipResult) Toast.makeText(frContext, "Unpacking completed", Toast.LENGTH_LONG).show()
-                                    else Toast.makeText(frContext, "Unpacking failed", Toast.LENGTH_LONG).show()
-                                    popupWindow?.dismiss()
-                                    start()
-                                }
-                            }
-                            else{
-                                frActivity.runOnUiThread{
-                                    Toast.makeText(frContext, "Download failed", Toast.LENGTH_LONG).show()
-                                    popupWindow?.dismiss()
-                                    start()
-                                }
-                            }
-                        },
-                        { progress -> frActivity.runOnUiThread { progressBar.progress = progress } }
-                    )
-                }
-                .setNegativeButton(getString(R.string.negative_button_text)) { _, _ ->
-                    start()
-                    Toast.makeText(frContext, getString(R.string.geomap_maps_download_instructions), Toast.LENGTH_LONG).show()
-                }
-                .show()
-        }
-        else{
-            start()
-        }
+        start()
     }
 
 

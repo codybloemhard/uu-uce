@@ -1,7 +1,5 @@
 package com.uu_uce.shapefiles
 
-import android.graphics.Color
-import android.graphics.Paint
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.views.CustomMap

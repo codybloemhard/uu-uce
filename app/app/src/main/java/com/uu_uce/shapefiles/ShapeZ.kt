@@ -1,7 +1,6 @@
 package com.uu_uce.shapefiles
 
 
-import android.graphics.Paint
 import android.opengl.GLES20
 import com.uu_uce.OpenGL.coordsPerVertex
 import com.uu_uce.misc.LinkedList
@@ -170,7 +169,7 @@ class PolygonDrawInfo(nrVertices: Int, nrIndices: Int): DrawInfo(){
 }
 
 //generic shape
-abstract class ShapeZ(){
+abstract class ShapeZ {
     abstract fun initDrawInfo(drawInfo: DrawInfo)
     abstract val nrPoints: Int
 }

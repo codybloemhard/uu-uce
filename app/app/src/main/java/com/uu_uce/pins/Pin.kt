@@ -35,15 +35,15 @@ import kotlin.math.roundToInt
 
 
 class Pin(
-    var id                      : Int = 0,
+    var id                      : String = "",
     var coordinate              : UTMCoordinate,
     private var title           : String,
     private var content         : PinContent,
     private var background      : Bitmap,
     private var icon            : Drawable,
     private var status          : Int,              //-1 : recalculating, 0 : locked, 1 : unlocked, 2 : completed
-    private var predecessorIds  : List<Int>,
-    private var followIds       : List<Int>,
+    private var predecessorIds  : List<String>,
+    private var followIds       : List<String>,
     private val viewModel       : ViewModel
 ) {
     // Used to determine if warning should show when closing pin
@@ -110,7 +110,7 @@ class Pin(
     private var questionRewards : Array<Int>    = Array(content.contentBlocks.count()) { 0 }
     private var totalReward                     = 0
 
-    var initialized = false
+    private var initialized = false
 
     fun initGL(){
         if(initialized) return
@@ -252,7 +252,7 @@ class Pin(
 
     // Check if pin should be unlocked
     fun tryUnlock(action : (() -> Unit)){
-        if(predecessorIds[0] != -1 && status < 1){
+        if(predecessorIds[0] != "" && status < 1){
             (viewModel as PinViewModel).tryUnlock(id, predecessorIds, action)
         }
         else{
@@ -324,6 +324,7 @@ class Pin(
                         val finishButton = Button(activity)
                         finishButton.id = R.id.finish_quiz_button
                         finishButton.text = activity.getString(R.string.pin_finish)
+                        finishButton.setTextColor(ResourcesCompat.getColor(activity.resources, R.color.TextDarkGrey, null))
                         finishButton.isAllCaps = false
                         finishButton.setBackgroundResource(R.drawable.custom_border_button)
                         val buttonLayout = LinearLayout.LayoutParams(
@@ -347,7 +348,7 @@ class Pin(
                     // Set onClickListeners
                     btnClosePopupWindow.setOnClickListener {
                         if(madeProgress){
-                            AlertDialog.Builder(activity)
+                            AlertDialog.Builder(activity, R.style.AlertDialogStyle)
                                 .setIcon(R.drawable.ic_sprite_warning)
                                 .setTitle(activity.getString(R.string.pin_close_warning_head))
                                 .setMessage(activity.getString(R.string.pin_close_warning_body))
@@ -367,7 +368,7 @@ class Pin(
 
     private fun complete() {
         status = 2
-        if (followIds[0] != -1)
+        if (followIds[0] != "")
             (viewModel as PinViewModel).completePin(id, followIds)
     }
 

@@ -65,11 +65,12 @@
         </com.uu_uce.views.DragButton>
 
         <View
+            android:id="@+id/menu_background"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@id/dragBar"
             android:layout_marginTop="0dp"
-            android:background="#F3F3F3" />
+            android:background="?colorPrimaryDarkRef" />
 
         <HorizontalScrollView
             android:id="@+id/toggle_layer_scroll"
@@ -127,7 +128,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
-                    android:background="#F3F3F3"
                     android:fontFamily="@font/roboto_bold"
                     android:text="@string/menu_profile_button_text"
                     android:textAllCaps="false"
@@ -164,7 +164,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
-                    android:background="#F3F3F3"
                     android:fontFamily="@font/roboto_bold"
                     android:text="@string/menu_fieldbook_button_text"
                     android:textAllCaps="false"
@@ -201,7 +200,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
-                    android:background="#F3F3F3"
                     android:fontFamily="@font/roboto_bold"
                     android:text="@string/menu_allpins_button_text"
                     android:textAllCaps="false"
@@ -238,7 +236,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
-                    android:background="#F3F3F3"
                     android:fontFamily="@font/roboto_bold"
                     android:text="@string/menu_settings_button_text"
                     android:textAllCaps="false"
@@ -275,7 +272,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
-                    android:background="#F3F3F3"
                     android:fontFamily="@font/roboto_bold"
                     android:text="@string/menu_logout_text"
                     android:textAllCaps="false"

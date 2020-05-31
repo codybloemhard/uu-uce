@@ -16,6 +16,14 @@
     <!--AllPins-->
     <string name="allpins_menuimage_description">Image for pins menu button</string>
     <string name="allpins_checkmark_description">Checkmark displaying if a pin is done</string>
+    <string name="allpins_topbar_title">Pins</string>
+    <string name="allpins_sorting_title_az">Title a-z</string>
+    <string name="allpins_sorting_title_za">Title z-a</string>
+    <string name="allpins_sorting_difficulty_easyhard">Difficulty easy-hard</string>
+    <string name="allpins_sorting_difficulty_hardeasy">Difficulty hard-easy</string>
+    <string name="allpins_sorting_type_az">Type a-z</string>
+    <string name="allpins_sorting_type_za">Type z-a</string>
+    <string name="allpins_filer_popup_title">Filter by:</string>
 
     <!--Pins-->
     <string name="pin_close">Close</string>
@@ -98,6 +106,7 @@
     <string name="settings_content_deleted_text">Content deleted</string>
     <string name="settings_maps_storage">Storage used for maps: </string>
     <string name="settings_content_storage">Storage used for content: </string>
+    <string name="settings_darkmode_switch_text">Dark mode</string>
 
     <!--Profile-->
     <string name="profile_user_name">User name</string>
@@ -137,5 +146,6 @@
     <string name="editor_edit_popup_title">Change content</string>
     <string name="editor_moveup">Move up</string>
     <string name="editor_movedown">Move down</string>
+
 
 </resources>

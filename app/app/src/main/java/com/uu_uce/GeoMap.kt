@@ -55,11 +55,16 @@ class GeoMap : AppCompatActivity() {
         Logger.setTagEnabled("Pin", false)
         Logger.setTagEnabled("DrawOverlay", false)
 
+        sharedPref = getDefaultSharedPreferences(this)
+        val darkMode = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
+        // Set desired theme
+        if(darkMode) setTheme(R.style.DarkTheme)
+
         // Set statusbar text color
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !darkMode) {
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
         }
-        else {
+        else if(!darkMode){
             window.statusBarColor = Color.BLACK// set status background white
         }
 
@@ -69,7 +74,7 @@ class GeoMap : AppCompatActivity() {
 
         // TODO: remove when streaming is implemented
         if(!File(getExternalFilesDir(null)?.path + File.separator + "Maps").exists()){
-            AlertDialog.Builder(this)
+            AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setIcon(R.drawable.ic_sprite_question)
                 .setTitle(getString(R.string.geomap_download_warning_head))
                 .setMessage(getString(R.string.geomap_download_warning_body))
@@ -116,11 +121,9 @@ class GeoMap : AppCompatActivity() {
     private fun start(){
         setContentView(R.layout.activity_geo_map)
 
-        // Get preferences
-        sharedPref = getDefaultSharedPreferences(this)
-
         // Set settings
         customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
+        customMap.resizePins()
 
         customMap.setActivity(this)
 
@@ -215,10 +218,18 @@ class GeoMap : AppCompatActivity() {
     }
 
     override fun onResume() {
+        // Get desired theme
+        if(needsRestart){
+            // Restart activity
+            val intent = intent
+            finish()
+            startActivity(intent)
+            needsRestart = false
+        }
         if(needsReload.getValue()) loadMap()
         if(started){
             customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
-            customMap.setPins(pinViewModel.allPinData)
+            customMap.resizePins()
             customMap.redrawMap()
         }
         super.onResume()
