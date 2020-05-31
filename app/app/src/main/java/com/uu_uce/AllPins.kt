@@ -104,7 +104,6 @@ class AllPins : AppCompatActivity() {
     }
 
     fun openDialog(view : View) {
-        val builder : AlertDialog.Builder = AlertDialog.Builder(this)
         val filterOptions : Array<String> = arrayOf(
             getString(R.string.allpins_sorting_title_az),
             getString(R.string.allpins_sorting_title_za),
@@ -112,8 +111,9 @@ class AllPins : AppCompatActivity() {
             getString(R.string.allpins_sorting_difficulty_hardeasy),
             getString(R.string.allpins_sorting_type_az),
             getString(R.string.allpins_sorting_type_za))
-        builder
-            .setTitle(getString(R.string.allpins_filer_popup_title))
+
+        AlertDialog.Builder(this, R.style.AlertDialogStyle)
+            .setTitle(getString(R.string.allpins_sort_popup_title))
             .setSingleChoiceItems(filterOptions, sharedPref.getInt("com.uu_uce.SORTMODE", 0)) { dialog, which ->
                 sortmode = which
                 dialog.dismiss()
@@ -122,8 +122,7 @@ class AllPins : AppCompatActivity() {
                     apply()
                 }
                 sortPins()
-            }
-        builder.show()
+            }.show()
     }
 
     private fun sortPins(){

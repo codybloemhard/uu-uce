@@ -21,7 +21,7 @@ class Zoomer(
     }
 
     override fun onScale(detector: ScaleGestureDetector?): Boolean {
-        val d = scaleGestureDetector.scaleFactor ?: 0.0f
+        val d = scaleGestureDetector.scaleFactor
         if(d == 0.0f)
             return false
         action(d)

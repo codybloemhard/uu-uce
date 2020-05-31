@@ -13,14 +13,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.allpins.PinViewModel
-import com.uu_uce.allpins.parsePins
 import com.uu_uce.pins.PinContent
 import com.uu_uce.services.dirSize
 import com.uu_uce.services.unpackZip
 import com.uu_uce.services.updateFiles
 import com.uu_uce.services.writableSize
 import com.uu_uce.ui.createTopbar
-import com.uu_uce.views.pinsUpdated
 import kotlinx.android.synthetic.main.activity_settings.*
 import java.io.File
 import kotlin.math.max
@@ -297,7 +295,7 @@ class Settings : AppCompatActivity() {
                 .show()
         }
 
-        databasetest.setOnClickListener{
+        /*databasetest.setOnClickListener{
             pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + "database.json"))){
                 pinsUpdated.setValue(true)
             }
@@ -307,6 +305,6 @@ class Settings : AppCompatActivity() {
             pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + "database (1).json"))){
                 pinsUpdated.setValue(true)
             }
-        }
+        }*/
     }
 }

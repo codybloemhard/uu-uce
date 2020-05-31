@@ -28,7 +28,7 @@ class PinContent(
     private val fieldbookPin : Boolean
 ) {
     val contentBlocks : MutableList<ContentBlockInterface>
-    var canCompletePin = false
+    private var canCompletePin = false
 
     lateinit var parent : Pin
     init{
@@ -87,7 +87,6 @@ class PinContent(
                             Logger.error("PinContent", "Tag needs to be specified before file_path")
                         }
                         BlockTag.TEXT       -> {
-                            //TODO: Add reading text from file?
                             Logger.log(LogType.NotImplemented, "PinContent", "file reading not implemented")
                             reader.nextString()
                         }
@@ -176,6 +175,12 @@ class TextBlock(
             imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION
             background = ResourcesCompat.getDrawable(activity.resources, R.drawable.custom_border_edgy, null)
             id = R.id.text_field
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(0, 0, 0, 10)
+            }
         }.also{
             layout.addView(it,blockId)
         }
@@ -244,11 +249,17 @@ class ImageContentBlock(
         try {
             content.apply {
                 setImageURI(imageURI)
+                content.setOnClickListener{
+                    openImageView(imageURI, title)
+                }
                 scaleType = ImageView.ScaleType.FIT_CENTER
                 adjustViewBounds = true
             }
         } catch (e: Exception) {
             Logger.error("PinContent","Couldn't load $imageURI, so loaded the thumbnail $thumbnailURI instead")
+            content.setOnClickListener{
+                openImageView(thumbnailURI, title)
+            }
             content.setImageURI(thumbnailURI)
         }
         val imageLayoutParams = LinearLayout.LayoutParams(
@@ -260,16 +271,11 @@ class ImageContentBlock(
         content.layoutParams = imageLayoutParams
         content.id = R.id.image_block
 
-        content.setOnClickListener{
-            openImageView(imageURI, title)
-        }
-
         layout.addView(content,blockId)
     }
 
     override fun removeContent(layout: LinearLayout) {
         super.removeContent(layout)
-        //TODO: check if thumbnail isn't used elsewhere (or don't delete at all?)
         totallyExterminateFileExistence(activity, thumbnailURI)
     }
 
@@ -324,7 +330,12 @@ class VideoContentBlock(
             content.addView(thumbnail)
         }
 
-        content.layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
+        content.layoutParams = RelativeLayout.LayoutParams(
+            RelativeLayout.LayoutParams.MATCH_PARENT,
+            RelativeLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            setMargins(0, 0, 0, 10)
+        }
         content.id = R.id.video_block
 
         // Create play button
@@ -345,7 +356,6 @@ class VideoContentBlock(
 
     override fun removeContent(layout: LinearLayout) {
         super.removeContent(layout)
-        //TODO: check if thumbnail isn't used elsewhere (or don't delete at all?)
         totallyExterminateFileExistence(activity, thumbnailURI)
     }
 

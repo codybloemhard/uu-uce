@@ -23,7 +23,6 @@ import java.util.zip.ZipInputStream
 
 val permissionsNeeded = listOf(Manifest.permission.INTERNET)
 
-private const val serverURL = "http://131.211.31.176:8080" // TODO: This should be dependedent of the users orginization
 private const val downloadURL = "/api/files/download/"
 
 private lateinit var sharedPref : SharedPreferences
@@ -77,6 +76,7 @@ fun getFiles (requiredFilePaths : List<Pair<String, String>>, activity: Activity
     val jobList : MutableList<Job> = mutableListOf()
     val wifiManager = activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager?
     sharedPref = PreferenceManager.getDefaultSharedPreferences(activity)
+    val serverURL = sharedPref.getString("com.uu_uce.SERVER_IP", "").toString()
     val networkDownloadAllowed = sharedPref.getBoolean("com.uu_uce.NETWORK_DOWNLOADING", false)
     if (!wifiManager!!.isWifiEnabled && !networkDownloadAllowed){
         Toast.makeText(activity, "Enable wifi or allow network downloading", Toast.LENGTH_LONG).show()

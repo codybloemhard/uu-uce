@@ -3,10 +3,10 @@ package com.uu_uce
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
@@ -40,6 +40,9 @@ class Profile : AppCompatActivity() {
         setContentView(R.layout.activity_profile)
 
         createTopbar(this, "Profile")
+
+        user_name_text.text = sharedPref.getString("com.uu_uce.USERNAME", getString(R.string.profile_user_name))
+        organization_name.text = sharedPref.getString("com.uu_uce.ORGNAME", getString(R.string.profile_organization_name))
 
         selectedOptionText = badges_button_text
         selectedOptionBar = badges_button_bar

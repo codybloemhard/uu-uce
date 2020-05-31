@@ -63,6 +63,7 @@
             android:layout_gravity="end|bottom"
             android:layout_margin="16dp"
             android:onClick="openDialog"
+            android:backgroundTint="?colorAccentRef"
             android:src="@drawable/ic_sprite_sort_white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />

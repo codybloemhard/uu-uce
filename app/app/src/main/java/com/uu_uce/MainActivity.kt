@@ -44,12 +44,21 @@ class MainActivity : TouchParent() {
         }
     }
 
-    @Suppress("UnnecessaryVariable") // TODO: remove when result which is a webtoken
+    @Suppress("UnnecessaryVariable") // TODO: remove when result is received which is a webtoken
     private fun checkLogin() : Boolean{
-        val result = login(
-            sharedPref.getString("com.uu_uce.USERNAME", "").toString(),
-            sharedPref.getString("com.uu_uce.PASSWORD", "").toString()
-        )
-        return result
+        val username = sharedPref.getString("com.uu_uce.USERNAME", "").toString()
+        val password = sharedPref.getString("com.uu_uce.PASSWORD", "").toString()
+        val ip       = sharedPref.getString("com.uu_uce.SERVER_IP", "").toString()
+
+        return if(username.isNotEmpty() && password.isNotEmpty() && ip.isNotEmpty()){
+            val result = login(
+                username,
+                password,
+                ip
+            )
+            result
+        } else{
+            false
+        }
     }
 }

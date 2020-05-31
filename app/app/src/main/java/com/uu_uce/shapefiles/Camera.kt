@@ -31,7 +31,7 @@ class Camera(
     private var y: Double,
     private var zoom: Double,
     private val viewMin: p3,
-    val viewMax: p3){
+    private val viewMax: p3){
 
     private val mx = (viewMin.first + viewMax.first) / 2.0
     private val my = (viewMin.second + viewMax.second) / 2.0

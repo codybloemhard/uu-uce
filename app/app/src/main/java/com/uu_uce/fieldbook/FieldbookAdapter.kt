@@ -2,20 +2,18 @@ package com.uu_uce.fieldbook
 
 import android.app.Activity
 import android.content.DialogInterface
-import android.content.Intent
 import android.net.Uri
-import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat.startActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.net.toFile
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import com.uu_uce.FieldbookEditor
 import com.uu_uce.R
+import com.uu_uce.openFieldbookPopup
 import com.uu_uce.pins.ImageContentBlock
 import com.uu_uce.pins.PinContent
 import com.uu_uce.pins.TextContentBlock
@@ -103,56 +101,13 @@ class FieldbookAdapter(
                 holder.frameFb.addView(it, params)
             }
 
-        holder.parentView.setOnClickListener { v ->
-                val layoutInflater = activity.layoutInflater
-
-                // Build an custom view (to be inflated on top of our current view & build it's popup window)
-                val customView =
-                    layoutInflater.inflate(R.layout.pin_content_view, rootView as ViewGroup, false)
-
-                val popupWindow = PopupWindow(
-                    customView,
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-
-                // Get elements
-                val layout: LinearLayout =
-                    customView.findViewById(R.id.scrollLayout)
-                val btnClosePopupWindow =
-                    customView.findViewById<Button>(R.id.popup_window_close_button)
-                val windowTitle =
-                    customView.findViewById<TextView>(R.id.popup_window_title)
-                val editButton =
-                    customView.findViewById<Button>(R.id.popup_window_edit_button).apply {
-                        isVisible = true
-                        isClickable = true
-                    }
-
-                // Add the title for the popup window
-                windowTitle.text = entry.title
-
-                // Fill layout of popup
-                for (i in 0 until content.count()) {
-                    content[i].apply {
-                        showContent(i, layout, rootView, null)
-                    }
-                }
-
-                // Open popup
-                popupWindow.showAtLocation(v, Gravity.CENTER, 0, 0)
-
-                // Set onClickListeners
-                btnClosePopupWindow.setOnClickListener {
-                    popupWindow.dismiss()
-                }
-
-                editButton.setOnClickListener {
-                    popupWindow.dismiss()
-                    val intent = Intent(activity, FieldbookEditor::class.java)
-                    intent.putExtra("fieldbook_index", entry.id)
-                    startActivity(activity, intent, null)
-            }
+        holder.parentView.setOnClickListener {
+            openFieldbookPopup(
+                activity,
+                rootView,
+                entry,
+                content
+            )
         }
 
         holder.parentView.setOnLongClickListener(

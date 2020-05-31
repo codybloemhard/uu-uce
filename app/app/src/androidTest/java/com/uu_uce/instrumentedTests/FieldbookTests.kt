@@ -29,7 +29,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.File
 
 
 @RunWith(AndroidJUnit4::class)
@@ -56,7 +55,8 @@ class FieldbookTests {
         fieldbookViewmodel = ViewModelProvider(intentsTestRule.activity).get(FieldbookViewModel::class.java)
         fieldbookViewmodel.deleteAll()
 
-        intending(hasAction(Intent.ACTION_PICK)).respondWith(getFileURIResult())
+        intending(hasAction(Intent.ACTION_GET_CONTENT))
+            .respondWith(setFile(Uri.parse("/sdcard/Android/data/com.uu_uce/files/PinContent/Images/test.png")))
         intending(hasAction(MediaStore.ACTION_IMAGE_CAPTURE))
             .respondWith(setFile(Uri.parse("/sdcard/Android/data/com.uu_uce/files/PinContent/Images/test.png")))
         intending(hasAction(MediaStore.ACTION_VIDEO_CAPTURE))
@@ -75,7 +75,7 @@ class FieldbookTests {
         val testTitle = "This is a dummy title"
 
         //Open add popup
-        onView(withId(R.id.fieldbook_fab))
+        onView(withId(R.id.fieldbook_addpin))
             .perform(click())
 
         // Check if popup opened up
@@ -163,7 +163,7 @@ class FieldbookTests {
     fun textPin(){
         val testText = "Lorem ipsum dolor sit amet"
         //Open add popup
-        onView(withId(R.id.fieldbook_fab))
+        onView(withId(R.id.fieldbook_addpin))
             .perform(click())
 
         // Check if popup opened up
@@ -254,7 +254,7 @@ class FieldbookTests {
     @Test
     fun galleryImagePin(){
         //Open add popup
-        onView(withId(R.id.fieldbook_fab))
+        onView(withId(R.id.fieldbook_addpin))
             .perform(click())
 
         // Check if popup opened up
@@ -344,7 +344,7 @@ class FieldbookTests {
     @Test
     fun cameraImagePin(){
         //Open add popup
-        onView(withId(R.id.fieldbook_fab))
+        onView(withId(R.id.fieldbook_addpin))
             .perform(click())
 
         // Check if popup opened up
@@ -434,7 +434,7 @@ class FieldbookTests {
     @Test
     fun cameraVideoPin(){
         //Open add popup
-        onView(withId(R.id.fieldbook_fab))
+        onView(withId(R.id.fieldbook_addpin))
             .perform(click())
 
         // Check if popup opened up
@@ -521,17 +521,192 @@ class FieldbookTests {
             .check(doesNotExist())
     }
 
-    private fun getFileURIResult(): Instrumentation.ActivityResult? {
-        val resultData = Intent()
-        val dir: File? = intentsTestRule.activity.filesDir
-        val file = File(dir?.path, "pin_content/images/test.png")
-        val uri: Uri = Uri.fromFile(file)
-        resultData.data = uri
-        return Instrumentation.ActivityResult(Activity.RESULT_OK, resultData)
+    @Test
+    fun openEditor(){
+        //Open add popup
+        onView(withId(R.id.fieldbook_addpin))
+            .perform(click())
+
+        // Check if popup opened up
+        onView(withId(R.id.fieldbook_pin_editor))
+            .check(matches(isDisplayed()))
+
+        // Upload image
+        onView(withId(R.id.add_video_block))
+            .perform(click())
+
+        onView(withText(intentsTestRule.activity.getString(R.string.editor_videoselection_camera)))
+            .perform(click())
+
+        // Finish pin
+        onView(withId(R.id.add_fieldbook_pin))
+            .perform(click())
+
+        // Open new pin
+        onView(withId(R.id.fieldbook_recyclerview)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                0, click()
+            )
+        )
+
+        // Check to see if pin opened successfully
+        onView(withId(R.id.popup_window_view))
+            .inRoot(isPlatformPopup())
+            .check(matches(isDisplayed()))
+
+        // Open editor
+        onView(withId(R.id.popup_window_edit_button))
+            .inRoot(isPlatformPopup())
+            .perform(click())
+
+        // Check if editor successfully opened
+        onView(withId(R.id.fieldbook_pin_editor))
+            .check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun removeBlock(){
+        val stringToBeTyped = "Test text content block"
+        //Open add popup
+        onView(withId(R.id.fieldbook_addpin))
+            .perform(click())
+
+        // Check if popup opened up
+        onView(withId(R.id.fieldbook_pin_editor))
+            .check(matches(isDisplayed()))
+
+        // Add text
+        onView(withId(R.id.add_text_block))
+            .perform(click())
+
+        onView(childAtPosition(withId(R.id.fieldbook_content_container), 0))
+            .perform(typeText(stringToBeTyped))
+
+        // Finish pin
+        onView(withId(R.id.add_fieldbook_pin))
+            .perform(click())
+
+        // Open new pin
+        onView(withId(R.id.fieldbook_recyclerview)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                0, click()
+            )
+        )
+
+        // Check to see if pin opened successfully
+        onView(withId(R.id.popup_window_view))
+            .inRoot(isPlatformPopup())
+            .check(matches(isDisplayed()))
+
+        // Open editor
+        onView(withId(R.id.popup_window_edit_button))
+            .inRoot(isPlatformPopup())
+            .perform(click())
+
+        // Check if editor successfully opened
+        onView(withId(R.id.fieldbook_pin_editor))
+            .check(matches(isDisplayed()))
+
+        // Feign deletion
+        onView(childAtPosition(withId(R.id.fieldbook_content_container), 0))
+            .perform(longClick())
+
+        onView(withText(intentsTestRule.activity.getString(R.string.cancel_button)))
+            .perform(click())
+
+        // Make sure text wasn't deleted
+        onView(childAtPosition(withId(R.id.fieldbook_content_container), 0))
+            .check(matches(isDisplayed()))
+
+        // Actually delete
+        onView(childAtPosition(withId(R.id.fieldbook_content_container), 0))
+            .perform(longClick())
+
+        onView(withText(intentsTestRule.activity.getString(R.string.editor_delete_block)))
+            .perform(click())
+
+        // Make sure text was deleted
+        onView(childAtPosition(withId(R.id.fieldbook_content_container), 0))
+            .check(doesNotExist())
+    }
+
+    @Test
+    fun moveBlock(){
+        val firstString = "Start at the top"
+        val secondString = "Start at the bottom"
+
+        //Open add popup
+        onView(withId(R.id.fieldbook_addpin))
+            .perform(click())
+
+        // Check if popup opened up
+        onView(withId(R.id.fieldbook_pin_editor))
+            .check(matches(isDisplayed()))
+
+        // Add text
+        onView(withId(R.id.add_text_block))
+            .perform(click())
+
+        onView(childAtPosition(withId(R.id.fieldbook_content_container), 0))
+            .perform(typeText(firstString))
+
+        // Add text
+        onView(withId(R.id.add_text_block))
+            .perform(click())
+
+        onView(childAtPosition(withId(R.id.fieldbook_content_container), 1))
+            .perform(typeText(secondString))
+
+        // Check if order was correct
+        onView(childAtPosition(withId(R.id.fieldbook_content_container), 0))
+            .check(matches(withText(firstString)))
+
+        onView(childAtPosition(withId(R.id.fieldbook_content_container), 1))
+            .check(matches(withText(secondString)))
+
+        // Open edit menu
+        onView(childAtPosition(withId(R.id.fieldbook_content_container), 0))
+            .perform(longClick())
+
+        // Check that move up is unavailable
+        onView(withText(intentsTestRule.activity.getString(R.string.editor_moveup)))
+            .check(doesNotExist())
+
+        // Move down
+        onView(withText(intentsTestRule.activity.getString(R.string.editor_movedown)))
+            .perform(click())
+
+        // Check if order was correct
+        onView(childAtPosition(withId(R.id.fieldbook_content_container), 0))
+            .check(matches(withText(secondString)))
+
+        onView(childAtPosition(withId(R.id.fieldbook_content_container), 1))
+            .check(matches(withText(firstString)))
+
+        // Open edit menu
+        onView(childAtPosition(withId(R.id.fieldbook_content_container), 1))
+            .perform(longClick())
+
+        // Check that move down is unavailable
+        onView(withText(intentsTestRule.activity.getString(R.string.editor_movedown)))
+            .check(doesNotExist())
+
+        // Move up
+        onView(withText(intentsTestRule.activity.getString(R.string.editor_moveup)))
+            .perform(click())
+
+
+        // Check if order was correct
+        onView(childAtPosition(withId(R.id.fieldbook_content_container), 0))
+            .check(matches(withText(firstString)))
+
+        onView(childAtPosition(withId(R.id.fieldbook_content_container), 1))
+            .check(matches(withText(secondString)))
     }
 
     private fun setFile(uri: Uri) : Instrumentation.ActivityResult? {
         val resultData = Intent()
+        resultData.data = uri
         currentUri = uri
         return Instrumentation.ActivityResult(Activity.RESULT_OK, resultData)
     }

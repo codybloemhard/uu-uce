@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/profile_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Profile">
@@ -14,7 +15,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
-        android:id="@+id/score_layout"
         android:layout_width="wrap_content"
         android:layout_height="20dp"
         android:layout_marginEnd="20dp"
@@ -85,7 +85,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:fontFamily="@font/roboto_bold"
-        android:text="@string/profile_university_name"
+        android:text="@string/profile_organization_name"
         android:textColor="@color/TextGrey"
         android:textSize="15sp"
         app:layout_constraintEnd_toEndOf="parent"

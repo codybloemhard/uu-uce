@@ -14,10 +14,12 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.ViewModel
 import androidx.preference.PreferenceManager
 import com.uu_uce.OpenGL.coordsPerVertex
 import com.uu_uce.R
 import com.uu_uce.allpins.PinViewModel
+import com.uu_uce.defaultPinSize
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
@@ -43,13 +45,13 @@ class Pin(
     private var status          : Int,              //-1 : recalculating, 0 : locked, 1 : unlocked, 2 : completed
     private var predecessorIds  : List<String>,
     private var followIds       : List<String>,
-    private val viewModel       : PinViewModel
+    private val viewModel       : ViewModel
 ) {
     // Used to determine if warning should show when closing pin
     private var madeProgress = false
 
-    // Set default pin size TODO: Get this from settings
-    private var pinWidth = 60f
+    // Set default pin size
+    private var pinWidth = defaultPinSize.toFloat()
 
     //opengl stuff
     private var backgroundHandle: Int = -1
@@ -57,7 +59,7 @@ class Pin(
     private lateinit var indexBuffer: ShortBuffer
     private lateinit var cubeCoordsBuffer: FloatBuffer
 
-    var spriteCoords = floatArrayOf(
+    private var spriteCoords = floatArrayOf(
         - 0.5f, + 1.0f,
         - 0.5f, - 0.0f,
         + 0.5f, - 0.0f,
@@ -101,6 +103,8 @@ class Pin(
     var boundingBox: Pair<p2, p2> = Pair(p2Zero, p2Zero)
 
     var popupWindow: PopupWindow? = null
+
+    var tapAction : ((Activity) -> Unit) = {}
 
     // Quiz
     private var answered : Array<Boolean>       = Array(content.contentBlocks.count()) { true }
@@ -181,8 +185,10 @@ class Pin(
 
         val screenLocation: Pair<Float, Float> = coordToScreen(coordinate, viewport, view.width, view.height)
 
-        if(screenLocation.first.isNaN() || screenLocation.second.isNaN())
-            return //TODO: Should not be called with NaN*/
+        if(screenLocation.first.isNaN() || screenLocation.second.isNaN()){
+            Logger.error("Pin", "Pin draw called with NaN location")
+            return
+        }
 
         // Calculate pin bounds on canvas
         val minX = (screenLocation.first - pinWidth / 2).roundToInt()
@@ -250,7 +256,7 @@ class Pin(
     // Check if pin should be unlocked
     fun tryUnlock(action : (() -> Unit)){
         if(predecessorIds[0] != "" && status < 1){
-            viewModel.tryUnlock(id, predecessorIds, action)
+            (viewModel as PinViewModel).tryUnlock(id, predecessorIds, action)
         }
         else{
             action()
@@ -366,7 +372,7 @@ class Pin(
     private fun complete() {
         status = 2
         if (followIds[0] != "")
-            viewModel.completePin(id, followIds)
+            (viewModel as PinViewModel).completePin(id, followIds)
     }
 
     fun addQuestion(questionId : Int, reward: Int){
@@ -502,7 +508,7 @@ class Pin(
         return status
     }
 
-    fun loadTexture(bitmap: Bitmap): Int {
+    private fun loadTexture(bitmap: Bitmap): Int {
         val textureHandle = IntArray(1)
         GLES20.glGenTextures(1, textureHandle, 0)
         if (textureHandle[0] != 0) {

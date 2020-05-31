@@ -18,15 +18,20 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.uu_uce.*
-import com.uu_uce.OpenGL.CustomMapGLRenderer
 import com.uu_uce.Fieldbook
+import com.uu_uce.OpenGL.CustomMapGLRenderer
 import com.uu_uce.allpins.PinConversion
 import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinViewModel
+import com.uu_uce.fieldbook.FieldbookEntry
+import com.uu_uce.fieldbook.FieldbookViewModel
 import com.uu_uce.fieldbook.FullRoute
 import com.uu_uce.fieldbook.Route
 import com.uu_uce.gestureDetection.*
-import com.uu_uce.mapOverlay.*
+import com.uu_uce.mapOverlay.Location
+import com.uu_uce.mapOverlay.coordToScreen
+import com.uu_uce.mapOverlay.pointDistance
+import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.misc.ListenableBoolean
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
@@ -63,17 +68,19 @@ class CustomMap : ViewTouchParent {
     private val deviceLocPaint      : Paint = Paint()
     private val deviceLocEdgePaint  : Paint = Paint()
 
-    // Pins
-    private lateinit var activity       : Activity
-    private lateinit var pinViewModel   : PinViewModel
-    private lateinit var lfOwner        : LifecycleOwner
-    private var pins                    : MutableMap<String, Pin>   = mutableMapOf()
-    private var sortedPins              : List<Pin>                 = listOf()
-    private var pinStatuses             : MutableMap<String, Int>   = mutableMapOf()
+    private lateinit var activity           : Activity
+    private lateinit var pinViewModel       : PinViewModel
+    private lateinit var fieldbookViewModel : FieldbookViewModel
+    private lateinit var lfOwner            : LifecycleOwner
 
-    var activePopup                     : PopupWindow?          = null
+    private var pins                        : MutableMap<String, Pin>   = mutableMapOf()
+    private var fieldbook                   : List<FieldbookEntry>      = listOf()
+    private var sortedPins                  : List<Pin>                 = listOf()
+    private var pinStatuses                 : MutableMap<String, Int>   = mutableMapOf()
+    var activePopup                         : PopupWindow?              = null
+
     var pinSize: Int
-    var locSizeFactor = 0.5f
+    private var locSizeFactor = 0.5f
 
     // Map
     private var smap = ShapeMap(this)
@@ -129,18 +136,22 @@ class CustomMap : ViewTouchParent {
     }
 
     // Add a new layer to the map, and generate a button to toggle it
-    fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout, buttonSize: Int, hasInfo: Boolean){
+    fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout?, hasInfo: Boolean, buttonSize: Int = 0){
         smap.addLayer(lt, chunkGetter, hasInfo)
-        val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle)
-        btn.setImageResource(R.drawable.ic_sprite_toggle_layer)
         val curLayers = nrLayers
-        btn.setOnClickListener{
-            toggleLayer(curLayers)
-        }
         nrLayers++
 
-        btn.layoutParams = ViewGroup.LayoutParams(buttonSize, buttonSize)
-        scrollLayout.addView(btn)
+        if (buttonSize > 0) {
+            val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle).apply {
+                setImageResource(R.drawable.ic_sprite_toggle_layer)
+                setOnClickListener {
+                    toggleLayer(curLayers)
+                }
+                layoutParams = ViewGroup.LayoutParams(buttonSize, buttonSize)
+            }
+
+            scrollLayout!!.addView(btn)
+        }
 
         mods = smap.getMods()
     }
@@ -179,17 +190,23 @@ class CustomMap : ViewTouchParent {
             // Draw map
             smap.draw(standardProgram, scale, trans)
 
-            (context as GeoMap).runOnUiThread {
-                if (context is GeoMap) {
+            if (context is GeoMap) {
+                (context as GeoMap).runOnUiThread {
                     val zoomLevel = smap.getZoomLevel()
                     if (zoomLevel >= 0 && mods.count() > 0) {
                         (context as GeoMap).heightline_diff_text.text =
-                            (context as Activity).getString(R.string.geomap_heightline_diff_text, mods[zoomLevel])
+                            (context as Activity).getString(
+                                R.string.geomap_heightline_diff_text,
+                                mods[zoomLevel]
+                            )
 
                     } else {
                         val standardValue = 0
                         (context as GeoMap).heightline_diff_text.text =
-                            (context as Activity).getString(R.string.geomap_heightline_diff_text, standardValue)
+                            (context as Activity).getString(
+                                R.string.geomap_heightline_diff_text,
+                                standardValue
+                            )
                     }
                 }
             }
@@ -341,6 +358,7 @@ class CustomMap : ViewTouchParent {
                         pins[pin.pinId] = newPin
                         pinStatuses[newPin.id] = pin.status
                     }
+                    newPin.tapAction = {activity: Activity -> (newPin::openContent)(this,activity) {activePopup = null}}
                     newPin.resize(pinSize)
                     renderer.pinsChanged = true
                 }
@@ -383,13 +401,30 @@ class CustomMap : ViewTouchParent {
         }
     }
 
+    fun setFieldbook (fieldbook: List<FieldbookEntry>) {
+        for (entry in fieldbook) {
+            val pin = PinConversion(activity).fieldbookEntryToPin(entry,fieldbookViewModel)
+            pins[pin.id] = pin.apply{
+                resize(pinSize)
+                tapAction = {activity: Activity ->  (::openFieldbookPopup)(activity,rootView,entry,pin.getContent().contentBlocks) }
+            }
+        }
+        synchronized(sortedPins) {
+            sortedPins = pins.values.sortedByDescending { pin -> pin.coordinate.north }
+        }
+
+        redrawMap()
+    }
+
     //called when the screen is tapped at tapLocation
     private fun tapPin(tapLocation : p2, activity : Activity){
         if(activePopup != null) return
         for(pin in sortedPins.reversed()){
             if(!pin.inScreen || pin.getStatus() < 1) continue
-            if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, 0)){
-                pin.openContent(this, activity) {activePopup = null}
+            if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, 0)) {
+                pin.run{
+                    tapAction(activity)
+                }
                 activePopup = pin.popupWindow
                 Logger.log(LogType.Info, "CustomMap", "${pin.getTitle()}: I have been tapped.")
                 return
@@ -404,15 +439,15 @@ class CustomMap : ViewTouchParent {
                 FullRoute(
                     "[\n" +
                             "    {\n" +
-                            "        \"coordinate\": \"31N3149680N46777336E\",\n" +
+                            "        \"coordinate\": \"31N46758336N3133680E\",\n" +
                             "        \"localtime\": \"10:19:16\"\n" +
                             "    },\n" +
                             "    {\n" +
-                            "        \"coordinate\": \"31N3133680N46718336E\",\n" +
+                            "        \"coordinate\": \"31N46670000N3130000E\",\n" +
                             "        \"localtime\": \"15:13:42\"\n" +
                             "    },\n" +
                             "    {\n" +
-                            "        \"coordinate\": \"31N3130000N46710000E\",\n" +
+                            "        \"coordinate\": \"31N46655335N3134680E\",\n" +
                             "        \"localtime\": \"18:00:57\"\n" +
                             "    }\n" +
                             "]"
@@ -440,6 +475,10 @@ class CustomMap : ViewTouchParent {
 
     fun setPinViewModel(vm: PinViewModel){
         pinViewModel = vm
+    }
+
+    fun setFieldbookViewModel(vm: FieldbookViewModel){
+        fieldbookViewModel = vm
     }
 
     fun setLifeCycleOwner(lifecycleOwner: LifecycleOwner){
@@ -483,7 +522,7 @@ class CustomMap : ViewTouchParent {
         return nrLayers
     }
 
-    val eps = 0.001
+    private val eps = 0.001
     //functions used for testing
     @TestOnly
     fun getPinLocation() : Pair<Float, Float>{

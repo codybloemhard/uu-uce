@@ -22,10 +22,10 @@ class LineDrawInfo(nrPoints: Int, nrLines: Int): DrawInfo(){
     private var vertices: FloatArray = FloatArray(nrPoints*4)
     var i = 0
     private var indices: ShortArray = ShortArray(nrLines*2)
-    var j = 0
+    private var j = 0
     private lateinit var vertexBuffer: FloatBuffer
     private lateinit var indexBuffer: ShortBuffer
-    var curIndex = 0.toShort()
+    private var curIndex = 0.toShort()
 
     fun shapeLength(length: Int){
 
