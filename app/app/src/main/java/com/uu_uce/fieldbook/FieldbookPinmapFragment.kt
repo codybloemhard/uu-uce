@@ -5,7 +5,10 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.Window
 import android.widget.PopupWindow
 import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
@@ -50,7 +53,6 @@ class FieldbookPinmapFragment : Fragment() {
     // Popup for showing download progress
     private var popupWindow: PopupWindow? = null
     private lateinit var progressBar : ProgressBar
-    private var downloadResult = false
 
     // TODO: Remove temporary hardcoded map information
     private val mapsName = "maps.zip"
@@ -183,21 +185,4 @@ class FieldbookPinmapFragment : Fragment() {
         customMap.redrawMap()
     }
 
-    private fun openProgressPopup(currentView: View){
-        val layoutInflater = layoutInflater
-
-        // Build an custom view (to be inflated on top of our current view & build it's popup window)
-        val customView = layoutInflater.inflate(R.layout.progress_popup, geoMapLayout, false)
-
-        popupWindow = PopupWindow(
-            customView,
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        )
-
-        progressBar = customView.findViewById(R.id.progress_popup_progressBar)
-
-        // Open popup
-        popupWindow?.showAtLocation(currentView, Gravity.CENTER, 0, 0)
-    }
 }
