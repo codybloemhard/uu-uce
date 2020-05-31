@@ -175,6 +175,12 @@ class TextBlock(
             imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION
             background = ResourcesCompat.getDrawable(activity.resources, R.drawable.custom_border_edgy, null)
             id = R.id.text_field
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(0, 0, 0, 10)
+            }
         }.also{
             layout.addView(it,blockId)
         }
@@ -324,7 +330,12 @@ class VideoContentBlock(
             content.addView(thumbnail)
         }
 
-        content.layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
+        content.layoutParams = RelativeLayout.LayoutParams(
+            RelativeLayout.LayoutParams.MATCH_PARENT,
+            RelativeLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            setMargins(0, 0, 0, 10)
+        }
         content.id = R.id.video_block
 
         // Create play button

@@ -14,6 +14,7 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.ViewModel
 import androidx.preference.PreferenceManager
 import com.uu_uce.OpenGL.coordsPerVertex
 import com.uu_uce.R
@@ -44,7 +45,7 @@ class Pin(
     private var status          : Int,              //-1 : recalculating, 0 : locked, 1 : unlocked, 2 : completed
     private var predecessorIds  : List<String>,
     private var followIds       : List<String>,
-    private val viewModel       : PinViewModel
+    private val viewModel       : ViewModel
 ) {
     // Used to determine if warning should show when closing pin
     private var madeProgress = false
@@ -102,6 +103,8 @@ class Pin(
     var boundingBox: Pair<p2, p2> = Pair(p2Zero, p2Zero)
 
     var popupWindow: PopupWindow? = null
+
+    var tapAction : ((Activity) -> Unit) = {}
 
     // Quiz
     private var answered : Array<Boolean>       = Array(content.contentBlocks.count()) { true }
@@ -253,7 +256,7 @@ class Pin(
     // Check if pin should be unlocked
     fun tryUnlock(action : (() -> Unit)){
         if(predecessorIds[0] != "" && status < 1){
-            viewModel.tryUnlock(id, predecessorIds, action)
+            (viewModel as PinViewModel).tryUnlock(id, predecessorIds, action)
         }
         else{
             action()
@@ -369,7 +372,7 @@ class Pin(
     private fun complete() {
         status = 2
         if (followIds[0] != "")
-            viewModel.completePin(id, followIds)
+            (viewModel as PinViewModel).completePin(id, followIds)
     }
 
     fun addQuestion(questionId : Int, reward: Int){
