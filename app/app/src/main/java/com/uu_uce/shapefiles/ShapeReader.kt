@@ -152,7 +152,7 @@ class PolygonReader(
     private val styles: List<Style>
 ): ChunkGetter(dir){
     override fun getChunk(cIndex: ChunkIndex): Chunk {
-        val file = File(dir, "geoboi")
+        val file = File(dir, chunkName(cIndex))
         val reader = FileReader(file)
 
         val xoff = reader.readULong().toDouble()

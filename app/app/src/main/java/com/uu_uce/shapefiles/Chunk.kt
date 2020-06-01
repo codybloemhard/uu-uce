@@ -6,6 +6,9 @@ typealias ChunkIndex = Triple<Int,Int,Int>
 fun chunkName(c: ChunkIndex): String{
     return "${c.third}-${c.first}-${c.second}.chunk"
     }
+fun polyChunkName(c: ChunkIndex): String{
+    return "${c.third}-${c.first}.polychunk"
+}
 
 /*
 a chunk holds all shapes of a layer that are in a specific AABB
