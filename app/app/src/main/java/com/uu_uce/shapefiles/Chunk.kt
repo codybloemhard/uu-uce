@@ -7,7 +7,7 @@ fun chunkName(c: ChunkIndex): String{
     return "${c.third}-${c.first}-${c.second}.chunk"
     }
 fun polyChunkName(c: ChunkIndex): String{
-    return "${c.third}-${c.first}.polychunk"
+    return "${c.first}-${c.second}.polychunk"
 }
 
 /*
