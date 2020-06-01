@@ -174,18 +174,19 @@ class PolygonReader(
                 reader.readUShort().toShort()
             }
 
-            val nrOutlineIndices = reader.readULong()
-            val outlineIndexPairs = List(nrOutlineIndices.toInt()) {
+
+            /*val nrOutlineIndices = reader.readULong()
+            var outlineIndexPairs = List(nrOutlineIndices.toInt()) {
                 Pair(reader.readUShort().toShort(),reader.readUShort().toShort())
-            }
+            }*/
 
             val outlineIndices: MutableList<Short> = mutableListOf()
-            for((start,end) in outlineIndexPairs){
+            /*for((start,end) in outlineIndexPairs){
                 for(i in start until end){
                     outlineIndices.add(i.toShort())
                     outlineIndices.add(((i + 1)%nrVertices.toInt()).toShort())
                 }
-            }
+            }*/
 
             val style  =
                 if(hasStyles) {
@@ -194,8 +195,8 @@ class PolygonReader(
                 }
                 else Style(false, floatArrayOf(0.2f,0.2f,0.8f))
 
-            //val sbmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
-            //val sbmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
+            val _bmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
+            val _bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
 
             PolygonZ(vertices, indices.toMutableList(), outlineIndices.toList(), style)
         }
