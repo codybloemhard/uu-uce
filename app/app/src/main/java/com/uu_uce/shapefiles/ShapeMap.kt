@@ -6,19 +6,19 @@ import com.uu_uce.views.CustomMap
 import org.jetbrains.annotations.TestOnly
 import kotlin.system.measureTimeMillis
 
-typealias p2 = Pair<Double, Double>
-typealias p3 = Triple<Double,Double,Double>
+typealias p2 = Pair<Float, Float>
+typealias p3 = Triple<Float,Float,Float>
 
-val p2Zero = Pair(0.0,0.0)
+val p2Zero = Pair(0.0f,0.0f)
 val p2ZeroPair = Pair(p2Zero,p2Zero)
-val p3Min = Triple(Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE)
-val p3Zero = Triple(0.0,0.0,0.0)
-val p3NaN = Triple(Double.NaN, Double.NaN, Double.NaN)
+val p3Min = Triple(Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE)
+val p3Zero = Triple(0.0f,0.0f,0.0f)
+val p3NaN = Triple(Float.NaN, Float.NaN, Float.NaN)
 
 //merge a list of bounding boxes in one big one containing them all
 fun mergeBBs(mins: List<p3>,maxs: List<p3>): Pair<p3,p3>{
-    var bmin = mutableListOf(Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE)
-    var bmax = mutableListOf(Double.MIN_VALUE,Double.MIN_VALUE,Double.MIN_VALUE)
+    var bmin = mutableListOf(Float.MAX_VALUE,Float.MAX_VALUE,Float.MAX_VALUE)
+    var bmax = mutableListOf(Float.MIN_VALUE,Float.MIN_VALUE,Float.MIN_VALUE)
 
     bmin = mins.fold(bmin, {bb, shapeZ ->
         bb[0] = minOf(shapeZ.first, bb[0])
@@ -32,7 +32,7 @@ fun mergeBBs(mins: List<p3>,maxs: List<p3>): Pair<p3,p3>{
         bb[2] = maxOf(shapez.third, bb[2])
         bb
     })
-    return Pair(Triple(bmin[0],bmin[1],bmin[2]),Triple(bmax[0],bmax[1],bmax[2]))
+    return Pair(p3(bmin[0],bmin[1],bmin[2]),p3(bmax[0],bmax[1],bmax[2]))
 }
 
 /*
@@ -71,7 +71,7 @@ class ShapeMap(
         }
     }
 
-    fun setzooms(minzoom: Double, maxzoom: Double){
+    fun setzooms(minzoom: Float, maxzoom: Float){
         for((_,layer) in layers){
             layer.setzooms(minzoom,maxzoom)
         }
@@ -113,14 +113,16 @@ class ShapeMap(
 
     //create a camera with the correct bounding box
     fun initialize(): Camera{
-        val bminmax = mergeBBs(
-            layers.map{l -> l.second.bmin},
-            layers.map{l -> l.second.bmax})
+        val first: List<Triple<Float,Float,Float>> = layers.map{l -> l.second.bmin}
+        val second:List<Triple<Float,Float,Float>> = layers.map{l -> l.second.bmax}
+        val bminmax: Pair<p3,p3> = mergeBBs(
+            first,
+            second)
         bMin = bminmax.first
         bMax = bminmax.second
-        val mx = (bMin.first + bMax.first) / 2.0
-        val my = (bMin.second + bMax.second) / 2.0
-        camera = Camera(mx, my, 1.0, bMin, bMax)
+        val mx = (bMin.first + bMax.first) / 2.0f
+        val my = (bMin.second + bMax.second) / 2.0f
+        camera = Camera(mx, my, 1.0f, bMin, bMax)
         return camera
     }
 

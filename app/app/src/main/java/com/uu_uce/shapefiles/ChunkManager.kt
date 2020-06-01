@@ -38,19 +38,19 @@ class ChunkManager(
     private var loading = false
     private var upToDate = false
     private var changed = false
-    var factor = 0.0
+    var factor = 0.0f
 
     private var xmin = 0
     private var xmax = 0
     private var ymin = 0
     private var ymax = 0
 
-    private var maxzoom = 0.0
+    private var maxzoom = 0.0f
 
     private var zoom = nrOfLODs-1
 
-    fun setZooms(minzoom: Double, maxzoom: Double){
-        factor = (minzoom/maxzoom).pow(1.0/chunkGetter.nrCuts.size)
+    fun setZooms(minzoom: Float, maxzoom: Float){
+        factor = (minzoom/maxzoom).pow(1.0f/chunkGetter.nrCuts.size)
         this.maxzoom = maxzoom
     }
 
@@ -60,14 +60,9 @@ class ChunkManager(
 
     //cancel all threads that are currently trying to load new chunks
     private fun cancelCurrentLoading(){
-        synchronized(chunks) {
-            chunkLoader?.cancel()
+        chunkLoader?.cancel()
 
-            Logger.error("ChunkManager", "loading false 1")
-            loading = false
-
-            //clearUnusedChunks()
-        }
+        loading = false
     }
 
     /*
@@ -75,7 +70,8 @@ class ChunkManager(
     viewport: current viewport of the camera
     camzoom: current zoom of the camera
      */
-    fun update(viewport: Pair<p2, p2>, camzoom: Double): ChunkUpdateResult {
+    fun update(viewport: Pair<p2, p2>, camzoom: Float): ChunkUpdateResult {
+        System.gc()
         zoom = ceil(log((camzoom/maxzoom), factor)).toInt()
         if(zoom < 0){
             Logger.log(LogType.Info, "ChunkManager", "zoom below zero")
@@ -135,9 +131,7 @@ class ChunkManager(
         chunkLoader = GlobalScope.launch{
             chunkloaderName = Thread.currentThread().name
             //wait until all chunks are loaded
-            synchronized(chunks) {
-                clearUnusedChunks()
-            }
+
             for(i in chunkIndices.indices){
                 val chunkIndex = chunkIndices[i]
                 if(!chunks.containsKey(chunkIndex)) {
@@ -155,10 +149,13 @@ class ChunkManager(
                 return@launch
             }
 
+            synchronized(chunks) {
+                clearUnusedChunks()
+            }
+
             changed = true
             upToDate = true
             loading = false
-            Logger.error("ChunkManager", "loading false 2")
         }
     }
 

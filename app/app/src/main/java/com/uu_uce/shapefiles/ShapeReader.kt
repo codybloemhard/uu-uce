@@ -13,10 +13,10 @@ unsigned types are marked as experimental, but they are perfectly safe to use
 abstract class ChunkGetter(
     protected var dir: File){
     abstract fun getChunk(cIndex: ChunkIndex):Chunk
-    protected var xoff = 0.0
-    protected var yoff = 0.0
-    protected var zoff = 0.0
-    protected var mult = 0.0
+    protected var xoff = 0.0f
+    protected var yoff = 0.0f
+    protected var zoff = 0.0f
+    protected var mult = 0.0f
     protected var bmin = p3NaN
     protected var bmax = p3NaN
     var nrCuts: List<Int> = listOf()
@@ -91,21 +91,21 @@ class HeightLineReader(
 
         val nrShapes = reader.readULong()
         val shapes = List(nrShapes.toInt()) {
-            val z = reader.readUShort().toDouble()
+            val z = reader.readUShort().toFloat()
             val bb1 = p3(
-                reader.readUShort().toDouble()/mult + xoff,
-                reader.readUShort().toDouble()/mult + yoff,
-                reader.readUShort().toDouble()
+                reader.readUShort().toFloat()/mult + xoff,
+                reader.readUShort().toFloat()/mult + yoff,
+                reader.readUShort().toFloat()
             )
             val bb2 = p3(
-                reader.readUShort().toDouble()/mult + xoff,
-                reader.readUShort().toDouble()/mult + yoff,
-                reader.readUShort().toDouble()
+                reader.readUShort().toFloat()/mult + xoff,
+                reader.readUShort().toFloat()/mult + yoff,
+                reader.readUShort().toFloat()
             )
 
             val nrPoints = reader.readULong()
             val points: List<p2> = List(nrPoints.toInt()) {
-                p2(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff)
+                p2(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff)
             }
 
             val style = Style(false, floatArrayOf(0.0f,0.0f,0.0f))
@@ -127,13 +127,13 @@ class HeightLineReader(
             reader.readULong().toInt()
         }
 
-        xoff = reader.readULong().toDouble()
-        yoff = reader.readULong().toDouble()
-        zoff = reader.readULong().toDouble()
-        mult = reader.readULong().toDouble()
+        xoff = reader.readULong().toFloat()
+        yoff = reader.readULong().toFloat()
+        zoff = reader.readULong().toFloat()
+        mult = reader.readULong().toFloat()
 
-        bmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult)
-        bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult)
+        bmin = p3(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff, reader.readUShort().toFloat()/mult)
+        bmax = p3(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff, reader.readUShort().toFloat()/mult)
 
         val nrMods = reader.readULong()
         mods = List(nrMods.toInt()){
@@ -155,19 +155,19 @@ class PolygonReader(
         val file = File(dir, polyChunkName(cIndex))
         val reader = FileReader(file)
 
-        val xoff = reader.readULong().toDouble()
-        val yoff = reader.readULong().toDouble()
-        val zoff = reader.readULong().toDouble()
-        val mult = reader.readULong().toDouble()
+        val xoff = reader.readULong().toFloat()
+        val yoff = reader.readULong().toFloat()
+        val zoff = reader.readULong().toFloat()
+        val mult = reader.readULong().toFloat()
 
-        val bmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
-        val bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
+        val bmin = p3(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff, reader.readUShort().toFloat())
+        val bmax = p3(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff, reader.readUShort().toFloat())
 
         val nrShapes = reader.readULong()
         val shapes: List<PolygonZ> = List(nrShapes.toInt()) {
             val nrVertices = reader.readULong()
-            val vertices: List<p3> = List(nrVertices.toInt()) {
-                p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, 0.0)
+            val vertices: List<p2> = List(nrVertices.toInt()) {
+                p2(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff)
             }
             val nrIndices = reader.readULong()
             val indices: List<Short> = List(nrIndices.toInt()) {
@@ -195,8 +195,8 @@ class PolygonReader(
                 }
                 else Style(false, floatArrayOf(0.2f,0.2f,0.8f))
 
-            val _bmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
-            val _bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
+            val _bmin = p3(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff, reader.readUShort().toFloat())
+            val _bmax = p3(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff, reader.readUShort().toFloat())
 
             PolygonZ(vertices, indices.toMutableList(), outlineIndices.toList(), style)
         }
@@ -207,8 +207,8 @@ class PolygonReader(
     override fun readInfo(): Pair<p3,p3>{
         val reader = FileReader(File(dir, "chunks.polyinfo"))
 
-        bmin = p3(reader.readUInt().toDouble(), reader.readUInt().toDouble(), reader.readUInt().toDouble())
-        bmax = p3(reader.readUInt().toDouble(), reader.readUInt().toDouble(), reader.readUInt().toDouble())
+        bmin = p3(reader.readUInt().toFloat(), reader.readUInt().toFloat(), reader.readUInt().toFloat())
+        bmax = p3(reader.readUInt().toFloat(), reader.readUInt().toFloat(), reader.readUInt().toFloat())
 
         val cuts = reader.readUByte()
 

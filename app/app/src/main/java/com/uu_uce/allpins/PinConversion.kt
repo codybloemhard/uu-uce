@@ -22,8 +22,8 @@ class PinConversion(val context: Context){
             return UTMCoordinate(
                 s.elementAt(0).value.toInt(),
                 s.elementAt(1).value.first(),
-                s.elementAt(4).value.toDouble()/10,
-                s.elementAt(2).value.toDouble()/10)
+                s.elementAt(4).value.toFloat()/10f,
+                s.elementAt(2).value.toFloat()/10f)
         }
     }
 

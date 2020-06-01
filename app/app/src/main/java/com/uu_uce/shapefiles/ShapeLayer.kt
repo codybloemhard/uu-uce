@@ -10,9 +10,9 @@ class ShapeLayer(private val chunkGetter: ChunkGetter, hasInfo: Boolean){
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk> = mutableMapOf()
     private val chunkManager: ChunkManager
 
-    var bmin: p3
+    var bmin: Triple<Float,Float,Float>
         private set
-    var bmax: p3
+    var bmax: Triple<Float,Float,Float>
         private set
 
     //setup the chunk and bounding box information
@@ -24,11 +24,11 @@ class ShapeLayer(private val chunkGetter: ChunkGetter, hasInfo: Boolean){
         chunkManager = ChunkManager(chunks, chunkGetter, bmin, bmax, chunkGetter.nrCuts)
     }
 
-    fun setzooms(minzoom: Double, maxzoom: Double){
+    fun setzooms(minzoom: Float, maxzoom: Float){
         chunkManager.setZooms(minzoom, maxzoom)
     }
 
-    fun updateChunks(viewport: Pair<p2,p2>, zoom: Double): ChunkUpdateResult {
+    fun updateChunks(viewport: Pair<p2,p2>, zoom: Float): ChunkUpdateResult {
         return chunkManager.update(viewport, zoom)
     }
 
@@ -44,15 +44,8 @@ class ShapeLayer(private val chunkGetter: ChunkGetter, hasInfo: Boolean){
     fun draw(lineProgram: Int, polygonProgram: Int, scale: FloatArray, trans: FloatArray, color: FloatArray){
 
         synchronized(chunks) {
-            var nrShapes = 0
-            var nrLines = 0
             for(chunk in chunks.values) {
                 chunk.draw(lineProgram, polygonProgram, scale, trans, color)
-
-                nrShapes += chunk.shapes.size
-                for(shape in chunk.shapes){
-                    nrLines+=shape.nrPoints-1
-                }
             }
         }
     }

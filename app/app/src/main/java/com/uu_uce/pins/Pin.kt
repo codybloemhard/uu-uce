@@ -202,7 +202,7 @@ class Pin(
         inScreen = true
 
         // Set boundingbox for pin tapping
-        boundingBox = Pair(p2(minX.toDouble(), minY.toDouble()), p2(maxX.toDouble(), maxY.toDouble()))
+        boundingBox = Pair(p2(minX.toFloat(), minY.toFloat()), p2(maxX.toFloat(), maxY.toFloat()))
 
 
 

@@ -31,8 +31,8 @@ class LineDrawInfo: DrawInfo(){
         }
         curIndex++
         for (k in line.points.indices) {
-            vertices.add(line.points[k].first.toFloat())
-            vertices.add(line.points[k].second.toFloat())
+            vertices.add(line.points[k].first)
+            vertices.add(line.points[k].second)
         }
     }
 
@@ -115,9 +115,9 @@ class PolygonDrawInfo: DrawInfo(){
             colors.add(polygon.style.color[2])
         }
 
-        for ((x,y,_) in polygon.vertices) {
-            vertices.add(x.toFloat())
-            vertices.add(y.toFloat())
+        for ((x,y) in polygon.vertices) {
+            vertices.add(x)
+            vertices.add(y)
         }
 
         indexOffset += polygon.vertices.size
@@ -265,12 +265,11 @@ class HeightShapeZ(var points: List<p2>, style: Style): ShapeZ(style) {
             drawInfo.addLine(this)
         }
         else Logger.error("ShapeZ", "wrong draw information for heightshape")
-        points = listOf()
     }
 }
 
 //shape consisting of polygons that need to be colorized
-class PolygonZ(var vertices: List<p3>, var indices: MutableList<Short>, var outlineIndices: List<Short>, style: Style): ShapeZ(style){
+class PolygonZ(var vertices: List<p2>, var indices: MutableList<Short>, var outlineIndices: List<Short>, style: Style): ShapeZ(style){
     override val nrPoints: Int = vertices.size
 
     override fun initDrawInfo(
@@ -280,9 +279,5 @@ class PolygonZ(var vertices: List<p3>, var indices: MutableList<Short>, var outl
             drawInfo.addPolygon(this)
         }
         else Logger.error("ShapeZ", "wrong draw information for polygon shape")
-
-        vertices = listOf()
-        indices = mutableListOf()
-        outlineIndices = listOf()
     }
 }

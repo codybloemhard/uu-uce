@@ -52,10 +52,10 @@ class CustomMap : ViewTouchParent {
     // Location
     private val locationServices                            = LocationServices()
     private val locationDeadZone    : Float                 = 5f // How much does the location have to change on the screen to warrant a redraw
-    private var loc                 : Location              = Location(UTMCoordinate(31, 'N', 0.0, 0.0), context)
+    private var loc                 : Location              = Location(UTMCoordinate(31, 'N', 0.0f, 0.0f), context)
     private var lastDrawnLoc        : Pair<Float, Float>    = Pair(0f, 0f)
     var locationAvailable           : Boolean               = false
-    private var locAtCenterPress    : UTMCoordinate         = UTMCoordinate(31, 'N', 0.0, 0.0)
+    private var locAtCenterPress    : UTMCoordinate         = UTMCoordinate(31, 'N', 0.0f, 0.0f)
 
     // Paints
     private val deviceLocPaint      : Paint = Paint()
@@ -264,16 +264,14 @@ class CustomMap : ViewTouchParent {
 
     //used to zoom the camera in and out
     private fun zoomMap(zoom: Float){
-        val deltaOne = 1.0 - zoom.toDouble().coerceIn(0.5, 1.5)
-        camera.zoomIn(1.0 + deltaOne)
+        val deltaOne = 1.0f - zoom.coerceIn(0.5f, 1.5f)
+        camera.zoomIn(1.0f + deltaOne)
         if(camera.needsInvalidate())
             requestRender()
     }
 
     //used to scroll the camera
-    private fun moveMap(dxpxf: Float, dypxf: Float){
-        val dxpx = dxpxf.toDouble()
-        val dypx = dypxf.toDouble()
+    private fun moveMap(dxpx: Float, dypx: Float){
         val dx = dxpx / width * 2
         val dy = dypx / height * 2
         camera.moveCamera(dx, -dy)
@@ -287,14 +285,14 @@ class CustomMap : ViewTouchParent {
 
     //zoomout until the whole map is visible
     private fun zoomOutMax(){
-        camera.zoomOutMax(500.0)
+        camera.zoomOutMax(500.0f)
         if(camera.needsInvalidate())
             requestRender()
     }
 
     //zoom in to the blue dot, at some arbitrary height
     fun zoomToDevice(){
-        camera.startAnimation(Triple(loc.utm.east, loc.utm.north, 0.02), 1500.0)
+        camera.startAnimation(Triple(loc.utm.east, loc.utm.north, 0.02f), 1500.0f)
         if(camera.needsInvalidate())
             requestRender()
     }
@@ -409,10 +407,10 @@ class CustomMap : ViewTouchParent {
     }
 
     fun setCameraWAspect(){
-        camera.wAspect = width.toDouble()/height
+        camera.wAspect = width.toFloat()/height
 
-        val z = 1.0 / (camera.wAspect)
-        camera.maxZoom = maxOf(1.0,z)
+        val z = 1.0f / (camera.wAspect)
+        camera.maxZoom = maxOf(1.0f,z)
         camera.setZoom(z)
         smap.setzooms(camera.minZoom, camera.maxZoom)
     }
