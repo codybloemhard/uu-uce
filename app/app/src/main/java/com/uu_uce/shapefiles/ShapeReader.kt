@@ -4,7 +4,6 @@ import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import java.io.File
 import java.io.FileInputStream
-import kotlin.random.Random
 
 /*
 a way of getting chunks, possibly from storage or a server
@@ -27,30 +26,7 @@ abstract class ChunkGetter(
     // And every heightline height(z) is a multiple of 100
     var mods: List<Int> = listOf()
 
-    //read the information file provided for most layers
-    //returns bounding box of the entire layer
-    fun readInfo(): Pair<p3,p3>{
-        val reader = FileReader(File(dir, "chunks.info"))
-
-        val nrLODs = reader.readULong()
-        nrCuts = List(nrLODs.toInt()) {
-            reader.readULong().toInt()
-        }
-
-        xoff = reader.readULong().toDouble()
-        yoff = reader.readULong().toDouble()
-        zoff = reader.readULong().toDouble()
-        mult = reader.readULong().toDouble()
-
-        bmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult)
-        bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult)
-
-        val nrMods = reader.readULong()
-        mods = List(nrMods.toInt()){
-            reader.readULong().toInt()
-        }
-        return Pair(bmin, bmax)
-    }
+    abstract fun readInfo(): Pair<p3,p3>
 }
 
 //simple reader that can read basic types from a binary file
@@ -142,6 +118,29 @@ class HeightLineReader(
 
         return Chunk(shapes, bmin, bmax, LayerType.Height)
     }
+
+    override fun readInfo(): Pair<p3,p3>{
+        val reader = FileReader(File(dir, "chunks.info"))
+
+        val nrLODs = reader.readULong()
+        nrCuts = List(nrLODs.toInt()) {
+            reader.readULong().toInt()
+        }
+
+        xoff = reader.readULong().toDouble()
+        yoff = reader.readULong().toDouble()
+        zoff = reader.readULong().toDouble()
+        mult = reader.readULong().toDouble()
+
+        bmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult)
+        bmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble()/mult)
+
+        val nrMods = reader.readULong()
+        mods = List(nrMods.toInt()){
+            reader.readULong().toInt()
+        }
+        return Pair(bmin, bmax)
+    }
 }
 
 class Style(val outline: Boolean, val color: FloatArray)
@@ -166,7 +165,7 @@ class PolygonReader(
 
         val nrShapes = reader.readULong()
         val shapes: List<PolygonZ> = List(nrShapes.toInt()) {
-            var nrVertices = reader.readULong()
+            val nrVertices = reader.readULong()
             val vertices: List<p3> = List(nrVertices.toInt()) {
                 p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, 0.0)
             }
@@ -176,7 +175,7 @@ class PolygonReader(
             }
 
             val nrOutlineIndices = reader.readULong()
-            var outlineIndexPairs = List(nrOutlineIndices.toInt()) {
+            val outlineIndexPairs = List(nrOutlineIndices.toInt()) {
                 Pair(reader.readUShort().toShort(),reader.readUShort().toShort())
             }
 
@@ -195,9 +194,25 @@ class PolygonReader(
                 }
                 else Style(false, floatArrayOf(0.2f,0.2f,0.8f))
 
+            //val sbmin = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
+            //val sbmax = p3(reader.readUShort().toDouble()/mult + xoff, reader.readUShort().toDouble()/mult + yoff, reader.readUShort().toDouble())
+
             PolygonZ(vertices, indices.toMutableList(), outlineIndices.toList(), style)
         }
 
         return Chunk(shapes, bmin, bmax, LayerType.Water)
+    }
+
+    override fun readInfo(): Pair<p3,p3>{
+        val reader = FileReader(File(dir, "chunks.info"))
+
+        bmin = p3(reader.readUInt().toDouble(), reader.readUInt().toDouble(), reader.readUInt().toDouble())
+        bmax = p3(reader.readUInt().toDouble(), reader.readUInt().toDouble(), reader.readUInt().toDouble())
+
+        val cuts = reader.readUByte()
+
+        nrCuts = listOf(cuts.toInt())
+
+        return Pair(bmin, bmax)
     }
 }

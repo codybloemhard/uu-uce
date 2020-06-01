@@ -128,7 +128,6 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
             GLES20.glAttachShader(it, fragmentShader)
             GLES20.glLinkProgram(it)
         }
-        GLES20.glBindAttribLocation(pinProgram, 0, "a_TexCoordinate")
     }
 
     override fun onDrawFrame(gl: GL10?) {

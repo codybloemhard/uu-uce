@@ -14,32 +14,17 @@ bmin/bmax: the bounding box of all shapes
 type: what type of content is in this chunk
  */
 class Chunk(var shapes: List<ShapeZ>, var bmin: p3, var bmax: p3, val type: LayerType){
-    private val drawInfo: DrawInfo
+    private val drawInfo: DrawInfo = when(type){
+        LayerType.Height -> {
+            LineDrawInfo()
+        }
+        LayerType.Water -> {
+            PolygonDrawInfo()
+        }
+        else -> throw Exception("chunk type not implemented")
+    }
 
     init{
-        drawInfo = when(type){
-            LayerType.Height -> {
-                var nrPoints = 0
-                var nrLines = 0
-                for(shape in shapes){
-                    nrPoints+=shape.nrPoints
-                    nrLines += shape.nrPoints - 1
-                }
-                LineDrawInfo(nrPoints, nrLines)
-            }
-            LayerType.Water -> {
-                var nrIndices = 0
-                var nrPoints = 0
-                var nrOutlineIndices = 0
-                for(shape in shapes){
-                    nrIndices+=(shape as PolygonZ).indices.size
-                    nrPoints+=shape.nrPoints
-                    if(shape.style.outline) nrOutlineIndices += shape.outlineIndices.size
-                }
-                PolygonDrawInfo(nrPoints, nrIndices, nrOutlineIndices)
-            }
-            else -> throw Exception("chunk type not implemented")
-        }
         for(shape in shapes) {
             shape.initDrawInfo(drawInfo)
         }

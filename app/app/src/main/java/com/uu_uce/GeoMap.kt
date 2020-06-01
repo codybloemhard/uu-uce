@@ -258,7 +258,7 @@ class GeoMap : AppCompatActivity() {
 
         try{readStyles(mydir)}
         catch(e: Exception){Logger.error("GeoMap", "no style file available: "+ e.message)}
-        /*try {
+        //try {
             val heightlines = File(mydir, "Heightlines")
             customMap.addLayer(
                 LayerType.Height,
@@ -268,9 +268,10 @@ class GeoMap : AppCompatActivity() {
                 true
             )
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
-        }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
-        }*/
+
+        //}catch(e: Exception){
+        //    Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
+        //}
         //try {
             val polygons = File(mydir, "Polygons")
             customMap.addLayer(

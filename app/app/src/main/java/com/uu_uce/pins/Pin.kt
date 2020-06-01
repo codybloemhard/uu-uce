@@ -107,7 +107,7 @@ class Pin(
     private var questionRewards : Array<Int>    = Array(content.contentBlocks.count()) { 0 }
     private var totalReward                     = 0
 
-    var initialized = false
+    private var initialized = false
 
     fun initGL(){
         if(initialized) return
@@ -243,6 +243,7 @@ class Pin(
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, drawOrder.size, GLES20.GL_UNSIGNED_SHORT, indexBuffer)
 
         GLES20.glDisableVertexAttribArray(positionHandle)
+        GLES20.glDisableVertexAttribArray(textureCoordinateHandle)
     }
 
     // Check if pin should be unlocked
@@ -499,7 +500,7 @@ class Pin(
         return status
     }
 
-    fun loadTexture(bitmap: Bitmap): Int {
+    private fun loadTexture(bitmap: Bitmap): Int {
         val textureHandle = IntArray(1)
         GLES20.glGenTextures(1, textureHandle, 0)
         if (textureHandle[0] != 0) {

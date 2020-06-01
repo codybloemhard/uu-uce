@@ -69,7 +69,7 @@ class CustomMap : ViewTouchParent {
     private lateinit var lfOwner        : LifecycleOwner
     var activePopup                     : PopupWindow?          = null
     var pinSize: Int
-    var locSizeFactor = 0.5f
+    private var locSizeFactor = 0.5f
 
     // Map
     private var smap = ShapeMap(this)
@@ -180,6 +180,7 @@ class CustomMap : ViewTouchParent {
                         (context as GeoMap).heightline_diff_text.text =
                             (context as Activity).getString(R.string.geomap_heightline_diff_text, standardValue)
                     }
+                    (context as GeoMap).scale_text.text = (viewport.second.first - viewport.first.first).toString() + "m"
                 }
             }
 
@@ -456,7 +457,7 @@ class CustomMap : ViewTouchParent {
         return nrLayers
     }
 
-    val eps = 0.001
+    private val eps = 0.001
     //functions used for testing
     @TestOnly
     fun getPinLocation() : Pair<Float, Float>{

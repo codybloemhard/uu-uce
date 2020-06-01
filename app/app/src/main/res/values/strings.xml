@@ -10,6 +10,7 @@
     <string name="geomap_download_warning_head">Streaming is unavailable</string>
     <string name="geomap_download_warning_body">Streaming maps is currently unsupported, to use the maps supplied by your organization you will have to download them. Would you like to download the maps now?</string>
     <string name="geomap_heightline_diff_text">%1$dm</string>
+    <string name="geomap_scale_default">0m</string>
     <string name="geomap_maps_download_instructions">Maps can be manually downloaded from settings</string>
 
     <!--AllPins-->

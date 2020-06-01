@@ -4,7 +4,6 @@ import android.content.Context
 import android.view.GestureDetector
 import android.view.MotionEvent
 import androidx.core.view.GestureDetectorCompat
-import com.uu_uce.misc.Logger
 
 //performs action(dx,dy) when scrolled
 class Scroller(

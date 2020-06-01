@@ -23,9 +23,9 @@ nrCuts: there are nrCuts.size different zoomlevels, where level i has nrCuts[i] 
 class ChunkManager(
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk>,
     private val chunkGetter: ChunkGetter,
-    val bmin: p3,
-    val bmax: p3,
-    val nrCuts: List<Int>)
+    private val bmin: p3,
+    private val bmax: p3,
+    private val nrCuts: List<Int>)
 {
     //render a little extra around the camera for smoothness
     private val extraRenderFac = 0.2f
@@ -41,25 +41,14 @@ class ChunkManager(
     private var changed = false
     var factor = 0.0
 
-    private val debugPaint = Paint()
-    private val loadedChunkPaint = Paint()
+    private var xmin = 0
+    private var xmax = 0
+    private var ymin = 0
+    private var ymax = 0
 
-    var xmin = 0
-    var xmax = 0
-    var ymin = 0
-    var ymax = 0
+    private var maxzoom = 0.0
 
-    var maxzoom = 0.0
-
-    var zoom = nrOfLODs-1
-
-    init{
-        debugPaint.color = Color.RED
-        debugPaint.strokeWidth = 5f
-
-        loadedChunkPaint.color = Color.GREEN
-        loadedChunkPaint.alpha = 128
-    }
+    private var zoom = nrOfLODs-1
 
     fun setZooms(minzoom: Double, maxzoom: Double){
         factor = (minzoom/maxzoom).pow(1.0/chunkGetter.nrCuts.size)
