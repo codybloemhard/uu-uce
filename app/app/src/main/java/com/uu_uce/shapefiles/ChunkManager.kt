@@ -1,7 +1,5 @@
 package com.uu_uce.shapefiles
 
-import android.graphics.Color
-import android.graphics.Paint
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import kotlinx.coroutines.GlobalScope
@@ -28,14 +26,15 @@ class ChunkManager(
     private val nrCuts: List<Int>)
 {
     //render a little extra around the camera for smoothness
-    private val extraRenderFac = 0.2f
+    private val extraRenderFac = -0.2f
 
     private var lastViewport: Pair<p2,p2> = Pair(p2Zero,p2Zero)
     private var lastZoom: Int = -1
     private val nrOfLODs = nrCuts.size
 
-    private var chunkLoaders: List<Pair<ChunkIndex,Job>> = listOf()
-    private var chunksLoadedListener: Job? = null
+    private var chunkLoader: Job? = null
+    private var chunkloaderName = ""
+
     private var loading = false
     private var upToDate = false
     private var changed = false
@@ -62,12 +61,12 @@ class ChunkManager(
     //cancel all threads that are currently trying to load new chunks
     private fun cancelCurrentLoading(){
         synchronized(chunks) {
-            chunksLoadedListener?.cancel()
+            chunkLoader?.cancel()
 
-            for ((_, job) in chunkLoaders) {
-                job.cancel()
-            }
+            Logger.error("ChunkManager", "loading false 1")
             loading = false
+
+            //clearUnusedChunks()
         }
     }
 
@@ -114,10 +113,6 @@ class ChunkManager(
         if(!upToDate) {
             val activeChunks = getActiveChunks(zoom)
             addChunks(activeChunks, zoom)
-
-            for (index in activeChunks)
-                if (!chunks.containsKey(index))
-                    Logger.log(LogType.Event, "ChunkManager", "loading $index")
             return ChunkUpdateResult.LOADING
         }
 
@@ -137,45 +132,39 @@ class ChunkManager(
     private fun addChunks(chunkIndices: List<ChunkIndex>, zoom: Int){
         loading = true
 
-        //make a thread for every chunk to be loaded
-        val loadedChunks: MutableList<Chunk?> = MutableList(chunkIndices.size){null}
-        chunkLoaders = List(chunkIndices.size) {i ->
-            val chunkIndex = chunkIndices[i]
-            val job = GlobalScope.launch {
+        chunkLoader = GlobalScope.launch{
+            chunkloaderName = Thread.currentThread().name
+            //wait until all chunks are loaded
+            synchronized(chunks) {
+                clearUnusedChunks()
+            }
+            for(i in chunkIndices.indices){
+                val chunkIndex = chunkIndices[i]
                 if(!chunks.containsKey(chunkIndex)) {
                     val c: Chunk = chunkGetter.getChunk(chunkIndex)
-                    loadedChunks[i] = c
+                    if(shouldGetLoaded(chunkIndex, zoom))
+                        synchronized(chunks) {
+                            chunks[chunkIndex] = c
+                        }
+                    Logger.log(LogType.Info, "ChunkManager", "loaded chunk $chunkIndex")
                 }
             }
-            val pair = Pair(chunkIndex,job)
-            pair
+
+            if(Thread.currentThread().name != chunkloaderName) {
+                Logger.error("ChunkManager", "${Thread.currentThread().name} is not main loader $chunkloaderName")
+                return@launch
+            }
+
+            changed = true
+            upToDate = true
+            loading = false
+            Logger.error("ChunkManager", "loading false 2")
         }
+    }
 
-        chunksLoadedListener = GlobalScope.launch{
-            //wait until all chunks are loaded
-            for((_,job) in chunkLoaders) {
-                job.join()
-            }
-
-            synchronized(chunks) {
-                //remove outdated chunks
-                chunks.keys.removeAll{index ->
-                    val res = !shouldGetLoaded(index, zoom)
-                    if(res)Logger.log(LogType.Continuous, "ChunkManager", "chunk $index should not be loaded")
-                    else Logger.log(LogType.Continuous, "ChunkManager", "chunk $index stays loaded")
-                    res
-                }
-                //add new chunks
-                for (i in chunkLoaders.indices) {
-                    val index = chunkIndices[i]
-                    val chunk = loadedChunks[i] ?: continue
-                    chunks[index] = chunk
-                    Logger.log(LogType.Event, "ChunkManager", "loaded chunk $index")
-                }
-                changed = true
-                upToDate = true
-                loading = false
-            }
+    private fun clearUnusedChunks(){
+        chunks.keys.removeAll{index ->
+            !shouldGetLoaded(index, zoom)
         }
     }
 

@@ -148,6 +148,7 @@ class CustomMap : ViewTouchParent {
 
         if(res == UpdateResult.NOOP && chunkRes == ChunkUpdateResult.NOTHING){
             //bufferframes to make sure everything is redrawn when returning from a different activity
+            Logger.error("CustomMap", "All updates done, no longer redrawing")
             curBufferFrame++
             if(curBufferFrame >= bufferFrames)
                 return
@@ -211,7 +212,7 @@ class CustomMap : ViewTouchParent {
         Logger.log(LogType.Continuous, "CustomMap", "Draw MS: $timeDraw")
 
         //invalidate so onDraw is called again next frame if necessary
-        if(res == UpdateResult.ANIM || chunkRes == ChunkUpdateResult.LOADING)
+        //if(res == UpdateResult.ANIM || chunkRes == ChunkUpdateResult.LOADING)
             requestRender()
     }
 

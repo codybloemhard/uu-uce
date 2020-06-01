@@ -138,7 +138,9 @@ class ShapeMap(
     fun updateChunks(): ChunkUpdateResult{
         var res = ChunkUpdateResult.NOTHING
         for((_,layer) in layers){
-            val cur = layer.updateChunks(camera.getViewport(), camera.getZoom())
+            val viewport = camera.getViewport()
+            val zoom = camera.getZoom()
+            val cur = layer.updateChunks(viewport, zoom)
             if(cur != ChunkUpdateResult.NOTHING)
                 res = cur
             if(res == ChunkUpdateResult.LOADING) break

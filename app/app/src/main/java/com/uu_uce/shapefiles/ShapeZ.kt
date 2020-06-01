@@ -86,8 +86,8 @@ class LineDrawInfo: DrawInfo(){
             }
 
         nrIndices = indices.size
-        vertices = mutableListOf()
-        indices = mutableListOf()
+        vertices.clear()
+        indices.clear()
     }
 }
 
@@ -239,10 +239,10 @@ class PolygonDrawInfo: DrawInfo(){
         nrIndices = indices.size
         nrOutlineIndices = outlineIndices.size
 
-        vertices = mutableListOf()
-        colors = mutableListOf()
-        indices = mutableListOf()
-        outlineIndices = mutableListOf()
+        vertices.clear()
+        colors.clear()
+        indices.clear()
+        outlineIndices.clear()
     }
 }
 
@@ -265,6 +265,7 @@ class HeightShapeZ(var points: List<p2>, style: Style): ShapeZ(style) {
             drawInfo.addLine(this)
         }
         else Logger.error("ShapeZ", "wrong draw information for heightshape")
+        points = listOf()
     }
 }
 
@@ -277,6 +278,11 @@ class PolygonZ(var vertices: List<p3>, var indices: MutableList<Short>, var outl
     ) {
         if (drawInfo is PolygonDrawInfo) {
             drawInfo.addPolygon(this)
-        } else Logger.error("ShapeZ", "wrong draw information for polygon shape")
+        }
+        else Logger.error("ShapeZ", "wrong draw information for polygon shape")
+
+        vertices = listOf()
+        indices = mutableListOf()
+        outlineIndices = listOf()
     }
 }
