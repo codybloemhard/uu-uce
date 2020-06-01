@@ -722,8 +722,7 @@ class FieldbookEditor: AppCompatActivity() {
             UTMCoordinate(0, 'N', 0.0, 0.0).toString()
         }
         else{
-            //degreeToUTM(Pair(location.latitude,location.longitude)).toString()
-            UTMCoordinate(31,'N',313000.0,4677733.6).toString()
+            degreeToUTM(Pair(location.latitude,location.longitude)).toString()
         }
 
         FieldbookEntry(

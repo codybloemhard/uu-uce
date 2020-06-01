@@ -74,7 +74,6 @@ class CustomMap : ViewTouchParent {
     private lateinit var lfOwner            : LifecycleOwner
 
     private var pins                        : MutableMap<String, Pin>   = mutableMapOf()
-    private var fieldbook                   : List<FieldbookEntry>      = listOf()
     private var sortedPins                  : List<Pin>                 = listOf()
     private var pinStatuses                 : MutableMap<String, Int>   = mutableMapOf()
     var activePopup                         : PopupWindow?              = null
@@ -123,8 +122,8 @@ class CustomMap : ViewTouchParent {
                 }
             }
         })
-        //width and height are not set in the init{} yet
-        //we delay calculations that use them by using post
+        // Width and height are not set in the init{} yet
+        // We delay calculations that use them by using post
         post{
             setCameraWAspect()
         }

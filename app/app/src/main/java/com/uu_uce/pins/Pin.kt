@@ -23,8 +23,7 @@ import com.uu_uce.defaultPinSize
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.services.UTMCoordinate
-import com.uu_uce.services.updateFiles
+import com.uu_uce.services.*
 import com.uu_uce.shapefiles.p2
 import com.uu_uce.shapefiles.p2Zero
 import org.jetbrains.annotations.TestOnly
@@ -52,6 +51,7 @@ class Pin(
 
     // Set default pin size
     private var pinWidth = defaultPinSize.toFloat()
+    private var completeRange = 100
 
     //opengl stuff
     private var backgroundHandle: Int = -1
@@ -320,6 +320,13 @@ class Pin(
                         val current = content.contentBlocks[i]
                         current.showContent(i, layout, parentView, this)
                         if(current is MCContentBlock) containsQuiz = true
+                    }
+
+                    if(LocationServices.lastKnownLocation != null && status == 1 && !containsQuiz){
+                        val dist = calculateDistance(degreeToUTM(p2(LocationServices.lastKnownLocation!!.latitude, LocationServices.lastKnownLocation!!.longitude)), coordinate)
+                        if(dist < completeRange){
+                            complete()
+                        }
                     }
 
                     // Fill layout of popup
