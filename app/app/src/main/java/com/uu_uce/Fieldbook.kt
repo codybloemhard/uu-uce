@@ -45,16 +45,16 @@ class Fieldbook : AppCompatActivity() {
         else if(!darkMode){
             window.statusBarColor = Color.BLACK// set status background white
         }
-        super.onCreate(savedInstanceState)
+        super.onCreate(null)
         setContentView(R.layout.activity_fieldbook)
 
-        // initiate views and layout
+        // Initiate views and layout
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.fieldbook_bottom_navigation)
         createTopbar(this, getString(R.string.fieldbook_topbar_title))
 
         openFragment(FieldbookHomeFragment.newInstance(window.decorView.rootView))
 
-        // set listeners
+        // Set listeners
         bottomNavigation.setOnNavigationItemSelectedListener(
             BottomNavigationView.OnNavigationItemSelectedListener(
                 fun(m): Boolean {
@@ -64,7 +64,10 @@ class Fieldbook : AppCompatActivity() {
                             return true
                         }
                         R.id.fieldbook_navigation_pinmap -> {
-                            openFragment(FieldbookPinmapFragment.newInstance())
+                            val current = supportFragmentManager.findFragmentById(R.id.fieldbook_container) as Fragment
+                            if(current !is FieldbookPinmapFragment){
+                                openFragment(FieldbookPinmapFragment.newInstance())
+                            }
                             return true
                         }
                         R.id.fieldbook_navigation_route -> {
