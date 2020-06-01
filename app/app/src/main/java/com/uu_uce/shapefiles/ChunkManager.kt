@@ -71,7 +71,6 @@ class ChunkManager(
     camzoom: current zoom of the camera
      */
     fun update(viewport: Pair<p2, p2>, camzoom: Float): ChunkUpdateResult {
-        System.gc()
         zoom = ceil(log((camzoom/maxzoom), factor)).toInt()
         if(zoom < 0){
             Logger.log(LogType.Info, "ChunkManager", "zoom below zero")
@@ -135,11 +134,13 @@ class ChunkManager(
             for(i in chunkIndices.indices){
                 val chunkIndex = chunkIndices[i]
                 if(!chunks.containsKey(chunkIndex)) {
-                    val c: Chunk = chunkGetter.getChunk(chunkIndex)
-                    if(shouldGetLoaded(chunkIndex, zoom))
-                        synchronized(chunks) {
-                            chunks[chunkIndex] = c
-                        }
+                    if(shouldGetLoaded(chunkIndex, zoom)) {
+                        val c: Chunk = chunkGetter.getChunk(chunkIndex)
+                        if (shouldGetLoaded(chunkIndex, zoom))
+                            synchronized(chunks) {
+                                chunks[chunkIndex] = c
+                            }
+                    }
                     Logger.log(LogType.Info, "ChunkManager", "loaded chunk $chunkIndex")
                 }
             }

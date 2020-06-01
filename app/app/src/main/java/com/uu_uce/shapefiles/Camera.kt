@@ -8,7 +8,7 @@ fun distXy(p: p3, q: p3): Float{
             (p.second - q.second).pow(2))
 }
 
-fun lerp(a: Float, b: Float, t: Float): Float{
+fun lerp(a: Double, b: Double, t: Double): Double{
     return a + (b - a) * t
 }
 
@@ -58,8 +58,8 @@ class Camera(
     private var animBegin = p3Zero
     private var animTarget = p3Zero
     private var animDuration = 0.0f
-    private var animStartT = 0.0f
-    private var animT = 0.0f
+    private var animStartT = 0.0
+    private var animT = 0.0
 
     //variables for sliding camera
     private var decline = p2(1.0f,1.0f)
@@ -167,10 +167,10 @@ class Camera(
         if(isBusy()) return
         animBegin = Triple(x, y, zoom)
         animTarget = Triple(mx,my,maxZoom)
-        animStartT = System.currentTimeMillis().toFloat()
+        animStartT = System.currentTimeMillis().toDouble()
         animDuration = duration
         animType = AnimType.OUT
-        animT = 0.0f
+        animT = 0.0
     }
 
     //initialize the animation from current position to target in durationMs milisecs
@@ -178,14 +178,14 @@ class Camera(
         if(isBusy()) return
         animBegin = Triple(x, y, zoom)
         animTarget = target
-        animStartT = System.currentTimeMillis().toFloat()
+        animStartT = System.currentTimeMillis().toDouble()
         animDuration = durationMs
         animType = AnimType.TRANS
-        animT = 0.0f
+        animT = 0.0
     }
 
-    private fun smooth(t: Float): Float{
-        return -(t - 1.0f).pow(2.0f) + 1.0f
+    private fun smooth(t: Double): Double{
+        return -(t - 1.0).pow(2.0) + 1.0
     }
 
     //Updates and returns true if viewport has changed
@@ -208,11 +208,11 @@ class Camera(
 
     //animate a full zoomout
     private fun updateOut(){
-        val ct = System.currentTimeMillis().toFloat()
-        val t = ((ct - animStartT) / animDuration).coerceIn(0.0f, 1.0f)
-        x = animBegin.first + (animTarget.first - animBegin.first) * t
-        y = animBegin.second + (animTarget.second - animBegin.second) * t
-        zoom = animBegin.third + (animTarget.third - animBegin.third) * t
+        val ct = System.currentTimeMillis().toDouble()
+        val t = ((ct - animStartT) / animDuration).coerceIn(0.0, 1.0)
+        x = (animBegin.first + (animTarget.first - animBegin.first) * t).toFloat()
+        y = (animBegin.second + (animTarget.second - animBegin.second) * t).toFloat()
+        zoom = (animBegin.third + (animTarget.third - animBegin.third) * t).toFloat()
         if(ct > animStartT + animDuration){
             animType = AnimType.NONE
             zoom = maxZoom
@@ -222,25 +222,25 @@ class Camera(
 
     //animate the movement to animTarget
     private fun updateTrans(){
-        val ct = System.currentTimeMillis().toFloat()
-        val t = ((ct - animStartT) / animDuration).coerceIn(0.0f, 1.0f)
+        val ct = System.currentTimeMillis().toDouble()
+        val t = ((ct - animStartT) / animDuration).coerceIn(0.0, 1.0)
         val distFraction = distXy(animBegin, animTarget) / maxDistXy
         val zoomAvg = (animBegin.third + animTarget.third) / 2.0f
         val midZoom = (maxZoom - zoomAvg)*distFraction + zoomAvg
         val zt = 1.0f/3.0f
         when {
             t < zt -> {
-                zoom = lerp(animBegin.third, midZoom, smooth(t / zt))
+                zoom = lerp(animBegin.third.toDouble(), midZoom.toDouble(), smooth(t / zt)).toFloat()
             }
             t < 1-zt -> {
                 val tt = (t - zt) / (1 - 2*zt)
-                x = animBegin.first + (animTarget.first - animBegin.first) * tt
-                y = animBegin.second + (animTarget.second - animBegin.second) * tt
+                x = (animBegin.first + (animTarget.first - animBegin.first) * tt).toFloat()
+                y = (animBegin.second + (animTarget.second - animBegin.second) * tt).toFloat()
             }
             else -> {
                 x = animTarget.first
                 y = animTarget.second
-                zoom = lerp(animTarget.third,midZoom, 1 - smooth((t - (1 - zt)) / zt))
+                zoom = lerp(animTarget.third.toDouble(),midZoom.toDouble(), 1 - smooth((t - (1 - zt)) / zt)).toFloat()
             }
         }
 

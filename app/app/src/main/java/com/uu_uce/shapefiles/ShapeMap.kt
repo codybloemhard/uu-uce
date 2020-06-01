@@ -112,7 +112,7 @@ class ShapeMap(
     }
 
     //create a camera with the correct bounding box
-    fun initialize(): Camera{
+    fun createCamera(): Camera{
         val first: List<Triple<Float,Float,Float>> = layers.map{l -> l.second.bmin}
         val second:List<Triple<Float,Float,Float>> = layers.map{l -> l.second.bmax}
         val bminmax: Pair<p3,p3> = mergeBBs(
@@ -139,7 +139,10 @@ class ShapeMap(
     //update chunks of all layers
     fun updateChunks(): ChunkUpdateResult{
         var res = ChunkUpdateResult.NOTHING
-        for((_,layer) in layers){
+        for(i in layers.indices){
+            if(!layerMask[i]) continue
+            val (_,layer) = layers[i]
+
             val viewport = camera.getViewport()
             val zoom = camera.getZoom()
             val cur = layer.updateChunks(viewport, zoom)
@@ -153,10 +156,10 @@ class ShapeMap(
     //draw all layers
     fun draw(lineProgram: Int, polygonProgram: Int, scale: FloatArray, trans: FloatArray){
         for(i in layers.indices) {
-            if(layerMask[i]) {
-                val (t,l) = layers[i]
-                l.draw(lineProgram, polygonProgram, scale, trans, layerColors[t.value])
-            }
+            if(!layerMask[i]) continue
+            val (t,layer) = layers[i]
+
+            layer.draw(lineProgram, polygonProgram, scale, trans, layerColors[t.value])
         }
     }
 

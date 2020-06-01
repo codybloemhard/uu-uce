@@ -114,7 +114,7 @@ class CustomMap : ViewTouchParent {
 
     //to be called after all addLayer calls
     fun initializeCamera(){
-        camera = smap.initialize()
+        camera = smap.createCamera()
     }
 
     // Add a new layer to the map, and generate a button to toggle it

@@ -34,8 +34,6 @@ class Chunk(var shapes: List<ShapeZ>, var bmin: p3, var bmax: p3, val type: Laye
         drawInfo.finalize()
 
         shapes = listOf()
-
-        System.gc()
     }
 
     //display all chunks to the canvas
