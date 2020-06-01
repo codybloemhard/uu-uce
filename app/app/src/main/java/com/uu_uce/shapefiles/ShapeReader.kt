@@ -152,7 +152,7 @@ class PolygonReader(
     private val styles: List<Style>
 ): ChunkGetter(dir){
     override fun getChunk(cIndex: ChunkIndex): Chunk {
-        val file = File(dir, chunkName(cIndex))
+        val file = File(dir, polyChunkName(cIndex))
         val reader = FileReader(file)
 
         val xoff = reader.readULong().toDouble()
@@ -205,7 +205,7 @@ class PolygonReader(
     }
 
     override fun readInfo(): Pair<p3,p3>{
-        val reader = FileReader(File(dir, "chunks.info"))
+        val reader = FileReader(File(dir, "chunks.polyinfo"))
 
         bmin = p3(reader.readUInt().toDouble(), reader.readUInt().toDouble(), reader.readUInt().toDouble())
         bmax = p3(reader.readUInt().toDouble(), reader.readUInt().toDouble(), reader.readUInt().toDouble())
