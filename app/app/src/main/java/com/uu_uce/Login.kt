@@ -98,7 +98,8 @@ class Login : AppCompatActivity() {
         var digest: MessageDigest? = null
         try {
             digest = MessageDigest.getInstance("SHA-256")
-        } catch (e1: NoSuchAlgorithmException) {
+        }
+        catch (e1: NoSuchAlgorithmException) {
             e1.printStackTrace()
         }
         digest!!.reset()

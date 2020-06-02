@@ -49,7 +49,7 @@ class GeoMapTests {
         pinList.add(
             PinData(
                 "0",
-                "31N46777336N3149680E",
+                "31N4677733N314968E",
                 1,
                 "TEXT",
                 "A",
@@ -63,11 +63,11 @@ class GeoMapTests {
         pinList.add(
             PinData(
                 "1",
-                "31N46718336N3133680E",
+                "31N4671833N313368E",
                 2,
                 "IMAGE",
                 "B",
-                "[{\"tag\":\"IMAGE\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/images/test.png\"}]",
+                "[{\"tag\":\"IMAGE\", \"file_path\":\"Images/test.png\"}]",
                 1,
                 1,
                 "-1",
@@ -77,11 +77,11 @@ class GeoMapTests {
         pinList.add(
             PinData(
                 "2",
-                "31N46710000N3130000E",
+                "31N4671000N313000E",
                 3,
                 "VIDEO",
                 "C",
-                "[{\"tag\":\"VIDEO\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/videos/zoo.mp4\", \"thumbnail\":\"file:///data/data/com.uu_uce/files/pin_content/videos/thumbnails/zoothumbnail.png\", \"title\":\"zoo video\"}]",
+                "[{\"tag\":\"VIDEO\", \"file_path\":\"Videos/zoo.mp4\", \"thumbnail\":\"Videos/thumbnails/Zoothumbnail.png\", \"title\":\"zoo video\"}]",
                 1,
                 1,
                 "-1",
@@ -91,7 +91,7 @@ class GeoMapTests {
         pinList.add(
             PinData(
                 "3",
-                "31N46715335N3134680E",
+                "31N4671533N313468E",
                 3,
                 "MCQUIZ",
                 "D",
