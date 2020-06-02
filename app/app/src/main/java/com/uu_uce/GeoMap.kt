@@ -223,13 +223,17 @@ class GeoMap : AppCompatActivity() {
         super.onResume()
     }
 
-    private fun initMenu(){
+    private fun initMenuAndScales(){
         if(customMap.getLayerCount() > 0){
             menu.setScreenHeight(customMap.height, dragBar.height, toggle_layer_scroll.height, lower_menu_layout.height)
         }
         else{
             menu.setScreenHeight(customMap.height, dragBar.height, 0, lower_menu_layout.height)
         }
+        val heightlineY = menu.downY - heightline_diff_text.height - heightline_diff_text.paddingBottom - heightline_diff_text.paddingBottom
+        val scaleY = heightlineY - scaleWidget.height - scaleWidget.paddingBottom - scaleWidget.paddingBottom
+        heightline_diff_text.y = heightlineY
+        scaleWidget.y = scaleY
     }
 
     // Respond to permission request result
@@ -296,8 +300,10 @@ class GeoMap : AppCompatActivity() {
         customMap.initializeCamera()
 
         //more menu initialization which needs its width/height
-        menu.post{
-            initMenu()
+        scaleWidget.post {
+            menu.post {
+                initMenuAndScales()
+            }
         }
 
         customMap.setCameraWAspect()

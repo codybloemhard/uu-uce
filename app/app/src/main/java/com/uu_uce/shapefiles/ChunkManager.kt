@@ -26,7 +26,7 @@ class ChunkManager(
     private val nrCuts: List<Int>)
 {
     //render a little extra around the camera for smoothness
-    private val extraRenderFac = -0.2f
+    private val extraRenderFac = 0.0f
 
     private var lastViewport: Pair<p2,p2> = Pair(p2Zero,p2Zero)
     private var lastZoom: Int = -1
