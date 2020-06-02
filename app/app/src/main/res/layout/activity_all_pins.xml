@@ -23,10 +23,12 @@
             android:layout_marginTop="15dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            android:focusable="true"
+            android:focusableInTouchMode="true">
 
             <EditText
-                android:id="@+id/searchbar"
+                android:id="@+id/pins_searchbar"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/custom_border_search"
@@ -61,6 +63,7 @@
             android:layout_gravity="end|bottom"
             android:layout_margin="16dp"
             android:onClick="openDialog"
+            android:backgroundTint="?colorAccentRef"
             android:src="@drawable/ic_sprite_sort_white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />

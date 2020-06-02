@@ -16,7 +16,11 @@ class FieldbookViewModel(application: Application): AndroidViewModel(application
     init {
         val fieldbookDao = UceRoomDatabase.getDatabase(application, viewModelScope).fieldbookDao()
         fieldbookRepository = FieldbookRepository(fieldbookDao)
-        allFieldbookEntries = fieldbookRepository.allFieldbookEntries
+        allFieldbookEntries = fieldbookRepository.allEntries
+    }
+
+    fun getContent (entryId: Int, action : ((FieldbookEntry) -> Unit)) = viewModelScope.launch {
+        fieldbookRepository.getContent(entryId, action)
     }
 
     fun insert (fieldbookEntry: FieldbookEntry) = viewModelScope.launch {
@@ -29,5 +33,13 @@ class FieldbookViewModel(application: Application): AndroidViewModel(application
 
     fun deleteAll() = viewModelScope.launch {
         fieldbookRepository.deleteAll()
+    }
+
+    fun search(searchText : String, action : ((List<FieldbookEntry>?) -> Unit)) = viewModelScope.launch {
+        fieldbookRepository.search(searchText, action)
+    }
+
+    fun update(title: String, content: String, entryId: Int) = viewModelScope.launch {
+        fieldbookRepository.update(title, content, entryId)
     }
 }

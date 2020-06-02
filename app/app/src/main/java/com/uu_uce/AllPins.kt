@@ -1,7 +1,6 @@
 package com.uu_uce
 
 import android.app.Activity
-import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
@@ -14,6 +13,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -30,13 +30,26 @@ class AllPins : AppCompatActivity() {
     private lateinit var pinViewModel   : PinViewModel
     private lateinit var sharedPref     : SharedPreferences
     private lateinit var viewAdapter    : PinListAdapter
-    private var selectedOption          : Int = 0
+    private var sortmode : Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+        val darkMode = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
+        // Set desired theme
+        if(darkMode) setTheme(R.style.DarkTheme)
+
+        // Set statusbar text color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !darkMode) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
+        }
+        else if(!darkMode){
+            window.statusBarColor = Color.BLACK// set status background white
+        }
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_all_pins)
 
-        createTopbar(this, "Pins")
+        createTopbar(this, getString(R.string.allpins_topbar_title))
 
         viewManager = LinearLayoutManager(this)
 
@@ -48,15 +61,15 @@ class AllPins : AppCompatActivity() {
         }
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         pinViewModel.allPinData.observe(this, Observer { pins ->
-            pins?.let { viewAdapter.setPins(sortList(pins, sharedPref.getInt("selectedOption", 0)), pinViewModel) }
+            pins?.let { viewAdapter.setPins(sortList(pins, sharedPref.getInt("com.uu_uce.SORTMODE", 0)), pinViewModel) }
         })
 
         val filterButton : FloatingActionButton = findViewById(R.id.fab)
         registerForContextMenu(filterButton)
 
-        sharedPref = this.getPreferences(Context.MODE_PRIVATE)
 
-        val searchBar = findViewById<EditText>(R.id.searchbar)
+
+        val searchBar = findViewById<EditText>(R.id.pins_searchbar)
 
         searchBar.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
@@ -82,8 +95,8 @@ class AllPins : AppCompatActivity() {
             viewAdapter.activePopup?.dismiss()
             return
         }
-        else if(searchbar.text.toString().count() > 0){
-            searchbar.text.clear()
+        else if(pins_searchbar.text.toString().count() > 0){
+            pins_searchbar.text.clear()
             searchPins("")
             return
         }
@@ -91,33 +104,38 @@ class AllPins : AppCompatActivity() {
     }
 
     fun openDialog(view : View) {
-        val builder : AlertDialog.Builder = AlertDialog.Builder(this)
-        val filterOptions : Array<String> = arrayOf("Title a-z", "Title z-a", "Difficulty easy-hard", "Difficulty hard-easy", "Type a-z", "Type z-a")
-        builder
-            .setTitle("Filter by:")
-            .setSingleChoiceItems(filterOptions, sharedPref.getInt("selectedOption", 0)) { dialog, which ->
-                selectedOption = which
+        val filterOptions : Array<String> = arrayOf(
+            getString(R.string.allpins_sorting_title_az),
+            getString(R.string.allpins_sorting_title_za),
+            getString(R.string.allpins_sorting_difficulty_easyhard),
+            getString(R.string.allpins_sorting_difficulty_hardeasy),
+            getString(R.string.allpins_sorting_type_az),
+            getString(R.string.allpins_sorting_type_za))
+
+        AlertDialog.Builder(this, R.style.AlertDialogStyle)
+            .setTitle(getString(R.string.allpins_sort_popup_title))
+            .setSingleChoiceItems(filterOptions, sharedPref.getInt("com.uu_uce.SORTMODE", 0)) { dialog, which ->
+                sortmode = which
                 dialog.dismiss()
-                sortList(selectedOption)
                 with(sharedPref.edit()) {
-                    putInt("selectedOption", selectedOption)
+                    putInt("com.uu_uce.SORTMODE", sortmode)
                     apply()
                 }
-            }
-        builder.show()
+                sortPins()
+            }.show()
     }
 
-    private fun sortList(category: Int){
+    private fun sortPins(){
         viewAdapter = PinListAdapter(this)
         recyclerView.adapter = viewAdapter
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         pinViewModel.allPinData.observe(this, Observer { pins ->
-            pins?.let { viewAdapter.setPins(sortList(it, category), pinViewModel) }
+            pins?.let { viewAdapter.setPins(sortList(it, sharedPref.getInt("com.uu_uce.SORTMODE", 0)), pinViewModel) }
         })
     }
 
-    private fun sortList(pins : List<PinData>, id: Int) : List<PinData> {
-        return when(id) {
+    private fun sortList(pins : List<PinData>, sortmode: Int) : List<PinData> {
+        return when(sortmode) {
             0 -> pins.sortedWith(compareBy { it.title })
             1 -> pins.sortedWith(compareByDescending { it.title })
             2 -> pins.sortedWith(compareBy { it.difficulty })
@@ -133,7 +151,7 @@ class AllPins : AppCompatActivity() {
     private fun searchPins(search : String){
         pinViewModel.searchPins(search){ pins ->
             pins?.let {
-                viewAdapter.setPins(sortList(pins, sharedPref.getInt("selectedOption", 0)), pinViewModel)
+                viewAdapter.setPins(sortList(pins, sharedPref.getInt("com.uu_uce.SORTMODE", 0)), pinViewModel)
             }
             hideKeyboard(this)
         }

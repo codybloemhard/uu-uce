@@ -23,7 +23,7 @@ import java.util.zip.ZipInputStream
 
 val permissionsNeeded = listOf(Manifest.permission.INTERNET)
 
-private const val serverURL = "http://131.211.31.176:8080" // TODO: This should be dependedent of the users orginization
+private const val downloadURL = "/api/files/download/"
 
 private lateinit var sharedPref : SharedPreferences
 
@@ -36,11 +36,11 @@ It will call getFiles for all missing files.
  */
 fun updateFiles(requiredFilePaths : List<String>, activity : Activity, onCompleteAction : (() -> Unit)= {}, progressAction : (Int) -> Unit = {}) : Boolean {
     val missingFiles = findMissingFilePaths(requiredFilePaths)
-    return if(missingFiles.count() > 0){
+    return if (missingFiles.count() > 0) {
         getPermissions(activity, permissionsNeeded, EXTERNAL_FILES_REQUEST)
         getFiles(missingFiles, activity, onCompleteAction, progressAction)
     }
-    else{
+    else {
         GlobalScope.launch { onCompleteAction() }
         true
     }
@@ -55,7 +55,8 @@ fun findMissingFilePaths(requestedFilePaths : List<String>) : List<Pair<String, 
     val missingFilePaths : MutableList<Pair<String, String>> = mutableListOf()
     val adding : MutableMap<String, Boolean> = mutableMapOf()
     for(filePath in requestedFilePaths){
-        if(!File(filePath).exists() && !adding.containsKey(filePath)){
+        val file = File(filePath)
+        if((!file.exists() || !file.canRead()) && !adding.containsKey(filePath)){
             val fileName = filePath.split('/').last().split('.').first() // Because we use UUID4 names there can never be a / or . in the file name
             missingFilePaths.add(Pair(filePath, fileName))
             adding[fileName] = true
@@ -75,6 +76,7 @@ fun getFiles (requiredFilePaths : List<Pair<String, String>>, activity: Activity
     val jobList : MutableList<Job> = mutableListOf()
     val wifiManager = activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager?
     sharedPref = PreferenceManager.getDefaultSharedPreferences(activity)
+    val serverURL = sharedPref.getString("com.uu_uce.SERVER_IP", "").toString()
     val networkDownloadAllowed = sharedPref.getBoolean("com.uu_uce.NETWORK_DOWNLOADING", false)
     if (!wifiManager!!.isWifiEnabled && !networkDownloadAllowed){
         Toast.makeText(activity, "Enable wifi or allow network downloading", Toast.LENGTH_LONG).show()
@@ -87,7 +89,7 @@ fun getFiles (requiredFilePaths : List<Pair<String, String>>, activity: Activity
                 Toast.makeText(activity, "Downloading", Toast.LENGTH_SHORT).show()
             }
             downloadFile(
-                URL(serverURL + "/api/files/download/" + filePath.second), filePath.first, progressAction)
+                URL(serverURL + downloadURL + filePath.second), filePath.first, progressAction)
         })
     }
 
@@ -105,7 +107,6 @@ fun getFiles (requiredFilePaths : List<Pair<String, String>>, activity: Activity
 Downloads specified file from URL.
 targetUrl: The URL from which a file needs to be downloaded
 fileDestination: The filepath to which the downloaded file will be downloaded.
-It will download the file.
  */
 fun downloadFile(targetUrl : URL, fileDestination : String, progressAction : (Int) -> Unit = {}) {
     with(targetUrl.openConnection() as HttpURLConnection) {
@@ -139,6 +140,11 @@ fun downloadFile(targetUrl : URL, fileDestination : String, progressAction : (In
     }
 }
 
+/*
+Unzips specified file in place.
+zipPath: The file path to the file that will be unzipped
+progressAction: The action that takes the progress of unzipping.
+ */
 fun unpackZip(zipPath: String, progressAction : (Int) -> Unit = {}): Boolean {
     val splitPath = zipPath.split('/')
     val destinationPath = splitPath.take(splitPath.count() - 1).fold(splitPath.first()){s1, s2 -> "$s1${File.separator}$s2"}.drop(1)
@@ -193,6 +199,10 @@ fun unpackZip(zipPath: String, progressAction : (Int) -> Unit = {}): Boolean {
     }
 }
 
+/*
+Recursively calculates the size of all files in a directory.
+dir: The filepath to the directory whichs size will be calculated.
+ */
 fun dirSize(dir: File): Long {
     if (dir.exists()) {
         var result: Long = 0
@@ -214,6 +224,10 @@ fun dirSize(dir: File): Long {
     return 0
 }
 
+/*
+Converts a number of bytes to a the largest appropriate unit with the unit attached.
+bytes: The amount of bytes that should be displayed.
+ */
 fun writableSize(bytes : Long) : String {
     val units = listOf("B", "KB", "MB", "GB")
 
@@ -226,4 +240,3 @@ fun writableSize(bytes : Long) : String {
 
     return String.format("%.2f", curSize) + " " + units[curUnit]
 }
-

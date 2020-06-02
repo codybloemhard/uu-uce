@@ -2,8 +2,8 @@ package com.uu_uce.mapOverlay
 
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.shapefiles.p2
-import com.uu_uce.shapefiles.p3
-import kotlin.math.*
+import kotlin.math.abs
+import kotlin.math.pow
 
 /*
 Calculates where on the screen a coordinate is.
@@ -60,10 +60,6 @@ fun aaBoundingBoxContains(bb1Min: p2, bb1Max: p2, bb2Min: p2, bb2Max: p2) : Bool
                 bb1Min.second   >   bb2Max.second ||
                 bb1Max.second   <   bb2Min.second
             )
-}
-
-fun aaBoundingBoxIntersect(bb1Min: p3, bb1Max: p3, bb2Min: p2, bb2Max: p2) : Boolean{
-    return aaBoundingBoxContains(p2(bb1Min.first, bb1Min.second), p2(bb1Max.first, bb1Max.second), bb2Min, bb2Max)
 }
 
 /*

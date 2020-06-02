@@ -1,6 +1,6 @@
 package com.uu_uce.allpins
 
-import android.content.Context
+import android.app.Activity
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -8,13 +8,14 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
+import com.uu_uce.fieldbook.FieldbookEntry
+import com.uu_uce.fieldbook.FieldbookViewModel
 import com.uu_uce.pins.Pin
 import com.uu_uce.pins.PinContent
 import com.uu_uce.services.UTMCoordinate
 
+class PinConversion(val activity: Activity){
 
-
-class PinConversion(val context: Context){
     companion object {
         fun stringToUtm(coord: String): UTMCoordinate {
             val regex = "(\\d+|[a-zA-Z])".toRegex()
@@ -27,19 +28,20 @@ class PinConversion(val context: Context){
         }
     }
 
-    private val resource = context.resources
+    private val resource = activity.resources
 
     private fun stringToPinContent(content: String): PinContent {
-        return PinContent(content)
+        return PinContent(content, activity, false)
     }
 
     private fun difficultyToBackground(difficulty: Int): Bitmap {
         val color = when (difficulty) {
-            1 -> ContextCompat.getColor(context, R.color.ReptileGreen)
-            2 -> ContextCompat.getColor(context, R.color.OrangeHibiscus)
-            3 -> ContextCompat.getColor(context, R.color.Desire)
+            0 -> ContextCompat.getColor(activity, R.color.HighBlue) //Neutral
+            1 -> ContextCompat.getColor(activity, R.color.ReptileGreen)
+            2 -> ContextCompat.getColor(activity, R.color.OrangeHibiscus)
+            3 -> ContextCompat.getColor(activity, R.color.Desire)
             else -> {
-                ContextCompat.getColor(context, R.color.TextGrey)
+                ContextCompat.getColor(activity, R.color.TextGrey)
             }
         }
         var background =  ResourcesCompat.getDrawable(resource, R.drawable.ic_pin, null) ?: error ("Image not found")
@@ -103,24 +105,41 @@ class PinConversion(val context: Context){
         return bitmap
     }
 
-    private fun stringToIds(ids : String) : List<Int>{
-        return ids.split(',').map{s -> s.toInt()}
+    private fun stringToIds(ids : String) : List<String>{
+        return ids.split(',').map{s -> s}
     }
 
     fun pinDataToPin(pinData : PinData, viewModel : PinViewModel): Pin {
         val pin = Pin(
-            pinData.pinId                           ,
-            stringToUtm(pinData.location)           , //location
-            pinData.title                           ,
-            stringToPinContent(pinData.content)     ,
+            pinData.pinId,
+            stringToUtm(pinData.location), //location
+            pinData.title,
+            stringToPinContent(pinData.content),
             difficultyToBackground(pinData.difficulty),
-            typeToIcon(pinData.type)                ,
-            pinData.status                          ,
-            stringToIds(pinData.predecessorIds)     ,
-            stringToIds(pinData.followIds)          ,
+            typeToIcon(pinData.type),
+            pinData.status,
+            stringToIds(pinData.predecessorIds),
+            stringToIds(pinData.followIds),
             viewModel
         )
         pin.getContent().parent = pin
         return pin
+    }
+
+    fun fieldbookEntryToPin(entry: FieldbookEntry, viewModel: FieldbookViewModel) : Pin {
+        return Pin(
+            entry.id.toString(),
+            stringToUtm(entry.location),
+            entry.title,
+            PinContent(entry.content, activity, true),
+            difficultyToBackground(0),
+            typeToIcon(""),
+            2,
+            listOf(),
+            listOf(),
+            viewModel
+        ).apply {
+            getContent().parent = this
+        }
     }
 }

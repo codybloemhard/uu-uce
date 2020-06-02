@@ -1,7 +1,11 @@
 package com.uu_uce
 
 import android.app.Activity
+import android.content.SharedPreferences
+import android.graphics.BlendMode
+import android.graphics.BlendModeColorFilter
 import android.graphics.Color
+import android.graphics.PorterDuff
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -10,26 +14,33 @@ import android.widget.MediaController
 import android.widget.TextView
 import android.widget.VideoView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.res.ResourcesCompat
+import androidx.preference.PreferenceManager
 
 //activity in which videos from video pins are shown
 class VideoViewer : Activity() {
-    private var uiVisible : Boolean = true
-    private lateinit var mediaController : MediaController
-    private lateinit var videoPlayer : VideoView
-
-    private var prevVideoPos : Int = 0
+    private var uiVisible                   : Boolean = true
+    private lateinit var mediaController    : MediaController
+    private lateinit var videoPlayer        : VideoView
+    private lateinit var sharedPref         : SharedPreferences
+    private var prevVideoPos                : Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_video_viewer)
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+        val darkMode = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
+        // Set desired theme
+        if(darkMode) setTheme(R.style.DarkTheme)
 
         // Set statusbar text color
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !darkMode) {
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
         }
-        else{
+        else if(!darkMode){
             window.statusBarColor = Color.BLACK// set status background white
         }
+
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_video_viewer)
 
         // Set title in bar
         val videoTitleText = findViewById<TextView>(R.id.video_title_text)
@@ -70,8 +81,24 @@ class VideoViewer : Activity() {
             videoPlayer.start()
         }
 
-        //set close button
+        val color =
+            if(sharedPref.getBoolean("com.uu_uce.DARKMODE", false))
+                ResourcesCompat.getColor(resources, R.color.BestWhite, null)
+            else
+                ResourcesCompat.getColor(resources, R.color.TextDarkGrey, null)
+
         val closeVideoButton = findViewById<Button>(R.id.close_video_player)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            closeVideoButton.background.colorFilter = BlendModeColorFilter(color, BlendMode.SRC_ATOP)
+        }
+        else{
+            // Older versions will use depricated function
+            @Suppress("DEPRECATION")
+            closeVideoButton.background.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
+        }
+
+        //set close button
         closeVideoButton.setOnClickListener {
             this.finish()
         }

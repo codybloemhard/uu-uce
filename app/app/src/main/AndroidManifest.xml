@@ -25,13 +25,21 @@
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
+        android:theme="@style/LightTheme"
         tools:targetApi="q">
-        <activity android:name=".ImageViewer" />
-        <activity android:name=".Profile" />
+        <activity android:name=".FieldbookEditor"
+            android:launchMode="singleInstance"/>
+        <activity android:name=".Login"
+            android:launchMode="singleInstance"/>
+        <activity android:name=".ImageViewer"
+            android:launchMode="singleInstance"/>
+        <activity android:name=".Profile"
+            android:launchMode="singleInstance"/>
         <activity
             android:name=".Settings"
-            android:label="@string/title_activity_settings" />
+            android:label="@string/title_activity_settings"
+            android:launchMode="singleInstance"
+            />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -44,7 +52,8 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity android:name=".Fieldbook" />
+        <activity android:name=".Fieldbook"
+            android:launchMode="singleInstance"/>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -55,13 +64,16 @@
         <activity android:name=".gestureDetection.TouchParent" />
         <activity
             android:name=".GeoMap"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/LightTheme.NoActionBar"
+            android:launchMode="singleInstance"/>
         <activity
             android:name=".AllPins"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/LightTheme.NoActionBar"
+            android:launchMode="singleInstance"/>
         <activity
             android:name=".VideoViewer"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/LightTheme.NoActionBar"
+            android:launchMode="singleInstance"/>
 
         <meta-data
             android:name="preloaded_fonts"

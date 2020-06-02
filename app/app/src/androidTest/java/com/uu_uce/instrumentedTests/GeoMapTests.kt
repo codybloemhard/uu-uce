@@ -48,38 +48,27 @@ class GeoMapTests {
         val pinList: MutableList<PinData> = mutableListOf()
         pinList.add(
             PinData(
-                0,
+                "0",
                 "31N46777336N3149680E",
                 1,
                 "TEXT",
                 "A",
                 "[{\"tag\":\"TEXT\", \"text\":\"test\"}]",
                 1,
+                1,
                 "-1",
                 "-1"
             )
         )
         pinList.add(
             PinData(
-                1,
+                "1",
                 "31N46718336N3133680E",
                 2,
                 "IMAGE",
                 "B",
                 "[{\"tag\":\"IMAGE\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/images/test.png\"}]",
                 1,
-                "-1",
-                "-1"
-            )
-        )
-        pinList.add(
-            PinData(
-                2,
-                "31N46710000N3130000E",
-                3,
-                "VIDEO",
-                "C",
-                "[{\"tag\":\"VIDEO\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/videos/zoo.mp4\", \"thumbnail\":\"file:///data/data/com.uu_uce/files/pin_content/videos/thumbnails/zoothumbnail.png\", \"title\":\"zoo video\"}]",
                 1,
                 "-1",
                 "-1"
@@ -87,12 +76,27 @@ class GeoMapTests {
         )
         pinList.add(
             PinData(
+                "2",
+                "31N46710000N3130000E",
                 3,
+                "VIDEO",
+                "C",
+                "[{\"tag\":\"VIDEO\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/videos/zoo.mp4\", \"thumbnail\":\"file:///data/data/com.uu_uce/files/pin_content/videos/thumbnails/zoothumbnail.png\", \"title\":\"zoo video\"}]",
+                1,
+                1,
+                "-1",
+                "-1"
+            )
+        )
+        pinList.add(
+            PinData(
+                "3",
                 "31N46715335N3134680E",
                 3,
                 "MCQUIZ",
                 "D",
                 "[{\"tag\":\"TEXT\", \"text\":\"Press right or also right\"}, {\"tag\":\"MCQUIZ\", \"mc_correct_option\" : \"Right\", \"mc_incorrect_option\" : \"Wrong\" , \"mc_correct_option\" : \"Also right\", \"mc_incorrect_option\" : \"Also wrong\", \"reward\" : 50}]",
+                1,
                 1,
                 "-1",
                 "-1"
@@ -147,7 +151,7 @@ class GeoMapTests {
             .perform(click())
 
         // Check if profile successfully loaded
-        onView(withId(R.id.user_name_text))
+        onView(withId(R.id.profile_layout))
             .check(matches(isDisplayed()))
 
         // Switch back to geomap

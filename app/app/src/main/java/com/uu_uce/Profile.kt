@@ -1,11 +1,15 @@
 package com.uu_uce
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.SharedPreferences
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import com.uu_uce.profile.ProfileAchievements
 import com.uu_uce.profile.ProfileBadges
 import com.uu_uce.profile.ProfileStatistics
@@ -16,16 +20,35 @@ class Profile : AppCompatActivity() {
 
     private lateinit var selectedOptionText : TextView
     private lateinit var selectedOptionBar : View
+    private lateinit var sharedPref : SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+        val darkMode = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
+        // Set desired theme
+        if(darkMode) setTheme(R.style.DarkTheme)
+
+        // Set statusbar text color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !darkMode) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
+        }
+        else if(!darkMode){
+            window.statusBarColor = Color.BLACK// set status background white
+        }
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 
         createTopbar(this, "Profile")
 
+        user_name_text.text = sharedPref.getString("com.uu_uce.USERNAME", getString(R.string.profile_user_name))
+        organization_name.text = sharedPref.getString("com.uu_uce.ORGNAME", getString(R.string.profile_organization_name))
+
         selectedOptionText = badges_button_text
         selectedOptionBar = badges_button_bar
         openFragment(ProfileBadges())
+
+        score_text.text = sharedPref.getInt("com.uu_uce.USER_POINTS", 0).toString()
 
         badges_button.setOnClickListener{
             if(selectedOptionBar != badges_button_bar){

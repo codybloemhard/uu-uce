@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#F3F3F3</color>
-    <color name="colorAccent">#FA8231</color>
+    <color name="BeniukonBronze">#FA8231</color>
     <color name="Flirtatious">#FED330</color>
     <color name="Desire">#EB3B5A</color>
     <color name="BestWhite">#F3F3F3</color>
@@ -14,9 +12,7 @@
     <color name="ReptileGreen">#26DE81</color>
     <color name="FusionRed">#FC5C65</color>
     <color name="NYCTaxi">#F7B731</color>
-    <color name="InnerBronze">#A86B42</color>
-    <color name="BronzeBorder">#81441B</color>
     <color name="TwinkleBlue">#D1D8E0</color>
     <color name="Innuendo">#A5B1C2</color>
-
+    <color name="DarkModeBlack">#1A1A1A</color>
 </resources>

@@ -2,7 +2,6 @@ package com.uu_uce.pins
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
@@ -15,9 +14,12 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.ViewModel
+import androidx.preference.PreferenceManager
 import com.uu_uce.OpenGL.coordsPerVertex
 import com.uu_uce.R
 import com.uu_uce.allpins.PinViewModel
+import com.uu_uce.defaultPinSize
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
@@ -34,22 +36,22 @@ import kotlin.math.roundToInt
 
 
 class Pin(
-    var id                      : Int = 0,
-    var coordinate      : UTMCoordinate,
+    var id                      : String = "",
+    var coordinate              : UTMCoordinate,
     private var title           : String,
     private var content         : PinContent,
     private var background      : Bitmap,
     private var icon            : Drawable,
     private var status          : Int,              //-1 : recalculating, 0 : locked, 1 : unlocked, 2 : completed
-    private var predecessorIds  : List<Int>,
-    private var followIds       : List<Int>,
-    private val viewModel       : PinViewModel
+    private var predecessorIds  : List<String>,
+    private var followIds       : List<String>,
+    private val viewModel       : ViewModel
 ) {
     // Used to determine if warning should show when closing pin
     private var madeProgress = false
 
-    // Set default pin size TODO: Get this from settings
-    private var pinWidth = 60f
+    // Set default pin size
+    private var pinWidth = defaultPinSize.toFloat()
 
     //opengl stuff
     private var backgroundHandle: Int = -1
@@ -101,6 +103,8 @@ class Pin(
     var boundingBox: Pair<p2, p2> = Pair(p2Zero, p2Zero)
 
     var popupWindow: PopupWindow? = null
+
+    var tapAction : ((Activity) -> Unit) = {}
 
     // Quiz
     private var answered : Array<Boolean>       = Array(content.contentBlocks.count()) { true }
@@ -181,8 +185,10 @@ class Pin(
 
         val screenLocation: Pair<Float, Float> = coordToScreen(coordinate, viewport, view.width, view.height)
 
-        if(screenLocation.first.isNaN() || screenLocation.second.isNaN())
-            return //TODO: Should not be called with NaN*/
+        if(screenLocation.first.isNaN() || screenLocation.second.isNaN()){
+            Logger.error("Pin", "Pin draw called with NaN location")
+            return
+        }
 
         // Calculate pin bounds on canvas
         val minX = (screenLocation.first - pinWidth / 2).roundToInt()
@@ -248,8 +254,8 @@ class Pin(
 
     // Check if pin should be unlocked
     fun tryUnlock(action : (() -> Unit)){
-        if(predecessorIds[0] != -1 && status < 1){
-            viewModel.tryUnlock(id, predecessorIds, action)
+        if(predecessorIds[0] != "" && status < 1){
+            (viewModel as PinViewModel).tryUnlock(id, predecessorIds, action)
         }
         else{
             action()
@@ -297,7 +303,7 @@ class Pin(
         // Get necessary files
         val fileList = mutableListOf<String>()
         for(block in content.contentBlocks){
-            for(path in block.getFilePaths()){
+            for(path in block.getFilePath()){
                 fileList.add(path)
             }
         }
@@ -311,7 +317,7 @@ class Pin(
                     // Generate content
                     for(i in 0 until content.contentBlocks.count()){
                         val current = content.contentBlocks[i]
-                        current.generateContent(i, layout, activity, parentView, this)
+                        current.showContent(i, layout, parentView, this)
                         if(current is MCContentBlock) containsQuiz = true
                     }
 
@@ -320,6 +326,7 @@ class Pin(
                         val finishButton = Button(activity)
                         finishButton.id = R.id.finish_quiz_button
                         finishButton.text = activity.getString(R.string.pin_finish)
+                        finishButton.setTextColor(ResourcesCompat.getColor(activity.resources, R.color.TextDarkGrey, null))
                         finishButton.isAllCaps = false
                         finishButton.setBackgroundResource(R.drawable.custom_border_button)
                         val buttonLayout = LinearLayout.LayoutParams(
@@ -343,7 +350,7 @@ class Pin(
                     // Set onClickListeners
                     btnClosePopupWindow.setOnClickListener {
                         if(madeProgress){
-                            AlertDialog.Builder(activity)
+                            AlertDialog.Builder(activity, R.style.AlertDialogStyle)
                                 .setIcon(R.drawable.ic_sprite_warning)
                                 .setTitle(activity.getString(R.string.pin_close_warning_head))
                                 .setMessage(activity.getString(R.string.pin_close_warning_body))
@@ -363,8 +370,8 @@ class Pin(
 
     private fun complete() {
         status = 2
-        if (followIds[0] != -1)
-            viewModel.completePin(id, followIds)
+        if (followIds[0] != "")
+            (viewModel as PinViewModel).completePin(id, followIds)
     }
 
     fun addQuestion(questionId : Int, reward: Int){
@@ -396,7 +403,7 @@ class Pin(
                 sufficient = true
                 complete()
 
-                val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
+                val sharedPref =  PreferenceManager.getDefaultSharedPreferences(activity)
                 val prevPoints = sharedPref.getInt("com.uu_uce.USER_POINTS", 0)
                 with(sharedPref.edit()) {
                     putInt("com.uu_uce.USER_POINTS", prevPoints + reward)

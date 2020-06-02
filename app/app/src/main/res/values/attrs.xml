@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="colorPrimaryRef" format="reference" />
+    <attr name="colorPrimaryDarkRef" format="reference" />
+    <attr name="colorAccentRef" format="reference" />
+    <attr name="textColorDarkRef" format="reference" />
+</resources>

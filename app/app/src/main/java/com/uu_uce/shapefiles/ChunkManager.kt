@@ -38,6 +38,7 @@ class ChunkManager(
     private var loading = false
     private var upToDate = false
     private var changed = false
+
     var factor = 0.0f
 
     private var xmin = 0
