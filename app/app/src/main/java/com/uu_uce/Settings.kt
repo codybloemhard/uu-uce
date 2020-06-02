@@ -26,6 +26,7 @@ import kotlin.math.min
 
 // Default settings
 const val defaultPinSize = 60
+const val defaultUnlockRange = 100
 var needsRestart = false
 const val mapsName = "maps.zip"
 const val mapsFolderName = "Maps"
@@ -35,6 +36,8 @@ class Settings : AppCompatActivity() {
     // private variables
     private val minPinSize = 10
     private val maxPinSize = 200
+    private val minRange = 10
+    private val maxRange = 200
 
     private lateinit var maps : List<String>
     private lateinit var mapsDir : String
@@ -102,6 +105,45 @@ class Settings : AppCompatActivity() {
                 pinsize_numberview.setText(progress.toString())
                 with(sharedPref.edit()) {
                     putInt("com.uu_uce.PIN_SIZE", progress)
+                    apply()
+                }
+                return@OnKeyListener true
+            }
+            false
+        })
+
+        // Unlock range
+        val curRange = sharedPref.getInt("com.uu_uce.UNLOCKRANGE", defaultUnlockRange)
+        unlockrange_seekbar.max = maxRange - minRange
+        unlockrange_seekbar.progress = curRange - minRange
+        unlockrange_numberview.setText(curRange.toString())
+
+        unlockrange_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
+                // Display the pinSize
+                unlockrange_numberview.setText((seekBar.progress + minRange).toString())
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                val range = seekBar.progress + minRange
+                with(sharedPref.edit()) {
+                    putInt("com.uu_uce.UNLOCKRANGE", range)
+                    apply()
+                }
+            }
+        })
+
+        unlockrange_numberview.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+                //Perform Code
+                val progress = min(max(unlockrange_numberview.text.toString().toInt(), minRange), maxRange)
+                unlockrange_seekbar.progress = progress - minRange
+                unlockrange_numberview.setText(progress.toString())
+                with(sharedPref.edit()) {
+                    putInt("com.uu_uce.UNLOCKRANGE", progress)
                     apply()
                 }
                 return@OnKeyListener true

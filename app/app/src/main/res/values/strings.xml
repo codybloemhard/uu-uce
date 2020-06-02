@@ -104,6 +104,7 @@
     <string name="menu_logout_text">Logout</string>
 
     <!--Settings-->
+    <string name="settings_unlock_range">Unlock range</string>
     <string name="settings_pin_size">Pin Size</string>
     <string name="settings_networkdownload">Enable downloads on mobile data</string>
     <string name="settings_download_maps">Download maps</string>

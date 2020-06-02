@@ -32,12 +32,12 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_margin="5dp">
 
                 <TextView
                     android:id="@+id/pinsize_text"
-                    android:layout_width="wrap_content"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:text="@string/settings_pin_size"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -55,6 +55,44 @@
 
                 <EditText
                     android:id="@+id/pinsize_numberview"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/custom_border_edgy"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="LabelFor" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp">
+
+                <TextView
+                    android:id="@+id/unlockrange_text"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_unlock_range"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <SeekBar
+                    android:id="@+id/unlockrange_seekbar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/unlockrange_numberview"
+                    app:layout_constraintStart_toEndOf="@+id/unlockrange_text"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <EditText
+                    android:id="@+id/unlockrange_numberview"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
                     android:background="@drawable/custom_border_edgy"

@@ -142,8 +142,8 @@ class Pin(
                 }
             }
 
-        indexBuffer=
-                // (# of coordinate values * 2 bytes per short)
+        indexBuffer =
+            // (# of coordinate values * 2 bytes per short)
             ByteBuffer.allocateDirect(drawOrder.size * 2).run {
                 order(ByteOrder.nativeOrder())
                 asShortBuffer().apply {
@@ -152,7 +152,7 @@ class Pin(
                 }
             }
 
-        //make background mutable
+        // Make background mutable
         background = if (background.isMutable) background else background.copy(
             Bitmap.Config.ARGB_8888,
             true
@@ -209,8 +209,6 @@ class Pin(
 
         // Set boundingbox for pin tapping
         boundingBox = Pair(p2(minX.toDouble(), minY.toDouble()), p2(maxX.toDouble(), maxY.toDouble()))
-
-
 
         if(!this::vertexBuffer.isInitialized) return
 
@@ -285,15 +283,6 @@ class Pin(
         val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
         windowTitle.text = title
 
-        // Set completed visibility
-        val checkMark = customView.findViewById<ImageView>(R.id.completed_marker)
-        if(status == 2){
-            checkMark.visibility = VISIBLE
-        }
-        else{
-            checkMark.visibility = GONE
-        }
-
         // Add content to popup window
         val layout: LinearLayout = customView.findViewById(R.id.scrollLayout)
 
@@ -324,9 +313,20 @@ class Pin(
 
                     if(LocationServices.lastKnownLocation != null && status == 1 && !containsQuiz){
                         val dist = calculateDistance(degreeToUTM(p2(LocationServices.lastKnownLocation!!.latitude, LocationServices.lastKnownLocation!!.longitude)), coordinate)
+                        val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity)
+                        completeRange = sharedPref.getInt("com.uu_uce.UNLOCKRANGE", 100)
                         if(dist < completeRange){
                             complete()
                         }
+                    }
+
+                    // Set completed visibility
+                    val checkMark = customView.findViewById<ImageView>(R.id.completed_marker)
+                    if(status == 2){
+                        checkMark.visibility = VISIBLE
+                    }
+                    else{
+                        checkMark.visibility = GONE
                     }
 
                     // Fill layout of popup
@@ -378,8 +378,7 @@ class Pin(
 
     private fun complete() {
         status = 2
-        if (followIds[0] != "")
-            (viewModel as PinViewModel).completePin(id, followIds)
+        (viewModel as PinViewModel).completePin(id, followIds)
     }
 
     fun addQuestion(questionId : Int, reward: Int){
@@ -419,7 +418,7 @@ class Pin(
                 }
             }
 
-            //Open popup
+            // Open popup
             val layoutInflater = activity.layoutInflater
 
             // Build an custom view (to be inflated on top of our current view & build it's popup window)

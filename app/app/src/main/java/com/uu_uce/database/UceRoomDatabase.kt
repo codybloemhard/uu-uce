@@ -13,7 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(entities = [PinData::class, FieldbookEntry::class], version = 4, exportSchema = false)
+@Database(entities = [PinData::class, FieldbookEntry::class], version = 5, exportSchema = false)
 abstract class UceRoomDatabase : RoomDatabase() {
 
     abstract fun pinDao(): PinDao
@@ -35,7 +35,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
             pinList.add(
                 PinData(
                     "691bee74-565d-4e2c-8615-c407b8e869c6",
-                    "31N46777336N3149680E",
+                    "31N4677733N314968E",
                     1,
                     "TEXT",
                     "Test text",
@@ -49,7 +49,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
             pinList.add(
                 PinData(
                     "d8abb292-c253-49be-8d55-f92d80275654",
-                    "31N46758336N3133680E",
+                    "31N4675833N313368E",
                     2,
                     "IMAGE",
                     "Test image",
@@ -63,7 +63,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
             pinList.add(
                 PinData(
                     "f0e7638e-9eaa-4c9e-be45-cdafabae3ad5",
-                    "31N46670000N3130000E",
+                    "31N4667000N313000E",
                     3,
                     "VIDEO",
                     "Test video",
@@ -77,7 +77,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
             pinList.add(
                 PinData(
                     "539272be-a3c3-4102-ae2f-9c740c1aa1b4",
-                    "31N46655335N3134680E",
+                    "31N4665533N313468E",
                     3,
                     "MCQUIZ",
                     "Test quiz",
@@ -104,7 +104,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
                     UceRoomDatabase::class.java,
                     "uce_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .fallbackToDestructiveMigration()
                     .addCallback(UceDatabaseCallback(scope))
                     .build()
@@ -203,6 +203,30 @@ abstract class UceRoomDatabase : RoomDatabase() {
         private val MIGRATION_3_4 = object : Migration(3, 4) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL( "ALTER TABLE pins ADD COLUMN startStatus INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    "CREATE TABLE fieldbook_new (" +
+                            "title TEXT NOT NULL," +
+                            "location TEXT NOT NULL, " +
+                            "dateTime TEXT NOT NULL, " +
+                            "content TEXT NOT NULL)"
+                )
+                // Copy the data
+                database.execSQL(
+                    "INSERT INTO fieldbook_new (" +
+                            "title, " +
+                            "location, " +
+                            "dateTime, " +
+                            "content" +
+                            " FROM fieldbook")
+                // Remove the old table
+                database.execSQL("DROP TABLE fieldbook")
+                // Change the table name to the correct one
+                database.execSQL("ALTER TABLE fieldbook_new RENAME TO fieldbook")
             }
         }
     }
