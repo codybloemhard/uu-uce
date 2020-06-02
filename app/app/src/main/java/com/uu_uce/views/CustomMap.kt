@@ -33,6 +33,7 @@ import com.uu_uce.pins.Pin
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
 import kotlinx.android.synthetic.main.activity_geo_map.*
+import kotlinx.android.synthetic.main.activity_geo_map.view.*
 import org.jetbrains.annotations.TestOnly
 import java.time.LocalDate
 import kotlin.math.abs
@@ -148,10 +149,11 @@ class CustomMap : ViewTouchParent {
 
         if(res == UpdateResult.NOOP && chunkRes == ChunkUpdateResult.NOTHING){
             //bufferframes to make sure everything is redrawn when returning from a different activity
-            Logger.error("CustomMap", "All updates done, no longer redrawing")
             curBufferFrame++
-            if(curBufferFrame >= bufferFrames)
+            if(curBufferFrame >= bufferFrames) {
+                Logger.log(LogType.Event, "CustomMap", "All updates done, no longer redrawing")
                 return
+            }
         }
         else curBufferFrame = 0
 
@@ -181,8 +183,8 @@ class CustomMap : ViewTouchParent {
                         (context as GeoMap).heightline_diff_text.text =
                             (context as Activity).getString(R.string.geomap_heightline_diff_text, standardValue)
                     }
-                    (context as GeoMap).scale_text.text = (viewport.second.first - viewport.first.first).toString() + "m"
                 }
+                (context as GeoMap).scaleWidget.update(viewport)
             }
 
             Logger.log(LogType.Event, "DrawOverlay", "east: ${loc.utm.east}, north: ${loc.utm.north}")

@@ -32,14 +32,14 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <TextView
-        android:id="@+id/scale_text"
-        android:layout_width="wrap_content"
+    <com.uu_uce.mapOverlay.ScaleWidget
+        android:id="@+id/scaleWidget"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginBottom="5dp"
+        android:layout_marginStart="5dp"
+        android:paddingBottom="10dp"
+        android:text="@string/geomap_heightline_diff_text"
         android:fontFamily="@font/roboto_bold"
-        android:text="@string/geomap_scale_default"
         android:textColor="@color/TextDarkGrey"
         app:layout_constraintBottom_toTopOf="@id/heightline_diff_text"
         app:layout_constraintStart_toStartOf="parent" />
