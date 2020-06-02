@@ -72,23 +72,26 @@ class ScaleWidget: AppCompatTextView {
                 values[cur] / width < maxScreenFac
     }
 
-    fun update(viewport: Pair<p2,p2>){
+    fun update(viewport: Pair<p2,p2>, activity: Activity){
         val width = viewport.second.first - viewport.first.first
 
         if(cur == -1 || !isCurOkay(width)) findCur(width)
 
+        activity.runOnUiThread{}
         if(cur == -1){
-            text = (context as Activity).getString(R.string.geomap_scale_text, 0, "m")
+            activity.runOnUiThread{text = (context as Activity).getString(R.string.geomap_scale_text, 0, "m")}
             return
         }
-        text = if(values[cur] < 1000) {
-            (context as Activity).getString(R.string.geomap_scale_text, values[cur], "m")
-        } else{
-            (context as Activity).getString(R.string.geomap_scale_text, values[cur]/1000, "km")
+        activity.runOnUiThread{
+            text = if(values[cur] < 1000) {
+                (context as Activity).getString(R.string.geomap_scale_text, values[cur], "m")
+            } else{
+                (context as Activity).getString(R.string.geomap_scale_text, values[cur]/1000, "km")
+            }
         }
         lineLength = values[cur] / width * screenWidth
         lineLength = (lineLength.toInt()).toFloat()
-        invalidate()
+        activity.runOnUiThread{invalidate()}
     }
 
     override fun onDraw(canvas: Canvas) {

@@ -194,10 +194,11 @@ class CustomMap : ViewTouchParent {
             smap.draw(lineProgram, polygonProgram, scale, trans)
 
             if (context is GeoMap) {
-                (context as GeoMap).runOnUiThread {
+                val gm = context as GeoMap
+                gm.runOnUiThread {
                     val zoomLevel = smap.getZoomLevel()
                     if (zoomLevel >= 0 && mods.count() > 0) {
-                        (context as GeoMap).heightline_diff_text.text =
+                        gm.heightline_diff_text.text =
                             (context as Activity).getString(
                                 R.string.geomap_heightline_diff_text,
                                 mods[zoomLevel]
@@ -205,14 +206,14 @@ class CustomMap : ViewTouchParent {
 
                     } else {
                         val standardValue = 0
-                        (context as GeoMap).heightline_diff_text.text =
+                        gm.heightline_diff_text.text =
                             (context as Activity).getString(
                                 R.string.geomap_heightline_diff_text,
                                 standardValue
                             )
                     }
                 }
-                (context as GeoMap).scaleWidget.update(viewport)
+                gm.scaleWidget.update(viewport, gm)
             }
 
             Logger.log(LogType.Event, "DrawOverlay", "east: ${loc.utm.east}, north: ${loc.utm.north}")

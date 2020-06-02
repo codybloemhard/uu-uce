@@ -21,9 +21,7 @@ import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.needsReload
 import com.uu_uce.services.LOCATION_REQUEST
-import com.uu_uce.shapefiles.HeightLineReader
-import com.uu_uce.shapefiles.LayerType
-import com.uu_uce.shapefiles.PolygonReader
+import com.uu_uce.shapefiles.*
 import kotlinx.android.synthetic.main.activity_geo_map.*
 import java.io.File
 
@@ -52,6 +50,8 @@ class FieldbookPinmapFragment : Fragment() {
     // TODO: Remove temporary hardcoded map information
     private val mapsName = "maps.zip"
     private lateinit var maps : List<String>
+
+    private var styles: List<Style> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -145,30 +145,33 @@ class FieldbookPinmapFragment : Fragment() {
 
     private fun loadMap(){
         val mydir = File(frContext.getExternalFilesDir(null)?.path + "/Maps/")
-        try {
-            val heightlines = File(mydir, "Heightlines")
-            customMap.addLayer(
-                LayerType.Height,
-                HeightLineReader(heightlines),
-                toggle_layer_layout,
-                true
-            )
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
-        }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
-        }
-        try {
-            val polygons = File(mydir, "Polygons")
-            customMap.addLayer(
-                LayerType.Water,
-                PolygonReader(polygons),
-                toggle_layer_layout,
-                false
-            )
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
-        }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
-        }
+        try{readStyles(mydir)}
+        catch(e: Exception){Logger.error("GeoMap", "no style file available: "+ e.message)}
+        //try {
+        val heightlines = File(mydir, "Heightlines")
+        customMap.addLayer(
+            LayerType.Height,
+            HeightLineReader(heightlines),
+            toggle_layer_layout,
+            true
+        )
+        Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
+
+        //}catch(e: Exception){
+        //    Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
+        //}
+        //try {
+        /*val polygons = File(mydir, "Polygons")
+        customMap.addLayer(
+            LayerType.Water,
+            PolygonReader(polygons, true, styles),
+            toggle_layer_layout,
+            false
+        )
+        Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")*/
+        //}catch(e: Exception){
+        //    Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
+        //}
 
         //create camera based on layers
         customMap.initializeCamera()
@@ -178,4 +181,22 @@ class FieldbookPinmapFragment : Fragment() {
         customMap.redrawMap()
     }
 
+    private fun readStyles(dir: File){
+        val file = File(dir, "styles")
+        val reader = FileReader(file)
+
+        val nrStyles = reader.readULong()
+        styles = List(nrStyles.toInt()) {
+            val outline = reader.readUByte()
+            val b = reader.readUByte()
+            val g = reader.readUByte()
+            val r = reader.readUByte()
+
+            Style(outline.toInt() == 1, floatArrayOf(
+                r.toFloat()/255,
+                g.toFloat()/255,
+                b.toFloat()/255
+            ))
+        }
+    }
 }

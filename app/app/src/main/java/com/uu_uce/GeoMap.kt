@@ -324,7 +324,6 @@ class GeoMap : AppCompatActivity() {
         needsReload.setValue(false)
         customMap.redrawMap()
     }
-
     private fun readStyles(dir: File){
         val file = File(dir, "styles")
         val reader = FileReader(file)
@@ -343,6 +342,7 @@ class GeoMap : AppCompatActivity() {
             ))
         }
     }
+
 
     private fun openProgressPopup(currentView: View){
         val layoutInflater = layoutInflater
