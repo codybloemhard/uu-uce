@@ -210,10 +210,12 @@ abstract class UceRoomDatabase : RoomDatabase() {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL(
                     "CREATE TABLE fieldbook_new (" +
-                            "title TEXT NOT NULL," +
+                            "title TEXT NOT NULL, " +
                             "location TEXT NOT NULL, " +
                             "dateTime TEXT NOT NULL, " +
-                            "content TEXT NOT NULL)"
+                            "content TEXT NOT NULL, " +
+                            "id INTEGER NOT NULL, " +
+                            "PRIMARY KEY(id))"
                 )
                 // Copy the data
                 database.execSQL(
@@ -221,7 +223,14 @@ abstract class UceRoomDatabase : RoomDatabase() {
                             "title, " +
                             "location, " +
                             "dateTime, " +
-                            "content" +
+                            "content, " +
+                            "id)" +
+                            "SELECT " +
+                            "title, " +
+                            "location, " +
+                            "dateTime, " +
+                            "content, " +
+                            "id" +
                             " FROM fieldbook")
                 // Remove the old table
                 database.execSQL("DROP TABLE fieldbook")
