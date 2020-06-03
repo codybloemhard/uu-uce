@@ -6,7 +6,7 @@ chunkGetter: means of getting chunks associated with this layer
 map: the map this layer is part of
 hasInfo: temporary indicator whether this layer has an info file associated with it
  */
-class ShapeLayer(private val chunkGetter: ChunkGetter, hasInfo: Boolean){
+class ShapeLayer(private val chunkGetter: ChunkGetter, zoomCutoff: Float){
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk> = mutableMapOf()
     private val chunkManager: ChunkManager
 
@@ -21,7 +21,7 @@ class ShapeLayer(private val chunkGetter: ChunkGetter, hasInfo: Boolean){
         bmin = info.first
         bmax = info.second
 
-        chunkManager = ChunkManager(chunks, chunkGetter, bmin, bmax, chunkGetter.nrCuts)
+        chunkManager = ChunkManager(chunks, chunkGetter, bmin, bmax, chunkGetter.nrCuts, zoomCutoff)
     }
 
     fun setzooms(minzoom: Float, maxzoom: Float){

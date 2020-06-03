@@ -137,8 +137,8 @@ class CustomMap : ViewTouchParent {
     }
 
     // Add a new layer to the map, and generate a button to toggle it
-    fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout?, hasInfo: Boolean, buttonSize: Int = 0){
-        smap.addLayer(lt, chunkGetter, hasInfo)
+    fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout?, zoomCutoff: Float = Float.MAX_VALUE, buttonSize: Int = 0){
+        smap.addLayer(lt, chunkGetter, zoomCutoff)
         val curLayers = nrLayers
         nrLayers++
 

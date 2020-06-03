@@ -95,9 +95,9 @@ class ShapeMap(
         } else layers[i].second.getMods()
     }
 
-    fun addLayer(type: LayerType, chunkGetter: ChunkGetter, hasInfo: Boolean){
+    fun addLayer(type: LayerType, chunkGetter: ChunkGetter, zoomCutoff: Float){
         val timeSave = measureTimeMillis {
-            layers.add(Pair(type,ShapeLayer(chunkGetter, hasInfo)))
+            layers.add(Pair(type,ShapeLayer(chunkGetter, zoomCutoff)))
         }
 
         Logger.log(LogType.Info,"ShapeMap", "Save: $timeSave")

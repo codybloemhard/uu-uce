@@ -288,7 +288,7 @@ class GeoMap : AppCompatActivity() {
                 LayerType.Height,
                 HeightLineReader(heightlines),
                 toggle_layer_layout,
-                true,
+                Float.MAX_VALUE,
                 size
             )
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
@@ -297,15 +297,15 @@ class GeoMap : AppCompatActivity() {
         //    Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         //}
         //try {
-            /*val polygons = File(mydir, "Polygons")
+            val polygons = File(mydir, "Polygons")
             customMap.addLayer(
                 LayerType.Water,
                 PolygonReader(polygons, true, styles),
                 toggle_layer_layout,
-                false,
+                0.5f,
                 size
             )
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")*/
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
         //}catch(e: Exception){
         //    Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         //}

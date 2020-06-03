@@ -152,8 +152,7 @@ class FieldbookPinmapFragment : Fragment() {
         customMap.addLayer(
             LayerType.Height,
             HeightLineReader(heightlines),
-            toggle_layer_layout,
-            true
+            toggle_layer_layout
         )
         Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
 
