@@ -96,13 +96,7 @@ class ShapeMap(
     }
 
     fun addLayer(type: LayerType, chunkGetter: ChunkGetter, zoomCutoff: Float){
-        val timeSave = measureTimeMillis {
-            layers.add(Pair(type,ShapeLayer(chunkGetter, zoomCutoff)))
-        }
-
-        Logger.log(LogType.Info,"ShapeMap", "Save: $timeSave")
-        Logger.log(LogType.Info, "ShapeMap", "bb: ($bMin),($bMax)")
-
+        layers.add(Pair(type,ShapeLayer(chunkGetter, zoomCutoff)))
         layerMask.add(true)
     }
 
@@ -137,13 +131,12 @@ class ShapeMap(
     }
 
     //update chunks of all layers
-    fun updateChunks(): ChunkUpdateResult{
+    fun updateChunks(viewport: Pair<p2,p2>): ChunkUpdateResult{
         var res = ChunkUpdateResult.NOTHING
         for(i in layers.indices){
             if(!layerMask[i]) continue
             val (_,layer) = layers[i]
 
-            val viewport = camera.getViewport()
             val zoom = camera.getZoom()
             val cur = layer.updateChunks(viewport, zoom)
             if(cur != ChunkUpdateResult.NOTHING)

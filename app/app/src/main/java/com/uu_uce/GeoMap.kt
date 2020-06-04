@@ -297,15 +297,15 @@ class GeoMap : AppCompatActivity() {
         //    Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         //}
         //try {
-            val polygons = File(mydir, "Polygons")
+            /*val polygons = File(mydir, "Polygons")
             customMap.addLayer(
                 LayerType.Water,
                 PolygonReader(polygons, true, styles),
                 toggle_layer_layout,
-                0.5f,
+                Float.MAX_VALUE,
                 size
             )
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")*/
         //}catch(e: Exception){
         //    Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         //}
@@ -320,7 +320,7 @@ class GeoMap : AppCompatActivity() {
             }
         }
 
-        customMap.setCameraWAspect()
+        //customMap.setCameraWAspect()
         needsReload.setValue(false)
         customMap.redrawMap()
     }

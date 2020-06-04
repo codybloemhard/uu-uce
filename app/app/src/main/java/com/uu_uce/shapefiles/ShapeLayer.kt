@@ -33,7 +33,7 @@ class ShapeLayer(private val chunkGetter: ChunkGetter, zoomCutoff: Float){
     }
 
     fun getZoomLevel() : Int {
-        return chunkManager.getZoomLevel()
+        return chunkManager.zoomLevel
     }
 
     fun getMods() : List<Int> {

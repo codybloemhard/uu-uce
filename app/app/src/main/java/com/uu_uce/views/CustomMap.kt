@@ -167,7 +167,13 @@ class CustomMap : ViewTouchParent {
     fun onDrawFrame(lineProgram: Int, polygonProgram: Int, pinProgram: Int, locProgram: Int){
         //if both the camera and the map have no updates, don't redraw
         val res = camera.update()
-        val chunkRes = smap.updateChunks()
+        val viewport = camera.getViewport()
+        if(viewport == p2ZeroPair){
+            Logger.error("CustomMap", "Camera could not be initialized")
+            return
+        }
+
+        val chunkRes = smap.updateChunks(viewport)
 
         if(res == UpdateResult.NOOP && chunkRes == ChunkUpdateResult.NOTHING){
             //bufferframes to make sure everything is redrawn when returning from a different activity
@@ -181,13 +187,8 @@ class CustomMap : ViewTouchParent {
 
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
 
-        val viewport = camera.getViewport()
-        val (scale,trans) = camera.getScaleTrans()
 
-        if(viewport == p2ZeroPair){
-            Logger.error("CustomMap", "Camera could not be initialized")
-            return
-        }
+        val (scale,trans) = camera.getScaleTrans()
 
         val timeDraw = measureTimeMillis {
             // Draw map
