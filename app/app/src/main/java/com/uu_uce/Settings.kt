@@ -13,12 +13,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.allpins.PinViewModel
+import com.uu_uce.allpins.parsePins
 import com.uu_uce.pins.PinContent
 import com.uu_uce.services.dirSize
 import com.uu_uce.services.unpackZip
 import com.uu_uce.services.updateFiles
 import com.uu_uce.services.writableSize
 import com.uu_uce.ui.createTopbar
+import com.uu_uce.views.pinsUpdated
 import kotlinx.android.synthetic.main.activity_settings.*
 import java.io.File
 import kotlin.math.max
@@ -28,9 +30,10 @@ import kotlin.math.min
 const val defaultPinSize = 60
 const val defaultUnlockRange = 100
 var needsRestart = false
-const val mapsName = "maps.zip"
+const val mapsName = "2e9e5736-a18f-402a-8843-8124d3b6248d.zip"
 const val mapsFolderName = "Maps"
 const val contentFolderName = "PinContent"
+const val pinDatabaseFile = "b0302273-dfe6-4b9c-b875-c90f704715bc.json"
 
 class Settings : AppCompatActivity() {
     // private variables
@@ -335,6 +338,28 @@ class Settings : AppCompatActivity() {
                 }
                 .setNegativeButton(getString(R.string.negative_button_text), null)
                 .show()
+        }
+
+        // Download pins
+        download_content_button.setOnClickListener{
+            pins_downloading_progress.visibility = View.VISIBLE
+
+            updateFiles(
+                listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
+                this,
+                {
+                    runOnUiThread {
+                        Toast.makeText(this, getString(R.string.settings_download_complete), Toast.LENGTH_LONG).show()
+                        pins_downloading_progress.visibility = View.INVISIBLE
+                        pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))){
+                            pinsUpdated.setValue(true)
+                        }
+                    }
+                },
+                {
+                        progress -> runOnUiThread { pins_downloading_progress.progress = progress }
+                }
+            )
         }
 
         /*databasetest.setOnClickListener{
