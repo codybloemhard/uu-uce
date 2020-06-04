@@ -35,7 +35,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
             pinList.add(
                 PinData(
                     "691bee74-565d-4e2c-8615-c407b8e869c6",
-                    "31N4677733N314968E",
+                    "31N314968E4677733N",
                     1,
                     "TEXT",
                     "Test text",
@@ -49,7 +49,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
             pinList.add(
                 PinData(
                     "d8abb292-c253-49be-8d55-f92d80275654",
-                    "31N4675833N313368E",
+                    "31N313368E4675833N",
                     2,
                     "IMAGE",
                     "Test image",
@@ -63,7 +63,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
             pinList.add(
                 PinData(
                     "f0e7638e-9eaa-4c9e-be45-cdafabae3ad5",
-                    "31N4667000N313000E",
+                    "31N313000E4667000N",
                     3,
                     "VIDEO",
                     "Test video",
@@ -77,7 +77,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
             pinList.add(
                 PinData(
                     "539272be-a3c3-4102-ae2f-9c740c1aa1b4",
-                    "31N4665533N313468E",
+                    "31N313468E4665533N",
                     3,
                     "MCQUIZ",
                     "Test quiz",
