@@ -283,29 +283,29 @@ class GeoMap : AppCompatActivity() {
         try{readStyles(mydir)}
         catch(e: Exception){Logger.error("GeoMap", "no style file available: "+ e.message)}
         //try {
-            val heightlines = File(mydir, "Heightlines")
-            customMap.addLayer(
-                LayerType.Height,
-                HeightLineReader(heightlines),
-                toggle_layer_layout,
-                Float.MAX_VALUE,
-                size
-            )
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
-
-        //}catch(e: Exception){
-        //    Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
-        //}
-        //try {
-            /*val polygons = File(mydir, "Polygons")
+            val polygons = File(mydir, "Polygons")
             customMap.addLayer(
                 LayerType.Water,
                 PolygonReader(polygons, true, styles),
                 toggle_layer_layout,
-                Float.MAX_VALUE,
+                0.5f,
                 size
             )
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")*/
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
+        //}catch(e: Exception){
+        //    Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
+        //}
+        //try {
+        val heightlines = File(mydir, "Heightlines")
+        customMap.addLayer(
+            LayerType.Height,
+            HeightLineReader(heightlines),
+            toggle_layer_layout,
+            Float.MAX_VALUE,
+            size
+        )
+        Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
+
         //}catch(e: Exception){
         //    Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         //}

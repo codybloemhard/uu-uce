@@ -62,15 +62,14 @@ class ChunkManager(
     camzoom: current zoom of the camera
      */
     fun update(viewport: Pair<p2, p2>, camzoom: Float): ChunkUpdateResult {
-        if(camzoom > zoomCutoff) return ChunkUpdateResult.NOTHING
-        zoomLevel = ceil(log((camzoom/maxzoom), factor)).toInt()
-        if(zoomLevel < 0){
-            Logger.log(LogType.Info, "ChunkManager", "zoom below zero")
-            zoomLevel = 0
-        }else if(zoomLevel > nrOfLODs-1){
-            Logger.log(LogType.Info, "ChunkManager", "zoom greater than nr of LODs")
-            zoomLevel = nrOfLODs-1
+        if(camzoom > zoomCutoff) {
+            synchronized(chunks){
+                chunks.clear()
+            }
+            return ChunkUpdateResult.NOTHING
         }
+        val newZoomLevel = ceil(log((camzoom/maxzoom), factor)).toInt()
+        zoomLevel = maxOf(0,minOf(nrOfLODs-1,newZoomLevel))
 
         //calculate which indices should be loaded
         //xmin..xmax through ymin..ymax are in the viewport
@@ -125,7 +124,7 @@ class ChunkManager(
                 val chunkIndex = chunkIndices[i]
                 if(!chunks.containsKey(chunkIndex)) {
                     Logger.log(LogType.Info, "ChunkManager", "loading chunk $chunkIndex")
-                    if(shouldGetLoaded(chunkIndex)) {
+                    if(shouldGetLoaded(chunkIndex, camzoom)) {
                         val c: Chunk = chunkGetter.getChunk(chunkIndex)
                         synchronized(chunks) {
                             chunks[chunkIndex] = c
@@ -149,7 +148,7 @@ class ChunkManager(
 
     private fun clearUnusedChunks(camzoom: Float){
         chunks.keys.removeAll { index ->
-            !shouldGetLoaded(index)
+            !shouldGetLoaded(index, camzoom)
         }
     }
 
@@ -202,9 +201,9 @@ class ChunkManager(
     }
 
     //whether a chunk should be loaded witht he current viewport and zoom
-    private fun shouldGetLoaded(chunkIndex: ChunkIndex): Boolean{
+    private fun shouldGetLoaded(chunkIndex: ChunkIndex, camzoom: Float): Boolean{
         val (x,y,z) = chunkIndex
-        return z == zoomLevel && x >= xmin && y >= ymin && x <= xmax && y <= ymax
+        return camzoom < zoomCutoff && z == zoomLevel && x >= xmin && y >= ymin && x <= xmax && y <= ymax
     }
 
     //whether the chunks have changed since last upate call
