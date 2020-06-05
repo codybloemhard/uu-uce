@@ -149,6 +149,7 @@ class GeoMap : AppCompatActivity() {
                 apply()
             }
             customMap.startLogin()
+            finish()
         }
 
         // Set menu controls
