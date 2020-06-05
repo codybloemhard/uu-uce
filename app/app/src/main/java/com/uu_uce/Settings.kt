@@ -341,7 +341,7 @@ class Settings : AppCompatActivity() {
         }
 
         // Download pins
-        download_content_button.setOnClickListener{
+        download_pins_button.setOnClickListener{
             pins_downloading_progress.visibility = View.VISIBLE
 
             updateFiles(
@@ -357,7 +357,7 @@ class Settings : AppCompatActivity() {
                     }
                 },
                 {
-                        progress -> runOnUiThread { pins_downloading_progress.progress = progress }
+                    progress -> runOnUiThread { pins_downloading_progress.progress = progress }
                 }
             )
         }

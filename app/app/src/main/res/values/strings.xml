@@ -125,7 +125,7 @@
     <string name="settings_maps">Maps</string>
     <string name="settings_content">Content</string>
     <string name="settings_download_content_text">Download content</string>
-    <string name="settings_general">General</string>
+    <string name="settings_accessibility">Accessibility</string>
     <string name="settings_map_deleted_text">Maps deleted</string>
     <string name="settings_content_deleted_text">Content deleted</string>
     <string name="settings_maps_storage">Storage used for maps: </string>
@@ -157,5 +157,6 @@
     <string name="login_nopassword_message">Please enter a password</string>
     <string name="login_signin_button_text">Sign In</string>
     <string name="settings_pins_download_button_text">Update</string>
+    <string name="settings_permissions">Permissions</string>
 
 </resources>
