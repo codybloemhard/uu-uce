@@ -33,7 +33,7 @@ var needsRestart = false
 const val mapsName = "2e9e5736-a18f-402a-8843-8124d3b6248d.zip"
 const val mapsFolderName = "Maps"
 const val contentFolderName = "PinContent"
-const val pinDatabaseFile = "b0302273-dfe6-4b9c-b875-c90f704715bc.json"
+const val pinDatabaseFile = "4da6aae3-5287-45f2-985f-01fdc27a3fbf.json"
 
 class Settings : AppCompatActivity() {
     // private variables
