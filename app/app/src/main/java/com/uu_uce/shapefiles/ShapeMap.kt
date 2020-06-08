@@ -1,10 +1,8 @@
 package com.uu_uce.shapefiles
 
-import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.views.CustomMap
 import org.jetbrains.annotations.TestOnly
-import kotlin.system.measureTimeMillis
 
 typealias p2 = Pair<Float, Float>
 typealias p3 = Triple<Float,Float,Float>
@@ -147,12 +145,12 @@ class ShapeMap(
     }
 
     //draw all layers
-    fun draw(lineProgram: Int, polygonProgram: Int, scale: FloatArray, trans: FloatArray){
+    fun draw(lineProgram: Int, varyingColorProgram: Int, scale: FloatArray, trans: FloatArray){
         for(i in layers.indices) {
             if(!layerMask[i]) continue
             val (t,layer) = layers[i]
 
-            layer.draw(lineProgram, polygonProgram, scale, trans, layerColors[t.value])
+            layer.draw(lineProgram, varyingColorProgram, scale, trans, layerColors[t.value])
         }
     }
 

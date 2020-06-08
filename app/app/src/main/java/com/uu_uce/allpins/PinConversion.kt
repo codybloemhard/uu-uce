@@ -122,7 +122,7 @@ class PinConversion(val activity: Activity){
             stringToIds(pinData.followIds),
             viewModel
         )
-        pin.getContent().parent = pin
+        pin.content.parent = pin
         return pin
     }
 
@@ -139,7 +139,7 @@ class PinConversion(val activity: Activity){
             listOf(),
             viewModel
         ).apply {
-            getContent().parent = this
+            content.parent = this
         }
     }
 }

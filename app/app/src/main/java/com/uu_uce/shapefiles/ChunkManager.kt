@@ -36,6 +36,7 @@ class ChunkManager(
     private val nrOfLODs = nrCuts.size
 
     private var chunkLoader: Job? = null
+    private var chunkloaderName = ""
 
     private var loading = false
     private var changed = false
@@ -116,6 +117,7 @@ class ChunkManager(
 
         chunkLoader?.cancel()
         chunkLoader = GlobalScope.launch{
+            chunkloaderName = Thread.currentThread().name
             synchronized(chunks) {
                 clearUnusedChunks(camzoom)
             }
@@ -123,7 +125,6 @@ class ChunkManager(
             for(i in chunkIndices.indices){
                 val chunkIndex = chunkIndices[i]
                 if(!chunks.containsKey(chunkIndex)) {
-                    Logger.log(LogType.Info, "ChunkManager", "loading chunk $chunkIndex")
                     if(shouldGetLoaded(chunkIndex, camzoom)) {
                         val c: Chunk = chunkGetter.getChunk(chunkIndex)
                         synchronized(chunks) {
@@ -131,11 +132,11 @@ class ChunkManager(
                         }
                         Logger.log(LogType.Info, "ChunkManager", "loaded chunk $chunkIndex")
                     }
-                    else{
-                        Logger.log(LogType.Info, "ChunkManager", "chunk $chunkIndex should not get loaded")
-                        Logger.log(LogType.Info, "ChunkManager", "viewport $viewport")
-                    }
                 }
+            }
+
+            if(Thread.currentThread().name != chunkloaderName) {
+                return@launch
             }
             synchronized(chunks) {
                 clearUnusedChunks(camzoom)

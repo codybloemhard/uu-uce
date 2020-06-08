@@ -30,6 +30,7 @@ var needsRestart = false
 const val mapsName = "maps.zip"
 const val mapsFolderName = "Maps"
 const val contentFolderName = "PinContent"
+const val legendName = "legend.png"
 
 class Settings : AppCompatActivity() {
     // private variables

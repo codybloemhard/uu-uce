@@ -19,14 +19,14 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
                 "  gl_Position = vec4((trans.x + vPosition.x)*scale.x, (trans.y + vPosition.y) * scale.y, 0.0, 1.0);\n" +
                 "}\n"
 
-    private val lineFragmentShaderCode =
+    private val uniformColorFragmentShaderCode =
                 "precision mediump float;\n" +
                 "uniform vec4 vColor;\n" +
                 "void main() {\n" +
                 "  gl_FragColor = vColor;\n" +
                 "}\n"
 
-    private val polygonVertexShaderCode =
+    private val varyingColorVertexShaderCode =
                 "uniform vec2 trans;\n" +
                 "uniform vec2 scale;\n" +
                 "attribute vec4 vPosition;\n" +
@@ -37,7 +37,7 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
                 "  vColor = inColor;\n" +
                 "}\n"
 
-    private val polygonFragmentShaderCode =
+    private val varyingColorFragmentShaderCode =
                 "precision mediump float;\n" +
                 "varying vec3 vColor;\n" +
                 "void main() {\n" +
@@ -75,7 +75,7 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
                 "}\n"
 
     private var lineProgram: Int = 0
-    private var polygonProgram: Int = 0
+    private var varyingColorProgram: Int = 0
     private var pinProgram: Int = 0
     private var locProgram: Int = 0
 
@@ -92,8 +92,7 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
 
 
         var vertexShader: Int = loadShader(GLES20.GL_VERTEX_SHADER, lineVertexShaderCode)
-        var fragmentShader: Int = loadShader(GLES20.GL_FRAGMENT_SHADER, lineFragmentShaderCode)
-
+        var fragmentShader: Int = loadShader(GLES20.GL_FRAGMENT_SHADER, uniformColorFragmentShaderCode)
         lineProgram = GLES20.glCreateProgram().also {
             GLES20.glAttachShader(it, vertexShader)
             GLES20.glAttachShader(it, fragmentShader)
@@ -103,18 +102,16 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
 
 
         vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, locVertexShaderCode)
-        fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, lineFragmentShaderCode)
-
+        fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, uniformColorFragmentShaderCode)
         locProgram = GLES20.glCreateProgram().also {
             GLES20.glAttachShader(it, vertexShader)
             GLES20.glAttachShader(it, fragmentShader)
             GLES20.glLinkProgram(it)
         }
 
-        vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, polygonVertexShaderCode)
-        fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, polygonFragmentShaderCode)
-
-        polygonProgram = GLES20.glCreateProgram().also {
+        vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, varyingColorVertexShaderCode)
+        fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, varyingColorFragmentShaderCode)
+        varyingColorProgram = GLES20.glCreateProgram().also {
             GLES20.glAttachShader(it, vertexShader)
             GLES20.glAttachShader(it, fragmentShader)
             GLES20.glLinkProgram(it)
@@ -122,7 +119,6 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
 
         vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, pinVertexShaderCode)
         fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, pinFragmentShaderCode)
-
         pinProgram = GLES20.glCreateProgram().also {
             GLES20.glAttachShader(it, vertexShader)
             GLES20.glAttachShader(it, fragmentShader)
@@ -138,7 +134,7 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
             pinsChanged = false
         }
 
-        map.onDrawFrame(lineProgram, polygonProgram, pinProgram, locProgram)
+        map.onDrawFrame(lineProgram, varyingColorProgram, pinProgram, locProgram)
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {

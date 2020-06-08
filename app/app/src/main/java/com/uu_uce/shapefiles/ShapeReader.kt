@@ -1,9 +1,11 @@
 package com.uu_uce.shapefiles
 
+import com.uu_uce.defaultLineWidth
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import java.io.File
 import java.io.FileInputStream
+import kotlin.random.Random
 
 /*
 a way of getting chunks, possibly from storage or a server
@@ -108,9 +110,9 @@ class HeightLineReader(
                 p2(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff)
             }
 
-            val style = Style(false, floatArrayOf(0.0f,0.0f,0.0f))
+            val style = Style(false, floatArrayOf(Random.nextFloat(), Random.nextFloat(), Random.nextFloat()))
 
-            HeightShapeZ(points, style)
+            Heightline(points, style)
         }
 
         val time1 = System.currentTimeMillis() - time
@@ -164,7 +166,7 @@ class PolygonReader(
         val bmax = p3(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff, reader.readUShort().toFloat())
 
         val nrShapes = reader.readULong()
-        val shapes: List<PolygonZ> = List(nrShapes.toInt()) {
+        val shapes: List<Polygon> = List(nrShapes.toInt()) {
             val nrVertices = reader.readULong()
             val vertices: List<p2> = List(nrVertices.toInt()) {
                 p2(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff)
@@ -173,20 +175,6 @@ class PolygonReader(
             val indices: List<Short> = List(nrIndices.toInt()) {
                 reader.readUShort().toShort()
             }
-
-
-            /*val nrOutlineIndices = reader.readULong()
-            var outlineIndexPairs = List(nrOutlineIndices.toInt()) {
-                Pair(reader.readUShort().toShort(),reader.readUShort().toShort())
-            }*/
-
-            val outlineIndices: MutableList<Short> = mutableListOf()
-            /*for((start,end) in outlineIndexPairs){
-                for(i in start until end){
-                    outlineIndices.add(i.toShort())
-                    outlineIndices.add(((i + 1)%nrVertices.toInt()).toShort())
-                }
-            }*/
 
             val style  =
                 if(hasStyles) {
@@ -198,7 +186,7 @@ class PolygonReader(
             val _bmin = p3(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff, reader.readUShort().toFloat())
             val _bmax = p3(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff, reader.readUShort().toFloat())
 
-            PolygonZ(vertices, indices.toMutableList(), outlineIndices.toList(), style)
+            Polygon(vertices, indices.toMutableList(), style)
         }
 
         return Chunk(shapes, bmin, bmax, LayerType.Water)

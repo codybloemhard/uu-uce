@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Point
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.*
@@ -12,6 +13,7 @@ import android.widget.PopupWindow
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.marginBottom
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.allpins.PinData
@@ -19,6 +21,7 @@ import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.misc.ListenableBoolean
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
+import com.uu_uce.pins.openImageView
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
 import com.uu_uce.views.DragStatus
@@ -28,8 +31,7 @@ import java.io.File
 
 var needsReload = ListenableBoolean()
 
-const val linewidth = 1f
-const val outlinewidth = 5f
+const val defaultLineWidth = 1f
 
 //main activity in which the map and menu are displayed
 class GeoMap : AppCompatActivity() {
@@ -176,6 +178,11 @@ class GeoMap : AppCompatActivity() {
             }
         }
 
+        // Set legend button
+        legend_button.setOnClickListener{
+            openLegend()
+        }
+
         needsReload.setListener(object : ListenableBoolean.ChangeListener {
             override fun onChange() {
                 if(needsReload.getValue()){
@@ -237,17 +244,21 @@ class GeoMap : AppCompatActivity() {
         super.onResume()
     }
 
-    private fun initMenuAndScales(){
+    private fun initMenu(){
         if(customMap.getLayerCount() > 0){
             menu.setScreenHeight(customMap.height, dragBar.height, toggle_layer_scroll.height, lower_menu_layout.height)
         }
         else{
             menu.setScreenHeight(customMap.height, dragBar.height, 0, lower_menu_layout.height)
         }
-        val heightlineY = menu.downY - heightline_diff_text.height - heightline_diff_text.paddingBottom - heightline_diff_text.paddingBottom
-        val scaleY = heightlineY - scaleWidget.height - scaleWidget.paddingBottom - scaleWidget.paddingBottom
+        val heightlineY = menu.downY - heightline_diff_text.height - heightline_diff_text.marginBottom - heightline_diff_text.paddingBottom
+        val centerY = menu.downY - center_button.height - center_button.marginBottom - center_button.paddingBottom
+        val scaleY = heightlineY - scaleWidget.height - scaleWidget.marginBottom - scaleWidget.paddingBottom
+        val legendY = centerY - legend_button.height - legend_button.marginBottom - legend_button.paddingBottom
         heightline_diff_text.y = heightlineY
+        center_button.y = centerY
         scaleWidget.y = scaleY
+        legend_button.y = legendY
     }
 
     // Respond to permission request result
@@ -316,7 +327,7 @@ class GeoMap : AppCompatActivity() {
         //more menu initialization which needs its width/height
         scaleWidget.post {
             menu.post {
-                initMenuAndScales()
+                initMenu()
             }
         }
 
@@ -345,8 +356,6 @@ class GeoMap : AppCompatActivity() {
 
 
     private fun openProgressPopup(currentView: View){
-        val layoutInflater = layoutInflater
-
         // Build an custom view (to be inflated on top of our current view & build it's popup window)
         val customView = layoutInflater.inflate(R.layout.progress_popup, geoMapLayout, false)
 
@@ -360,6 +369,12 @@ class GeoMap : AppCompatActivity() {
 
         // Open popup
         popupWindow?.showAtLocation(currentView, Gravity.CENTER, 0, 0)
+    }
+
+    private fun openLegend(){
+        val uri = getExternalFilesDir(null)?.path + File.separator + mapsFolderName + File.separator + legendName
+
+        openImageView(this, Uri.parse(uri), "Legend")
     }
 
     @TestOnly

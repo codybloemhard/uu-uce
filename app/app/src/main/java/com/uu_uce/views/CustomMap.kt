@@ -39,7 +39,6 @@ import com.uu_uce.pins.Pin
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
 import kotlinx.android.synthetic.main.activity_geo_map.*
-import kotlinx.android.synthetic.main.activity_geo_map.view.*
 import org.jetbrains.annotations.TestOnly
 import java.time.LocalDate
 import kotlin.math.abs
@@ -164,7 +163,7 @@ class CustomMap : ViewTouchParent {
         scrollLayout.removeAllViewsInLayout()
     }
 
-    fun onDrawFrame(lineProgram: Int, polygonProgram: Int, pinProgram: Int, locProgram: Int){
+    fun onDrawFrame(lineProgram: Int, varyingColorProgram: Int, pinProgram: Int, locProgram: Int){
         //if both the camera and the map have no updates, don't redraw
         val res = camera.update()
         val viewport = camera.getViewport()
@@ -192,7 +191,7 @@ class CustomMap : ViewTouchParent {
 
         val timeDraw = measureTimeMillis {
             // Draw map
-            smap.draw(lineProgram, polygonProgram, scale, trans)
+            smap.draw(lineProgram, varyingColorProgram, scale, trans)
 
             if (context is GeoMap) {
                 val gm = context as GeoMap
@@ -371,7 +370,7 @@ class CustomMap : ViewTouchParent {
                     val changedPin = pins[pin.pinId]
 
                     changedPin?.tryUnlock {
-                        changedPin.setStatus(1)
+                        changedPin.status =1
                         pinStatuses[changedPin.id] = 1
                     }
                 }
@@ -380,7 +379,7 @@ class CustomMap : ViewTouchParent {
                     val changedPin = pins[pin.pinId]
 
                     if (changedPin != null) {
-                        changedPin.setStatus(pin.status)
+                        changedPin.status = pin.status
                         pinStatuses[changedPin.id] = pin.status
                     }
                 }
@@ -410,7 +409,7 @@ class CustomMap : ViewTouchParent {
             val pin = PinConversion(activity).fieldbookEntryToPin(entry,fieldbookViewModel)
             pins[pin.id] = pin.apply{
                 resize(pinSize)
-                tapAction = {activity: Activity ->  (::openFieldbookPopup)(activity,rootView,entry,pin.getContent().contentBlocks) }
+                tapAction = {activity: Activity ->  (::openFieldbookPopup)(activity,rootView,entry,pin.content.contentBlocks) }
             }
         }
         synchronized(sortedPins) {
@@ -423,15 +422,23 @@ class CustomMap : ViewTouchParent {
     //called when the screen is tapped at tapLocation
     private fun tapPin(tapLocation : p2, activity : Activity){
         if(activePopup != null) return
-        for(pin in sortedPins.reversed()){
-            if(!pin.inScreen || pin.getStatus() < 1) continue
-            if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, 0)) {
-                pin.run{
-                    tapAction(activity)
+        synchronized(sortedPins) {
+            for (pin in sortedPins.reversed()) {
+                if (!pin.inScreen || pin.status < 1) continue
+                if (pointInAABoundingBox(
+                        pin.boundingBox.first,
+                        pin.boundingBox.second,
+                        tapLocation,
+                        0
+                    )
+                ) {
+                    pin.run {
+                        tapAction(activity)
+                    }
+                    activePopup = pin.popupWindow
+                    Logger.log(LogType.Info, "CustomMap", "${pin.title}: I have been tapped.")
+                    return
                 }
-                activePopup = pin.popupWindow
-                Logger.log(LogType.Info, "CustomMap", "${pin.getTitle()}: I have been tapped.")
-                return
             }
         }
     }

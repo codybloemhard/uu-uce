@@ -41,11 +41,11 @@ class ShapeLayer(private val chunkGetter: ChunkGetter, zoomCutoff: Float){
     }
 
     //draw all chunks associated with this layer
-    fun draw(lineProgram: Int, polygonProgram: Int, scale: FloatArray, trans: FloatArray, color: FloatArray){
+    fun draw(lineProgram: Int, varyingColorProgram: Int, scale: FloatArray, trans: FloatArray, color: FloatArray){
 
         synchronized(chunks) {
             for(chunk in chunks.values) {
-                chunk.draw(lineProgram, polygonProgram, scale, trans, color)
+                chunk.draw(lineProgram, varyingColorProgram, scale, trans, color)
             }
         }
     }

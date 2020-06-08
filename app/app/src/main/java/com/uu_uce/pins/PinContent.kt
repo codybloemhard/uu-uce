@@ -22,6 +22,16 @@ import com.uu_uce.misc.Logger
 import java.io.File
 import java.io.StringReader
 
+
+fun openImageView(activity: Activity, imageURI: Uri, imageTitle : String?){
+    val intent = Intent(activity, ImageViewer::class.java)
+
+    intent.putExtra("uri", imageURI)
+    if(imageTitle != null)
+        intent.putExtra("title", imageTitle)
+    activity.startActivity(intent)
+}
+
 class PinContent(
     private val contentString: String,
     private val activity: Activity,
@@ -250,7 +260,7 @@ class ImageContentBlock(
             content.apply {
                 setImageURI(imageURI)
                 content.setOnClickListener{
-                    openImageView(imageURI, title)
+                    openImageView(activity, imageURI, title)
                 }
                 scaleType = ImageView.ScaleType.FIT_CENTER
                 adjustViewBounds = true
@@ -258,7 +268,7 @@ class ImageContentBlock(
         } catch (e: Exception) {
             Logger.error("PinContent","Couldn't load $imageURI, so loaded the thumbnail $thumbnailURI instead")
             content.setOnClickListener{
-                openImageView(thumbnailURI, title)
+                openImageView(activity, thumbnailURI, title)
             }
             content.setImageURI(thumbnailURI)
         }
@@ -287,15 +297,6 @@ class ImageContentBlock(
         return "{${tagToJsonString(tag)}," +
                 "${fileToJsonString(imageURI)}," +
                 "${thumbnailToJsonString(thumbnailURI)}}"
-    }
-
-    private fun openImageView(imageURI: Uri, imageTitle : String?){
-        val intent = Intent(activity, ImageViewer::class.java)
-
-        intent.putExtra("uri", imageURI)
-        if(imageTitle != null)
-            intent.putExtra("title", imageTitle)
-        activity.startActivity(intent)
     }
 
     fun getThumbnailURI() : Uri{
@@ -453,7 +454,7 @@ class MCContentBlock(
 
             currentRow.addView(currentFrame)
 
-            if(parent.getStatus() < 2){
+            if(parent.status < 2){
                 background.setCardBackgroundColor(ContextCompat.getColor(activity, R.color.Boyzone))
                 currentFrame.setOnClickListener {
                     selectedBackground.setCardBackgroundColor(ContextCompat.getColor(activity, R.color.Boyzone))

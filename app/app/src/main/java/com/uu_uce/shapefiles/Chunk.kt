@@ -16,10 +16,10 @@ shapes: all shapes present in the chunk
 bmin/bmax: the bounding box of all shapes
 type: what type of content is in this chunk
  */
-class Chunk(var shapes: List<ShapeZ>, var bmin: p3, var bmax: p3, val type: LayerType){
+class Chunk(var shapes: List<Shape>, var bmin: p3, var bmax: p3, val type: LayerType){
     private val drawInfo: DrawInfo = when(type){
         LayerType.Height -> {
-            LineDrawInfo()
+            HeightlineDrawInfo()
         }
         LayerType.Water -> {
             PolygonDrawInfo()
@@ -37,7 +37,7 @@ class Chunk(var shapes: List<ShapeZ>, var bmin: p3, var bmax: p3, val type: Laye
     }
 
     //display all chunks to the canvas
-    fun draw(lineProgram: Int, polygonProgram: Int, scale: FloatArray, trans: FloatArray, color: FloatArray){
-        drawInfo.draw(lineProgram, polygonProgram, scale, trans, color)
+    fun draw(lineProgram: Int, varyingColorProgram: Int, scale: FloatArray, trans: FloatArray, color: FloatArray){
+        drawInfo.draw(lineProgram, varyingColorProgram, scale, trans, color)
     }
 }
