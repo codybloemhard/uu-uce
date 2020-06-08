@@ -155,6 +155,7 @@ class PolygonReader(
 ): ChunkGetter(dir){
     override fun getChunk(cIndex: ChunkIndex): Chunk {
         val file = File(dir, polyChunkName(cIndex))
+
         val reader = FileReader(file)
 
         val xoff = reader.readULong().toFloat()
@@ -162,14 +163,24 @@ class PolygonReader(
         val zoff = reader.readULong().toFloat()
         val mult = reader.readULong().toFloat()
 
-        val bmin = p3(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff, reader.readUShort().toFloat())
-        val bmax = p3(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff, reader.readUShort().toFloat())
+        val compression = reader.readUByte().toInt()
+        val readValue: () -> Float = {
+            when(compression){
+                1 -> reader.readUByte().toFloat()
+                2 -> reader.readUShort().toFloat()
+                4 -> reader.readUInt().toFloat()
+                else -> reader.readULong().toFloat()
+            }
+        }
+
+        val bmin = p3(readValue()/mult + xoff, readValue()/mult + yoff, readValue())
+        val bmax = p3(readValue()/mult + xoff, readValue()/mult + yoff, readValue())
 
         val nrShapes = reader.readULong()
         val shapes: List<Polygon> = List(nrShapes.toInt()) {
             val nrVertices = reader.readULong()
             val vertices: List<p2> = List(nrVertices.toInt()) {
-                p2(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff)
+                p2(readValue()/mult + xoff, readValue()/mult + yoff)
             }
             val nrIndices = reader.readULong()
             val indices: List<Short> = List(nrIndices.toInt()) {
@@ -183,8 +194,8 @@ class PolygonReader(
                 }
                 else Style(false, floatArrayOf(0.2f,0.2f,0.8f))
 
-            val _bmin = p3(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff, reader.readUShort().toFloat())
-            val _bmax = p3(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff, reader.readUShort().toFloat())
+            val _bmin = p3(readValue()/mult + xoff, readValue()/mult + yoff, readValue())
+            val _bmax = p3(readValue()/mult + xoff, readValue()/mult + yoff, readValue())
 
             Polygon(vertices, indices.toMutableList(), style)
         }

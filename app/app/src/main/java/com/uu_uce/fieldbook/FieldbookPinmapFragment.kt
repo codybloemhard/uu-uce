@@ -172,7 +172,6 @@ class FieldbookPinmapFragment : Fragment() {
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
 
-
         //create camera based on layers
         customMap.initializeCamera()
 

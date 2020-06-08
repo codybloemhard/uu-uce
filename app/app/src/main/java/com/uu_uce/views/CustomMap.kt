@@ -42,6 +42,7 @@ import kotlinx.android.synthetic.main.activity_geo_map.*
 import org.jetbrains.annotations.TestOnly
 import java.time.LocalDate
 import kotlin.math.abs
+import kotlin.math.max
 import kotlin.system.measureTimeMillis
 
 /*
@@ -81,6 +82,10 @@ class CustomMap : ViewTouchParent {
 
     var pinSize: Int
     private var locSizeFactor = 0.5f
+
+    //pin merging
+    private val minPinChunks = 4
+    private val pinChunksDepth = 4
 
     // Map
     private var smap = ShapeMap(this)
@@ -441,6 +446,32 @@ class CustomMap : ViewTouchParent {
                 }
             }
         }
+    }
+
+    fun mergePins(): List<Pin>{
+        var pinxmin = 0f
+        var pinxmax = 0f
+        var pinymin = 0f
+        var pinymax = 0f
+        for((_,pin) in pins){
+            pinxmin = minOf(pinxmin,pin.coordinate.east)
+            pinxmax = maxOf(pinxmax,pin.coordinate.east)
+            pinymin = minOf(pinymin,pin.coordinate.north)
+            pinymax = maxOf(pinymax,pin.coordinate.north)
+        }
+
+        val res: List<Pin> = mutableListOf()
+
+        /*val levels: List<MutableMap<Pair<Int,Int>, MutableList<Pin>>> = List(pinChunksDepth){mutableMapOf()}
+
+        for(level in levels.indices) {
+            val chunkWidth = 0
+            for (pin in pins) {
+
+            }
+        }*/
+
+        return res
     }
 
     fun setRoute() : Route {
