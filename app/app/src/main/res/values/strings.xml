@@ -17,6 +17,7 @@
     <string name="geomap_download_warning_head">Streaming is unavailable</string>
     <string name="geomap_download_warning_body">Streaming maps is currently unsupported, to use the maps supplied by your organization you will have to download them. Would you like to download the maps now?</string>
     <string name="geomap_maps_download_instructions">Maps can be manually downloaded from settings</string>
+    <string name="geomap_pins_download_instructions">Pins could not be updated, this can be done manually from settings</string>
     <string name="geomap_heightline_diff_text">%1$dm</string>
 
     <!--AllPins-->
@@ -75,6 +76,7 @@
     <string name="fieldbook_pindeletion_popup_text">Are you sure you want to delete this entry?</string>
     <string name="fieldbook_addpin_button_description">Button for adding new fieldbook pin</string>
     <string name="fieldbook_topbar_title">My Fieldbook</string>
+    <string name="fieldbook_mediaselection_failed">Failed to select media</string>
 
     <!--Editor-->
     <string name="editor_topbar_title">Edit pins</string>
@@ -134,6 +136,9 @@
     <string name="settings_pins_settings">Pins</string>
     <string name="settings_pins_storage">Storage used for pins:</string>
     <string name="settings_download_pins">Update pins</string>
+    <string name="settings_pins_downloaded">Pins updated</string>
+    <string name="settings_pins_download_button_text">Update</string>
+    <string name="settings_permissions">Permissions</string>
 
     <!--Profile-->
     <string name="profile_user_name">User name</string>
@@ -155,8 +160,12 @@
     <string name="login_nocredentials_message">Please enter a username and password</string>
     <string name="login_nousername_message">Please enter a username</string>
     <string name="login_nopassword_message">Please enter a password</string>
+    <string name="login_wrongcredentials_message">Incorrect username or password</string>
     <string name="login_signin_button_text">Sign In</string>
-    <string name="settings_pins_download_button_text">Update</string>
-    <string name="settings_permissions">Permissions</string>
+    <string name="login_successfullogin">Login successful</string>
+
+    <!--ContentServices-->
+    <string name="contentservices_nowifi_downloadblock">Enable wifi or allow network downloading</string>
+    <string name="contentservices_downloading">Downloading</string>
 
 </resources>

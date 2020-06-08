@@ -33,32 +33,34 @@ class MainActivity : TouchParent() {
             window.statusBarColor = Color.BLACK// set status background white
         }
 
-        if (checkLogin()) {
-            val intent = Intent(this, GeoMap::class.java)
-            startActivity(intent)
-        }
-        else{
-            val intent = Intent(this, Login::class.java)
-            startActivity(intent)
-            Logger.setTypeEnabled(LogType.Continuous, true)
-        }
-    }
-
-    @Suppress("UnnecessaryVariable") // TODO: remove when result is received which is a webtoken
-    private fun checkLogin() : Boolean{
         val username = sharedPref.getString("com.uu_uce.USERNAME", "").toString()
         val password = sharedPref.getString("com.uu_uce.PASSWORD", "").toString()
         val ip       = sharedPref.getString("com.uu_uce.SERVER_IP", "").toString()
 
-        return if(username.isNotEmpty() && password.isNotEmpty() && ip.isNotEmpty()){
-            val result = login(
+        if(username.isNotEmpty() && password.isNotEmpty() && ip.isNotEmpty()){
+            login(
                 username,
                 password,
-                ip
+                ip,
+                this
             )
-            result
+            { b ->
+                if(b){
+                    val intent = Intent(this, GeoMap::class.java)
+                    startActivity(intent)
+                }
+                else{
+                    openLogin()
+                }
+            }
         } else{
-            false
+            openLogin()
         }
+    }
+
+    private fun openLogin(){
+        val intent = Intent(this, Login::class.java)
+        startActivity(intent)
+        Logger.setTypeEnabled(LogType.Continuous, true)
     }
 }

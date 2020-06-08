@@ -9,6 +9,7 @@ import android.content.SharedPreferences
 import android.net.wifi.WifiManager
 import android.widget.Toast
 import androidx.preference.PreferenceManager
+import com.uu_uce.R
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import kotlinx.coroutines.GlobalScope
@@ -36,15 +37,14 @@ activity: The activity from which this function is called.
 onCompleteAction : A function to be executed when all files are present.
 It will call getFiles for all missing files.
  */
-fun updateFiles(requiredFilePaths : List<String>, activity : Activity, onCompleteAction : (() -> Unit)= {}, progressAction : (Int) -> Unit = {}) : Boolean {
+fun updateFiles(requiredFilePaths : List<String>, activity : Activity, onCompleteAction : ((success : Boolean) -> Unit)= {}, progressAction : (Int) -> Unit = {}) {
     val missingFiles = findMissingFilePaths(requiredFilePaths)
-    return if (missingFiles.count() > 0) {
+    if (missingFiles.count() > 0) {
         getPermissions(activity, permissionsNeeded, EXTERNAL_FILES_REQUEST)
         getFiles(missingFiles, activity, onCompleteAction, progressAction)
     }
     else {
-        GlobalScope.launch { onCompleteAction() }
-        true
+        GlobalScope.launch { onCompleteAction(true) }
     }
 }
 
@@ -74,21 +74,21 @@ activity: The activity from which this function is called.
 onCompleteAction : A function to be executed when all files are present.
 It will download all files and start onCompleteAction.
  */
-fun getFiles (requiredFilePaths : List<Pair<String, String>>, activity: Activity, onCompleteAction : (() -> Unit) = {}, progressAction : (Int) -> Unit = {}) : Boolean {
+fun getFiles (requiredFilePaths : List<Pair<String, String>>, activity: Activity, onCompleteAction : ((success : Boolean) -> Unit) = {}, progressAction : (Int) -> Unit = {}) {
     val jobList : MutableList<Job> = mutableListOf()
     val wifiManager = activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager?
     sharedPref = PreferenceManager.getDefaultSharedPreferences(activity)
     val serverURL = sharedPref.getString("com.uu_uce.SERVER_IP", "").toString()
     val networkDownloadAllowed = sharedPref.getBoolean("com.uu_uce.NETWORK_DOWNLOADING", false)
     if (!wifiManager!!.isWifiEnabled && !networkDownloadAllowed){
-        Toast.makeText(activity, "Enable wifi or allow network downloading", Toast.LENGTH_LONG).show()
-        onCompleteAction()
-        return false
+        Toast.makeText(activity, activity.getString(R.string.contentservices_nowifi_downloadblock), Toast.LENGTH_LONG).show()
+        onCompleteAction(false)
+        return
     }
     for(filePath in requiredFilePaths){
         jobList.add(GlobalScope.launch{
             activity.runOnUiThread{
-                Toast.makeText(activity, "Downloading", Toast.LENGTH_SHORT).show()
+                Toast.makeText(activity, activity.getString(R.string.contentservices_downloading), Toast.LENGTH_SHORT).show()
             }
             downloadFile(
                 URL(serverURL + downloadURL + filePath.second), filePath.first, progressAction)
@@ -99,10 +99,8 @@ fun getFiles (requiredFilePaths : List<Pair<String, String>>, activity: Activity
         for(job in jobList){
             job.join()
         }
-        onCompleteAction()
+        onCompleteAction(true)
     }
-
-    return true
 }
 
 /*

@@ -19,6 +19,7 @@ fun parsePins(pinFile : File) : List<PinData> {
     }
     reader.endArray()
 
+    pinFile.delete()
     return pinList
 }
 

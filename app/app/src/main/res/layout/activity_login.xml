@@ -89,10 +89,11 @@
             android:layout_margin="5dp"
             android:autofillHints="username"
             android:background="?colorPrimaryDarkRef"
+            android:capitalize="none"
             android:drawableStart="@drawable/ic_sprite_idcard"
             android:ems="10"
             android:hint="@string/login_username_hint"
-            android:inputType="textPersonName"
+            android:inputType="text"
             android:textColorHint="@color/TwinkleBlue" />
 
         <View

@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinViewModel
+import com.uu_uce.allpins.parsePins
 import com.uu_uce.misc.ListenableBoolean
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
@@ -24,7 +25,9 @@ import com.uu_uce.shapefiles.HeightLineReader
 import com.uu_uce.shapefiles.LayerType
 import com.uu_uce.shapefiles.PolygonReader
 import com.uu_uce.views.DragStatus
+import com.uu_uce.views.pinsUpdated
 import kotlinx.android.synthetic.main.activity_geo_map.*
+import kotlinx.android.synthetic.main.activity_settings.*
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 
@@ -43,7 +46,6 @@ class GeoMap : AppCompatActivity() {
     // Popup for showing download progress
     private var popupWindow: PopupWindow? = null
     private lateinit var progressBar : ProgressBar
-    private var downloadResult = false
 
     private lateinit var maps : List<String>
 
@@ -69,7 +71,7 @@ class GeoMap : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapsName, getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile)
+        maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapsName)
 
         // Alert that notifies the user that maps need to be downloaded TODO: remove when streaming is implemented
         if(!File(getExternalFilesDir(null)?.path + File.separator + mapsFolderName).exists()){
@@ -77,35 +79,7 @@ class GeoMap : AppCompatActivity() {
                 .setIcon(R.drawable.ic_sprite_question)
                 .setTitle(getString(R.string.geomap_download_warning_head))
                 .setMessage(getString(R.string.geomap_download_warning_body))
-                .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
-                    openProgressPopup(window.decorView.rootView)
-                    downloadResult = updateFiles(
-                        maps,
-                        this,
-                        {
-                            if(downloadResult){
-                                runOnUiThread{
-                                    Toast.makeText(this, getString(R.string.zip_download_completed), Toast.LENGTH_LONG).show()
-                                }
-                                val unzipResult = unpackZip(maps.first()) { progress -> runOnUiThread { progressBar.progress = progress } }
-                                runOnUiThread{
-                                    if(unzipResult) Toast.makeText(this, getString(R.string.zip_unpack_completed), Toast.LENGTH_LONG).show()
-                                    else Toast.makeText(this, getString(R.string.zip_unpacking_failed), Toast.LENGTH_LONG).show()
-                                    popupWindow?.dismiss()
-                                    start()
-                                }
-                            }
-                            else{
-                                runOnUiThread{
-                                    Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG).show()
-                                    popupWindow?.dismiss()
-                                    start()
-                                }
-                            }
-                        },
-                        { progress -> runOnUiThread { progressBar.progress = progress } }
-                    )
-                }
+                .setPositiveButton(getString(R.string.positive_button_text)) { _, _ -> downloadMaps() }
                 .setNegativeButton(getString(R.string.negative_button_text)) { _, _ ->
                     start()
                     Toast.makeText(this, getString(R.string.geomap_maps_download_instructions), Toast.LENGTH_LONG).show()
@@ -115,6 +89,36 @@ class GeoMap : AppCompatActivity() {
         else{
             start()
         }
+    }
+
+    private fun downloadMaps(){
+        openProgressPopup(window.decorView.rootView)
+        updateFiles(
+            maps,
+            this,
+            { success ->
+                if(success){
+                    runOnUiThread{
+                        Toast.makeText(this, getString(R.string.zip_download_completed), Toast.LENGTH_LONG).show()
+                    }
+                    val unzipResult = unpackZip(maps.first()) { progress -> runOnUiThread { progressBar.progress = progress } }
+                    runOnUiThread{
+                        if(unzipResult) Toast.makeText(this, getString(R.string.zip_unpack_completed), Toast.LENGTH_LONG).show()
+                        else Toast.makeText(this, getString(R.string.zip_unpacking_failed), Toast.LENGTH_LONG).show()
+                        popupWindow?.dismiss()
+                        start()
+                    }
+                }
+                else{
+                    runOnUiThread{
+                        Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG).show()
+                        popupWindow?.dismiss()
+                        start()
+                    }
+                }
+            },
+            { progress -> runOnUiThread { progressBar.progress = progress } }
+        )
     }
 
     private fun start(){
@@ -130,6 +134,25 @@ class GeoMap : AppCompatActivity() {
         this.customMap.setPinViewModel(pinViewModel)
         this.customMap.setLifeCycleOwner(this)
         this.customMap.setPins(pinViewModel.allPinData)
+
+        // Update pins
+        updateFiles(
+            listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
+            this,
+            { success ->
+                if(success){
+                    runOnUiThread {
+                        Toast.makeText(this, getString(R.string.settings_pins_downloaded), Toast.LENGTH_LONG).show()
+                        pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))){
+                            pinsUpdated.setValue(true)
+                        }
+                    }
+                }
+                else{
+                    runOnUiThread { Toast.makeText(this, getString(R.string.geomap_pins_download_instructions), Toast.LENGTH_LONG).show() }
+                }
+            }
+        )
 
         // Get statusbar height
         resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")

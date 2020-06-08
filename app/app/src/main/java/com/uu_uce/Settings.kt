@@ -30,10 +30,10 @@ import kotlin.math.min
 const val defaultPinSize = 60
 const val defaultUnlockRange = 100
 var needsRestart = false
-const val mapsName = "2e9e5736-a18f-402a-8843-8124d3b6248d.zip"
+const val mapsName = "cb4d4e19-ee36-4dfa-bfc4-2cd2fb3ff4bc.zip"
 const val mapsFolderName = "Maps"
 const val contentFolderName = "PinContent"
-const val pinDatabaseFile = "4da6aae3-5287-45f2-985f-01fdc27a3fbf.json"
+const val pinDatabaseFile = "3ab39591-a35e-4184-a846-8809f8e7063e.json"
 
 class Settings : AppCompatActivity() {
     // private variables
@@ -177,10 +177,7 @@ class Settings : AppCompatActivity() {
             }
             else{
                 with(sharedPref.edit()) {
-                    putBoolean(
-                        "com.uu_uce.NETWORK_DOWNLOADING",
-                        false
-                    )
+                    putBoolean("com.uu_uce.NETWORK_DOWNLOADING", false)
                     apply()
                 }
             }
@@ -190,10 +187,7 @@ class Settings : AppCompatActivity() {
         darktheme_switch.isChecked = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
         darktheme_switch.setOnClickListener {
             with(sharedPref.edit()) {
-                putBoolean(
-                    "com.uu_uce.DARKMODE",
-                    darktheme_switch.isChecked
-                )
+                putBoolean("com.uu_uce.DARKMODE", darktheme_switch.isChecked)
                 apply()
             }
 
@@ -349,7 +343,7 @@ class Settings : AppCompatActivity() {
                 this,
                 {
                     runOnUiThread {
-                        Toast.makeText(this, getString(R.string.settings_download_complete), Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, getString(R.string.settings_pins_downloaded), Toast.LENGTH_LONG).show()
                         pins_downloading_progress.visibility = View.INVISIBLE
                         pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))){
                             pinsUpdated.setValue(true)
@@ -361,17 +355,5 @@ class Settings : AppCompatActivity() {
                 }
             )
         }
-
-        /*databasetest.setOnClickListener{
-            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + "database.json"))){
-                pinsUpdated.setValue(true)
-            }
-        }
-
-        databasetest2.setOnClickListener{
-            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + "database (1).json"))){
-                pinsUpdated.setValue(true)
-            }
-        }*/
     }
 }
