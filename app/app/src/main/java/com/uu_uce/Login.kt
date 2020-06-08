@@ -83,10 +83,10 @@ class Login : AppCompatActivity() {
                             }
                             this.runOnUiThread{
                                 Toast.makeText(this, getString(R.string.login_successfullogin), Toast.LENGTH_SHORT).show()
+                                val intent = Intent(this, GeoMap::class.java)
+                                startActivity(intent)
+                                finish()
                             }
-                            val intent = Intent(this, GeoMap::class.java)
-                            startActivity(intent)
-                            finish()
                         }
                         else{
                             this.runOnUiThread{
