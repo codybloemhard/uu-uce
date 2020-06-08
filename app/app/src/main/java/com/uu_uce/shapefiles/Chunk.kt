@@ -4,7 +4,7 @@ package com.uu_uce.shapefiles
 //from the bottom, in zoomlevel z
 typealias ChunkIndex = Triple<Int,Int,Int>
 fun chunkName(c: ChunkIndex): String{
-    return "${c.third}-${c.first}-${c.second}.chunk"
+    return "${c.third}-${c.first}-${c.second}.hlinechunk"
     }
 fun polyChunkName(c: ChunkIndex): String{
     return "${c.first}-${c.second}.polychunk"

@@ -81,6 +81,8 @@ class FileReader{
 class HeightLineReader(
     dir: File
 ): ChunkGetter(dir) {
+    private var readValue: (reader: FileReader) -> Float = {reader -> reader.readUShort().toFloat()}
+
     override fun getChunk(cIndex: ChunkIndex): Chunk {
         //find the correct file and read all information inside
         val time = System.currentTimeMillis()
@@ -93,21 +95,21 @@ class HeightLineReader(
 
         val nrShapes = reader.readULong()
         val shapes = List(nrShapes.toInt()) {
-            val z = reader.readUShort().toFloat()
+            val z = readValue(reader)
             val bb1 = p3(
-                reader.readUShort().toFloat()/mult + xoff,
-                reader.readUShort().toFloat()/mult + yoff,
-                reader.readUShort().toFloat()
+                readValue(reader)/mult + xoff,
+                readValue(reader)/mult + yoff,
+                readValue(reader)
             )
             val bb2 = p3(
-                reader.readUShort().toFloat()/mult + xoff,
-                reader.readUShort().toFloat()/mult + yoff,
-                reader.readUShort().toFloat()
+                readValue(reader)/mult + xoff,
+                readValue(reader)/mult + yoff,
+                readValue(reader)
             )
 
             val nrPoints = reader.readULong()
             val points: List<p2> = List(nrPoints.toInt()) {
-                p2(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff)
+                p2(readValue(reader)/mult + xoff, readValue(reader)/mult + yoff)
             }
 
             val style = Style(false, floatArrayOf(Random.nextFloat(), Random.nextFloat(), Random.nextFloat()))
@@ -134,8 +136,18 @@ class HeightLineReader(
         zoff = reader.readULong().toFloat()
         mult = reader.readULong().toFloat()
 
-        bmin = p3(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff, reader.readUShort().toFloat()/mult)
-        bmax = p3(reader.readUShort().toFloat()/mult + xoff, reader.readUShort().toFloat()/mult + yoff, reader.readUShort().toFloat()/mult)
+        val compression = reader.readUByte().toInt()
+        readValue = {fileReader ->
+            when(compression){
+                1 -> fileReader.readUByte().toFloat()
+                2 -> fileReader.readUShort().toFloat()
+                4 -> fileReader.readUInt().toFloat()
+                else -> fileReader.readULong().toFloat()
+            }
+        }
+
+        bmin = p3(readValue(reader)/mult + xoff, readValue(reader)/mult + yoff, readValue(reader)/mult)
+        bmax = p3(readValue(reader)/mult + xoff, readValue(reader)/mult + yoff, readValue(reader)/mult)
 
         val nrMods = reader.readULong()
         mods = List(nrMods.toInt()){
