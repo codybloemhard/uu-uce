@@ -40,7 +40,7 @@ class PinContent(
     val contentBlocks : MutableList<ContentBlockInterface>
     private var canCompletePin = false
 
-    lateinit var parent : Pin
+    lateinit var parent : FinalPin
     init{
         contentBlocks = getContent()
     }
@@ -155,7 +155,7 @@ interface ContentBlockInterface {
     val content: View
     val tag : BlockTag
     val canCompleteBlock : Boolean
-    fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?)
+    fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : FinalPin?)
     fun makeEditable(blockId : Int, layout : LinearLayout, view : View, action : ((ContentBlockInterface) -> Boolean)) : ContentBlockInterface {
         showContent(blockId,layout,view,null)
         content.setOnLongClickListener{
@@ -178,7 +178,7 @@ class TextBlock(
     override var content = EditText(activity)
     override val tag = BlockTag.TEXT
     override val canCompleteBlock = false
-    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?) {
+    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : FinalPin?) {
         content = EditText(activity).apply {
             inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
             isSingleLine = false
@@ -211,7 +211,7 @@ class TextContentBlock(
     override var content = TextView(activity)
     override val tag = BlockTag.TEXT
     override val canCompleteBlock = false
-    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?){
+    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : FinalPin?){
         content = TextView(activity).apply {
             text = textContent
             setPadding(12, 12, 12, 20)
@@ -254,7 +254,7 @@ class ImageContentBlock(
     override var content = ImageView(activity)
     override val tag = BlockTag.IMAGE
     override val canCompleteBlock = false
-    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?){
+    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : FinalPin?){
         content = ImageView(activity)
         try {
             content.apply {
@@ -316,7 +316,7 @@ class VideoContentBlock(
     override val tag = BlockTag.VIDEO
     override val canCompleteBlock = false
 
-    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?){
+    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : FinalPin?){
         content = FrameLayout(activity)
 
         // Create thumbnail image
@@ -399,7 +399,7 @@ class MCContentBlock(
     private var selectedAnswer : Int = -1
     private lateinit var selectedBackground : CardView
 
-    override fun showContent(blockId : Int, layout: LinearLayout, view : View, parent : Pin?) {
+    override fun showContent(blockId : Int, layout: LinearLayout, view : View, parent : FinalPin?) {
         content = TableLayout(activity)
 
         if(parent == null) {

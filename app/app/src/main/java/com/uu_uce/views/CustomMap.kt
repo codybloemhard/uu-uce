@@ -35,14 +35,13 @@ import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.misc.ListenableBoolean
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.pins.Pin
+import com.uu_uce.pins.FinalPin
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
 import kotlinx.android.synthetic.main.activity_geo_map.*
 import org.jetbrains.annotations.TestOnly
 import java.time.LocalDate
 import kotlin.math.abs
-import kotlin.math.max
 import kotlin.system.measureTimeMillis
 
 /*
@@ -74,9 +73,9 @@ class CustomMap : ViewTouchParent {
     private lateinit var fieldbookViewModel : FieldbookViewModel
     private lateinit var lfOwner            : LifecycleOwner
 
-    private var pins                        : MutableMap<String, Pin>   = mutableMapOf()
+    private var pins                        : MutableMap<String, FinalPin>   = mutableMapOf()
     private var fieldbook                   : List<FieldbookEntry>      = listOf()
-    private var sortedPins                  : List<Pin>                 = listOf()
+    private var sortedPins                  : List<FinalPin>                 = listOf()
     private var pinStatuses                 : MutableMap<String, Int>   = mutableMapOf()
     var activePopup                         : PopupWindow?              = null
 
@@ -449,7 +448,7 @@ class CustomMap : ViewTouchParent {
         }
     }
 
-    fun mergePins(): List<Pin>{
+    fun mergePins(): List<FinalPin>{
         var pinxmin = 0f
         var pinxmax = 0f
         var pinymin = 0f
@@ -461,7 +460,7 @@ class CustomMap : ViewTouchParent {
             pinymax = maxOf(pinymax,pin.coordinate.north)
         }
 
-        val res: List<Pin> = mutableListOf()
+        val res: List<FinalPin> = mutableListOf()
 
         /*val levels: List<MutableMap<Pair<Int,Int>, MutableList<Pin>>> = List(pinChunksDepth){mutableMapOf()}
 

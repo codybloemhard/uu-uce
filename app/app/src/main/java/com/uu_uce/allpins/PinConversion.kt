@@ -10,7 +10,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.uu_uce.R
 import com.uu_uce.fieldbook.FieldbookEntry
 import com.uu_uce.fieldbook.FieldbookViewModel
-import com.uu_uce.pins.Pin
+import com.uu_uce.pins.FinalPin
 import com.uu_uce.pins.PinContent
 import com.uu_uce.services.UTMCoordinate
 
@@ -109,8 +109,8 @@ class PinConversion(val activity: Activity){
         return ids.split(',').map{s -> s}
     }
 
-    fun pinDataToPin(pinData : PinData, viewModel : PinViewModel): Pin {
-        val pin = Pin(
+    fun pinDataToPin(pinData : PinData, viewModel : PinViewModel): FinalPin {
+        val pin = FinalPin(
             pinData.pinId,
             stringToUtm(pinData.location), //location
             pinData.title,
@@ -126,8 +126,8 @@ class PinConversion(val activity: Activity){
         return pin
     }
 
-    fun fieldbookEntryToPin(entry: FieldbookEntry, viewModel: FieldbookViewModel) : Pin {
-        return Pin(
+    fun fieldbookEntryToPin(entry: FieldbookEntry, viewModel: FieldbookViewModel) : FinalPin {
+        return FinalPin(
             entry.id.toString(),
             stringToUtm(entry.location),
             entry.title,

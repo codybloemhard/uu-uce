@@ -34,23 +34,12 @@ import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 import kotlin.math.roundToInt
 
-open class Pin(
-    var id                      : String = "",
-    var coordinate              : UTMCoordinate,
-    var title           : String,
-    var content         : PinContent,
+abstract class Pin(
+    val coordinate: UTMCoordinate,
     protected var background      : Bitmap,
-    protected var icon            : Drawable,
-    var status          : Int,              //-1 : recalculating, 0 : locked, 1 : unlocked, 2 : completed
-    protected var predecessorIds  : List<String>,
-    protected var followIds       : List<String>,
-    protected val viewModel       : ViewModel
+    protected var icon            : Drawable
 ){
-    // Used to determine if warning should show when closing pin
-    private var madeProgress = false
-
-    // Set default pin size
-    private var pinWidth = defaultPinSize.toFloat()
+    private var initialized = false
 
     //opengl stuff
     private var backgroundHandle: Int = -1
@@ -72,6 +61,9 @@ open class Pin(
     private val bitmapBackgroundWidth = background.width.toFloat()
     private val bitmapBackgroundHeight = background.height.toFloat()
 
+    // Set default pin size
+    private var pinWidth = defaultPinSize.toFloat()
+
     // Calculate pin height to maintain aspect ratio
     private var pinHeight =
         pinWidth * (bitmapBackgroundHeight / bitmapBackgroundWidth)
@@ -80,12 +72,11 @@ open class Pin(
     private var iconWidth  : Double = 0.0
     private var iconHeight : Double = 0.0
 
-    init {
-        // Check if predecessors contain self
-        predecessorIds.forEach { I ->
-            if (I == id) error("Pin can not be own predecessor")
-        }
+    // Initialize variables used in checking for clicks
+    var inScreen: Boolean = true
+    var boundingBox: Pair<p2, p2> = Pair(p2Zero, p2Zero)
 
+    init {
         // Calculate icon measurements
         if(icon.intrinsicHeight > icon.intrinsicWidth){
             iconHeight = pinHeight * 0.5
@@ -96,21 +87,6 @@ open class Pin(
             iconHeight = iconWidth * (bitmapIconHeight / bitmapIconWidth)
         }
     }
-
-    // Initialize variables used in checking for clicks
-    var inScreen: Boolean = true
-    var boundingBox: Pair<p2, p2> = Pair(p2Zero, p2Zero)
-
-    var popupWindow: PopupWindow? = null
-
-    var tapAction : ((Activity) -> Unit) = {}
-
-    // Quiz
-    private var answered : Array<Boolean>       = Array(content.contentBlocks.count()) { true }
-    private var questionRewards : Array<Int>    = Array(content.contentBlocks.count()) { 0 }
-    private var totalReward                     = 0
-
-    private var initialized = false
 
     fun initGL(){
         if(initialized) return
@@ -195,9 +171,6 @@ open class Pin(
         val maxX = (screenLocation.first + pinWidth / 2).roundToInt()
         val maxY = (screenLocation.second).roundToInt()
 
-        // Check whether pin is unlocked
-        if (status == 0) return
-
         // Check whether pin is out of screen
         if (minX > width || maxX < 0 || minY > height || maxY < 0) {
             Logger.log(LogType.Event, "Pin", "Pin outside of viewport")
@@ -246,6 +219,102 @@ open class Pin(
 
         GLES20.glDisableVertexAttribArray(positionHandle)
         GLES20.glDisableVertexAttribArray(textureCoordinateHandle)
+    }
+
+    fun resize(pinSize : Int){
+        pinWidth = pinSize.toFloat()
+
+        // Calculate pin height to maintain aspect ratio
+        pinHeight =
+            pinWidth * bitmapBackgroundHeight / bitmapBackgroundWidth
+
+        // Calculate icon measurements
+        if(bitmapIconHeight > bitmapIconWidth){
+            iconHeight = pinHeight * 0.5
+            iconWidth = iconHeight * (bitmapIconWidth / bitmapIconHeight)
+        }
+        else{
+            iconWidth = pinWidth * 0.55
+            iconHeight = iconWidth * (bitmapIconHeight / bitmapIconWidth)
+        }
+    }
+
+    private fun loadTexture(bitmap: Bitmap): Int {
+        val textureHandle = IntArray(1)
+        GLES20.glGenTextures(1, textureHandle, 0)
+        if (textureHandle[0] != 0) {
+            // Bind to the texture in OpenGL
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureHandle[0])
+
+            // Set filtering
+            GLES20.glTexParameteri(
+                GLES20.GL_TEXTURE_2D,
+                GLES20.GL_TEXTURE_MIN_FILTER,
+                GLES20.GL_NEAREST
+            )
+            GLES20.glTexParameteri(
+                GLES20.GL_TEXTURE_2D,
+                GLES20.GL_TEXTURE_MAG_FILTER,
+                GLES20.GL_NEAREST
+            )
+
+            // Load the bitmap into the bound texture.
+            GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0)
+
+            // Recycle the bitmap, since its data has been loaded into OpenGL.
+            bitmap.recycle()
+        }
+        if (textureHandle[0] == 0) {
+            Logger.error("Pin", "Error loading texture")
+        }
+        return textureHandle[0]
+    }
+}
+
+class FinalPin(
+    var id                      : String = "",
+    coordinate              : UTMCoordinate,
+    var title           : String,
+    var content         : PinContent,
+    background      : Bitmap,
+    icon            : Drawable,
+    var status          : Int,              //-1 : recalculating, 0 : locked, 1 : unlocked, 2 : completed
+    protected var predecessorIds  : List<String>,
+    protected var followIds       : List<String>,
+    protected val viewModel       : ViewModel
+): Pin(coordinate, background, icon) {
+    // Used to determine if warning should show when closing pin
+    private var madeProgress = false
+
+    var popupWindow: PopupWindow? = null
+
+    var tapAction : ((Activity) -> Unit) = {}
+
+    // Quiz
+    private var answered : Array<Boolean>       = Array(content.contentBlocks.count()) { true }
+    private var questionRewards : Array<Int>    = Array(content.contentBlocks.count()) { 0 }
+    private var totalReward                     = 0
+
+    init{
+        // Check if predecessors contain self
+        predecessorIds.forEach { I ->
+            if (I == id) error("Pin can not be own predecessor")
+        }
+    }
+
+    override fun draw(
+        program: Int,
+        scale: FloatArray,
+        trans: FloatArray,
+        viewport: Pair<p2, p2>,
+        width: Int,
+        height: Int,
+        view: View
+    ) {
+        // Check whether pin is unlocked
+        if (status == 0) return
+
+        super.draw(program, scale, trans, viewport, width, height, view)
     }
 
     // Check if pin should be unlocked
@@ -469,55 +538,6 @@ open class Pin(
         }
     }
 
-    fun resize(pinSize : Int){
-        pinWidth = pinSize.toFloat()
-
-        // Calculate pin height to maintain aspect ratio
-        pinHeight =
-            pinWidth * bitmapBackgroundHeight / bitmapBackgroundWidth
-
-        // Calculate icon measurements
-        if(bitmapIconHeight > bitmapIconWidth){
-            iconHeight = pinHeight * 0.5
-            iconWidth = iconHeight * (bitmapIconWidth / bitmapIconHeight)
-        }
-        else{
-            iconWidth = pinWidth * 0.55
-            iconHeight = iconWidth * (bitmapIconHeight / bitmapIconWidth)
-        }
-    }
-
-    private fun loadTexture(bitmap: Bitmap): Int {
-        val textureHandle = IntArray(1)
-        GLES20.glGenTextures(1, textureHandle, 0)
-        if (textureHandle[0] != 0) {
-            // Bind to the texture in OpenGL
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureHandle[0])
-
-            // Set filtering
-            GLES20.glTexParameteri(
-                GLES20.GL_TEXTURE_2D,
-                GLES20.GL_TEXTURE_MIN_FILTER,
-                GLES20.GL_NEAREST
-            )
-            GLES20.glTexParameteri(
-                GLES20.GL_TEXTURE_2D,
-                GLES20.GL_TEXTURE_MAG_FILTER,
-                GLES20.GL_NEAREST
-            )
-
-            // Load the bitmap into the bound texture.
-            GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0)
-
-            // Recycle the bitmap, since its data has been loaded into OpenGL.
-            bitmap.recycle()
-        }
-        if (textureHandle[0] == 0) {
-            Logger.error("Pin", "Error loading texture")
-        }
-        return textureHandle[0]
-    }
-
     @TestOnly
     fun getScreenLocation(viewport: Pair<p2, p2>, width : Int, height : Int) : Pair<Float, Float>{
         return coordToScreen(coordinate, viewport, width, height)
@@ -525,18 +545,14 @@ open class Pin(
 }
 
 class MergedPin(
-    id                      : String = "",
-    coordinate              : UTMCoordinate,
-    title           : String,
-    content         : PinContent,
-    background      : Bitmap,
-    icon            : Drawable,
-    status          : Int,              //-1 : recalculating, 0 : locked, 1 : unlocked, 2 : completed
-    predecessorIds  : List<String>,
-    followIds       : List<String>,
-    viewModel       : ViewModel
-): Pin(id,coordinate,title,content,background,icon,status,predecessorIds,followIds,viewModel) {
-    val pins: MutableList<Pin> = mutableListOf()
+    private val a: Pin,
+    private val b: Pin,
+    private val dis: Float,
+    coordinate: UTMCoordinate,
+    background: Bitmap,
+    icon: Drawable
+): Pin(coordinate, background, icon) {
+    val pins: MutableList<FinalPin> = mutableListOf()
 
     override fun draw(
         program: Int,
