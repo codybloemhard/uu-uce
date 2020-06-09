@@ -173,6 +173,7 @@ class CustomMap : ViewTouchParent {
         val res = camera.update()
         val viewport = camera.getViewport()
         if(viewport == p2ZeroPair){
+            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
             Logger.error("CustomMap", "Camera could not be initialized")
             return
         }
