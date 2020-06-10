@@ -43,10 +43,6 @@ class FieldbookPinmapFragment : Fragment() {
 
     private lateinit var sharedPref : SharedPreferences
 
-    // Popup for showing download progress
-    private var popupWindow: PopupWindow? = null
-    private lateinit var progressBar : ProgressBar
-
     // TODO: Remove temporary hardcoded map information
     private val mapsName = "maps.zip"
     private lateinit var maps : List<String>

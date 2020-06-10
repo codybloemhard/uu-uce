@@ -23,11 +23,12 @@
             android:focusableInTouchMode="true">
 
             <TextView
+                android:id="@+id/textView5"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:fontFamily="@font/roboto_bold"
-                android:text="@string/settings_general"
+                android:text="@string/settings_permissions"
                 android:textSize="20sp" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -36,8 +37,39 @@
                 android:layout_margin="5dp">
 
                 <TextView
-                    android:id="@+id/pinsize_text"
                     android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_networkdownload"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Switch
+                    android:id="@+id/networkdownload_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:fontFamily="@font/roboto_bold"
+                android:text="@string/settings_accessibility"
+                android:textSize="20sp" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp">
+
+                <TextView
+                    android:id="@+id/pinsize_text"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:text="@string/settings_pin_size"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -74,20 +106,35 @@
                 android:layout_margin="5dp">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:id="@+id/unlockrange_text"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/settings_networkdownload"
+                    android:text="@string/settings_unlock_range"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <Switch
-                    android:id="@+id/networkdownload_switch"
-                    android:layout_width="wrap_content"
+                <SeekBar
+                    android:id="@+id/unlockrange_seekbar"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/unlockrange_numberview"
+                    app:layout_constraintStart_toEndOf="@+id/unlockrange_text"
                     app:layout_constraintTop_toTopOf="parent" />
+
+                <EditText
+                    android:id="@+id/unlockrange_numberview"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/custom_border_edgy"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="LabelFor" />
+
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -272,6 +319,52 @@
                     app:layout_constraintStart_toEndOf="@+id/delete_content_text"
                     app:layout_constraintTop_toTopOf="parent" />
 
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:fontFamily="@font/roboto_bold"
+                android:text="@string/settings_pins_settings"
+                android:textSize="20sp" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp">
+
+                <TextView
+                    android:id="@+id/download_pins_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_download_pins"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/download_pins_button"
+                    android:layout_width="110dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_pins_download_button_text"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ProgressBar
+                    android:id="@+id/pins_downloading_progress"
+                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:max="100"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/download_pins_button"
+                    app:layout_constraintStart_toEndOf="@+id/download_pins_text"
+                    app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <!--<Button

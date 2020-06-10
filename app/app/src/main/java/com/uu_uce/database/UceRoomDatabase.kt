@@ -13,85 +13,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(entities = [PinData::class, FieldbookEntry::class], version = 4, exportSchema = false)
+@Database(entities = [PinData::class, FieldbookEntry::class], version = 5, exportSchema = false)
 abstract class UceRoomDatabase : RoomDatabase() {
 
     abstract fun pinDao(): PinDao
-
     abstract fun fieldbookDao(): FieldbookDao
-
-    private class UceDatabaseCallback(private val scope: CoroutineScope) : RoomDatabase.Callback() {
-        override fun onOpen(db: SupportSQLiteDatabase) {
-            super.onOpen(db)
-            INSTANCE?.let { database ->
-                scope.launch(Dispatchers.IO) {
-                    populatePinTable(database.pinDao()) // TODO: remove when database is fully implemented
-                }
-            }
-        }
-
-        suspend fun populatePinTable(pinDao: PinDao) {
-            val pinList: MutableList<PinData> = mutableListOf()
-            pinList.add(
-                PinData(
-                    "691bee74-565d-4e2c-8615-c407b8e869c6",
-                    "31N46777336N3149680E",
-                    1,
-                    "TEXT",
-                    "Test text",
-                    "[{\"tag\":\"TEXT\", \"text\":\"test\"}]",
-                    1,
-                    1,
-                    "",
-                    ""
-                )
-            )
-            pinList.add(
-                PinData(
-                    "d8abb292-c253-49be-8d55-f92d80275654",
-                    "31N46758336N3133680E",
-                    2,
-                    "IMAGE",
-                    "Test image",
-                    "[{\"tag\":\"IMAGE\", \"file_path\":\"Images/1afccc95-a809-4992-8e89-4f35c7e0b453.png\"}]",
-                    1,
-                    1,
-                    "",
-                    ""
-                )
-            )
-            pinList.add(
-                PinData(
-                    "f0e7638e-9eaa-4c9e-be45-cdafabae3ad5",
-                    "31N46670000N3130000E",
-                    3,
-                    "VIDEO",
-                    "Test video",
-                    "[{\"tag\":\"VIDEO\", \"file_path\":\"Videos/7fd7ee4c-62ac-4a55-a3aa-30cc91cdaf27.mp4\", \"title\":\"zoo video\"}]",
-                    0,
-                    0,
-                    "539272be-a3c3-4102-ae2f-9c740c1aa1b4",
-                    ""
-                )
-            )
-            pinList.add(
-                PinData(
-                    "539272be-a3c3-4102-ae2f-9c740c1aa1b4",
-                    "31N46655335N3134680E",
-                    3,
-                    "MCQUIZ",
-                    "Test quiz",
-                    "[{\"tag\":\"TEXT\", \"text\":\"Press right or also right\"}, {\"tag\":\"MCQUIZ\", \"mc_correct_option\" : \"Right\", \"mc_incorrect_option\" : \"Wrong\" , \"mc_correct_option\" : \"Also right\", \"mc_incorrect_option\" : \"Also wrong\", \"reward\" : 50}, {\"tag\":\"TEXT\", \"text\":\"Press right again\"}, {\"tag\":\"MCQUIZ\", \"mc_correct_option\" : \"Right\", \"mc_incorrect_option\" : \"Wrong\", \"reward\" : 25}]",
-                    1,
-                    1,
-                    "",
-                    "f0e7638e-9eaa-4c9e-be45-cdafabae3ad5"
-                )
-            )
-            pinDao.updateData(pinList)
-            pinsUpdated.setValue(true)
-        }
-    }
 
     companion object {
         @Volatile
@@ -104,9 +30,8 @@ abstract class UceRoomDatabase : RoomDatabase() {
                     UceRoomDatabase::class.java,
                     "uce_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .fallbackToDestructiveMigration()
-                    .addCallback(UceDatabaseCallback(scope))
                     .build()
                 INSTANCE = instance
                 instance
@@ -203,6 +128,39 @@ abstract class UceRoomDatabase : RoomDatabase() {
         private val MIGRATION_3_4 = object : Migration(3, 4) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL( "ALTER TABLE pins ADD COLUMN startStatus INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    "CREATE TABLE fieldbook_new (" +
+                            "title TEXT NOT NULL, " +
+                            "location TEXT NOT NULL, " +
+                            "dateTime TEXT NOT NULL, " +
+                            "content TEXT NOT NULL, " +
+                            "id INTEGER NOT NULL, " +
+                            "PRIMARY KEY(id))"
+                )
+                // Copy the data
+                database.execSQL(
+                    "INSERT INTO fieldbook_new (" +
+                            "title, " +
+                            "location, " +
+                            "dateTime, " +
+                            "content, " +
+                            "id)" +
+                            "SELECT " +
+                            "title, " +
+                            "location, " +
+                            "dateTime, " +
+                            "content, " +
+                            "id" +
+                            " FROM fieldbook")
+                // Remove the old table
+                database.execSQL("DROP TABLE fieldbook")
+                // Change the table name to the correct one
+                database.execSQL("ALTER TABLE fieldbook_new RENAME TO fieldbook")
             }
         }
     }

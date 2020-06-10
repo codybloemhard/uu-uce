@@ -49,7 +49,7 @@ class AllPinsTests {
         pinList.add(
             PinData(
                 "0",
-                "31N46777336N3149680E",
+                "31N314968E4677733N",
                 1,
                 "TEXT",
                 "A",
@@ -63,7 +63,7 @@ class AllPinsTests {
         pinList.add(
             PinData(
                 "1",
-                "31N46718336N3133680E",
+                "31N313368E4671833N",
                 2,
                 "IMAGE",
                 "B",
@@ -77,7 +77,7 @@ class AllPinsTests {
         pinList.add(
             PinData(
                 "2",
-                "31N46710000N3130000E",
+                "31N313000E4671000N",
                 3,
                 "VIDEO",
                 "C",
@@ -91,7 +91,7 @@ class AllPinsTests {
         pinList.add(
             PinData(
                 "3",
-                "31N46715335N3134680E",
+                "31N3134680E46715335N",
                 3,
                 "MCQUIZ",
                 "D",

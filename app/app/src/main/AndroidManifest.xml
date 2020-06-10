@@ -30,7 +30,7 @@
         <activity android:name=".FieldbookEditor"
             android:launchMode="singleInstance"/>
         <activity android:name=".Login"
-            android:launchMode="singleInstance"/>
+            android:launchMode="singleTop"/>
         <activity android:name=".ImageViewer"
             android:launchMode="singleInstance"/>
         <activity android:name=".Profile"
@@ -65,7 +65,7 @@
         <activity
             android:name=".GeoMap"
             android:theme="@style/LightTheme.NoActionBar"
-            android:launchMode="singleInstance"/>
+            android:launchMode="singleTop"/>
         <activity
             android:name=".AllPins"
             android:theme="@style/LightTheme.NoActionBar"

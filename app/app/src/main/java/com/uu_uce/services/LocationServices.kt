@@ -53,6 +53,11 @@ data class UTMCoordinate(val zone : Int, val letter : Char, val east : Float, va
     }
 }
 
+fun calculateDistance(location1 : UTMCoordinate, location2 : UTMCoordinate) : Double {
+    // TODO: Make this work over multiple zones : https://gis.stackexchange.com/questions/151505/measuring-distances-when-crossing-utm-zones
+    return abs(((location1.east - location2.east).pow(2) + (location1.north - location2.north).pow(2)).pow(0.5))
+}
+
 /*
 Will convert latitude, longitude coordinate to UTM.
 degPos: a pair of doubles of the form (latitude, longitude).
@@ -125,7 +130,7 @@ Will poll the location for you.
  */
 class LocationServices{
     companion object {
-        lateinit var lastKnownLocation: Location
+        var lastKnownLocation: Location? = null
         val permissionsNeeded = listOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
     }
 

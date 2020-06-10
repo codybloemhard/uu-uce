@@ -13,12 +13,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.allpins.PinViewModel
+import com.uu_uce.allpins.parsePins
 import com.uu_uce.pins.PinContent
 import com.uu_uce.services.dirSize
 import com.uu_uce.services.unpackZip
 import com.uu_uce.services.updateFiles
 import com.uu_uce.services.writableSize
 import com.uu_uce.ui.createTopbar
+import com.uu_uce.views.pinsUpdated
 import kotlinx.android.synthetic.main.activity_settings.*
 import java.io.File
 import kotlin.math.max
@@ -26,16 +28,20 @@ import kotlin.math.min
 
 // Default settings
 const val defaultPinSize = 60
+const val defaultUnlockRange = 100
 var needsRestart = false
 const val mapsName = "50016551-7038-4305-b717-17bd9f93fb34.zip"
 const val mapsFolderName = "Maps"
 const val contentFolderName = "PinContent"
 const val legendName = "legend.png"
+const val pinDatabaseFile = "4da6aae3-5287-45f2-985f-01fdc27a3fbf.json"
 
 class Settings : AppCompatActivity() {
     // private variables
     private val minPinSize = 10
     private val maxPinSize = 200
+    private val minRange = 10
+    private val maxRange = 200
 
     private lateinit var maps : List<String>
     private lateinit var mapsDir : String
@@ -103,6 +109,45 @@ class Settings : AppCompatActivity() {
                 pinsize_numberview.setText(progress.toString())
                 with(sharedPref.edit()) {
                     putInt("com.uu_uce.PIN_SIZE", progress)
+                    apply()
+                }
+                return@OnKeyListener true
+            }
+            false
+        })
+
+        // Unlock range
+        val curRange = sharedPref.getInt("com.uu_uce.UNLOCKRANGE", defaultUnlockRange)
+        unlockrange_seekbar.max = maxRange - minRange
+        unlockrange_seekbar.progress = curRange - minRange
+        unlockrange_numberview.setText(curRange.toString())
+
+        unlockrange_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
+                // Display the pinSize
+                unlockrange_numberview.setText((seekBar.progress + minRange).toString())
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                val range = seekBar.progress + minRange
+                with(sharedPref.edit()) {
+                    putInt("com.uu_uce.UNLOCKRANGE", range)
+                    apply()
+                }
+            }
+        })
+
+        unlockrange_numberview.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+                //Perform Code
+                val progress = min(max(unlockrange_numberview.text.toString().toInt(), minRange), maxRange)
+                unlockrange_seekbar.progress = progress - minRange
+                unlockrange_numberview.setText(progress.toString())
+                with(sharedPref.edit()) {
+                    putInt("com.uu_uce.UNLOCKRANGE", progress)
                     apply()
                 }
                 return@OnKeyListener true
@@ -294,6 +339,28 @@ class Settings : AppCompatActivity() {
                 }
                 .setNegativeButton(getString(R.string.negative_button_text), null)
                 .show()
+        }
+
+        // Download pins
+        download_pins_button.setOnClickListener{
+            pins_downloading_progress.visibility = View.VISIBLE
+
+            updateFiles(
+                listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
+                this,
+                {
+                    runOnUiThread {
+                        Toast.makeText(this, getString(R.string.settings_download_complete), Toast.LENGTH_LONG).show()
+                        pins_downloading_progress.visibility = View.INVISIBLE
+                        pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))){
+                            pinsUpdated.setValue(true)
+                        }
+                    }
+                },
+                {
+                    progress -> runOnUiThread { pins_downloading_progress.progress = progress }
+                }
+            )
         }
 
         /*databasetest.setOnClickListener{
