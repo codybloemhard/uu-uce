@@ -47,27 +47,27 @@ class UnitTests {
     }
     @Test
     fun testDegreeToUTM(){
-        val utm = degreeToUTM(Pair(55.0,110.0))
+        val utm = degreeToUTM(Pair(55.0f,110.0f))
         assertEquals(utm.letter, 'U')
         assertEquals(utm.zone, 49)
-        assertEquals(utm.east, 436032.58, 0.1)
-        assertEquals(utm.north, 6095248.71, 0.1)
+        assertEquals(utm.east, 436032.58f, 0.1f)
+        assertEquals(utm.north, 6095248.71f, 0.1f)
     }
 
     @Test
     fun testScreenMapConversion(){
-        val coordinate = UTMCoordinate(31, 'N', 313368.0, 4671833.6)
+        val coordinate = UTMCoordinate(31, 'N', 313368.0f, 4671833.6f)
         val viewport = Pair(
-                p2(308968.83, 4667733.3),
-                p2(319547.5, 4682999.6))
+                p2(308968.83f, 4667733.3f),
+                p2(319547.5f, 4682999.6f))
 
         val screenWidth = 1920
         val screenHeight = 1080
 
         val screenCoordinate = coordToScreen(coordinate, viewport, screenWidth, screenHeight)
         val mapCoordinate = screenToCoord(screenCoordinate, viewport, screenWidth, screenHeight)
-        assertEquals(mapCoordinate.east, coordinate.east, 0.1)
-        assertEquals(mapCoordinate.north, coordinate.north, 0.1)
+        assertEquals(mapCoordinate.east, coordinate.east, 0.1f)
+        assertEquals(mapCoordinate.north, coordinate.north, 0.1f)
     }
 
     @ExperimentalUnsignedTypes

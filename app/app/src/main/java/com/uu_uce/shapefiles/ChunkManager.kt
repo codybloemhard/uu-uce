@@ -1,15 +1,15 @@
 package com.uu_uce.shapefiles
 
-import android.graphics.Color
-import android.graphics.Paint
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
 import kotlin.math.log
 import kotlin.math.pow
+import kotlin.system.measureTimeMillis
 
 enum class ChunkUpdateResult{NOTHING, REDRAW, LOADING}
 
@@ -25,59 +25,36 @@ class ChunkManager(
     private val chunkGetter: ChunkGetter,
     private val bmin: p3,
     private val bmax: p3,
-    private val nrCuts: List<Int>)
+    private val nrCuts: List<Int>,
+    private val zoomCutoff: Float)
 {
+    //render a little extra around the camera for smoothness
+    private val extraRenderFac = 0.0f
 
     private var lastViewport: Pair<p2,p2> = Pair(p2Zero,p2Zero)
-    private var lastZoom: Int = -1
+    private var lastZoomLevel: Int = -1
     private val nrOfLODs = nrCuts.size
 
-    private var chunkLoaders: List<Pair<ChunkIndex,Job>> = listOf()
-    private var chunksLoadedListener: Job? = null
-    private var loading = false
-    private var upToDate = false
-    private var changed = false
-    private var factor = 0.0
+    private var chunkLoader: Job? = null
+    private var chunkloaderName = ""
 
-    private val debugPaint = Paint()
-    private val loadedChunkPaint = Paint()
+    private var loading = false
+    private var changed = false
+
+    var factor = 0.0f
 
     private var xmin = 0
     private var xmax = 0
     private var ymin = 0
     private var ymax = 0
 
-    private var maxzoom = 0.0
+    private var maxzoom = 0.0f
 
-    private var zoom = nrOfLODs-1
+    var zoomLevel = nrOfLODs-1
 
-    init{
-        debugPaint.color = Color.RED
-        debugPaint.strokeWidth = 5f
-
-        loadedChunkPaint.color = Color.GREEN
-        loadedChunkPaint.alpha = 128
-    }
-
-    fun setZooms(minzoom: Double, maxzoom: Double){
-        factor = (minzoom/maxzoom).pow(1.0/chunkGetter.nrCuts.size)
+    fun setZooms(minzoom: Float, maxzoom: Float){
+        factor = (minzoom/maxzoom).pow(1.0f/chunkGetter.nrCuts.size)
         this.maxzoom = maxzoom
-    }
-
-    fun getZoomLevel() : Int{
-        return lastZoom
-    }
-
-    //cancel all threads that are currently trying to load new chunks
-    private fun cancelCurrentLoading(){
-        synchronized(chunks) {
-            chunksLoadedListener?.cancel()
-
-            for ((_, job) in chunkLoaders) {
-                job.cancel()
-            }
-            loading = false
-        }
     }
 
     /*
@@ -85,54 +62,48 @@ class ChunkManager(
     viewport: current viewport of the camera
     camzoom: current zoom of the camera
      */
-    fun update(viewport: Pair<p2, p2>, camzoom: Double): ChunkUpdateResult {
-        zoom = ceil(log((camzoom/maxzoom), factor)).toInt()
-        if(zoom < 0){
-            Logger.log(LogType.Info, "ChunkManager", "zoom below zero")
-            zoom = 0
-        }else if(zoom > nrOfLODs-1){
-            Logger.log(LogType.Info, "ChunkManager", "zoom greater than nr of LODs")
-            zoom = nrOfLODs-1
+    fun update(viewport: Pair<p2, p2>, camzoom: Float): ChunkUpdateResult {
+        if(camzoom > zoomCutoff) {
+            synchronized(chunks){
+                chunks.clear()
+            }
+            return ChunkUpdateResult.NOTHING
         }
+        val newZoomLevel = ceil(log((camzoom/maxzoom), factor)).toInt()
+        zoomLevel = maxOf(0,minOf(nrOfLODs-1,newZoomLevel))
 
         //calculate which indices should be loaded
         //xmin..xmax through ymin..ymax are in the viewport
-        xmin = maxOf(0,((viewport.first.first - bmin.first)/(bmax.first - bmin.first)*nrCuts[zoom]).toInt())
-        xmax = minOf(nrCuts[zoom]-1, ((viewport.second.first - bmin.first)/(bmax.first - bmin.first)*nrCuts[zoom]).toInt())
-        ymin = maxOf(0, ((viewport.first.second - bmin.second)/(bmax.second - bmin.second)*nrCuts[zoom]).toInt())
-        ymax = minOf(nrCuts[zoom]-1, ((viewport.second.second - bmin.second)/(bmax.second - bmin.second)*nrCuts[zoom]).toInt())
+        val width = viewport.second.first - viewport.first.first
+        val height = viewport.second.second - viewport.first.second
+        xmin = maxOf(0,((viewport.first.first - bmin.first - extraRenderFac * width)/(bmax.first - bmin.first)*nrCuts[zoomLevel]).toInt())
+        xmax = minOf(nrCuts[zoomLevel]-1, ((viewport.second.first - bmin.first + extraRenderFac * width)/(bmax.first - bmin.first)*nrCuts[zoomLevel]).toInt())
+        ymin = maxOf(0, ((viewport.first.second - bmin.second - extraRenderFac * height)/(bmax.second - bmin.second)*nrCuts[zoomLevel]).toInt())
+        ymax = minOf(nrCuts[zoomLevel]-1, ((viewport.second.second - bmin.second + extraRenderFac * height)/(bmax.second - bmin.second)*nrCuts[zoomLevel]).toInt())
 
-        //only update chunks if camera has been still for a while
-        if(chunksChanged(zoom)) {
-            Logger.log(LogType.Event, "ChunkManager", "camera moved, not updating chunks")
-            cancelCurrentLoading()
-            upToDate = false
-            lastViewport = viewport
-            lastZoom = zoom
+        val chunksChanged = chunksChanged()
+        lastViewport = viewport
+        lastZoomLevel = zoomLevel
+
+        if(chunksChanged) {
+            val activeChunks = getActiveChunks()
+            addChunks(activeChunks, camzoom, viewport)
+            Logger.log(LogType.Info, "ChunkManager", "0")
             return ChunkUpdateResult.LOADING
         }
-        lastViewport = viewport
-        lastZoom = zoom
 
         if(loading){
-            return ChunkUpdateResult.LOADING
-        }
-
-        if(!upToDate) {
-            val activeChunks = getActiveChunks(zoom)
-            addChunks(activeChunks, zoom)
-
-            for (index in activeChunks)
-                if (!chunks.containsKey(index))
-                    Logger.log(LogType.Event, "ChunkManager", "loading $index")
+            Logger.log(LogType.Info, "ChunkManager", "1")
             return ChunkUpdateResult.LOADING
         }
 
         if(changed) {
             changed = false
+            Logger.log(LogType.Info, "ChunkManager", "2")
             return ChunkUpdateResult.REDRAW
         }
 
+        Logger.log(LogType.Info, "ChunkManager", "3")
         return ChunkUpdateResult.NOTHING
     }
 
@@ -141,85 +112,109 @@ class ChunkManager(
     chunkIndices: the chunks to load
     zoom: the current zoom level
      */
-    private fun addChunks(chunkIndices: List<ChunkIndex>, zoom: Int){
+    private fun addChunks(chunkIndices: List<ChunkIndex>, camzoom: Float, viewport: Pair<p2,p2>){
         loading = true
 
-        //make a thread for every chunk to be loaded
-        val loadedChunks: MutableList<Chunk?> = MutableList(chunkIndices.size){null}
-        chunkLoaders = List(chunkIndices.size) {i ->
-            val chunkIndex = chunkIndices[i]
-            val job = GlobalScope.launch {
-                if(!chunks.containsKey(chunkIndex)) {
-                    val c: Chunk = chunkGetter.getChunk(chunkIndex)
-                    loadedChunks[i] = c
-                }
-            }
-            val pair = Pair(chunkIndex,job)
-            pair
-        }
-
-        chunksLoadedListener = GlobalScope.launch{
-            //wait until all chunks are loaded
-            for((_,job) in chunkLoaders) {
-                job.join()
-            }
-
+        chunkLoader?.cancel()
+        chunkLoader = GlobalScope.launch{
+            chunkloaderName = Thread.currentThread().name
             synchronized(chunks) {
-                //remove outdated chunks
-                chunks.keys.removeAll{index ->
-                    val res = !shouldGetLoaded(index, zoom)
-                    if(res)Logger.log(LogType.Continuous, "ChunkManager", "chunk $index should not be loaded")
-                    else Logger.log(LogType.Continuous, "ChunkManager", "chunk $index stays loaded")
-                    res
-                }
-                //add new chunks
-                for (i in chunkLoaders.indices) {
-                    val index = chunkIndices[i]
-                    val chunk = loadedChunks[i] ?: continue
-                    chunks[index] = chunk
-                    Logger.log(LogType.Event, "ChunkManager", "loaded chunk $index")
-                }
-                changed = true
-                upToDate = true
-                loading = false
+                clearUnusedChunks(camzoom)
             }
+
+            for(i in chunkIndices.indices){
+                val chunkIndex = chunkIndices[i]
+                if(!chunks.containsKey(chunkIndex)) {
+                    if(shouldGetLoaded(chunkIndex, camzoom)) {
+                        val c: Chunk = chunkGetter.getChunk(chunkIndex)
+                        synchronized(chunks) {
+                            chunks[chunkIndex] = c
+                        }
+                        Logger.log(LogType.Info, "ChunkManager", "loaded chunk $chunkIndex")
+                    }
+                }
+            }
+
+            if(Thread.currentThread().name != chunkloaderName) {
+                return@launch
+            }
+            synchronized(chunks) {
+                clearUnusedChunks(camzoom)
+            }
+
+            changed = true
+            loading = false
         }
     }
 
-    //all chunks that should currently be active
-    private fun getActiveChunks(zoom: Int): List<ChunkIndex>{
+    private fun clearUnusedChunks(camzoom: Float){
+        chunks.keys.removeAll { index ->
+            !shouldGetLoaded(index, camzoom)
+        }
+    }
+
+    //all chunks that should currently be active, in a spiral pattern
+    private fun getActiveChunks(): List<ChunkIndex>{
         val res:MutableList<ChunkIndex> = mutableListOf()
-        for(x in xmin..xmax) for(y in ymin..ymax){
-            res.add(ChunkIndex(x,y,zoom))
+        val nrrings = maxOf((xmax+1-xmin)/2f + 1, (ymax+1-ymin)/2f + 1).toInt()
+        val midx = (xmax+xmin)/2
+        val midy = (ymax+ymin)/2
+        res.add(ChunkIndex(midx,midy,zoomLevel))
+        for(ring in 1 until nrrings){
+            val left = maxOf(xmin,midx-ring)
+            val leftok = left == midx-ring
+            val right = minOf(xmax, midx+ring)
+            val rightok = right == midx+ring
+            val bot = maxOf(ymin,midy-ring)
+            val botok = bot == midy-ring
+            val top = minOf(ymax,midy+ring)
+            val topok = top == midy+ring
+
+            if(topok) {
+                for (x in left + 1..right - 1) {
+                    res.add(ChunkIndex(x, top, zoomLevel))
+                }
+            }
+            if(rightok||topok)res.add(ChunkIndex(right, top, zoomLevel))
+
+            if(rightok) {
+                for (y in top - 1 downTo bot + 1) {
+                    res.add(ChunkIndex(right, y, zoomLevel))
+                }
+            }
+            if(rightok||botok)res.add(ChunkIndex(right, bot, zoomLevel))
+
+            if(botok){
+                for(x in right-1 downTo left+1){
+                    res.add(ChunkIndex(x, bot, zoomLevel))
+                }
+            }
+            if(leftok||botok)res.add(ChunkIndex(left, bot, zoomLevel))
+
+            if(leftok){
+                for(y in bot+1..top-1){
+                    res.add(ChunkIndex(left, y, zoomLevel))
+                }
+            }
+            if(leftok || topok) res.add(ChunkIndex(left, top, zoomLevel))
         }
         return res
     }
 
     //whether a chunk should be loaded witht he current viewport and zoom
-    private fun shouldGetLoaded(chunkIndex: ChunkIndex, zoom: Int): Boolean{
+    private fun shouldGetLoaded(chunkIndex: ChunkIndex, camzoom: Float): Boolean{
         val (x,y,z) = chunkIndex
-        return z == zoom && x >= xmin && y >= ymin && x <= xmax && y <= ymax
+        return camzoom < zoomCutoff && z == zoomLevel && x >= xmin && y >= ymin && x <= xmax && y <= ymax
     }
 
     //whether the chunks have changed since last upate call
-    private fun chunksChanged( zoom: Int): Boolean {
-        val lastxmin = maxOf(
-            0,
-            ((lastViewport.first.first - bmin.first) / (bmax.first - bmin.first) * nrCuts[zoom]).toInt()
-        )
-        val lastxmax = minOf(
-            nrCuts[zoom] - 1,
-            ((lastViewport.second.first - bmin.first) / (bmax.first - bmin.first) * nrCuts[zoom]).toInt()
-        )
-        val lastymin = maxOf(
-            0,
-            ((lastViewport.first.second - bmin.second) / (bmax.second - bmin.second) * nrCuts[zoom]).toInt()
-        )
-        val lastymax = minOf(
-            nrCuts[zoom] - 1,
-            ((lastViewport.second.second - bmin.second) / (bmax.second - bmin.second) * nrCuts[zoom]).toInt()
-        )
-
-        return zoom != lastZoom || xmin != lastxmin || xmax != lastxmax || ymin != lastymin || ymax != lastymax
+    private fun chunksChanged(): Boolean {
+        val width = lastViewport.second.first - lastViewport.first.first
+        val height = lastViewport.second.second - lastViewport.first.second
+        val lastxmin = maxOf(0, ((lastViewport.first.first - bmin.first - extraRenderFac * width) / (bmax.first - bmin.first) * nrCuts[zoomLevel]).toInt())
+        val lastxmax = minOf(nrCuts[zoomLevel] - 1, ((lastViewport.second.first - bmin.first + extraRenderFac * width) / (bmax.first - bmin.first) * nrCuts[zoomLevel]).toInt())
+        val lastymin = maxOf(0, ((lastViewport.first.second - bmin.second - extraRenderFac * height) / (bmax.second - bmin.second) * nrCuts[zoomLevel]).toInt())
+        val lastymax = minOf(nrCuts[zoomLevel] - 1, ((lastViewport.second.second - bmin.second + extraRenderFac * height) / (bmax.second - bmin.second) * nrCuts[zoomLevel]).toInt())
+        return zoomLevel != lastZoomLevel || xmin != lastxmin || xmax != lastxmax || ymin != lastymin || ymax != lastymax
     }
 }

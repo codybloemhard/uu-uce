@@ -11,8 +11,6 @@
         android:id="@+id/customMap"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clickable="true"
-        android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -24,12 +22,26 @@
         android:id="@+id/heightline_diff_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginBottom="38dp"
+        android:layout_marginStart="5dp"
+        android:paddingBottom="2dp"
         android:fontFamily="@font/roboto_bold"
-        android:text="@string/geomap_heightline_diff_text"
+        android:text="@string/geomap_default_distance"
+        android:textSize="12sp"
         android:textColor="@color/TextDarkGrey"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.uu_uce.mapOverlay.ScaleWidget
+        android:id="@+id/scaleWidget"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:paddingBottom="2dp"
+        android:text="@string/geomap_default_distance"
+        android:fontFamily="@font/roboto_bold"
+        android:textSize="12sp"
+        android:textColor="@color/TextDarkGrey"
+        app:layout_constraintBottom_toTopOf="@id/heightline_diff_text"
         app:layout_constraintStart_toStartOf="parent" />
 
     <com.uu_uce.views.Menu
@@ -289,12 +301,25 @@
         android:id="@+id/center_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="38dp"
-        android:src="@drawable/ic_sprite_center"
-        app:backgroundTint="#FFFFFF"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        android:src="@drawable/ic_sprite_center"
+        app:backgroundTint="#FFFFFF"
+        app:elevation="5dp"
+        android:elevation="5dp"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/legend_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="2dp"
+        app:layout_constraintBottom_toTopOf="@id/center_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:src="@android:drawable/ic_menu_mapmode"
+        app:backgroundTint="#FFFFFF"
         app:elevation="5dp"
         android:elevation="5dp"/>
 

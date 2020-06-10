@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Point
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.*
@@ -12,6 +13,7 @@ import android.widget.PopupWindow
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.marginBottom
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.allpins.PinData
@@ -20,10 +22,9 @@ import com.uu_uce.allpins.parsePins
 import com.uu_uce.misc.ListenableBoolean
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
+import com.uu_uce.pins.openImageView
 import com.uu_uce.services.*
-import com.uu_uce.shapefiles.HeightLineReader
-import com.uu_uce.shapefiles.LayerType
-import com.uu_uce.shapefiles.PolygonReader
+import com.uu_uce.shapefiles.*
 import com.uu_uce.views.DragStatus
 import com.uu_uce.views.pinsUpdated
 import kotlinx.android.synthetic.main.activity_geo_map.*
@@ -32,6 +33,8 @@ import org.jetbrains.annotations.TestOnly
 import java.io.File
 
 var needsReload = ListenableBoolean()
+
+const val defaultLineWidth = 1f
 
 //main activity in which the map and menu are displayed
 class GeoMap : AppCompatActivity() {
@@ -48,6 +51,8 @@ class GeoMap : AppCompatActivity() {
     private lateinit var progressBar : ProgressBar
 
     private lateinit var maps : List<String>
+
+    private var styles: List<Style> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Set logger settings
@@ -198,6 +203,11 @@ class GeoMap : AppCompatActivity() {
             }
         }
 
+        // Set legend button
+        legend_button.setOnClickListener{
+            openLegend()
+        }
+
         needsReload.setListener(object : ListenableBoolean.ChangeListener {
             override fun onChange() {
                 if(needsReload.getValue()){
@@ -205,6 +215,12 @@ class GeoMap : AppCompatActivity() {
                 }
             }
         })
+        
+        customMap.post {
+            scaleWidget.post {
+                scaleWidget.setScreenWidth(customMap.width)
+            }
+        }
 
         started = true
     }
@@ -260,6 +276,14 @@ class GeoMap : AppCompatActivity() {
         else{
             menu.setScreenHeight(customMap.height, dragBar.height, 0, lower_menu_layout.height)
         }
+        val heightlineY = menu.downY - heightline_diff_text.height - heightline_diff_text.marginBottom - heightline_diff_text.paddingBottom
+        val centerY = menu.downY - center_button.height - center_button.marginBottom - center_button.paddingBottom
+        val scaleY = heightlineY - scaleWidget.height - scaleWidget.marginBottom - scaleWidget.paddingBottom
+        val legendY = centerY - legend_button.height - legend_button.marginBottom - legend_button.paddingBottom
+        heightline_diff_text.y = heightlineY
+        center_button.y = centerY
+        scaleWidget.y = scaleY
+        legend_button.y = legendY
     }
 
     // Respond to permission request result
@@ -291,29 +315,32 @@ class GeoMap : AppCompatActivity() {
         customMap.removeLayers(toggle_layer_layout)
 
         val mydir = File(getExternalFilesDir(null)?.path + "/Maps/")
+
+        try{readStyles(mydir)}
+        catch(e: Exception){Logger.error("GeoMap", "no style file available: "+ e.message)}
+        try {
+            val polygons = File(mydir, "Polygons")
+            customMap.addLayer(
+                LayerType.Water,
+                PolygonReader(polygons, true, styles),
+                toggle_layer_layout,
+                0.5f,
+                size
+            )
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
+        }catch(e: Exception){
+            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
+        }
         try {
             val heightlines = File(mydir, "Heightlines")
             customMap.addLayer(
                 LayerType.Height,
                 HeightLineReader(heightlines),
                 toggle_layer_layout,
-                true,
+                Float.MAX_VALUE,
                 size
             )
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
-        }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
-        }
-        try {
-            val polygons = File(mydir, "Polygons")
-            customMap.addLayer(
-                LayerType.Water,
-                PolygonReader(polygons),
-                toggle_layer_layout,
-                false,
-                size
-            )
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
         }catch(e: Exception){
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
@@ -322,18 +349,37 @@ class GeoMap : AppCompatActivity() {
         customMap.initializeCamera()
 
         //more menu initialization which needs its width/height
-        menu.post{
-            initMenu()
+        scaleWidget.post {
+            menu.post {
+                initMenu()
+            }
         }
 
-        customMap.setCameraWAspect()
+        //customMap.setCameraWAspect()
         needsReload.setValue(false)
         customMap.redrawMap()
     }
+    private fun readStyles(dir: File){
+        val file = File(dir, "styles")
+        val reader = FileReader(file)
+
+        val nrStyles = reader.readULong()
+        styles = List(nrStyles.toInt()) {
+            val outline = reader.readUByte()
+            val b = reader.readUByte()
+            val g = reader.readUByte()
+            val r = reader.readUByte()
+
+            Style(outline.toInt() == 1, floatArrayOf(
+                r.toFloat()/255,
+                g.toFloat()/255,
+                b.toFloat()/255
+            ))
+        }
+    }
+
 
     private fun openProgressPopup(currentView: View){
-        val layoutInflater = layoutInflater
-
         // Build an custom view (to be inflated on top of our current view & build it's popup window)
         val customView = layoutInflater.inflate(R.layout.progress_popup, geoMapLayout, false)
 
@@ -347,6 +393,12 @@ class GeoMap : AppCompatActivity() {
 
         // Open popup
         popupWindow?.showAtLocation(currentView, Gravity.CENTER, 0, 0)
+    }
+
+    private fun openLegend(){
+        val uri = getExternalFilesDir(null)?.path + File.separator + mapsFolderName + File.separator + legendName
+
+        openImageView(this, Uri.parse(uri), "Legend")
     }
 
     @TestOnly

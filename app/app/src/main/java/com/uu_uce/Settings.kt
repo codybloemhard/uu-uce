@@ -30,9 +30,10 @@ import kotlin.math.min
 const val defaultPinSize = 60
 const val defaultUnlockRange = 100
 var needsRestart = false
-const val mapsName = "cb4d4e19-ee36-4dfa-bfc4-2cd2fb3ff4bc.zip"
+const val mapsName = "50016551-7038-4305-b717-17bd9f93fb34.zip"
 const val mapsFolderName = "Maps"
 const val contentFolderName = "PinContent"
+const val legendName = "legend.png"
 const val pinDatabaseFile = "ac3447db-278e-4fd8-ad78-a0c3075b12df.json"
 
 class Settings : AppCompatActivity() {
@@ -48,7 +49,6 @@ class Settings : AppCompatActivity() {
 
     private lateinit var sharedPref : SharedPreferences
     private lateinit var pinViewModel: PinViewModel
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         sharedPref = getDefaultSharedPreferences(this)

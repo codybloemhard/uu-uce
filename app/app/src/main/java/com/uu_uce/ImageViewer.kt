@@ -8,6 +8,8 @@ import android.graphics.PorterDuff
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.ViewTreeObserver
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +17,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.preference.PreferenceManager
 import com.github.chrisbanes.photoview.PhotoView
 import com.github.chrisbanes.photoview.PhotoViewAttacher
+
 
 class ImageViewer : AppCompatActivity() {
 
@@ -44,7 +47,9 @@ class ImageViewer : AppCompatActivity() {
         // Load image
         val imageViewer = findViewById<PhotoView>(R.id.image_photoview)
         imageViewer.setImageURI(intent.getParcelableExtra("uri"))
-        PhotoViewAttacher(imageViewer)
+        val attacher = PhotoViewAttacher(imageViewer)
+        attacher.maximumScale = 5f
+        attacher.maximumScale = 20f
 
         val color =
             if(sharedPref.getBoolean("com.uu_uce.DARKMODE", false))

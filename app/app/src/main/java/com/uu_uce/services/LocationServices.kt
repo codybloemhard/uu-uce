@@ -35,7 +35,7 @@ enum class LocationPollStartResult{
     }
 }
 
-data class UTMCoordinate(val zone : Int, val letter : Char, val east : Double, val north : Double)
+data class UTMCoordinate(val zone : Int, val letter : Char, val east : Float, val north : Float)
 {
     override fun toString(): String {
         return  "$zone" +
@@ -53,9 +53,9 @@ data class UTMCoordinate(val zone : Int, val letter : Char, val east : Double, v
     }
 }
 
-fun calculateDistance(location1 : UTMCoordinate, location2 : UTMCoordinate) : Double {
+fun calculateDistance(location1 : UTMCoordinate, location2 : UTMCoordinate) : Float {
     // TODO: Make this work over multiple zones : https://gis.stackexchange.com/questions/151505/measuring-distances-when-crossing-utm-zones
-    return abs(((location1.east - location2.east).pow(2) + (location1.north - location2.north).pow(2)).pow(0.5))
+    return abs(((location1.east - location2.east).pow(2) + (location1.north - location2.north).pow(2)).pow(0.5f))
 }
 
 /*
@@ -72,7 +72,7 @@ fun degreeToUTM(degPos : p2) : UTMCoordinate{
     val lon = degPos.second
 
     val zone = floor(lon / 6 + 31).toInt()
-    val letter = latToUTMLetter(lat)
+    val letter = latToUTMLetter(lat.toDouble())
 
     val deg = Math.PI / 180
 
@@ -110,7 +110,7 @@ fun degreeToUTM(degPos : p2) : UTMCoordinate{
     if (letter < 'M') northing += 10000000
     northing = (northing * 100).roundToInt() * 0.01
 
-    return UTMCoordinate(zone, letter, easting, northing)
+    return UTMCoordinate(zone, letter, easting.toFloat(), northing.toFloat())
 }
 
 fun latToUTMLetter(lat: Double): Char{
@@ -194,7 +194,7 @@ class LocationServices{
             override fun onLocationChanged(location: Location?) {
                 if (location != null) {
                     lastKnownLocation = location
-                    action(Pair(location.latitude, location.longitude))
+                    action(Pair(location.latitude.toFloat(), location.longitude.toFloat()))
                     Logger.log( LogType.Event,
                         "LocationServices",
                         "Latitude : " + location.latitude
@@ -255,7 +255,7 @@ class LocationServices{
         fun startLocUpdates(provider : String){
             locationManager.requestLocationUpdates(provider, pollTimeMs, minDist, locationListener)
             if(locationManager.getLastKnownLocation(provider) != null)
-                action(Pair(locationManager.getLastKnownLocation(provider).latitude, locationManager.getLastKnownLocation(provider).longitude))
+                action(Pair(locationManager.getLastKnownLocation(provider).latitude.toFloat(), locationManager.getLastKnownLocation(provider).longitude.toFloat()))
             networkRunning = true
             networkProvider = provider
         }

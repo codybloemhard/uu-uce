@@ -719,10 +719,10 @@ class FieldbookEditor: AppCompatActivity() {
         location: Location?
     ) {
         val utm = if(location == null){
-            UTMCoordinate(0, 'N', 0.0, 0.0).toString()
+            UTMCoordinate(0, 'N', 0.0f, 0.0f).toString()
         }
         else{
-            degreeToUTM(Pair(location.latitude,location.longitude)).toString()
+            degreeToUTM(Pair(location.latitude.toFloat(),location.longitude.toFloat())).toString()
         }
 
         FieldbookEntry(

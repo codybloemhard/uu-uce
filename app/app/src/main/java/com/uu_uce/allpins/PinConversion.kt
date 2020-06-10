@@ -23,8 +23,8 @@ class PinConversion(val activity: Activity){
             return UTMCoordinate(
                 s.elementAt(0).value.toInt(),
                 s.elementAt(1).value.first(),
-                s.elementAt(2).value.toDouble(),
-                s.elementAt(4).value.toDouble())
+                s.elementAt(2).value.toFloat(),
+                s.elementAt(4).value.toFloat())
         }
     }
 
@@ -123,7 +123,7 @@ class PinConversion(val activity: Activity){
             stringToIds(pinData.followIds),
             viewModel
         )
-        pin.getContent().parent = pin
+        pin.content.parent = pin
         return pin
     }
 
@@ -140,7 +140,7 @@ class PinConversion(val activity: Activity){
             listOf(),
             viewModel
         ).apply {
-            getContent().parent = this
+            content.parent = this
         }
     }
 }

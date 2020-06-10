@@ -33,19 +33,18 @@ import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 import kotlin.math.roundToInt
 
-
-class Pin(
+open class Pin(
     var id                      : String = "",
     var coordinate              : UTMCoordinate,
-    private var title           : String,
-    private var content         : PinContent,
-    private var background      : Bitmap,
-    private var icon            : Drawable,
-    private var status          : Int,              //-1 : recalculating, 0 : locked, 1 : unlocked, 2 : completed
-    private var predecessorIds  : List<String>,
-    private var followIds       : List<String>,
-    private val viewModel       : ViewModel
-) {
+    var title           : String,
+    var content         : PinContent,
+    protected var background      : Bitmap,
+    protected var icon            : Drawable,
+    var status          : Int,              //-1 : recalculating, 0 : locked, 1 : unlocked, 2 : completed
+    protected var predecessorIds  : List<String>,
+    protected var followIds       : List<String>,
+    protected val viewModel       : ViewModel
+){
     // Used to determine if warning should show when closing pin
     private var madeProgress = false
 
@@ -181,7 +180,7 @@ class Pin(
         backgroundHandle = loadTexture(background)
     }
 
-    fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2,p2>, width : Int, height : Int, view: View) {
+    open fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2,p2>, width : Int, height : Int, view: View) {
 
         val screenLocation: Pair<Float, Float> = coordToScreen(coordinate, viewport, view.width, view.height)
 
@@ -208,11 +207,9 @@ class Pin(
         inScreen = true
 
         // Set boundingbox for pin tapping
-        boundingBox = Pair(p2(minX.toDouble(), minY.toDouble()), p2(maxX.toDouble(), maxY.toDouble()))
+        boundingBox = Pair(p2(minX.toFloat(), minY.toFloat()), p2(maxX.toFloat(), maxY.toFloat()))
 
         if(!this::vertexBuffer.isInitialized) return
-
-        val color = floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f)
 
         GLES20.glUseProgram(program)
 
@@ -231,24 +228,24 @@ class Pin(
         val pinScaleHandle = GLES20.glGetUniformLocation(program, "pinScale")
         GLES20.glUniform2fv(pinScaleHandle, 1, pinScale, 0)
 
+        val color = floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f)
         val colorHandle = GLES20.glGetUniformLocation(program, "vColor")
         GLES20.glUniform4fv(colorHandle, 1, color, 0)
 
-        val textureUniformHandle = GLES20.glGetAttribLocation(program, "u_Texture")
         val textureCoordinateHandle = GLES20.glGetAttribLocation(program, "a_TexCoordinate")
+        GLES20.glVertexAttribPointer(textureCoordinateHandle, 2, GLES20.GL_FLOAT, false, 0, cubeCoordsBuffer)
+        GLES20.glEnableVertexAttribArray(textureCoordinateHandle)
 
+        val textureUniformHandle = GLES20.glGetAttribLocation(program, "u_Texture")
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
-
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, backgroundHandle)
         GLES20.glUniform1i(textureUniformHandle, 0)
 
-        cubeCoordsBuffer.position(0)
-        GLES20.glVertexAttribPointer(textureCoordinateHandle, 2, GLES20.GL_FLOAT, false, 0, cubeCoordsBuffer)
-        GLES20.glEnableVertexAttribArray(textureCoordinateHandle)
 
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, drawOrder.size, GLES20.GL_UNSIGNED_SHORT, indexBuffer)
 
         GLES20.glDisableVertexAttribArray(positionHandle)
+        GLES20.glDisableVertexAttribArray(textureCoordinateHandle)
     }
 
     // Check if pin should be unlocked
@@ -312,7 +309,7 @@ class Pin(
                     }
 
                     if(LocationServices.lastKnownLocation != null && status == 1 && !containsQuiz){
-                        val dist = calculateDistance(degreeToUTM(p2(LocationServices.lastKnownLocation!!.latitude, LocationServices.lastKnownLocation!!.longitude)), coordinate)
+                        val dist = calculateDistance(degreeToUTM(p2(LocationServices.lastKnownLocation!!.latitude.toFloat(), LocationServices.lastKnownLocation!!.longitude.toFloat())), coordinate)
                         val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity)
                         completeRange = sharedPref.getInt("com.uu_uce.UNLOCKRANGE", 100)
                         if(dist < completeRange){
@@ -498,22 +495,6 @@ class Pin(
         }
     }
 
-    fun getTitle(): String {
-        return title
-    }
-
-    fun getContent(): PinContent {
-        return content
-    }
-
-    fun setStatus(newStatus: Int) {
-        status = newStatus
-    }
-
-    fun getStatus(): Int {
-        return status
-    }
-
     private fun loadTexture(bitmap: Bitmap): Int {
         val textureHandle = IntArray(1)
         GLES20.glGenTextures(1, textureHandle, 0)
@@ -551,3 +532,31 @@ class Pin(
     }
 }
 
+class MergedPin(
+    id                      : String = "",
+    coordinate              : UTMCoordinate,
+    title           : String,
+    content         : PinContent,
+    background      : Bitmap,
+    icon            : Drawable,
+    status          : Int,              //-1 : recalculating, 0 : locked, 1 : unlocked, 2 : completed
+    predecessorIds  : List<String>,
+    followIds       : List<String>,
+    viewModel       : ViewModel
+): Pin(id,coordinate,title,content,background,icon,status,predecessorIds,followIds,viewModel) {
+    val pins: MutableList<Pin> = mutableListOf()
+
+    override fun draw(
+        program: Int,
+        scale: FloatArray,
+        trans: FloatArray,
+        viewport: Pair<p2, p2>,
+        width: Int,
+        height: Int,
+        view: View
+    ) {
+        for(pin in pins){
+            pin.draw(program,scale,trans,viewport,width,height,view)
+        }
+    }
+}

@@ -26,7 +26,7 @@ class SingleTapper(
     }
 
     override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
-        action(Pair((e?.x ?: 0.0f).toDouble(), (e?.y ?: 0.0f).toDouble()), parent)
+        action(Pair((e?.x ?: 0.0f), (e?.y ?: 0.0f)), parent)
         return true
     }
 
