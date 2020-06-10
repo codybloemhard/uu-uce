@@ -388,7 +388,9 @@ class CustomMap : ViewTouchParent {
     }
 
     private fun updatePins(){
-        pins = mutableMapOf()
+        synchronized(pins) {
+            pins = mutableMapOf()
+        }
         pinStatuses = mutableMapOf()
         pinViewModel.reloadPins { newPinData -> updatePinStatuses(newPinData) }
         pinsUpdated.setValue(false)
