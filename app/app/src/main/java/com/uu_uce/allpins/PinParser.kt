@@ -7,7 +7,7 @@ import java.io.FileReader
 import java.lang.Exception
 
 
-fun parsePins(pinFile : File) : List<PinData> {
+fun parsePins(pinFile : File) : List<PinData>? {
     val reader = JsonReader(FileReader(pinFile))
     val pinList = mutableListOf<PinData>()
 
@@ -26,7 +26,7 @@ fun parsePins(pinFile : File) : List<PinData> {
     }
     catch(e : Exception){
         e.printStackTrace()
-        return listOf()
+        return null
     }
 }
 
