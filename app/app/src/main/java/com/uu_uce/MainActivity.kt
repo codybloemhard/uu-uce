@@ -62,8 +62,14 @@ class MainActivity : TouchParent() {
                             Toast.makeText(this, getString(R.string.login_serverdown), Toast.LENGTH_LONG).show()
                         }
                     }
+                    else -> {
+                        openLogin()
+                    }
                 }
             }
+        }
+        else{
+            openLogin()
         }
     }
 

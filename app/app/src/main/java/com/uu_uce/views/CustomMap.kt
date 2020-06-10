@@ -363,7 +363,9 @@ class CustomMap : ViewTouchParent {
                     val newPin = PinConversion(activity).pinDataToPin(pin, pinViewModel)
                     newPin.tryUnlock {
                         Logger.log(LogType.Info, "CustomMap", "Adding pin")
-                        pins[pin.pinId] = newPin
+                        synchronized(pins){
+                            pins[pin.pinId] = newPin
+                        }
                         pinStatuses[newPin.id] = pin.status
                     }
                     newPin.tapAction = {activity: Activity -> (newPin::openContent)(this,activity) {activePopup = null}}
