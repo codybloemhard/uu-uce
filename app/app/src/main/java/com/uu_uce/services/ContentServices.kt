@@ -87,24 +87,24 @@ fun getFiles (
     sharedPref = PreferenceManager.getDefaultSharedPreferences(activity)
     val serverURL = sharedPref.getString("com.uu_uce.SERVER_IP", "").toString()
     val networkDownloadAllowed = sharedPref.getBoolean("com.uu_uce.NETWORK_DOWNLOADING", false)
-    if (!wifiManager!!.isWifiEnabled && !networkDownloadAllowed){
+    if (!wifiManager!!.isWifiEnabled && !networkDownloadAllowed) {
         Toast.makeText(activity, activity.getString(R.string.contentservices_nowifi_downloadblock), Toast.LENGTH_LONG).show()
         onCompleteAction(false)
         return
     }
-    for(filePath in requiredFilePaths){
-        jobList.add(GlobalScope.launch{
-            activity.runOnUiThread{
-                Toast.makeText(activity, activity.getString(R.string.contentservices_downloading), Toast.LENGTH_SHORT).show()
-            }
+    activity.runOnUiThread {
+        Toast.makeText(activity, activity.getString(R.string.contentservices_downloading), Toast.LENGTH_SHORT).show()
+    }
+    for (filePath in requiredFilePaths) {
+        jobList.add(GlobalScope.launch {
             val success = downloadFile(
                 URL(serverURL + downloadURL + filePath.second), filePath.first, progressAction)
-            if(!success) allSucceed = false
+            if (!success) allSucceed = false
         })
     }
 
-    GlobalScope.launch{
-        for(job in jobList){
+    GlobalScope.launch {
+        for (job in jobList) {
             job.join()
         }
         onCompleteAction(allSucceed)
