@@ -53,9 +53,9 @@ data class UTMCoordinate(val zone : Int, val letter : Char, val east : Float, va
     }
 }
 
-fun calculateDistance(location1 : UTMCoordinate, location2 : UTMCoordinate) : Double {
+fun calculateDistance(location1 : UTMCoordinate, location2 : UTMCoordinate) : Float {
     // TODO: Make this work over multiple zones : https://gis.stackexchange.com/questions/151505/measuring-distances-when-crossing-utm-zones
-    return abs(((location1.east - location2.east).pow(2) + (location1.north - location2.north).pow(2)).pow(0.5))
+    return abs(((location1.east - location2.east).pow(2) + (location1.north - location2.north).pow(2)).pow(0.5f))
 }
 
 /*
