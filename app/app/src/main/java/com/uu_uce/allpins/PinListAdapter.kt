@@ -21,6 +21,7 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mikhaellopez.circleview.CircleView
 import com.uu_uce.R
+import com.uu_uce.misc.Logger
 
 class PinListAdapter internal constructor(
     private val activity: Activity
@@ -82,7 +83,11 @@ class PinListAdapter internal constructor(
             "IMAGE"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image, null) ?: error ("Image not found")
             "VIDEO"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video, null) ?: error ("Image not found")
             "MCQUIZ"    -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz, null) ?: error ("Image not found")
-            else -> error("Missing drawable")
+            "TASK"    -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null) ?: error ("Image not found")
+            else -> {
+                Logger.error("PinlistAdapter", "Unknown type")
+                ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null) ?: error ("Image not found")
+            }
         }
 
         val color =
