@@ -34,7 +34,7 @@ const val mapsName = "50016551-7038-4305-b717-17bd9f93fb34.zip"
 const val mapsFolderName = "Maps"
 const val contentFolderName = "PinContent"
 const val legendName = "legend.png"
-const val pinDatabaseFile = "4da6aae3-5287-45f2-985f-01fdc27a3fbf.json"
+const val pinDatabaseFile = "ac3447db-278e-4fd8-ad78-a0c3075b12df.json"
 
 class Settings : AppCompatActivity() {
     // private variables
@@ -49,7 +49,6 @@ class Settings : AppCompatActivity() {
 
     private lateinit var sharedPref : SharedPreferences
     private lateinit var pinViewModel: PinViewModel
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         sharedPref = getDefaultSharedPreferences(this)

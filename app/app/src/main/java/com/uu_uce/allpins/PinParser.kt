@@ -41,7 +41,7 @@ private fun parsePin(reader: JsonReader) : PinData? {
             "type"          -> type             = reader.nextString()
             "status"        -> status           = reader.nextInt()
             "difficulty"    -> difficulty       = reader.nextInt()
-            "location_utm"  -> location         = reader.nextString()
+            "location"      -> location         = reader.nextString()
             "pred_id"       -> predecessorIds   = reader.nextString()
             "succ_id"       -> followIds        = reader.nextString()
             "content"       -> content          = reader.nextString()
