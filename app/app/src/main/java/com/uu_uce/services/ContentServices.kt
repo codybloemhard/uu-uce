@@ -16,6 +16,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.*
+import java.lang.Exception
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.zip.ZipEntry
@@ -74,7 +75,13 @@ activity: The activity from which this function is called.
 onCompleteAction : A function to be executed when all files are present.
 It will download all files and start onCompleteAction.
  */
-fun getFiles (requiredFilePaths : List<Pair<String, String>>, activity: Activity, onCompleteAction : ((success : Boolean) -> Unit) = {}, progressAction : (Int) -> Unit = {}) {
+fun getFiles (
+    requiredFilePaths : List<Pair<String, String>>,
+    activity: Activity,
+    onCompleteAction : ((success : Boolean) -> Unit) = {},
+    progressAction : (Int) -> Unit = {}
+) {
+    var allSucceed = true
     val jobList : MutableList<Job> = mutableListOf()
     val wifiManager = activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager?
     sharedPref = PreferenceManager.getDefaultSharedPreferences(activity)
@@ -90,8 +97,9 @@ fun getFiles (requiredFilePaths : List<Pair<String, String>>, activity: Activity
             activity.runOnUiThread{
                 Toast.makeText(activity, activity.getString(R.string.contentservices_downloading), Toast.LENGTH_SHORT).show()
             }
-            downloadFile(
+            val success = downloadFile(
                 URL(serverURL + downloadURL + filePath.second), filePath.first, progressAction)
+            if(!success) allSucceed = false
         })
     }
 
@@ -99,7 +107,7 @@ fun getFiles (requiredFilePaths : List<Pair<String, String>>, activity: Activity
         for(job in jobList){
             job.join()
         }
-        onCompleteAction(true)
+        onCompleteAction(allSucceed)
     }
 }
 
@@ -108,35 +116,42 @@ Downloads specified file from URL.
 targetUrl: The URL from which a file needs to be downloaded
 fileDestination: The filepath to which the downloaded file will be downloaded.
  */
-fun downloadFile(targetUrl : URL, fileDestination : String, progressAction : (Int) -> Unit = {}) {
-    with(targetUrl.openConnection() as HttpURLConnection) {
-        requestMethod = "GET"
+fun downloadFile(targetUrl : URL, fileDestination : String, progressAction : (Int) -> Unit = {}) : Boolean {
+    try{
+        with(targetUrl.openConnection() as HttpURLConnection) {
+            requestMethod = "GET"
 
-        Logger.log(LogType.Event, "ContentServices", "\nSent 'GET' request to URL : $targetUrl; Response Code : $responseCode")
+            Logger.log(LogType.Event, "ContentServices", "\nSent 'GET' request to URL : $targetUrl; Response Code : $responseCode")
 
-        inputStream.use { inputStream ->
-            val splitPath = fileDestination.split('/')
-            val folder = File(splitPath.take(splitPath.count() - 1).fold(""){s1, s2 -> "$s1${File.separator}$s2"})
+            inputStream.use { inputStream ->
+                val splitPath = fileDestination.split('/')
+                val folder = File(splitPath.take(splitPath.count() - 1).fold(""){s1, s2 -> "$s1${File.separator}$s2"})
 
-            if (!folder.exists()) {
-                folder.mkdirs()
-            }
-            val file = File(fileDestination)
-            FileOutputStream(file).use { output ->
-                val length = contentLength
-                var total = 0.0
-                val buffer = ByteArray(4 * 1024) // or other buffer size
-                var read: Int
-                while (inputStream.read(buffer).also { read = it } != -1) {
-                    if(length > 0){
-                        total += read
-                        progressAction((total / length * 100).toInt())
-                    }
-                    output.write(buffer, 0, read)
+                if (!folder.exists()) {
+                    folder.mkdirs()
                 }
-                output.flush()
+                val file = File(fileDestination)
+                FileOutputStream(file).use { output ->
+                    val length = contentLength
+                    var total = 0.0
+                    val buffer = ByteArray(4 * 1024) // or other buffer size
+                    var read: Int
+                    while (inputStream.read(buffer).also { read = it } != -1) {
+                        if(length > 0){
+                            total += read
+                            progressAction((total / length * 100).toInt())
+                        }
+                        output.write(buffer, 0, read)
+                    }
+                    output.flush()
+                    return true
+                }
             }
         }
+    }
+    catch(e : Exception){
+        e.printStackTrace()
+        return false
     }
 }
 

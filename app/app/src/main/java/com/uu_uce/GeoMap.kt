@@ -169,6 +169,7 @@ class GeoMap : AppCompatActivity() {
             with(sharedPref.edit()) {
                 putString("com.uu_uce.USERNAME", "")
                 putString("com.uu_uce.PASSWORD", "")
+                putString("com.uu_uce.WEBTOKEN", "")
                 apply()
             }
             customMap.startLogin()

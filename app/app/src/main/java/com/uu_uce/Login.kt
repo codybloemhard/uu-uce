@@ -14,6 +14,7 @@ import androidx.preference.PreferenceManager
 import com.uu_uce.services.login
 import kotlinx.android.synthetic.main.activity_login.*
 import java.math.BigInteger
+import java.net.HttpURLConnection
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
@@ -72,29 +73,36 @@ class Login : AppCompatActivity() {
                     // Hash password for sending and storing
                     password = bin2hex(getHash(password))
 
-                    login(username, password, ip, this){ b ->
-                        if(b){
-                            with(sharedPref.edit()) {
-                                putString("com.uu_uce.USERNAME", username)
-                                putString("com.uu_uce.PASSWORD", password)
-                                putString("com.uu_uce.SERVER_IP", ip)
-                                putString("com.uu_uce.ORGNAME", orgselector.selectedItem.toString())
-                                apply()
+                    login(username, password, ip, this){ response ->
+                        when (response) {
+                            HttpURLConnection.HTTP_OK -> {
+                                with(sharedPref.edit()) {
+                                    putString("com.uu_uce.USERNAME", username)
+                                    putString("com.uu_uce.PASSWORD", password)
+                                    putString("com.uu_uce.SERVER_IP", ip)
+                                    putString("com.uu_uce.ORGNAME", orgselector.selectedItem.toString())
+                                    apply()
+                                }
+                                this.runOnUiThread{
+                                    Toast.makeText(this, getString(R.string.login_successfullogin), Toast.LENGTH_SHORT).show()
+                                    val intent = Intent(this, GeoMap::class.java)
+                                    startActivity(intent)
+                                    finish()
+                                }
                             }
-                            this.runOnUiThread{
-                                Toast.makeText(this, getString(R.string.login_successfullogin), Toast.LENGTH_SHORT).show()
-                                val intent = Intent(this, GeoMap::class.java)
-                                startActivity(intent)
-                                finish()
+                            HttpURLConnection.HTTP_NOT_FOUND -> {
+                                this.runOnUiThread{
+                                    Toast.makeText(this, getString(R.string.login_wrongcredentials_message), Toast.LENGTH_SHORT).show()
+                                    username_field.text.clear()
+                                    username_field.setHintTextColor(ResourcesCompat.getColor(resources, R.color.FusionRed, null))
+                                    password_field.text.clear()
+                                    password_field.setHintTextColor(ResourcesCompat.getColor(resources, R.color.FusionRed, null))
+                                }
                             }
-                        }
-                        else{
-                            this.runOnUiThread{
-                                Toast.makeText(this, getString(R.string.login_wrongcredentials_message), Toast.LENGTH_SHORT).show()
-                                username_field.text.clear()
-                                username_field.setHintTextColor(ResourcesCompat.getColor(resources, R.color.FusionRed, null))
-                                password_field.text.clear()
-                                password_field.setHintTextColor(ResourcesCompat.getColor(resources, R.color.FusionRed, null))
+                            HttpURLConnection.HTTP_INTERNAL_ERROR -> {
+                                this.runOnUiThread{
+                                    Toast.makeText(this, getString(R.string.login_serverdown), Toast.LENGTH_LONG).show()
+                                }
                             }
                         }
                     }

@@ -12,7 +12,7 @@ import java.util.*
 
 
 @Suppress("BlockingMethodInNonBlockingContext")
-fun login(username : String, password : String, ip : String, activity: Activity, onCompleteAction : ((b : Boolean) -> Unit)){
+fun login(username : String, password : String, ip : String, activity: Activity, onCompleteAction : ((responseCode : Int) -> Unit)){
     val loginApi = URL("$ip/api/user/login")
     val reqParam =
         URLEncoder.encode("username", "UTF-8") +
@@ -45,10 +45,13 @@ fun login(username : String, password : String, ip : String, activity: Activity,
                         putString("com.uu_uce.WEBTOKEN", jsonWebToken)
                         apply()
                     }
-                    onCompleteAction(true)
+                    onCompleteAction(responseCode)
                 }
                 HttpURLConnection.HTTP_NOT_FOUND -> {
-                    onCompleteAction(false)
+                    onCompleteAction(responseCode)
+                }
+                HttpURLConnection.HTTP_INTERNAL_ERROR -> {
+                    onCompleteAction(responseCode)
                 }
                 else -> {
                     throw IOException("Server returned non-OK status: $responseCode")
