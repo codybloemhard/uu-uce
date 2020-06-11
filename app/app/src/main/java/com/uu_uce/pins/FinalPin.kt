@@ -10,18 +10,21 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.opengl.GLES20
 import android.opengl.GLUtils
-import android.view.Gravity
-import android.view.KeyEvent
-import android.view.View
+import android.view.*
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.OpenGL.coordsPerVertex
 import com.uu_uce.R
+import com.uu_uce.allpins.PinData
+import com.uu_uce.allpins.PinListAdapter
 import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.defaultPinSize
 import com.uu_uce.mapOverlay.coordToScreen
@@ -164,7 +167,7 @@ abstract class Pin(
 
     abstract fun tap(tapLocation : p2, activity : Activity, view: View, disPerPixel: Float)
 
-    abstract fun addContent(view: View, activity: Activity, scrollLayout: LinearLayout)
+    abstract fun addContent(): MutableList<String>
 
     open fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2,p2>, width : Int, height : Int, view: View, disPerPixel: Float): Boolean {
 
@@ -324,15 +327,8 @@ class FinalPin(
         }
     }
 
-    override fun addContent(view: View, activity: Activity, scrollLayout: LinearLayout) {
-        val btn = Button(activity, null, R.attr.buttonBarButtonStyle).apply {
-            setOnClickListener {
-                openContent(view, activity)
-            }
-            text = title
-            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        }
-        scrollLayout.addView(btn)
+    override fun addContent(): MutableList<String> {
+        return mutableListOf(id)
     }
 
     // Check if pin should be unlocked
@@ -350,7 +346,16 @@ class FinalPin(
 
         var popupWindow: PopupWindow? = null
         // Build an custom view (to be inflated on top of our current view & build it's popup window)
-        val customView = layoutInflater.inflate(R.layout.pin_content_view, parentView.parent as ViewGroup, false)
+        val viewGroup: ViewGroup
+        var newViewGroup: ViewParent = parentView.parent
+        while(true){
+            if(newViewGroup is ViewGroup){
+                viewGroup = newViewGroup
+                break
+            }
+            newViewGroup = newViewGroup.parent
+        }
+        val customView = layoutInflater.inflate(R.layout.pin_content_view, viewGroup, false)
         customView.setOnKeyListener { v, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_BACK && event.repeatCount == 0 && popupWindow?.isShowing == true) {
                     popupWindow?.dismiss()
@@ -551,11 +556,11 @@ class FinalPin(
 
             // Set buttons
             btnClosePopupWindow.setOnClickListener {
-                popupWindow?.dismiss()
+                popupWindow.dismiss()
             }
 
             btnOpenQuiz.setOnClickListener {
-                popupWindow?.dismiss()
+                popupWindow.dismiss()
 
                 openContent(parentView, activity)
             }
@@ -577,6 +582,7 @@ class MergedPin(
     private val b: Pin?,
     private val actualDis: Float,
     private val nrPixels: Float,
+    private val pinViewModel: PinViewModel,
     coordinate: UTMCoordinate,
     background: Bitmap,
     icon: Drawable,
@@ -609,9 +615,11 @@ class MergedPin(
         }
     }
 
-    override fun addContent(view: View, activity: Activity, scrollLayout: LinearLayout) {
-        a?.addContent(view, activity, scrollLayout)
-        b?.addContent(view, activity, scrollLayout)
+    override fun addContent(): MutableList<String> {
+        val alist = a?.addContent()?:mutableListOf()
+        val blist = b?.addContent()?:mutableListOf()
+        alist.addAll(blist)
+        return alist
     }
 
     private fun openContent(view: View, activity: Activity){
@@ -642,16 +650,24 @@ class MergedPin(
         val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
         windowTitle.text = activity.getString(R.string.merged_pin_name)
 
-        // Get elements
         val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
-
-        // Set onClickListeners
         btnClosePopupWindow.setOnClickListener {
                 popupWindow.dismiss()
         }
 
-        val scrollView: LinearLayout = customView.findViewById(R.id.scroll_layout)
-        addContent(view, activity, scrollView)
+        val viewManager = LinearLayoutManager(activity)
+        val viewAdapter = PinListAdapter(activity)
+        viewAdapter.view = view
+
+        customView.findViewById<RecyclerView>(R.id.allpins_recyclerview).apply {
+            layoutManager = viewManager
+            adapter = viewAdapter
+        }
+
+        val ids =  addContent()
+        pinViewModel.getPins(ids) { pindatas ->
+            viewAdapter.setPins(pindatas,pinViewModel)
+        }
 
         popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0)
     }

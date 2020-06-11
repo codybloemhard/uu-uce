@@ -488,7 +488,7 @@ class CustomMap : ViewTouchParent {
             val background = PinConversion.difficultyToBackground(mergedPinBackground, (context as Activity), context.resources)
             val icon = PinConversion.typeToIcon(mergedPinIcon, context.resources)
 
-            val newMergedPin = MergedPin(finalpins[mini], finalpins[minj], actualDis, pixeldis, coordinate, background, icon, pinSize.toFloat())
+            val newMergedPin = MergedPin(finalpins[mini], finalpins[minj], actualDis, pixeldis, pinViewModel, coordinate, background, icon, pinSize.toFloat())
 
             finalpins.removeAt(minj)
             finalpins.removeAt(mini)
