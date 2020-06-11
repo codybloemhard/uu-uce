@@ -34,16 +34,16 @@ import java.nio.ShortBuffer
 import kotlin.math.roundToInt
 
 open class Pin(
-    var id                      : String = "",
-    var coordinate              : UTMCoordinate,
-    var title           : String,
-    var content         : PinContent,
-    protected var background      : Bitmap,
-    protected var icon            : Drawable,
-    var status          : Int,              //-1 : recalculating, 0 : locked, 1 : unlocked, 2 : completed
-    protected var predecessorIds  : List<String>,
-    protected var followIds       : List<String>,
-    protected val viewModel       : ViewModel
+    var id                          : String = "",
+    var coordinate                  : UTMCoordinate,
+    var title                       : String,
+    var content                     : PinContent,
+    protected var background        : Bitmap,
+    protected var icon              : Drawable,
+    var status                      : Int, //-1 : recalculating, 0 : locked, 1 : unlocked, 2 : completed
+    protected var predecessorIds    : List<String>,
+    protected var followIds         : List<String>,
+    protected val viewModel         : ViewModel
 ){
     // Used to determine if warning should show when closing pin
     private var madeProgress = false

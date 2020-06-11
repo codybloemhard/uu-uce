@@ -30,7 +30,7 @@ class AllPins : AppCompatActivity() {
     private lateinit var pinViewModel   : PinViewModel
     private lateinit var sharedPref     : SharedPreferences
     private lateinit var viewAdapter    : PinListAdapter
-    private var sortmode : Int = 0
+    private var sortmode                : Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this)

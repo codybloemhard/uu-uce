@@ -27,11 +27,11 @@ class PinListAdapter internal constructor(
     private val activity: Activity
 ) : RecyclerView.Adapter<PinListAdapter.PinViewHolder>() {
 
+    var activePopup: PopupWindow? = null
     private val resource = activity.resources
     private val inflater: LayoutInflater = LayoutInflater.from(activity)
     private var pinDataList = emptyList<PinData>()
     private val pinViewModel: PinViewModel = ViewModelProvider(activity as ViewModelStoreOwner).get(PinViewModel::class.java)
-    var activePopup: PopupWindow? = null
     private lateinit var sharedPref : SharedPreferences
 
     inner class PinViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
@@ -83,7 +83,7 @@ class PinListAdapter internal constructor(
             "IMAGE"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image, null) ?: error ("Image not found")
             "VIDEO"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video, null) ?: error ("Image not found")
             "MCQUIZ"    -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz, null) ?: error ("Image not found")
-            "TASK"    -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null) ?: error ("Image not found")
+            "TASK"      -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null) ?: error ("Image not found")
             else -> {
                 Logger.error("PinlistAdapter", "Unknown type")
                 ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null) ?: error ("Image not found")

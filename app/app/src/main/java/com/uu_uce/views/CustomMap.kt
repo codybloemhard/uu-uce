@@ -8,12 +8,18 @@ import android.graphics.Paint
 import android.opengl.GLES20
 import android.os.Build
 import android.util.AttributeSet
+import android.view.Gravity
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -42,7 +48,6 @@ import kotlinx.android.synthetic.main.activity_geo_map.*
 import org.jetbrains.annotations.TestOnly
 import java.time.LocalDate
 import kotlin.math.abs
-import kotlin.math.max
 import kotlin.system.measureTimeMillis
 
 /*
@@ -146,15 +151,39 @@ class CustomMap : ViewTouchParent {
         nrLayers++
 
         if (buttonSize > 0) {
+            val buttonLayout = FrameLayout(context, null).apply{
+                layoutParams = ViewGroup.LayoutParams(buttonSize, buttonSize)
+            }
+
+            val btnBackground = CardView(context, null).apply{
+                val params = FrameLayout.LayoutParams(
+                    (buttonSize * 0.9).toInt(),
+                    (buttonSize * 0.9).toInt()
+                )
+                params.gravity = Gravity.CENTER
+                layoutParams = params
+                setCardBackgroundColor(ResourcesCompat.getColor(context.resources, R.color.BeniukonBronze, null))
+                radius = 10f
+            }
+
             val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle).apply {
                 setImageResource(R.drawable.ic_sprite_toggle_layer)
                 setOnClickListener {
                     toggleLayer(curLayers)
+                    if(layerVisible(curLayers)){
+                        btnBackground.setCardBackgroundColor(ResourcesCompat.getColor(context.resources, R.color.BeniukonBronze, null))
+                    }
+                    else{
+                        btnBackground.setCardBackgroundColor(ResourcesCompat.getColor(context.resources, R.color.TextGrey, null))
+                    }
                 }
-                layoutParams = ViewGroup.LayoutParams(buttonSize, buttonSize)
+                elevation = 6.5f
             }
 
-            scrollLayout!!.addView(btn)
+            buttonLayout.addView(btnBackground)
+            buttonLayout.addView(btn)
+
+            scrollLayout!!.addView(buttonLayout)
         }
 
         mods = smap.getMods()
@@ -517,6 +546,10 @@ class CustomMap : ViewTouchParent {
     // Turn a layer on or off
     private fun toggleLayer(l: Int){
         smap.toggleLayer(l)
+    }
+
+    private fun layerVisible(l: Int): Boolean {
+        return smap.layerVisible(l)
     }
 
     fun setPinViewModel(vm: PinViewModel){
