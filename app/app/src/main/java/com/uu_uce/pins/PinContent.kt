@@ -38,7 +38,6 @@ class PinContent(
     private val fieldbookPin : Boolean
 ) {
     val contentBlocks : MutableList<ContentBlockInterface>
-    private var canCompletePin = false
 
     lateinit var parent : FinalPin
     init{
@@ -58,7 +57,6 @@ class PinContent(
         while (reader.hasNext()) {
             val curBlock = readBlock(reader)
             if(curBlock != null) {
-                if(curBlock.canCompleteBlock) canCompletePin = true
                 contentBlocks.add(curBlock)
             }
         }
@@ -154,7 +152,6 @@ class PinContent(
 interface ContentBlockInterface {
     val content: View
     val tag : BlockTag
-    val canCompleteBlock : Boolean
     fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : FinalPin?)
     fun makeEditable(blockId : Int, layout : LinearLayout, view : View, action : ((ContentBlockInterface) -> Boolean)) : ContentBlockInterface {
         showContent(blockId,layout,view,null)
@@ -177,7 +174,6 @@ class TextBlock(
 {
     override var content = EditText(activity)
     override val tag = BlockTag.TEXT
-    override val canCompleteBlock = false
     override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : FinalPin?) {
         content = EditText(activity).apply {
             inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
@@ -210,7 +206,6 @@ class TextContentBlock(
 {
     override var content = TextView(activity)
     override val tag = BlockTag.TEXT
-    override val canCompleteBlock = false
     override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : FinalPin?){
         content = TextView(activity).apply {
             text = textContent
@@ -253,7 +248,6 @@ class ImageContentBlock(
 {
     override var content = ImageView(activity)
     override val tag = BlockTag.IMAGE
-    override val canCompleteBlock = false
     override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : FinalPin?){
         content = ImageView(activity)
         try {
@@ -314,7 +308,6 @@ class VideoContentBlock(
 {
     override var content = FrameLayout(activity)
     override val tag = BlockTag.VIDEO
-    override val canCompleteBlock = false
 
     override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : FinalPin?){
         content = FrameLayout(activity)
@@ -395,7 +388,6 @@ class MCContentBlock(
 {
     override var content = TableLayout(activity)
     override val tag = BlockTag.MCQUIZ
-    override val canCompleteBlock = true
     private var selectedAnswer : Int = -1
     private lateinit var selectedBackground : CardView
 

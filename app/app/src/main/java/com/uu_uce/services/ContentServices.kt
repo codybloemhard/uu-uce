@@ -1,3 +1,5 @@
+@file:Suppress("BlockingMethodInNonBlockingContext") //TODO: Look into this
+
 package com.uu_uce.services
 
 import android.Manifest

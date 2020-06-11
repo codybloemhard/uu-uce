@@ -74,10 +74,10 @@ class GeoMap : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapsName)
+        maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapsName, getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile)
 
         // Alert that notifies the user that maps need to be downloaded TODO: remove when streaming is implemented
-        if(!File(getExternalFilesDir(null)?.path + File.separator + "Maps").exists()){
+        if(!File(getExternalFilesDir(null)?.path + File.separator + mapsFolderName).exists()){
             AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setIcon(R.drawable.ic_sprite_question)
                 .setTitle(getString(R.string.geomap_download_warning_head))
@@ -154,6 +154,7 @@ class GeoMap : AppCompatActivity() {
                 apply()
             }
             customMap.startLogin()
+            finish()
         }
 
         // Set menu controls

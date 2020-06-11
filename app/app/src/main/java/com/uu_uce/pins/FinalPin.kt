@@ -28,8 +28,7 @@ import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.services.UTMCoordinate
-import com.uu_uce.services.updateFiles
+import com.uu_uce.services.*
 import com.uu_uce.shapefiles.p2
 import com.uu_uce.shapefiles.p2Zero
 import com.uu_uce.views.PopupHandler
@@ -47,6 +46,8 @@ abstract class Pin(
     protected var icon            : Drawable,
     var pinWidth: Float = defaultPinSize.toFloat()
 ){
+    private var madeProgress = false
+    protected var completeRange = 100
     //opengl stuff
     private var backgroundHandle: Int = -1
     private lateinit var vertexBuffer: FloatBuffer
@@ -118,8 +119,8 @@ abstract class Pin(
                 }
             }
 
-        indexBuffer=
-                // (# of coordinate values * 2 bytes per short)
+        indexBuffer =
+            // (# of coordinate values * 2 bytes per short)
             ByteBuffer.allocateDirect(drawOrder.size * 2).run {
                 order(ByteOrder.nativeOrder())
                 asShortBuffer().apply {
@@ -128,7 +129,7 @@ abstract class Pin(
                 }
             }
 
-        //make background mutable
+        // Make background mutable
         background = if (background.isMutable) background else background.copy(
             Bitmap.Config.ARGB_8888,
             true
@@ -372,15 +373,6 @@ class FinalPin(
         val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
         windowTitle.text = title
 
-        // Set completed visibility
-        val checkMark = customView.findViewById<ImageView>(R.id.completed_marker)
-        if(status == 2){
-            checkMark.visibility = VISIBLE
-        }
-        else{
-            checkMark.visibility = GONE
-        }
-
         // Add content to popup window
         val layout: LinearLayout = customView.findViewById(R.id.scrollLayout)
 
@@ -407,6 +399,24 @@ class FinalPin(
                         val current = content.contentBlocks[i]
                         current.showContent(i, layout, parentView, this)
                         if(current is MCContentBlock) containsQuiz = true
+                    }
+
+                    if(LocationServices.lastKnownLocation != null && status == 1 && !containsQuiz){
+                        val dist = calculateDistance(degreeToUTM(p2(LocationServices.lastKnownLocation!!.latitude.toFloat(), LocationServices.lastKnownLocation!!.longitude.toFloat())), coordinate)
+                        val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity)
+                        completeRange = sharedPref.getInt("com.uu_uce.UNLOCKRANGE", 100)
+                        if(dist < completeRange){
+                            complete()
+                        }
+                    }
+
+                    // Set completed visibility
+                    val checkMark = customView.findViewById<ImageView>(R.id.completed_marker)
+                    if(status == 2){
+                        checkMark.visibility = VISIBLE
+                    }
+                    else{
+                        checkMark.visibility = GONE
                     }
 
                     // Fill layout of popup
@@ -459,8 +469,7 @@ class FinalPin(
 
     private fun complete() {
         status = 2
-        if (followIds[0] != "")
-            (viewModel as PinViewModel).completePin(id, followIds)
+        (viewModel as PinViewModel).completePin(id, followIds)
     }
 
     fun addQuestion(questionId : Int, reward: Int){
@@ -499,7 +508,7 @@ class FinalPin(
                 }
             }
 
-            //Open popup
+            // Open popup
             val layoutInflater = activity.layoutInflater
 
             // Build an custom view (to be inflated on top of our current view & build it's popup window)

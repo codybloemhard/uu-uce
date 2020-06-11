@@ -12,10 +12,8 @@ const val EXTERNAL_FILES_REQUEST    = 0
 const val EXTERNAL_PHOTO_REQUEST    = 1
 const val EXTERNAL_VIDEO_REQUEST    = 2
 const val LOCATION_REQUEST          = 3
-const val PHOTOCAMERA_REQUEST       = 4
-const val VIDEOCAMERA_REQUEST       = 5
-const val PHOTOSTORAGE_REQUEST      = 6
-const val VIDEOSTORAGE_REQUEST      = 7
+const val PHOTOSTORAGE_REQUEST      = 4
+const val VIDEOSTORAGE_REQUEST      = 5
 
 /*
 Takes: a context and activity and a list of strings describing permissions.

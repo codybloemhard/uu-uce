@@ -107,6 +107,7 @@
     <string name="menu_logout_text">Logout</string>
 
     <!--Settings-->
+    <string name="settings_unlock_range">Unlock range</string>
     <string name="settings_pin_size">Pin Size</string>
     <string name="settings_networkdownload">Enable downloads on mobile data</string>
     <string name="settings_download_maps">Download maps</string>
@@ -127,12 +128,15 @@
     <string name="settings_maps">Maps</string>
     <string name="settings_content">Content</string>
     <string name="settings_download_content_text">Download content</string>
-    <string name="settings_general">General</string>
+    <string name="settings_accessibility">Accessibility</string>
     <string name="settings_map_deleted_text">Maps deleted</string>
     <string name="settings_content_deleted_text">Content deleted</string>
     <string name="settings_maps_storage">Storage used for maps: </string>
     <string name="settings_content_storage">Storage used for content: </string>
     <string name="settings_darkmode_switch_text">Dark mode</string>
+    <string name="settings_pins_settings">Pins</string>
+    <string name="settings_pins_storage">Storage used for pins:</string>
+    <string name="settings_download_pins">Update pins</string>
 
     <!--Profile-->
     <string name="profile_user_name">User name</string>
@@ -155,5 +159,7 @@
     <string name="login_nousername_message">Please enter a username</string>
     <string name="login_nopassword_message">Please enter a password</string>
     <string name="login_signin_button_text">Sign In</string>
+    <string name="settings_pins_download_button_text">Update</string>
+    <string name="settings_permissions">Permissions</string>
 
 </resources>

@@ -132,8 +132,8 @@ class CustomMap : ViewTouchParent {
                 }
             }
         })
-        //width and height are not set in the init{} yet
-        //we delay calculations that use them by using post
+        // Width and height are not set in the init{} yet
+        // We delay calculations that use them by using post
         post{
             setCameraWAspect()
         }
