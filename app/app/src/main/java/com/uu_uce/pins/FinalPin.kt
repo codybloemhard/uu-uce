@@ -2,6 +2,7 @@ package com.uu_uce.pins
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
@@ -162,6 +163,8 @@ abstract class Pin(
 
     abstract fun tap(tapLocation : p2, activity : Activity, view: View, disPerPixel: Float)
 
+    abstract fun addContent(view: View, activity: Activity, scrollLayout: LinearLayout)
+
     open fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2,p2>, width : Int, height : Int, view: View, disPerPixel: Float): Boolean {
 
         val screenLocation: Pair<Float, Float> = coordToScreen(coordinate, viewport, view.width, view.height)
@@ -320,6 +323,17 @@ class FinalPin(
         }
     }
 
+    override fun addContent(view: View, activity: Activity, scrollLayout: LinearLayout) {
+        val btn = Button(activity, null, R.attr.buttonBarButtonStyle).apply {
+            setOnClickListener {
+                openContent(view, activity)
+            }
+            text = title
+            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
+        scrollLayout.addView(btn)
+    }
+
     // Check if pin should be unlocked
     fun tryUnlock(action : (() -> Unit)){
         if(predecessorIds[0] != "" && status < 1){
@@ -429,12 +443,12 @@ class FinalPin(
                                 .setIcon(R.drawable.ic_sprite_warning)
                                 .setTitle(activity.getString(R.string.pin_close_warning_head))
                                 .setMessage(activity.getString(R.string.pin_close_warning_body))
-                                .setPositiveButton(activity.getString(R.string.positive_button_text)) { _, _ -> popupWindow?.dismiss() }
+                                .setPositiveButton(activity.getString(R.string.positive_button_text)) { _, _ -> popupWindow.dismiss() }
                                 .setNegativeButton(activity.getString(R.string.negative_button_text), null)
                                 .show()
                         }
                         else{
-                            popupWindow?.dismiss()
+                            popupWindow.dismiss()
                         }
                     }
                 }
@@ -561,12 +575,12 @@ class MergedPin(
 ): Pin(coordinate, background, icon, pinSize) {
 
     override fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2, p2>, width: Int, height: Int, view: View, disPerPixel: Float): Boolean {
-        if(nrPixels * disPerPixel < actualDis) {
+        return if(nrPixels * disPerPixel < actualDis) {
             var res = a?.draw(program,scale,trans,viewport,width,height,view,disPerPixel) ?: false
             res = res || b?.draw(program,scale,trans,viewport,width,height,view,disPerPixel) ?: false
-            return res
+            res
         }else{
-            return super.draw(program,scale,trans,viewport,width,height,view,disPerPixel)
+            super.draw(program,scale,trans,viewport,width,height,view,disPerPixel)
         }
     }
 
@@ -581,8 +595,56 @@ class MergedPin(
             a?.tap(tapLocation, activity, view, disPerPixel)
             b?.tap(tapLocation, activity, view, disPerPixel)
         }else{
-
+            if(!isInside(tapLocation)) return
+            openContent(view, activity)
         }
+    }
+
+    override fun addContent(view: View, activity: Activity, scrollLayout: LinearLayout) {
+        a?.addContent(view, activity, scrollLayout)
+        b?.addContent(view, activity, scrollLayout)
+    }
+
+    private fun openContent(view: View, activity: Activity){
+        val layoutInflater = activity.layoutInflater
+
+        var popupWindow: PopupWindow? = null
+        // Build an custom view (to be inflated on top of our current view & build it's popup window)
+        val customView = layoutInflater.inflate(R.layout.merged_pin_popup, view.parent as ViewGroup, false)
+        customView.setOnKeyListener { v, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_BACK && event.repeatCount == 0 && popupWindow?.isShowing == true) {
+                popupWindow?.dismiss()
+                true
+            }
+            else false
+        }
+
+        popupWindow = PopupWindow(
+            customView,
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
+
+        popupWindow.setBackgroundDrawable(ColorDrawable())
+        popupWindow.isOutsideTouchable = true
+        popupWindow.isFocusable = true
+
+        // Add the title for the popup window
+        val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
+        windowTitle.text = activity.getString(R.string.merged_pin_name)
+
+        // Get elements
+        val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
+
+        // Set onClickListeners
+        btnClosePopupWindow.setOnClickListener {
+                popupWindow.dismiss()
+        }
+
+        val scrollView: LinearLayout = customView.findViewById(R.id.scroll_layout)
+        addContent(view, activity, scrollView)
+
+        popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0)
     }
 
     override fun resize(pinSize: Int) {
