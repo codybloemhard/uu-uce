@@ -31,6 +31,8 @@ const val mapsName = "85468989-af89-40cc-a013-7421dec8a13f.zip"
 const val mapsFolderName = "Maps"
 const val contentFolderName = "PinContent"
 const val legendName = "legend.png"
+const val mergedPinBackground = 5
+const val mergedPinIcon = "MERGEDPIN"
 
 class Settings : AppCompatActivity() {
     // private variables

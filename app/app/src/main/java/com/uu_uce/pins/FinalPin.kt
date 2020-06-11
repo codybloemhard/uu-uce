@@ -4,10 +4,13 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.opengl.GLES20
 import android.opengl.GLUtils
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -21,12 +24,14 @@ import com.uu_uce.R
 import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.defaultPinSize
 import com.uu_uce.mapOverlay.coordToScreen
+import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.services.UTMCoordinate
 import com.uu_uce.services.updateFiles
 import com.uu_uce.shapefiles.p2
 import com.uu_uce.shapefiles.p2Zero
+import com.uu_uce.views.PopupHandler
 import org.jetbrains.annotations.TestOnly
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -34,13 +39,13 @@ import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 import kotlin.math.roundToInt
 
+
 abstract class Pin(
     val coordinate: UTMCoordinate,
     protected var background      : Bitmap,
-    protected var icon            : Drawable
+    protected var icon            : Drawable,
+    var pinWidth: Float = defaultPinSize.toFloat()
 ){
-    private var initialized = false
-
     //opengl stuff
     private var backgroundHandle: Int = -1
     private lateinit var vertexBuffer: FloatBuffer
@@ -61,11 +66,8 @@ abstract class Pin(
     private val bitmapBackgroundWidth = background.width.toFloat()
     private val bitmapBackgroundHeight = background.height.toFloat()
 
-    // Set default pin size
-    private var pinWidth = defaultPinSize.toFloat()
-
     // Calculate pin height to maintain aspect ratio
-    private var pinHeight =
+    var pinHeight =
         pinWidth * (bitmapBackgroundHeight / bitmapBackgroundWidth)
 
     // Declare variables for icon size
@@ -88,11 +90,9 @@ abstract class Pin(
         }
     }
 
-    fun initGL(){
-        if(initialized) return
-        initialized = true
+    open fun initGL(){
+        if(this::vertexBuffer.isInitialized) return
         //initialize opengl drawing
-
         vertexBuffer =
             ByteBuffer.allocateDirect(spriteCoords.size * 4).run {
                 order(ByteOrder.nativeOrder())
@@ -156,13 +156,19 @@ abstract class Pin(
         backgroundHandle = loadTexture(background)
     }
 
-    open fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2,p2>, width : Int, height : Int, view: View) {
+    protected fun isInside(tapLocation: p2): Boolean{
+        return pointInAABoundingBox(boundingBox.first, boundingBox.second, tapLocation, 0)
+    }
+
+    abstract fun tap(tapLocation : p2, activity : Activity, view: View, disPerPixel: Float)
+
+    open fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2,p2>, width : Int, height : Int, view: View, disPerPixel: Float): Boolean {
 
         val screenLocation: Pair<Float, Float> = coordToScreen(coordinate, viewport, view.width, view.height)
 
         if(screenLocation.first.isNaN() || screenLocation.second.isNaN()){
             Logger.error("Pin", "Pin draw called with NaN location")
-            return
+            return false
         }
 
         // Calculate pin bounds on canvas
@@ -175,14 +181,14 @@ abstract class Pin(
         if (minX > width || maxX < 0 || minY > height || maxY < 0) {
             Logger.log(LogType.Event, "Pin", "Pin outside of viewport")
             inScreen = false
-            return
+            return false
         }
         inScreen = true
 
         // Set boundingbox for pin tapping
         boundingBox = Pair(p2(minX.toFloat(), minY.toFloat()), p2(maxX.toFloat(), maxY.toFloat()))
 
-        if(!this::vertexBuffer.isInitialized) return
+        if(!this::vertexBuffer.isInitialized) return true
 
         GLES20.glUseProgram(program)
 
@@ -219,9 +225,11 @@ abstract class Pin(
 
         GLES20.glDisableVertexAttribArray(positionHandle)
         GLES20.glDisableVertexAttribArray(textureCoordinateHandle)
+
+        return false
     }
 
-    fun resize(pinSize : Int){
+    open fun resize(pinSize : Int){
         pinWidth = pinSize.toFloat()
 
         // Calculate pin height to maintain aspect ratio
@@ -288,8 +296,6 @@ class FinalPin(
 
     var popupWindow: PopupWindow? = null
 
-    var tapAction : ((Activity) -> Unit) = {}
-
     // Quiz
     private var answered : Array<Boolean>       = Array(content.contentBlocks.count()) { true }
     private var questionRewards : Array<Int>    = Array(content.contentBlocks.count()) { 0 }
@@ -302,19 +308,18 @@ class FinalPin(
         }
     }
 
-    override fun draw(
-        program: Int,
-        scale: FloatArray,
-        trans: FloatArray,
-        viewport: Pair<p2, p2>,
-        width: Int,
-        height: Int,
-        view: View
-    ) {
+    override fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2, p2>, width: Int, height: Int, view: View, disPerPixel: Float): Boolean {
         // Check whether pin is unlocked
-        if (status == 0) return
+        if (status == 0) return false
 
-        super.draw(program, scale, trans, viewport, width, height, view)
+        return super.draw(program, scale, trans, viewport, width, height, view, disPerPixel)
+    }
+
+    override fun tap(tapLocation: p2, activity: Activity, view: View, disPerPixel: Float){
+        if(status <1) return
+        if(isInside(tapLocation)) {
+            openContent(view, activity)
+        }
     }
 
     // Check if pin should be unlocked
@@ -327,11 +332,18 @@ class FinalPin(
         }
     }
 
-    fun openContent(parentView: View, activity : Activity, onDissmissAction: () -> Unit) {
+    fun openContent(parentView: View, activity : Activity) {
         val layoutInflater = activity.layoutInflater
 
         // Build an custom view (to be inflated on top of our current view & build it's popup window)
         val customView = layoutInflater.inflate(R.layout.pin_content_view, parentView.parent as ViewGroup, false)
+        customView.setOnKeyListener { v, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_BACK && event.repeatCount == 0 && popupWindow?.isShowing == true) {
+                    popupWindow?.dismiss()
+                    true
+            }
+            else false
+        }
 
         popupWindow = PopupWindow(
             customView,
@@ -339,11 +351,9 @@ class FinalPin(
             ViewGroup.LayoutParams.MATCH_PARENT
         )
 
-        popupWindow?.setOnDismissListener {
-            popupWindow = null
-
-            onDissmissAction()
-        }
+        popupWindow?.setBackgroundDrawable(ColorDrawable())
+        popupWindow?.isOutsideTouchable = true
+        popupWindow?.isFocusable = true
 
         // Add the title for the popup window
         val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
@@ -529,7 +539,7 @@ class FinalPin(
             btnOpenQuiz.setOnClickListener {
                 popupWindow?.dismiss()
 
-                openContent(parentView, activity){}
+                openContent(parentView, activity)
             }
         }
         else{
@@ -545,26 +555,44 @@ class FinalPin(
 }
 
 class MergedPin(
-    private val a: Pin,
-    private val b: Pin,
-    private val dis: Float,
+    private val a: Pin?,
+    private val b: Pin?,
+    private val actualDis: Float,
+    private val nrPixels: Float,
     coordinate: UTMCoordinate,
     background: Bitmap,
-    icon: Drawable
-): Pin(coordinate, background, icon) {
-    val pins: MutableList<FinalPin> = mutableListOf()
+    icon: Drawable,
+    pinSize: Float = defaultPinSize.toFloat()
+): Pin(coordinate, background, icon, pinSize) {
 
-    override fun draw(
-        program: Int,
-        scale: FloatArray,
-        trans: FloatArray,
-        viewport: Pair<p2, p2>,
-        width: Int,
-        height: Int,
-        view: View
-    ) {
-        for(pin in pins){
-            pin.draw(program,scale,trans,viewport,width,height,view)
+    override fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2, p2>, width: Int, height: Int, view: View, disPerPixel: Float): Boolean {
+        if(nrPixels * disPerPixel < actualDis) {
+            var res = a?.draw(program,scale,trans,viewport,width,height,view,disPerPixel) ?: false
+            res = res || b?.draw(program,scale,trans,viewport,width,height,view,disPerPixel) ?: false
+            return res
+        }else{
+            return super.draw(program,scale,trans,viewport,width,height,view,disPerPixel)
         }
+    }
+
+    override fun initGL() {
+        a?.initGL()
+        b?.initGL()
+        super.initGL()
+    }
+
+    override fun tap(tapLocation: p2, activity: Activity, view: View, disPerPixel: Float){
+        if(nrPixels * disPerPixel < actualDis) {
+            a?.tap(tapLocation, activity, view, disPerPixel)
+            b?.tap(tapLocation, activity, view, disPerPixel)
+        }else{
+
+        }
+    }
+
+    override fun resize(pinSize: Int) {
+        a?.resize(pinSize)
+        b?.resize(pinSize)
+        super.resize(pinSize)
     }
 }

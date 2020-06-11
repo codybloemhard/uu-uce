@@ -218,9 +218,6 @@ class GeoMap : AppCompatActivity() {
             menu.down()
             return
         }
-        if (customMap.activePopup != null) {
-            customMap.activePopup!!.dismiss()
-        }
         else {
             moveTaskToBack(true)
         }

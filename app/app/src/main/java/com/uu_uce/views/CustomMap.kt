@@ -36,17 +36,22 @@ import com.uu_uce.misc.ListenableBoolean
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.pins.FinalPin
+import com.uu_uce.pins.MergedPin
+import com.uu_uce.pins.Pin
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
 import kotlinx.android.synthetic.main.activity_geo_map.*
 import org.jetbrains.annotations.TestOnly
 import java.time.LocalDate
 import kotlin.math.abs
+import kotlin.math.pow
 import kotlin.system.measureTimeMillis
 
 /*
 the view displayed in the app that holds the map
  */
+class PopupHandler(var popup: PopupWindow?)
+
 var pinsUpdated = ListenableBoolean()
 class CustomMap : ViewTouchParent {
 
@@ -75,9 +80,9 @@ class CustomMap : ViewTouchParent {
 
     private var pins                        : MutableMap<String, FinalPin>   = mutableMapOf()
     private var fieldbook                   : List<FieldbookEntry>      = listOf()
-    private var sortedPins                  : List<FinalPin>                 = listOf()
+    private var mergedPins: Pin? = null
+    private var mergedPinsLock: Any = Object()
     private var pinStatuses                 : MutableMap<String, Int>   = mutableMapOf()
-    var activePopup                         : PopupWindow?              = null
 
     var pinSize: Int
     private var locSizeFactor = 0.5f
@@ -233,11 +238,10 @@ class CustomMap : ViewTouchParent {
                 lastDrawnLoc = deviceScreenLoc
             }
 
-            // Draw pin
-            synchronized(sortedPins) {
-                for(pin in sortedPins) {
-                    //pins are drawn at increasing height, lowest at 0, highest at (almost) 1
-                    pin.draw(pinProgram, scale, trans, viewport, width, height, this)
+            synchronized(mergedPinsLock){
+                val disPerPixel = (viewport.second.first - viewport.first.first)/width
+                if(mergedPins?.draw(pinProgram, scale, trans, viewport, width, height, this, disPerPixel) == true){
+                    renderer.pinsChanged = true
                 }
             }
 
@@ -253,9 +257,8 @@ class CustomMap : ViewTouchParent {
     }
 
     fun initPinsGL(){
-        synchronized(pins) {
-            for ((_, pin) in pins)
-                pin.initGL()
+        synchronized(mergedPinsLock){
+            mergedPins?.initGL()
         }
     }
 
@@ -366,7 +369,6 @@ class CustomMap : ViewTouchParent {
                         pins[pin.pinId] = newPin
                         pinStatuses[newPin.id] = pin.status
                     }
-                    newPin.tapAction = {activity: Activity -> (newPin::openContent)(this,activity) {activePopup = null}}
                     newPin.resize(pinSize)
                     renderer.pinsChanged = true
                 }
@@ -390,8 +392,8 @@ class CustomMap : ViewTouchParent {
                 }
             }
         }
-        synchronized(sortedPins) {
-            sortedPins = pins.values.sortedByDescending { pin -> pin.coordinate.north }
+        synchronized(mergedPinsLock){
+            mergedPins = mergePins()
         }
         redrawMap()
     }
@@ -404,8 +406,9 @@ class CustomMap : ViewTouchParent {
     }
 
     fun resizePins(){
-        for(pin in pins.values){
-            pin.resize(pinSize)
+        mergedPins?.resize(pinSize)
+        synchronized(mergedPinsLock){
+            mergedPins = mergePins()
         }
     }
 
@@ -414,11 +417,10 @@ class CustomMap : ViewTouchParent {
             val pin = PinConversion(activity).fieldbookEntryToPin(entry,fieldbookViewModel)
             pins[pin.id] = pin.apply{
                 resize(pinSize)
-                tapAction = {activity: Activity ->  (::openFieldbookPopup)(activity,rootView,entry,pin.content.contentBlocks) }
             }
         }
-        synchronized(sortedPins) {
-            sortedPins = pins.values.sortedByDescending { pin -> pin.coordinate.north }
+        synchronized(mergedPinsLock){
+            mergedPins = mergePins()
         }
 
         redrawMap()
@@ -426,52 +428,69 @@ class CustomMap : ViewTouchParent {
 
     //called when the screen is tapped at tapLocation
     private fun tapPin(tapLocation : p2, activity : Activity){
-        if(activePopup != null) return
-        synchronized(sortedPins) {
-            for (pin in sortedPins.reversed()) {
-                if (!pin.inScreen || pin.status < 1) continue
-                if (pointInAABoundingBox(
-                        pin.boundingBox.first,
-                        pin.boundingBox.second,
-                        tapLocation,
-                        0
-                    )
-                ) {
-                    pin.run {
-                        tapAction(activity)
-                    }
-                    activePopup = pin.popupWindow
-                    Logger.log(LogType.Info, "CustomMap", "${pin.title}: I have been tapped.")
-                    return
-                }
-            }
+        val viewport = camera.getViewport()
+        synchronized(mergedPinsLock){
+            val disPerPixel = (viewport.second.first - viewport.first.first)/width
+            mergedPins?.tap(tapLocation, activity, this, disPerPixel)
         }
     }
 
-    fun mergePins(): List<FinalPin>{
-        var pinxmin = 0f
-        var pinxmax = 0f
-        var pinymin = 0f
-        var pinymax = 0f
-        for((_,pin) in pins){
-            pinxmin = minOf(pinxmin,pin.coordinate.east)
-            pinxmax = maxOf(pinxmax,pin.coordinate.east)
-            pinymin = minOf(pinymin,pin.coordinate.north)
-            pinymax = maxOf(pinymax,pin.coordinate.north)
+    private fun mergePins(): Pin?{
+        val finalpins: MutableList<Pin> = pins.values.filter{pin -> pin.status > 0}.toMutableList()
+        
+        while(finalpins.size > 1) {
+            //find two closest pins
+            var mini = -1
+            var minj = -1
+            var mindis2 = Float.MAX_VALUE
+            for (i in finalpins.indices) for (j in i+1 until finalpins.size) {
+                val dis2 = (finalpins[i].coordinate.east - finalpins[j].coordinate.east).pow(2) + (finalpins[i].coordinate.north - finalpins[j].coordinate.north).pow(2)
+                if (dis2 < mindis2) {
+                    mini = i
+                    minj = j
+                    mindis2 = dis2
+                }
+            }
+
+            //calculate minimum distance in pixels between the two pins
+            //depending on if they hit each other horizontally or vertically
+            val xdisabs = abs(finalpins[minj].coordinate.east - finalpins[mini].coordinate.east)
+            val ydis = finalpins[minj].coordinate.north - finalpins[mini].coordinate.north
+
+            val (top,bot) = if(ydis < 0){
+                Pair(finalpins[mini],finalpins[minj])
+            }else{
+                Pair(finalpins[minj],finalpins[mini])
+            }
+
+            val slope = abs(ydis)/xdisabs
+            val width = (bot.pinWidth + top.pinWidth)/2
+            val slopeSwitch = bot.pinHeight/width
+            val pixeldis = if(slope > slopeSwitch) bot.pinHeight else width
+            val actualDis = abs(
+                if(slope > slopeSwitch) bot.coordinate.north - top.coordinate.north
+                else bot.coordinate.east - top.coordinate.east
+            )
+
+            //coordinate is average of two pins
+            val coordinate = UTMCoordinate(
+                bot.coordinate.zone,
+                bot.coordinate.letter,
+                (bot.coordinate.east + top.coordinate.east)/2,
+                (bot.coordinate.north + top.coordinate.north)/2
+            )
+
+            val background = PinConversion.difficultyToBackground(mergedPinBackground, (context as Activity), context.resources)
+            val icon = PinConversion.typeToIcon(mergedPinIcon, context.resources)
+
+            val newMergedPin = MergedPin(finalpins[mini], finalpins[minj], actualDis, pixeldis, coordinate, background, icon, pinSize.toFloat())
+
+            finalpins.removeAt(minj)
+            finalpins.removeAt(mini)
+            finalpins.add(newMergedPin)
         }
 
-        val res: List<FinalPin> = mutableListOf()
-
-        /*val levels: List<MutableMap<Pair<Int,Int>, MutableList<Pin>>> = List(pinChunksDepth){mutableMapOf()}
-
-        for(level in levels.indices) {
-            val chunkWidth = 0
-            for (pin in pins) {
-
-            }
-        }*/
-
-        return res
+        return finalpins.getOrNull(0)
     }
 
     fun setRoute() : Route {
