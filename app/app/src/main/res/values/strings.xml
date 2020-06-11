@@ -20,6 +20,7 @@
     <string name="geomap_scale_text">%1$d%2$s</string>
     <string name="geomap_default_distance">0m</string>
     <string name="geomap_maps_download_instructions">Maps can be manually downloaded from settings</string>
+    <string name="merged_pin_name">Choose a pin to open</string>
 
     <!--AllPins-->
     <string name="allpins_menuimage_description">Image for pins menu button</string>
