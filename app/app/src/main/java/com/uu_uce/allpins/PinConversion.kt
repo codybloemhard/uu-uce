@@ -59,7 +59,7 @@ class PinConversion(val activity: Activity){
                 1 -> ContextCompat.getColor(activity, R.color.ReptileGreen)
                 2 -> ContextCompat.getColor(activity, R.color.OrangeHibiscus)
                 3 -> ContextCompat.getColor(activity, R.color.Desire)
-                mergedPinBackground -> ContextCompat.getColor(activity, R.color.Purple)
+                mergedPinBackground -> ContextCompat.getColor(activity, R.color.Boyzone)
                 else -> {
                     ContextCompat.getColor(activity, R.color.TextGrey)
                 }
@@ -84,7 +84,7 @@ class PinConversion(val activity: Activity){
                 "IMAGE"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image, null)  ?: error("image not found")
                 "VIDEO"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video, null)  ?: error("image not found")
                 "MCQUIZ"    -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz, null)   ?: error("image not found")
-                "MERGEDPIN" -> ResourcesCompat.getDrawable(resource, R.drawable.ic_george_sad, null)    ?: error("image not found")
+                "MERGEDPIN" -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_stack, null)    ?: error("image not found")
                 "TASK"    -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null)      ?: error("image not found")
                 else        -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null)  ?: error("image not found")
             }
