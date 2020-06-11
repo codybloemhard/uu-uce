@@ -366,7 +366,9 @@ class CustomMap : ViewTouchParent {
                     val newPin = PinConversion(activity).pinDataToPin(pin, pinViewModel)
                     newPin.tryUnlock {
                         Logger.log(LogType.Info, "CustomMap", "Adding pin")
-                        pins[pin.pinId] = newPin
+                        synchronized(pins) {
+                            pins[pin.pinId] = newPin
+                        }
                         pinStatuses[newPin.id] = pin.status
                     }
                     newPin.resize(pinSize)
@@ -398,11 +400,14 @@ class CustomMap : ViewTouchParent {
         redrawMap()
     }
 
-    private fun updatePins(){
+    fun updatePins(){
         pins = mutableMapOf()
         pinStatuses = mutableMapOf()
         pinViewModel.reloadPins { newPinData -> updatePinStatuses(newPinData) }
         pinsUpdated.setValue(false)
+        synchronized(mergedPinsLock){
+            mergedPins = mergePins()
+        }
     }
 
     fun resizePins(){

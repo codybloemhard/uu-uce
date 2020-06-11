@@ -235,8 +235,12 @@ class GeoMap : AppCompatActivity() {
         }
         if(needsReload.getValue()) loadMap()
         if(started){
-            customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
-            customMap.resizePins()
+            val newSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
+            customMap.updatePins()
+            if(newSize != customMap.pinSize) {
+                customMap.pinSize = newSize
+                customMap.resizePins()
+            }
             customMap.redrawMap()
         }
         super.onResume()
