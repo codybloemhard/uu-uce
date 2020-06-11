@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
@@ -32,6 +31,8 @@ class PinListAdapter internal constructor(
     private var pinDataList = emptyList<PinData>()
     private val pinViewModel: PinViewModel = ViewModelProvider(activity as ViewModelStoreOwner).get(PinViewModel::class.java)
     private lateinit var sharedPref : SharedPreferences
+
+    var view: View? = null
 
     inner class PinViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         val parentView : View = itemView
@@ -66,7 +67,7 @@ class PinListAdapter internal constructor(
             val pinConverter = PinConversion(activity)
             val pin = pinConverter.pinDataToPin(current, pinViewModel)
             pin.content.parent = pin
-            pin.openContent(holder.parentView, activity)
+            pin.openContent(view ?: holder.parentView, activity)
         }
 
         when(current.difficulty){
