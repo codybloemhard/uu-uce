@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
@@ -27,12 +26,13 @@ class PinListAdapter internal constructor(
     private val activity: Activity
 ) : RecyclerView.Adapter<PinListAdapter.PinViewHolder>() {
 
-    var activePopup: PopupWindow? = null
     private val resource = activity.resources
     private val inflater: LayoutInflater = LayoutInflater.from(activity)
     private var pinDataList = emptyList<PinData>()
     private val pinViewModel: PinViewModel = ViewModelProvider(activity as ViewModelStoreOwner).get(PinViewModel::class.java)
     private lateinit var sharedPref : SharedPreferences
+
+    var view: View? = null
 
     inner class PinViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         val parentView : View = itemView
@@ -67,8 +67,7 @@ class PinListAdapter internal constructor(
             val pinConverter = PinConversion(activity)
             val pin = pinConverter.pinDataToPin(current, pinViewModel)
             pin.content.parent = pin
-            pin.openContent(holder.parentView, activity) {activePopup = null}
-            activePopup = pin.popupWindow
+            pin.openContent(view ?: holder.parentView, activity)
         }
 
         when(current.difficulty){
@@ -84,7 +83,7 @@ class PinListAdapter internal constructor(
             "VIDEO"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video, null) ?: error ("Image not found")
             "MCQUIZ"    -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz, null) ?: error ("Image not found")
             "TASK"      -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null) ?: error ("Image not found")
-            else -> {
+            else        -> {
                 Logger.error("PinlistAdapter", "Unknown type")
                 ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null) ?: error ("Image not found")
             }

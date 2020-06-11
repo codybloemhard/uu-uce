@@ -48,6 +48,10 @@ class PinRepository(private val pinDao : PinDao){
         }
     }
 
+    suspend fun getPins(pinIds : List<String>, action: (List<PinData>) -> Unit){
+        action(pinDao.getPins(pinIds))
+    }
+
     suspend fun getContent(list : MutableList<String>, action : (() -> Unit)){
         for(content in pinDao.getContent()){
             list.add(content)
