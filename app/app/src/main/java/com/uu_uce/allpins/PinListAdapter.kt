@@ -30,7 +30,6 @@ class PinListAdapter internal constructor(
     private val inflater: LayoutInflater = LayoutInflater.from(activity)
     private var pinDataList = emptyList<PinData>()
     private val pinViewModel: PinViewModel = ViewModelProvider(activity as ViewModelStoreOwner).get(PinViewModel::class.java)
-    var activePopup: PopupWindow? = null
     private lateinit var sharedPref : SharedPreferences
 
     inner class PinViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
@@ -67,7 +66,6 @@ class PinListAdapter internal constructor(
             val pin = pinConverter.pinDataToPin(current, pinViewModel)
             pin.content.parent = pin
             pin.openContent(holder.parentView, activity)
-            activePopup = pin.popupWindow
         }
 
         when(current.difficulty){

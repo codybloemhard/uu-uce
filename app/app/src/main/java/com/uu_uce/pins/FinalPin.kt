@@ -294,8 +294,6 @@ class FinalPin(
     // Used to determine if warning should show when closing pin
     private var madeProgress = false
 
-    var popupWindow: PopupWindow? = null
-
     // Quiz
     private var answered : Array<Boolean>       = Array(content.contentBlocks.count()) { true }
     private var questionRewards : Array<Int>    = Array(content.contentBlocks.count()) { 0 }
@@ -335,6 +333,7 @@ class FinalPin(
     fun openContent(parentView: View, activity : Activity) {
         val layoutInflater = activity.layoutInflater
 
+        var popupWindow: PopupWindow? = null
         // Build an custom view (to be inflated on top of our current view & build it's popup window)
         val customView = layoutInflater.inflate(R.layout.pin_content_view, parentView.parent as ViewGroup, false)
         customView.setOnKeyListener { v, keyCode, event ->
@@ -351,9 +350,9 @@ class FinalPin(
             ViewGroup.LayoutParams.MATCH_PARENT
         )
 
-        popupWindow?.setBackgroundDrawable(ColorDrawable())
-        popupWindow?.isOutsideTouchable = true
-        popupWindow?.isFocusable = true
+        popupWindow.setBackgroundDrawable(ColorDrawable())
+        popupWindow.isOutsideTouchable = true
+        popupWindow.isFocusable = true
 
         // Add the title for the popup window
         val windowTitle = customView.findViewById<TextView>(R.id.popup_window_title)
@@ -412,12 +411,13 @@ class FinalPin(
                         finishButton.layoutParams = buttonLayout
                         finishButton.setOnClickListener{
                             finishQuiz(activity, parentView)
+                            popupWindow.dismiss()
                         }
                         layout.addView(finishButton)
                     }
 
                     // Open popup
-                    popupWindow?.showAtLocation(parentView, Gravity.CENTER, 0, 0)
+                    popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
 
                     // Get elements
                     val btnClosePopupWindow = customView.findViewById<Button>(R.id.popup_window_close_button)
@@ -471,7 +471,6 @@ class FinalPin(
         if(answered.all{b -> b}){
             // All questions answered
             val reward = questionRewards.sum()
-            popupWindow?.dismiss()
 
             var sufficient = false
             if(reward >= 0.55 * totalReward){
@@ -492,18 +491,14 @@ class FinalPin(
             // Build an custom view (to be inflated on top of our current view & build it's popup window)
             val customView = layoutInflater.inflate(R.layout.quiz_complete_popup, parentView.parent as ViewGroup, false)
 
-            popupWindow = PopupWindow(
+            val popupWindow = PopupWindow(
                 customView,
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
 
-            popupWindow?.setOnDismissListener {
-                popupWindow = null
-            }
-
             // Open popup
-            popupWindow?.showAtLocation(parentView, Gravity.CENTER, 0, 0)
+            popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
 
             // Get elements
             val georgeReaction      = customView.findViewById<ImageView>(R.id.george_reaction)

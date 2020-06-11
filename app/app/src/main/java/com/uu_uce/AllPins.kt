@@ -91,11 +91,7 @@ class AllPins : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if(viewAdapter.activePopup != null) {
-            viewAdapter.activePopup?.dismiss()
-            return
-        }
-        else if(pins_searchbar.text.toString().count() > 0){
+        if(pins_searchbar.text.toString().count() > 0){
             pins_searchbar.text.clear()
             searchPins("")
             return
