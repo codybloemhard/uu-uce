@@ -34,7 +34,7 @@ const val mapsName = "50016551-7038-4305-b717-17bd9f93fb34.zip"
 const val mapsFolderName = "Maps"
 const val contentFolderName = "PinContent"
 const val legendName = "legend.png"
-const val pinDatabaseFile = "ac3447db-278e-4fd8-ad78-a0c3075b12df.json"
+const val pinDatabaseFile = "a6659236-273f-4eaf-b92d-d11231fd43aa.json"
 
 class Settings : AppCompatActivity() {
     // private variables
