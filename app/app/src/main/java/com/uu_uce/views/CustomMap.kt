@@ -50,12 +50,10 @@ import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.system.measureTimeMillis
 
-/*
-the view displayed in the app that holds the map
- */
 class PopupHandler(var popup: PopupWindow?)
-
 var pinsUpdated = ListenableBoolean()
+
+// The view displayed in the app that holds the map
 class CustomMap : ViewTouchParent {
 
     constructor(context: Context): super(context)
@@ -427,7 +425,7 @@ class CustomMap : ViewTouchParent {
         redrawMap()
     }
 
-    private fun updatePins(){
+    fun updatePins(){
         synchronized(pins) {
             pins = mutableMapOf()
         }

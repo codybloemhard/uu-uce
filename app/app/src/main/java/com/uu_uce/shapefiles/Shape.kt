@@ -4,9 +4,11 @@ package com.uu_uce.shapefiles
 import android.opengl.GLES20
 import com.uu_uce.OpenGL.colorsPerVertex
 import com.uu_uce.OpenGL.coordsPerVertex
-import com.uu_uce.defaultLineWidth
 import com.uu_uce.misc.Logger
-import java.nio.*
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.nio.FloatBuffer
+import java.nio.IntBuffer
 
 //abstract class for drawing shapes
 abstract class DrawInfo{

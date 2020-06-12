@@ -34,7 +34,7 @@ const val mapsName = "50016551-7038-4305-b717-17bd9f93fb34.zip"
 const val mapsFolderName = "Maps"
 const val contentFolderName = "PinContent"
 const val legendName = "legend.png"
-const val pinDatabaseFile = "a6659236-273f-4eaf-b92d-d11231fd43aa.json"
+const val pinDatabaseFile = "75aa95dd-b74b-467e-a7db-5d0677d7da7b.json"
 const val mergedPinBackground = 5
 const val mergedPinIcon = "MERGEDPIN"
 

@@ -7,13 +7,11 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.core.content.res.ResourcesCompat
 import androidx.preference.PreferenceManager
 import com.uu_uce.gestureDetection.TouchParent
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.services.login
-import kotlinx.android.synthetic.main.activity_login.*
 import java.net.HttpURLConnection
 
 //currently used only to switch to the GeoMap activity

@@ -1,6 +1,5 @@
 package com.uu_uce.shapefiles
 
-import com.uu_uce.defaultLineWidth
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import java.io.File
@@ -162,7 +161,7 @@ class Style(val outline: Boolean, val color: FloatArray)
 @ExperimentalUnsignedTypes
 class PolygonReader(
     dir: File,
-    var hasStyles: Boolean,
+    private var hasStyles: Boolean,
     private val styles: List<Style>
 ): ChunkGetter(dir){
     override fun getChunk(cIndex: ChunkIndex): Chunk {
@@ -206,8 +205,12 @@ class PolygonReader(
                 }
                 else Style(false, floatArrayOf(0.2f,0.2f,0.8f))
 
-            val _bmin = p3(readValue()/mult + xoff, readValue()/mult + yoff, readValue())
-            val _bmax = p3(readValue()/mult + xoff, readValue()/mult + yoff, readValue())
+            /* Read shape bounding boxes
+            val bmi = p3(readValue()/mult + xoff, readValue()/mult + yoff, readValue())
+            val bma = p3(readValue()/mult + xoff, readValue()/mult + yoff, readValue())*/
+
+            // Discard shape bounding boxes
+            for(i in 0 .. 5) readValue()
 
             Polygon(vertices, indices.toMutableList(), style)
         }

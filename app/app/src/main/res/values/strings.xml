@@ -137,7 +137,6 @@
     <string name="settings_content_storage">Storage used for content: </string>
     <string name="settings_darkmode_switch_text">Dark mode</string>
     <string name="settings_pins_settings">Pins</string>
-    <string name="settings_pins_storage">Storage used for pins:</string>
     <string name="settings_download_pins">Update pins</string>
     <string name="settings_pins_downloaded">Pins updated</string>
     <string name="settings_pins_download_button_text">Update</string>

@@ -22,16 +22,6 @@ import com.uu_uce.misc.Logger
 import java.io.File
 import java.io.StringReader
 
-
-fun openImageView(activity: Activity, imageURI: Uri, imageTitle : String?){
-    val intent = Intent(activity, ImageViewer::class.java)
-
-    intent.putExtra("uri", imageURI)
-    if(imageTitle != null)
-        intent.putExtra("title", imageTitle)
-    activity.startActivity(intent)
-}
-
 class PinContent(
     private val contentString: String,
     private val activity: Activity,
@@ -306,15 +296,6 @@ class ImageContentBlock(
                 "${thumbnailToJsonString(thumbnailURI)}}"
     }
 
-    private fun openImageView(imageURI: Uri, imageTitle: String?) {
-        val intent = Intent(activity, ImageViewer::class.java)
-
-        intent.putExtra("uri", imageURI)
-        if(imageTitle != null)
-            intent.putExtra("title", imageTitle)
-        activity.startActivity(intent)
-    }
-
     fun getThumbnailURI() : Uri{
         return thumbnailURI
     }
@@ -363,7 +344,7 @@ class VideoContentBlock(
         // Add thumbnail and button
         content.addView(playButton)
         content.setOnClickListener{
-            openVideoView(videoURI, title)
+            openVideoView(activity, videoURI, title)
         }
         layout.addView(content,blockId)
     }
@@ -382,15 +363,6 @@ class VideoContentBlock(
         return "{${tagToJsonString(tag)}," +
                 "${fileToJsonString(videoURI)}," +
                 "${thumbnailToJsonString(thumbnailURI)}}"
-    }
-
-    private fun openVideoView(videoURI: Uri, videoTitle: String?){
-        val intent = Intent(activity, VideoViewer::class.java)
-
-        intent.putExtra("uri", videoURI)
-        if(videoTitle != null)
-            intent.putExtra("title", videoTitle)
-        activity.startActivity(intent)
     }
 
     fun getThumbnailURI(): Uri{
@@ -576,6 +548,24 @@ fun totallyExterminateFileExistence(activity: Activity, thumbnail: Uri) {
     } else {
         Logger.log(LogType.Info,"PinContent","This thumbnail doesn't exist")
     }
+}
+
+fun openImageView(activity: Activity, imageURI: Uri, imageTitle : String?){
+    val intent = Intent(activity, ImageViewer::class.java)
+
+    intent.putExtra("uri", imageURI)
+    if(imageTitle != null)
+        intent.putExtra("title", imageTitle)
+    activity.startActivity(intent)
+}
+
+fun openVideoView(activity: Activity, videoURI: Uri, videoTitle: String?){
+    val intent = Intent(activity, VideoViewer::class.java)
+
+    intent.putExtra("uri", videoURI)
+    if(videoTitle != null)
+        intent.putExtra("title", videoTitle)
+    activity.startActivity(intent)
 }
 
 
