@@ -42,7 +42,7 @@ import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 import kotlin.math.roundToInt
 
-
+//abstract pin class includes functionality for drawing the pin, and some abstract methods
 abstract class Pin(
     val coordinate: UTMCoordinate,
     protected var background      : Bitmap,
@@ -95,6 +95,7 @@ abstract class Pin(
         }
     }
 
+    //to be called once by the GL thread, to initialize all buffers related to this pin
     open fun initGL(){
         if(this::vertexBuffer.isInitialized) return
         //initialize opengl drawing
@@ -161,14 +162,19 @@ abstract class Pin(
         backgroundHandle = loadTexture(background)
     }
 
+    //whether tapLocation hits this pin or not
     protected fun isInside(tapLocation: p2): Boolean{
         return pointInAABoundingBox(boundingBox.first, boundingBox.second, tapLocation, 0)
     }
 
+    //what to do when tapped
     abstract fun tap(tapLocation : p2, activity : Activity, view: View, disPerPixel: Float)
 
+    //should create a list of links to all content in this pin
+    //used to create the list when a mergedPin is clicked
     abstract fun addContent(): MutableList<String>
 
+    //main drawing function, draws the pin and recalculates the bounding box
     open fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2,p2>, width : Int, height : Int, view: View, disPerPixel: Float): Boolean {
 
         val screenLocation: Pair<Float, Float> = coordToScreen(coordinate, viewport, view.width, view.height)
@@ -236,6 +242,8 @@ abstract class Pin(
         return false
     }
 
+    //changes the width of the pin to pinSize, and the height accordingly
+    //also changes the icon's size
     open fun resize(pinSize : Int){
         pinWidth = pinSize.toFloat()
 
@@ -254,6 +262,7 @@ abstract class Pin(
         }
     }
 
+    //helper function to load a bitmap into a buffer
     private fun loadTexture(bitmap: Bitmap): Int {
         val textureHandle = IntArray(1)
         GLES20.glGenTextures(1, textureHandle, 0)
@@ -286,6 +295,7 @@ abstract class Pin(
     }
 }
 
+//normal singular pin, which shows its information when tapped
 class FinalPin(
     var id                      : String = "",
     coordinate              : UTMCoordinate,
@@ -320,6 +330,7 @@ class FinalPin(
         return super.draw(program, scale, trans, viewport, width, height, view, disPerPixel)
     }
 
+    //show this pins content when tapped
     override fun tap(tapLocation: p2, activity: Activity, view: View, disPerPixel: Float){
         if(status <1) return
         if(isInside(tapLocation)) {
@@ -327,6 +338,7 @@ class FinalPin(
         }
     }
 
+    //final pin contains just one piece of content
     override fun addContent(): MutableList<String> {
         return mutableListOf(id)
     }
@@ -341,6 +353,7 @@ class FinalPin(
         }
     }
 
+    //create popup showing this pins content
     fun openContent(parentView: View, activity : Activity) {
         val layoutInflater = activity.layoutInflater
 
@@ -577,6 +590,13 @@ class FinalPin(
     }
 }
 
+//merged pin, contains two pins a,b which can be merged pins too, creating a tree-structure
+//a and b are drawn/tapped seperately when their hitboxes don't collide
+//a merged pin is drawn/tapped when they do collide
+//nrPixels: minimum number of pixels needed between a and b until they collide
+//actualDis: distance between a and b, but only in the direction in which they will collide, which is the same direction as for nrPixels
+//      this will be difference in x coordinate if they  approach each other horizontally
+//      and difference in y coordinate if they approach each other vertically
 class MergedPin(
     private val a: Pin?,
     private val b: Pin?,
@@ -588,7 +608,7 @@ class MergedPin(
     icon: Drawable,
     pinSize: Float = defaultPinSize.toFloat()
 ): Pin(coordinate, background, icon, pinSize) {
-
+    //draw a and b if they don't collide, draw merge pin if they do
     override fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2, p2>, width: Int, height: Int, view: View, disPerPixel: Float): Boolean {
         return if(nrPixels * disPerPixel < actualDis) {
             var res = a?.draw(program,scale,trans,viewport,width,height,view,disPerPixel) ?: false
@@ -605,6 +625,7 @@ class MergedPin(
         super.initGL()
     }
 
+    //tap a and b if they don't collide, tap merge pin if they do
     override fun tap(tapLocation: p2, activity: Activity, view: View, disPerPixel: Float){
         if(nrPixels * disPerPixel < actualDis) {
             a?.tap(tapLocation, activity, view, disPerPixel)
@@ -615,6 +636,7 @@ class MergedPin(
         }
     }
 
+    //add content of both sub pins
     override fun addContent(): MutableList<String> {
         val alist = a?.addContent()?:mutableListOf()
         val blist = b?.addContent()?:mutableListOf()
@@ -622,6 +644,7 @@ class MergedPin(
         return alist
     }
 
+    //create a popup containing all of the pins inside this pin, in the same style as AllPins
     private fun openContent(view: View, activity: Activity){
         val layoutInflater = activity.layoutInflater
 
@@ -672,6 +695,7 @@ class MergedPin(
         popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0)
     }
 
+    //resize a b and this
     override fun resize(pinSize: Int) {
         a?.resize(pinSize)
         b?.resize(pinSize)

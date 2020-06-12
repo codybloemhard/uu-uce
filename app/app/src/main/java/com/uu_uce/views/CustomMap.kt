@@ -196,7 +196,6 @@ class CustomMap : ViewTouchParent {
 
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
 
-
         val (scale,trans) = camera.getScaleTrans()
 
         val timeDraw = measureTimeMillis {
@@ -225,8 +224,6 @@ class CustomMap : ViewTouchParent {
                 }
                 gm.scaleWidget.update(viewport, gm)
             }
-
-            Logger.log(LogType.Event, "DrawOverlay", "east: ${loc.utm.east}, north: ${loc.utm.north}")
 
             // Draw device location
             val deviceScreenLoc = coordToScreen(loc.utm, viewport, width, height)
@@ -281,9 +278,9 @@ class CustomMap : ViewTouchParent {
         if(distance > locationDeadZone){
             redrawMap()
             Logger.log(LogType.Event,"CustomMap", "Redrawing, distance: $distance")
+            return
         }
-        Logger.log(LogType.Event,"CustomMap", "No redraw needed")
-        Logger.log(LogType.Event,"CustomMap", "${loc.utm.east}, ${loc.utm.north}")
+        Logger.log(LogType.Event,"CustomMap", "No redraw needed, current loc ${loc.utm.east}, ${loc.utm.north}")
     }
 
     fun startLocServices(){
@@ -440,6 +437,7 @@ class CustomMap : ViewTouchParent {
         }
     }
 
+    //pre-calculate all distances between all pins, and merge them optimally
     private fun mergePins(): Pin?{
         val finalpins: MutableList<Pin> = pins.values.filter{pin -> pin.status > 0}.toMutableList()
         

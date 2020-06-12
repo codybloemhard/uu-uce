@@ -291,6 +291,8 @@ class GeoMap : AppCompatActivity() {
 
         customMap.removeLayers(toggle_layer_layout)
 
+        Logger.log(LogType.Event, "GeoMap", "loading maps")
+
         val mydir = File(getExternalFilesDir(null)?.path + "/Maps/")
 
         try{readStyles(mydir)}

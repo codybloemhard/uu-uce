@@ -88,22 +88,17 @@ class ChunkManager(
         if(chunksChanged) {
             val activeChunks = getActiveChunks()
             addChunks(activeChunks, camzoom, viewport)
-            Logger.log(LogType.Info, "ChunkManager", "0")
             return ChunkUpdateResult.LOADING
         }
 
         if(loading){
-            Logger.log(LogType.Info, "ChunkManager", "1")
             return ChunkUpdateResult.LOADING
         }
 
         if(changed) {
             changed = false
-            Logger.log(LogType.Info, "ChunkManager", "2")
             return ChunkUpdateResult.REDRAW
         }
-
-        Logger.log(LogType.Info, "ChunkManager", "3")
         return ChunkUpdateResult.NOTHING
     }
 
@@ -127,10 +122,13 @@ class ChunkManager(
                 if(!chunks.containsKey(chunkIndex)) {
                     if(shouldGetLoaded(chunkIndex, camzoom)) {
                         val c: Chunk = chunkGetter.getChunk(chunkIndex)
-                        synchronized(chunks) {
-                            chunks[chunkIndex] = c
+                        //checking again if the chunk should be loaded, to prevent flickering
+                        if(shouldGetLoaded(chunkIndex, camzoom)) {
+                            synchronized(chunks) {
+                                chunks[chunkIndex] = c
+                            }
+                            Logger.log(LogType.Info, "ChunkManager", "loaded chunk $chunkIndex")
                         }
-                        Logger.log(LogType.Info, "ChunkManager", "loaded chunk $chunkIndex")
                     }
                 }
             }
