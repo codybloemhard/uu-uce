@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
+import com.uu_uce.allpins.PinData
 import com.uu_uce.database.UceRoomDatabase
 import kotlinx.coroutines.launch
 
@@ -41,5 +42,9 @@ class FieldbookViewModel(application: Application): AndroidViewModel(application
 
     fun update(title: String, content: String, entryId: Int) = viewModelScope.launch {
         fieldbookRepository.update(title, content, entryId)
+    }
+
+    fun getPins(pinIds : List<String>, action : ((List<PinData>) -> (Unit))) = viewModelScope.launch {
+        fieldbookRepository.getPins(pinIds, action)
     }
 }
