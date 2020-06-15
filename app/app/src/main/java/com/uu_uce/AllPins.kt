@@ -22,6 +22,7 @@ import com.uu_uce.allpins.PinListAdapter
 import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.ui.createTopbar
 import kotlinx.android.synthetic.main.activity_all_pins.*
+import kotlinx.android.synthetic.main.activity_geo_map.*
 
 
 class AllPins : AppCompatActivity() {
@@ -66,8 +67,6 @@ class AllPins : AppCompatActivity() {
 
         val filterButton : FloatingActionButton = findViewById(R.id.fab)
         registerForContextMenu(filterButton)
-
-
 
         val searchBar = findViewById<EditText>(R.id.pins_searchbar)
 

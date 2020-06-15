@@ -23,6 +23,7 @@ class HeightlineDrawInfo: DrawInfo(){
     private var nrIndices = 0
     private var curIndex = 0
 
+    //add a single HeightLine shape
     fun addLine(line: Heightline){
         for(k in 0 until line.points.size-1){
             indices.add(curIndex)
@@ -66,7 +67,6 @@ class HeightlineDrawInfo: DrawInfo(){
 
     override fun finalize() {
         vertexBuffer =
-            // (# of coordinate values * 4 bytes per float)
             ByteBuffer.allocateDirect(vertices.size * 4).run {
                 order(ByteOrder.nativeOrder())
                 asFloatBuffer().apply {
@@ -75,7 +75,6 @@ class HeightlineDrawInfo: DrawInfo(){
                 }
             }
         indexBuffer=
-            // (# of coordinate values * 2 bytes per short)
             ByteBuffer.allocateDirect(indices.size * 4).run {
                 order(ByteOrder.nativeOrder())
                 asIntBuffer().apply {
@@ -140,7 +139,7 @@ class ColoredLineDrawInfo: DrawInfo(){
             colorsPerVertex,
             GLES20.GL_FLOAT,
             false,
-            colorsPerVertex * 4, //4 bytes per float
+            colorsPerVertex * 4,
             colorBuffer
         )
 
@@ -158,7 +157,6 @@ class ColoredLineDrawInfo: DrawInfo(){
 
     override fun finalize() {
         vertexBuffer =
-                // (# of coordinate values * 4 bytes per float)
             ByteBuffer.allocateDirect(vertices.size * 4).run {
                 order(ByteOrder.nativeOrder())
                 asFloatBuffer().apply {
@@ -167,7 +165,6 @@ class ColoredLineDrawInfo: DrawInfo(){
                 }
             }
         indexBuffer=
-                // (# of coordinate values * 2 bytes per short)
             ByteBuffer.allocateDirect(indices.size * 4).run {
                 order(ByteOrder.nativeOrder())
                 asIntBuffer().apply {
@@ -233,7 +230,7 @@ class PolygonDrawInfo: DrawInfo(){
             coordsPerVertex,
             GLES20.GL_FLOAT,
             false,
-            coordsPerVertex*4, //4 bytes per float
+            coordsPerVertex*4,
             vertexBuffer
         )
 
@@ -244,7 +241,7 @@ class PolygonDrawInfo: DrawInfo(){
             colorsPerVertex,
             GLES20.GL_FLOAT,
             false,
-            colorsPerVertex * 4, //4 bytes per float
+            colorsPerVertex * 4,
             colorBuffer
         )
 
@@ -262,7 +259,6 @@ class PolygonDrawInfo: DrawInfo(){
 
     override fun finalize() {
         vertexBuffer =
-                // (# of coordinate values * 4 bytes per float)
             ByteBuffer.allocateDirect(vertices.size * 4).run {
                 order(ByteOrder.nativeOrder())
                 asFloatBuffer().apply {
@@ -281,7 +277,6 @@ class PolygonDrawInfo: DrawInfo(){
             }
 
         indexBuffer=
-                // (# of coordinate values * 4 bytes per int)
             ByteBuffer.allocateDirect(indices.size * 4).run {
                 order(ByteOrder.nativeOrder())
                 asIntBuffer().apply {
@@ -320,6 +315,7 @@ class Heightline(var points: List<p2>, style: Style): Shape(style) {
     }
 }
 
+//shape consisting of colored lines
 class ColoredLineShape(var points: List<p2>, style: Style): Shape(style) {
     override val nrPoints = points.size
 
@@ -334,7 +330,7 @@ class ColoredLineShape(var points: List<p2>, style: Style): Shape(style) {
     }
 }
 
-        //shape consisting of polygons that need to be colorized
+//shape consisting of colored polygons
 class Polygon(var vertices: List<p2>, var indices: MutableList<Short>, style: Style): Shape(style){
     override val nrPoints: Int = vertices.size
 

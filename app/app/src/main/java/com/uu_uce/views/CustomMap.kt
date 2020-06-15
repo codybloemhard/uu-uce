@@ -47,11 +47,6 @@ import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.system.measureTimeMillis
 
-/*
-the view displayed in the app that holds the map
- */
-class PopupHandler(var popup: PopupWindow?)
-
 var pinsUpdated = ListenableBoolean()
 class CustomMap : ViewTouchParent {
 

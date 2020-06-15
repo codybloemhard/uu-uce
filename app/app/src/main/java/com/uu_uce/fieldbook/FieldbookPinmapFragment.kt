@@ -93,6 +93,7 @@ class FieldbookPinmapFragment : Fragment() {
 
         // Start database and get pins from database
         this.customMap.setFieldbookViewModel(viewModel)
+
         this.customMap.setLifeCycleOwner(this)
         viewModel.allFieldbookEntries.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
             this.customMap.setFieldbook(it)

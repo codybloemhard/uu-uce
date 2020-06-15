@@ -1,6 +1,7 @@
 package com.uu_uce.fieldbook
 
 import androidx.lifecycle.LiveData
+import com.uu_uce.allpins.PinData
 import com.uu_uce.database.FieldbookDao
 
 class FieldbookRepository(private val fieldbookDao: FieldbookDao) {
@@ -34,5 +35,9 @@ class FieldbookRepository(private val fieldbookDao: FieldbookDao) {
 
     suspend fun update(title: String, content: String, entryId: Int) {
         fieldbookDao.update(title, content, entryId)
+    }
+
+    suspend fun getPins(pinIds : List<String>, action: (List<PinData>) -> Unit){
+        action(fieldbookDao.getPins(pinIds))
     }
 }

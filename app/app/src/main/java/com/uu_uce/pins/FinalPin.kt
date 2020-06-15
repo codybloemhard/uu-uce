@@ -34,7 +34,6 @@ import com.uu_uce.misc.Logger
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.p2
 import com.uu_uce.shapefiles.p2Zero
-import com.uu_uce.views.PopupHandler
 import org.jetbrains.annotations.TestOnly
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
