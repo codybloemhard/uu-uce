@@ -5,15 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Paint
+import android.icu.lang.UCharacter
 import android.opengl.GLES20
 import android.os.Build
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.PopupWindow
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat.startActivity
@@ -32,6 +30,7 @@ import com.uu_uce.fieldbook.FieldbookViewModel
 import com.uu_uce.fieldbook.FullRoute
 import com.uu_uce.fieldbook.Route
 import com.uu_uce.gestureDetection.*
+import com.uu_uce.gestureDetection.Scroller
 import com.uu_uce.mapOverlay.Location
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.pointDistance
@@ -44,6 +43,7 @@ import com.uu_uce.pins.Pin
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
 import kotlinx.android.synthetic.main.activity_geo_map.*
+import kotlinx.android.synthetic.main.quiz_complete_popup.view.*
 import org.jetbrains.annotations.TestOnly
 import java.time.LocalDate
 import kotlin.math.abs
@@ -146,13 +146,17 @@ class CustomMap : ViewTouchParent {
     }
 
     // Add a new layer to the map, and generate a button to toggle it
-    fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout?, zoomCutoff: Float = Float.MAX_VALUE, buttonSize: Int = 0){
+    fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout?, zoomCutoff: Float = Float.MAX_VALUE, buttonSize: Int = 0, layerName: String){
         smap.addLayer(lt, chunkGetter, zoomCutoff)
         val curLayers = nrLayers
         nrLayers++
 
         if (buttonSize > 0) {
-            val buttonLayout = FrameLayout(context, null).apply{
+            val buttonLayout = LinearLayout(context, null).apply {
+                layoutParams = ViewGroup.LayoutParams(buttonSize, LinearLayout.LayoutParams.WRAP_CONTENT)
+                orientation = LinearLayout.VERTICAL
+            }
+            val buttonFrame = FrameLayout(context, null).apply{
                 layoutParams = ViewGroup.LayoutParams(buttonSize, buttonSize)
             }
 
@@ -181,8 +185,17 @@ class CustomMap : ViewTouchParent {
                 elevation = 6.5f
             }
 
-            buttonLayout.addView(btnBackground)
-            buttonLayout.addView(btn)
+            buttonFrame.addView(btnBackground)
+            buttonFrame.addView(btn)
+
+            val layerTitle = TextView(context, null).apply{
+                text = layerName
+                gravity = Gravity.CENTER_HORIZONTAL
+                layoutParams = ViewGroup.LayoutParams(buttonSize, LinearLayout.LayoutParams.WRAP_CONTENT)
+            }
+
+            buttonLayout.addView(buttonFrame)
+            buttonLayout.addView(layerTitle)
 
             scrollLayout!!.addView(buttonLayout)
         }
