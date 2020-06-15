@@ -18,14 +18,15 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/searchLayout"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="15dp"
             android:focusable="true"
-            android:focusableInTouchMode="true">
+            android:focusableInTouchMode="true"
+            app:layout_constraintBottom_toBottomOf="@+id/sortButton"
+            app:layout_constraintEnd_toStartOf="@+id/sortButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/sortButton">
 
             <EditText
                 android:id="@+id/pins_searchbar"
@@ -44,6 +45,15 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <ImageView
+            android:id="@+id/sortButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="15dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_sprite_allpins_sortpins" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/allpins_recyclerview"
             android:layout_width="match_parent"
@@ -53,20 +63,9 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/searchLayout"
+            app:layout_constraintTop_toBottomOf="@+id/sortButton"
             tools:listitem="@layout/allpins_recyclerview_item" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end|bottom"
-            android:layout_margin="16dp"
-            android:onClick="openDialog"
-            android:backgroundTint="?colorAccentRef"
-            android:src="@drawable/ic_sprite_sort_white"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>

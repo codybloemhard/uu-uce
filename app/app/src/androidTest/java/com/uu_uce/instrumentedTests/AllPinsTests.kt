@@ -441,7 +441,7 @@ class AllPinsTests {
     @Test
     fun pinSorting(){
         // Open sorting popup
-        onView(withId(R.id.fab))
+        onView(withId(R.id.sortButton))
             .perform(click())
 
         // Sort by title
@@ -457,7 +457,7 @@ class AllPinsTests {
         ).check(matches(withText("A")))
 
         // Open sorting popup
-        onView(withId(R.id.fab))
+        onView(withId(R.id.sortButton))
             .perform(click())
 
         // Sort by title reversed
@@ -473,7 +473,7 @@ class AllPinsTests {
         ).check(matches(withText("D")))
 
         // Open sorting popup
-        onView(withId(R.id.fab))
+        onView(withId(R.id.sortButton))
             .perform(click())
 
         // Sort by difficulty
@@ -489,7 +489,7 @@ class AllPinsTests {
         ).check(matches(withText("A")))
 
         // Open sorting popup
-        onView(withId(R.id.fab))
+        onView(withId(R.id.sortButton))
             .perform(click())
 
         // Sort by difficulty reversed
@@ -505,7 +505,7 @@ class AllPinsTests {
         ).check(matches(withText("C")))
 
         // Open sorting popup
-        onView(withId(R.id.fab))
+        onView(withId(R.id.sortButton))
             .perform(click())
 
         // Sort by type
@@ -521,7 +521,7 @@ class AllPinsTests {
         ).check(matches(withText("B")))
 
         // Open sorting popup
-        onView(withId(R.id.fab))
+        onView(withId(R.id.sortButton))
             .perform(click())
 
         // Sort by type reversed
