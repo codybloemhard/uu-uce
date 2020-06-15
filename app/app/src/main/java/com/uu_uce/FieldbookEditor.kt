@@ -723,6 +723,8 @@ class FieldbookEditor: AppCompatActivity() {
         }
         else{
             degreeToUTM(Pair(location.latitude.toFloat(),location.longitude.toFloat())).toString()
+            UTMCoordinate(31,'F',313000f,4667000f).toString()
+            UTMCoordinate(31,'F',4667000f,313000f).toString()
         }
 
         FieldbookEntry(

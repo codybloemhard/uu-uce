@@ -41,12 +41,12 @@ data class UTMCoordinate(val zone : Int, val letter : Char, val east : Float, va
         return  "$zone" +
                 "$letter" +
                 "${north.run{ 
-                    this*10
+                    this
         }.toInt()
                 }" +
                 "N" +
                 "${east.run{ 
-                    this*10
+                    this
         }.toInt()
                 }" +
                 "E"

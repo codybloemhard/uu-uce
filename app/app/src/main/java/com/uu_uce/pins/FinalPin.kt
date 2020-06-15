@@ -27,6 +27,8 @@ import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinListAdapter
 import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.defaultPinSize
+import com.uu_uce.fieldbook.FieldbookAdapter
+import com.uu_uce.fieldbook.FieldbookViewModel
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.misc.LogType
@@ -358,16 +360,7 @@ class FinalPin(
 
         var popupWindow: PopupWindow? = null
         // Build an custom view (to be inflated on top of our current view & build it's popup window)
-        val viewGroup: ViewGroup
-        var newViewGroup: ViewParent = parentView.parent
-        while(true){
-            if(newViewGroup is ViewGroup){
-                viewGroup = newViewGroup
-                break
-            }
-            newViewGroup = newViewGroup.parent
-        }
-        val customView = layoutInflater.inflate(R.layout.pin_content_view, viewGroup, false)
+        val customView = layoutInflater.inflate(R.layout.pin_content_view, parentView.parent as ViewGroup, false)
         customView.setOnKeyListener { v, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_BACK && event.repeatCount == 0 && popupWindow?.isShowing == true) {
                     popupWindow?.dismiss()
@@ -601,7 +594,8 @@ class MergedPin(
     private val b: Pin?,
     private val actualDis: Float,
     private val nrPixels: Float,
-    private val pinViewModel: PinViewModel,
+    private val pinViewModel: PinViewModel?,
+    private val fieldbookViewModel: FieldbookViewModel?,
     coordinate: UTMCoordinate,
     background: Bitmap,
     icon: Drawable,
@@ -677,18 +671,33 @@ class MergedPin(
                 popupWindow.dismiss()
         }
 
-        val viewManager = LinearLayoutManager(activity)
-        val viewAdapter = PinListAdapter(activity)
-        viewAdapter.view = view
-
-        customView.findViewById<RecyclerView>(R.id.allpins_recyclerview).apply {
-            layoutManager = viewManager
-            adapter = viewAdapter
-        }
-
         val ids =  addContent()
-        pinViewModel.getPins(ids) { pindatas ->
-            viewAdapter.setPins(pindatas,pinViewModel)
+        val viewManager = LinearLayoutManager(activity)
+        if(pinViewModel != null) {
+            val pinViewAdapter = PinListAdapter(activity)
+            pinViewAdapter.view = view
+
+            customView.findViewById<RecyclerView>(R.id.allpins_recyclerview).apply {
+                layoutManager = viewManager
+                adapter = pinViewAdapter
+            }
+
+            pinViewModel.getPins(ids) { pindatas ->
+                pinViewAdapter.setPins(pindatas,pinViewModel)
+            }
+        }
+        if(fieldbookViewModel != null) {
+            val fieldbookViewAdapter = FieldbookAdapter(activity, fieldbookViewModel, view)
+            fieldbookViewAdapter.view = view
+
+            customView.findViewById<RecyclerView>(R.id.allpins_recyclerview).apply {
+                layoutManager = viewManager
+                adapter = fieldbookViewAdapter
+            }
+
+            fieldbookViewModel.getPins(ids) { pindatas ->
+                fieldbookViewAdapter.setFieldbook(pindatas)
+            }
         }
 
         popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0)

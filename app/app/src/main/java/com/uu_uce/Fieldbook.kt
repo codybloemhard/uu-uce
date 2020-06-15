@@ -4,9 +4,11 @@ import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
@@ -102,14 +104,26 @@ class Fieldbook : AppCompatActivity() {
 fun openFieldbookPopup (activity: Activity, rootView: View, entry: FieldbookEntry, content: List<ContentBlockInterface>) {
     val layoutInflater = activity.layoutInflater
 
-    // Build an custom view (to be inflated on top of our current view & build it's popup window)
-    val customView = layoutInflater.inflate(R.layout.pin_content_view, rootView as ViewGroup, false)
+    var popupWindow: PopupWindow? = null
 
-    val popupWindow = PopupWindow(
+    // Build an custom view (to be inflated on top of our current view & build it's popup window)
+    val customView = layoutInflater.inflate(R.layout.pin_content_view, rootView.parent as ViewGroup, false)
+    customView.setOnKeyListener { v, keyCode, event ->
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.repeatCount == 0 && popupWindow?.isShowing == true) {
+            popupWindow?.dismiss()
+            true
+        }
+        else false
+    }
+
+    popupWindow = PopupWindow(
         customView,
         ViewGroup.LayoutParams.MATCH_PARENT,
         ViewGroup.LayoutParams.MATCH_PARENT
     )
+    popupWindow.setBackgroundDrawable(ColorDrawable())
+    popupWindow.isOutsideTouchable = true
+    popupWindow.isFocusable = true
 
     // Get elements
     val layout: LinearLayout =

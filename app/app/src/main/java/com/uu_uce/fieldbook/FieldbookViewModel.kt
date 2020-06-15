@@ -44,7 +44,7 @@ class FieldbookViewModel(application: Application): AndroidViewModel(application
         fieldbookRepository.update(title, content, entryId)
     }
 
-    fun getPins(pinIds : List<String>, action : ((List<PinData>) -> (Unit))) = viewModelScope.launch {
+    fun getPins(pinIds : List<String>, action : ((List<FieldbookEntry>) -> (Unit))) = viewModelScope.launch {
         fieldbookRepository.getPins(pinIds, action)
     }
 }

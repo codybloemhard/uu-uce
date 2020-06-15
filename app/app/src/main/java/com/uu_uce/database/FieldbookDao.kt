@@ -33,5 +33,5 @@ interface FieldbookDao {
     suspend fun update(title: String, content : String, entryId : Int)
 
     @Query("SELECT * from fieldbook where id in (:pids)")
-    suspend fun getPins(pids: List<String>) : List<PinData>
+    suspend fun getPins(pids: List<String>) : List<FieldbookEntry>
 }

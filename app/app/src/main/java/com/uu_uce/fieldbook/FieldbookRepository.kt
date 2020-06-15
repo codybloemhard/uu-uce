@@ -37,7 +37,7 @@ class FieldbookRepository(private val fieldbookDao: FieldbookDao) {
         fieldbookDao.update(title, content, entryId)
     }
 
-    suspend fun getPins(pinIds : List<String>, action: (List<PinData>) -> Unit){
+    suspend fun getPins(pinIds : List<String>, action: (List<FieldbookEntry>) -> Unit){
         action(fieldbookDao.getPins(pinIds))
     }
 }

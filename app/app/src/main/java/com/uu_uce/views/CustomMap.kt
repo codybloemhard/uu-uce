@@ -69,8 +69,8 @@ class CustomMap : ViewTouchParent {
     private val deviceLocEdgePaint  : Paint = Paint()
 
     private lateinit var activity           : Activity
-    private lateinit var pinViewModel       : PinViewModel
-    private lateinit var fieldbookViewModel : FieldbookViewModel
+    private var pinViewModel                : PinViewModel? = null
+    private var fieldbookViewModel          : FieldbookViewModel? = null
     private lateinit var lfOwner            : LifecycleOwner
 
     private var pins                        : MutableMap<String, FinalPin>   = mutableMapOf()
@@ -355,7 +355,7 @@ class CustomMap : ViewTouchParent {
             when {
                 pinStatuses[pin.pinId] == null -> {
                     // Pin was not yet present
-                    val newPin = PinConversion(activity).pinDataToPin(pin, pinViewModel)
+                    val newPin = PinConversion(activity).pinDataToPin(pin, pinViewModel!!)
                     newPin.tryUnlock {
                         Logger.log(LogType.Info, "CustomMap", "Adding pin")
                         synchronized(pins) {
@@ -395,7 +395,7 @@ class CustomMap : ViewTouchParent {
     fun updatePins(){
         pins = mutableMapOf()
         pinStatuses = mutableMapOf()
-        pinViewModel.reloadPins { newPinData -> updatePinStatuses(newPinData) }
+        pinViewModel!!.reloadPins { newPinData -> updatePinStatuses(newPinData) }
         pinsUpdated.setValue(false)
         synchronized(mergedPinsLock){
             mergedPins = mergePins()
@@ -411,7 +411,7 @@ class CustomMap : ViewTouchParent {
 
     fun setFieldbook (fieldbook: List<FieldbookEntry>) {
         for (entry in fieldbook) {
-            val pin = PinConversion(activity).fieldbookEntryToPin(entry,fieldbookViewModel)
+            val pin = PinConversion(activity).fieldbookEntryToPin(entry,fieldbookViewModel!!)
             pins[pin.id] = pin.apply{
                 resize(pinSize)
             }
@@ -481,7 +481,7 @@ class CustomMap : ViewTouchParent {
             val background = PinConversion.difficultyToBackground(mergedPinBackground, (context as Activity), context.resources)
             val icon = PinConversion.typeToIcon(mergedPinIcon, context.resources)
 
-            val newMergedPin = MergedPin(finalpins[mini], finalpins[minj], actualDis, pixeldis, pinViewModel, coordinate, background, icon, pinSize.toFloat())
+            val newMergedPin = MergedPin(finalpins[mini], finalpins[minj], actualDis, pixeldis, pinViewModel, fieldbookViewModel, coordinate, background, icon, pinSize.toFloat())
 
             finalpins.removeAt(minj)
             finalpins.removeAt(mini)
