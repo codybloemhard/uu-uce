@@ -17,7 +17,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinListAdapter
 import com.uu_uce.allpins.PinViewModel
@@ -65,8 +64,8 @@ class AllPins : AppCompatActivity() {
             pins?.let { viewAdapter.setPins(sortList(pins, sharedPref.getInt("com.uu_uce.SORTMODE", 0)), pinViewModel) }
         })
 
-        val filterButton = findViewById<ImageView>(R.id.sortButton)
-        filterButton.setOnClickListener{
+        val sortButton = findViewById<ImageView>(R.id.sortButton)
+        sortButton.setOnClickListener{
             openDialog()
         }
 

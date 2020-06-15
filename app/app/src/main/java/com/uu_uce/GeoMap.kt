@@ -32,6 +32,7 @@ import org.jetbrains.annotations.TestOnly
 import java.io.File
 
 var needsReload = ListenableBoolean()
+var testing = false
 
 const val defaultLineWidth = 1f
 
@@ -139,24 +140,26 @@ class GeoMap : AppCompatActivity() {
         this.customMap.setLifeCycleOwner(this)
         this.customMap.setPins(pinViewModel.allPinData)
 
-        // Update pins
-        updateFiles(
-            listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
-            this,
-            { success ->
-                if(success){
-                    runOnUiThread {
-                        Toast.makeText(this, getString(R.string.settings_pins_downloaded), Toast.LENGTH_LONG).show()
-                        pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))){
-                            pinsUpdated.setValue(true)
+        // Update pins when not testing
+        if(!testing){
+            updateFiles(
+                listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
+                this,
+                { success ->
+                    if(success){
+                        runOnUiThread {
+                            Toast.makeText(this, getString(R.string.settings_pins_downloaded), Toast.LENGTH_LONG).show()
+                            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))){
+                                pinsUpdated.setValue(true)
+                            }
                         }
                     }
+                    else{
+                        runOnUiThread { Toast.makeText(this, getString(R.string.geomap_pins_download_instructions), Toast.LENGTH_LONG).show() }
+                    }
                 }
-                else{
-                    runOnUiThread { Toast.makeText(this, getString(R.string.geomap_pins_download_instructions), Toast.LENGTH_LONG).show() }
-                }
-            }
-        )
+            )
+        }
 
         // Get statusbar height
         resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")

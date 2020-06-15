@@ -27,7 +27,9 @@ import org.junit.runner.RunWith
 @LargeTest
 class GeoMapTests {
     private lateinit var pinLocation : Pair<Float, Float>
-    private var wifi : WifiManager? = null
+    init{
+        testing = true
+    }
 
     @get:Rule
     var activityRule: ActivityTestRule<GeoMap>
@@ -44,7 +46,6 @@ class GeoMapTests {
 
     @Before
     fun init(){
-        wifi = activityRule.activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager?
         val pinList: MutableList<PinData> = mutableListOf()
         pinList.add(
             PinData(

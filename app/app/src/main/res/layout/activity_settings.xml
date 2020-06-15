@@ -109,7 +109,7 @@
                     android:id="@+id/unlockrange_text"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/settings_unlock_range"
+                    android:text="@string/settings_complete_range"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
