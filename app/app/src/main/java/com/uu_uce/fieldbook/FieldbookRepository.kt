@@ -1,7 +1,6 @@
 package com.uu_uce.fieldbook
 
 import androidx.lifecycle.LiveData
-import com.uu_uce.allpins.PinData
 import com.uu_uce.database.FieldbookDao
 
 class FieldbookRepository(private val fieldbookDao: FieldbookDao) {

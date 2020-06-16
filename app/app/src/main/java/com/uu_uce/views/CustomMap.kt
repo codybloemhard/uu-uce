@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Paint
-import android.icu.lang.UCharacter
 import android.opengl.GLES20
 import android.os.Build
 import android.util.AttributeSet
@@ -43,7 +42,6 @@ import com.uu_uce.pins.SinglePin
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
 import kotlinx.android.synthetic.main.activity_geo_map.*
-import kotlinx.android.synthetic.main.quiz_complete_popup.view.*
 import org.jetbrains.annotations.TestOnly
 import java.time.LocalDate
 import kotlin.math.abs

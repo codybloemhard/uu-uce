@@ -5,7 +5,6 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import com.uu_uce.allpins.PinData
 import com.uu_uce.fieldbook.FieldbookEntry
 
 @Dao

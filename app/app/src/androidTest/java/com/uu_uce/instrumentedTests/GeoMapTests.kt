@@ -1,7 +1,5 @@
 package com.uu_uce.instrumentedTests
 
-import android.content.Context
-import android.net.wifi.WifiManager
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.doubleClick
