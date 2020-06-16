@@ -8,6 +8,7 @@ import android.graphics.Paint
 import android.icu.lang.UCharacter
 import android.opengl.GLES20
 import android.os.Build
+import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.ViewGroup
@@ -192,6 +193,8 @@ class CustomMap : ViewTouchParent {
                 text = layerName
                 gravity = Gravity.CENTER_HORIZONTAL
                 layoutParams = ViewGroup.LayoutParams(buttonSize, LinearLayout.LayoutParams.WRAP_CONTENT)
+                maxLines = 1
+                ellipsize = TextUtils.TruncateAt.END
             }
 
             buttonLayout.addView(buttonFrame)

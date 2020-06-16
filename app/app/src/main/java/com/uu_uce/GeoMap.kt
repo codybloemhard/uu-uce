@@ -259,7 +259,6 @@ class GeoMap : AppCompatActivity() {
             startActivity(intent)
             needsRestart = false
         }
-        if(needsReload.getValue()) loadMap()
         if(started){
             val newSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
             customMap.updatePins()
@@ -354,6 +353,10 @@ class GeoMap : AppCompatActivity() {
 
         //create camera based on layers
         customMap.initializeCamera()
+        customMap.post{
+            customMap.setCameraWAspect()
+            customMap.redrawMap()
+        }
 
         //more menu initialization which needs its width/height
         scaleWidget.post {
