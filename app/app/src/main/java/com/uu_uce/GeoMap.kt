@@ -34,8 +34,6 @@ import java.io.File
 var needsReload = ListenableBoolean()
 var testing = false
 
-const val defaultLineWidth = 1f
-
 //main activity in which the map and menu are displayed
 class GeoMap : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel
@@ -266,6 +264,15 @@ class GeoMap : AppCompatActivity() {
                 customMap.pinSize = newSize
                 customMap.resizePins()
             }
+
+            needsReload.setListener(object : ListenableBoolean.ChangeListener {
+                override fun onChange() {
+                    if(needsReload.getValue()){
+                        loadMap()
+                    }
+                }
+            })
+
             customMap.redrawMap()
         }
         super.onResume()
@@ -380,11 +387,13 @@ class GeoMap : AppCompatActivity() {
             val g = reader.readUByte()
             val r = reader.readUByte()
 
-            Style(outline.toInt() == 1, floatArrayOf(
-                r.toFloat()/255,
-                g.toFloat()/255,
-                b.toFloat()/255
-            ))
+            Style(
+                floatArrayOf(
+                    r.toFloat()/255,
+                    g.toFloat()/255,
+                    b.toFloat()/255
+                )
+            )
         }
     }
 

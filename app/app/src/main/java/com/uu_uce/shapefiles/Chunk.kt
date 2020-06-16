@@ -16,7 +16,10 @@ shapes: all shapes present in the chunk
 bmin/bmax: the bounding box of all shapes
 type: what type of content is in this chunk
  */
-class Chunk(private var shapes: List<Shape>, var bmin: p3, var bmax: p3, val type: LayerType){
+class Chunk(
+    private var shapes: List<Shape>,
+    val type: LayerType
+){
     private val drawInfo: DrawInfo = when(type){
         LayerType.Height -> {
             HeightlineDrawInfo()

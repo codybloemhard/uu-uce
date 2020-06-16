@@ -73,6 +73,17 @@ class FieldbookPinmapFragment : Fragment() {
         super.onStart()
         start()
     }
+
+    override fun onResume() {
+        super.onResume()
+        needsReload.setListener(object : ListenableBoolean.ChangeListener {
+            override fun onChange() {
+                if(needsReload.getValue()){
+                    loadMap()
+                }
+            }
+        })
+    }
     
     private fun start(){
         // Get preferences
@@ -175,6 +186,10 @@ class FieldbookPinmapFragment : Fragment() {
 
         //create camera based on layers
         customMap.initializeCamera()
+        customMap.post{
+            customMap.setCameraWAspect()
+            customMap.redrawMap()
+        }
 
         customMap.setCameraWAspect()
         needsReload.setValue(false)
@@ -192,11 +207,13 @@ class FieldbookPinmapFragment : Fragment() {
             val g = reader.readUByte()
             val r = reader.readUByte()
 
-            Style(outline.toInt() == 1, floatArrayOf(
-                r.toFloat()/255,
-                g.toFloat()/255,
-                b.toFloat()/255
-            ))
+            Style(
+                floatArrayOf(
+                    r.toFloat()/255,
+                    g.toFloat()/255,
+                    b.toFloat()/255
+                )
+            )
         }
     }
 }

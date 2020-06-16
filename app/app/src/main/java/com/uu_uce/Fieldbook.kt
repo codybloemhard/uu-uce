@@ -19,7 +19,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.uu_uce.fieldbook.FieldbookEntry
 import com.uu_uce.fieldbook.FieldbookHomeFragment
 import com.uu_uce.fieldbook.FieldbookPinmapFragment
-import com.uu_uce.fieldbook.FieldbookRouteFragment
 import com.uu_uce.pins.ContentBlockInterface
 import com.uu_uce.ui.createTopbar
 
@@ -70,10 +69,11 @@ class Fieldbook : AppCompatActivity() {
                             }
                             return true
                         }
-                        R.id.fieldbook_navigation_route -> {
+                        // TODO: implement route
+                        /*R.id.fieldbook_navigation_route -> {
                             openFragment(FieldbookRouteFragment.newInstance("", ""))
                             return true
-                        }
+                        }*/
                     }
                     return false
                 }

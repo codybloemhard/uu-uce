@@ -9,7 +9,6 @@ typealias p3 = Triple<Float,Float,Float>
 
 val p2Zero = Pair(0.0f,0.0f)
 val p2ZeroPair = Pair(p2Zero,p2Zero)
-val p3Min = Triple(Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE)
 val p3Zero = Triple(0.0f,0.0f,0.0f)
 val p3NaN = Triple(Float.NaN, Float.NaN, Float.NaN)
 

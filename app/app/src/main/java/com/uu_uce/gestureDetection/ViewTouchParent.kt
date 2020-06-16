@@ -14,6 +14,7 @@ interface TouchChild{
 Easy way to add a gesturedetector to a view without having to override all the methods
 Make your view a ViewTouchParent and add childs with the desired behaviour
  */
+@SuppressLint("ClickableViewAccessibility")
 open class ViewTouchParent: GLSurfaceView {
     constructor(context: Context): super(context)
     constructor(context: Context, attrs: AttributeSet): super(context, attrs)

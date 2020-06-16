@@ -111,7 +111,7 @@ class HeightLineReader(
                 p2(readValue(reader)/mult + xoff, readValue(reader)/mult + yoff)
             }
 
-            val style = Style(false, floatArrayOf(Random.nextFloat(), Random.nextFloat(), Random.nextFloat()))
+            val style = Style(floatArrayOf(Random.nextFloat(), Random.nextFloat(), Random.nextFloat()))
 
             Heightline(points, style)
         }
@@ -119,7 +119,7 @@ class HeightLineReader(
         val time1 = System.currentTimeMillis() - time
         Logger.log(LogType.Continuous, "BinShapeReader", "loadtime: $time1")
 
-        return Chunk(shapes, bmin, bmax, LayerType.Height)
+        return Chunk(shapes, LayerType.Height)
     }
 
     override fun readInfo(): Pair<p3,p3>{
@@ -156,7 +156,7 @@ class HeightLineReader(
     }
 }
 
-class Style(val outline: Boolean, val color: FloatArray)
+class Style(val color: FloatArray)
 
 @ExperimentalUnsignedTypes
 class PolygonReader(
@@ -203,7 +203,7 @@ class PolygonReader(
                     val styleIndex = reader.readULong().toInt()
                     styles[styleIndex]
                 }
-                else Style(false, floatArrayOf(0.2f,0.2f,0.8f))
+                else Style(floatArrayOf(0.2f,0.2f,0.8f))
 
             /* Read shape bounding boxes
             val bmi = p3(readValue()/mult + xoff, readValue()/mult + yoff, readValue())
@@ -215,7 +215,7 @@ class PolygonReader(
             Polygon(vertices, indices.toMutableList(), style)
         }
 
-        return Chunk(shapes, bmin, bmax, LayerType.Water)
+        return Chunk(shapes, LayerType.Water)
     }
 
     override fun readInfo(): Pair<p3,p3>{

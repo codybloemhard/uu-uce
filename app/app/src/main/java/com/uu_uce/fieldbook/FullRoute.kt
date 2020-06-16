@@ -1,6 +1,7 @@
 package com.uu_uce.fieldbook
 
-import android.os.Build
+// TODO: implement route
+/*import android.os.Build
 import android.util.JsonReader
 import android.view.View
 import com.uu_uce.allpins.PinConversion
@@ -99,4 +100,4 @@ class FullRoute (routeString: String) {
         reader.endObject()
         return RoutePoint(coordinate,localtime)
     }
-}
+}*/

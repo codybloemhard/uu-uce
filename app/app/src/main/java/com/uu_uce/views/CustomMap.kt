@@ -5,9 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Paint
-import android.icu.lang.UCharacter
 import android.opengl.GLES20
-import android.os.Build
 import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.Gravity
@@ -28,8 +26,6 @@ import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.fieldbook.FieldbookEntry
 import com.uu_uce.fieldbook.FieldbookViewModel
-import com.uu_uce.fieldbook.FullRoute
-import com.uu_uce.fieldbook.Route
 import com.uu_uce.gestureDetection.*
 import com.uu_uce.gestureDetection.Scroller
 import com.uu_uce.mapOverlay.Location
@@ -38,20 +34,17 @@ import com.uu_uce.mapOverlay.pointDistance
 import com.uu_uce.misc.ListenableBoolean
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.pins.SinglePin
 import com.uu_uce.pins.MergedPin
 import com.uu_uce.pins.Pin
+import com.uu_uce.pins.SinglePin
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
 import kotlinx.android.synthetic.main.activity_geo_map.*
-import kotlinx.android.synthetic.main.quiz_complete_popup.view.*
 import org.jetbrains.annotations.TestOnly
-import java.time.LocalDate
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.system.measureTimeMillis
 
-class PopupHandler(var popup: PopupWindow?)
 var pinsUpdated = ListenableBoolean()
 
 // The view displayed in the app that holds the map
@@ -81,17 +74,12 @@ class CustomMap : ViewTouchParent {
     private lateinit var lfOwner            : LifecycleOwner
 
     private var pins                        : MutableMap<String, SinglePin>   = mutableMapOf()
-    private var fieldbook                   : List<FieldbookEntry>      = listOf()
     private var mergedPins: Pin? = null
     private var mergedPinsLock: Any = Object()
     private var pinStatuses                 : MutableMap<String, Int>   = mutableMapOf()
 
     var pinSize: Int
     private var locSizeFactor = 0.5f
-
-    //pin merging
-    private val minPinChunks = 4
-    private val pinChunksDepth = 4
 
     // Map
     private var smap = ShapeMap(this)
@@ -541,7 +529,8 @@ class CustomMap : ViewTouchParent {
         return finalpins.getOrNull(0)
     }
 
-    fun setRoute() : Route {
+    // TODO: Implement route in fieldbook
+    /*fun setRoute() : Route {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Route(
                 0,
@@ -566,7 +555,7 @@ class CustomMap : ViewTouchParent {
         } else {
             TODO("VERSION.SDK_INT < O")
         }
-    }
+    }*/
 
     fun setCameraWAspect(){
         camera.wAspect = width.toFloat()/height

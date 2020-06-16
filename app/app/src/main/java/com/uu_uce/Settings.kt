@@ -343,7 +343,6 @@ class Settings : AppCompatActivity() {
                 .setMessage(getString(R.string.settings_delete_content_warning_body))
                 .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
                     File(contentDir).deleteRecursively()
-                    needsReload.setValue(true)
                     delete_content_button.visibility = View.INVISIBLE
                     content_storage_size.text = writableSize(dirSize(File(contentDir)))
                     Toast.makeText(this, getString(R.string.settings_content_deleted_text), Toast.LENGTH_LONG).show()
