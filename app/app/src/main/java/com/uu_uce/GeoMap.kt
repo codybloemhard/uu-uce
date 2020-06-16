@@ -94,36 +94,6 @@ class GeoMap : AppCompatActivity() {
         }
     }
 
-    private fun downloadMaps(){
-        openProgressPopup(window.decorView.rootView)
-        updateFiles(
-            maps,
-            this,
-            { success ->
-                if(success){
-                    runOnUiThread{
-                        Toast.makeText(this, getString(R.string.zip_download_completed), Toast.LENGTH_LONG).show()
-                    }
-                    val unzipResult = unpackZip(maps.first()) { progress -> runOnUiThread { progressBar.progress = progress } }
-                    runOnUiThread{
-                        if(unzipResult) Toast.makeText(this, getString(R.string.zip_unpack_completed), Toast.LENGTH_LONG).show()
-                        else Toast.makeText(this, getString(R.string.zip_unpacking_failed), Toast.LENGTH_LONG).show()
-                        popupWindow?.dismiss()
-                        start()
-                    }
-                }
-                else{
-                    runOnUiThread{
-                        Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG).show()
-                        popupWindow?.dismiss()
-                        start()
-                    }
-                }
-            },
-            { progress -> runOnUiThread { progressBar.progress = progress } }
-        )
-    }
-
     private fun start(){
         setContentView(R.layout.activity_geo_map)
         customMap.setActivity(this)
@@ -140,23 +110,7 @@ class GeoMap : AppCompatActivity() {
 
         // Update pins when not testing
         if(!testing){
-            updateFiles(
-                listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
-                this,
-                { success ->
-                    if(success){
-                        runOnUiThread {
-                            Toast.makeText(this, getString(R.string.settings_pins_downloaded), Toast.LENGTH_LONG).show()
-                            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))){
-                                pinsUpdated.setValue(true)
-                            }
-                        }
-                    }
-                    else{
-                        runOnUiThread { Toast.makeText(this, getString(R.string.geomap_pins_download_instructions), Toast.LENGTH_LONG).show() }
-                    }
-                }
-            )
+            queryServer("pin", this) { s -> updateDatabase(s) }
         }
 
         // Get statusbar height
@@ -376,6 +330,57 @@ class GeoMap : AppCompatActivity() {
         needsReload.setValue(false)
         customMap.redrawMap()
     }
+
+    private fun downloadMaps(){
+        openProgressPopup(window.decorView.rootView)
+        updateFiles(
+            maps,
+            this,
+            { success ->
+                if(success){
+                    runOnUiThread{
+                        Toast.makeText(this, getString(R.string.zip_download_completed), Toast.LENGTH_LONG).show()
+                    }
+                    val unzipResult = unpackZip(maps.first()) { progress -> runOnUiThread { progressBar.progress = progress } }
+                    runOnUiThread{
+                        if(unzipResult) Toast.makeText(this, getString(R.string.zip_unpack_completed), Toast.LENGTH_LONG).show()
+                        else Toast.makeText(this, getString(R.string.zip_unpacking_failed), Toast.LENGTH_LONG).show()
+                        popupWindow?.dismiss()
+                        start()
+                    }
+                }
+                else{
+                    runOnUiThread{
+                        Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG).show()
+                        popupWindow?.dismiss()
+                        start()
+                    }
+                }
+            },
+            { progress -> runOnUiThread { progressBar.progress = progress } }
+        )
+    }
+
+    private fun updateDatabase(pinDatabaseFile : String) {
+        updateFiles(
+            listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
+            this,
+            { success ->
+                if(success){
+                    runOnUiThread {
+                        Toast.makeText(this, getString(R.string.settings_pins_downloaded), Toast.LENGTH_LONG).show()
+                        pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))){
+                            pinsUpdated.setValue(true)
+                        }
+                    }
+                }
+                else{
+                    runOnUiThread { Toast.makeText(this, getString(R.string.geomap_pins_download_instructions), Toast.LENGTH_LONG).show() }
+                }
+            }
+        )
+    }
+
     private fun readStyles(dir: File){
         val file = File(dir, "styles")
         val reader = FileReader(file)

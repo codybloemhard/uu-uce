@@ -15,10 +15,7 @@ import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.allpins.parsePins
 import com.uu_uce.pins.PinContent
-import com.uu_uce.services.dirSize
-import com.uu_uce.services.unpackZip
-import com.uu_uce.services.updateFiles
-import com.uu_uce.services.writableSize
+import com.uu_uce.services.*
 import com.uu_uce.ui.createTopbar
 import com.uu_uce.views.pinsUpdated
 import kotlinx.android.synthetic.main.activity_settings.*
@@ -34,7 +31,7 @@ const val mapsName = "50016551-7038-4305-b717-17bd9f93fb34.zip"
 const val mapsFolderName = "Maps"
 const val contentFolderName = "PinContent"
 const val legendName = "legend.png"
-const val pinDatabaseFile = "75aa95dd-b74b-467e-a7db-5d0677d7da7b.json"
+//const val pinDatabaseFile = "75aa95dd-b74b-467e-a7db-5d0677d7da7b.json"
 const val mergedPinBackground = 5
 const val mergedPinIcon = "MERGEDPIN"
 
@@ -354,10 +351,7 @@ class Settings : AppCompatActivity() {
         // Download pins
         var updating = false
         download_pins_button.setOnClickListener{
-            if(!updating) {
-                pins_downloading_progress.visibility = View.VISIBLE
-                updating = true
-
+            fun updateDatabase(pinDatabaseFile : String){
                 updateFiles(
                     listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
                     this,
@@ -391,6 +385,12 @@ class Settings : AppCompatActivity() {
                         runOnUiThread { pins_downloading_progress.progress = progress }
                     }
                 )
+            }
+
+            if(!updating) {
+                pins_downloading_progress.visibility = View.VISIBLE
+                updating = true
+                queryServer("pin", this) { s -> updateDatabase(s) }
             }
         }
     }
