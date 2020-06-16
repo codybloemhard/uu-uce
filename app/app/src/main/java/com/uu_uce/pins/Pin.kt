@@ -354,7 +354,16 @@ class SinglePin(
 
         var popupWindow: PopupWindow? = null
         // Build an custom view (to be inflated on top of our current view & build it's popup window)
-        val customView = layoutInflater.inflate(R.layout.pin_content_view, parentView.parent as ViewGroup, false)
+        val viewGroup: ViewGroup
+        var newViewGroup: ViewParent = if(parentView is ViewParent) parentView else parentView.parent
+        while(true){
+            if(newViewGroup is ViewGroup){
+                viewGroup = newViewGroup
+                break
+            }
+            newViewGroup = newViewGroup.parent
+        }
+        val customView = layoutInflater.inflate(R.layout.pin_content_view, viewGroup, false)
         customView.setOnKeyListener { v, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_BACK && event.repeatCount == 0 && popupWindow?.isShowing == true) {
                     popupWindow?.dismiss()

@@ -49,8 +49,8 @@ class PinConversion(val activity: Activity){
             return UTMCoordinate(
                 s.elementAt(0).value.toInt(),
                 s.elementAt(1).value.first(),
-                s.elementAt(4).value.toFloat(),
-                s.elementAt(2).value.toFloat())
+                s.elementAt(2).value.toFloat(),
+                s.elementAt(4).value.toFloat())
         }
 
         fun difficultyToBackground(difficulty: Int, activity: Activity, resource: Resources): Bitmap {
