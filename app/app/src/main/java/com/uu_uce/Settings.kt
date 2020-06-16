@@ -353,33 +353,46 @@ class Settings : AppCompatActivity() {
         }
 
         // Download pins
+        var updating = false
         download_pins_button.setOnClickListener{
-            pins_downloading_progress.visibility = View.VISIBLE
+            if(!updating) {
+                pins_downloading_progress.visibility = View.VISIBLE
+                updating = true
 
-            updateFiles(
-                listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
-                this,
-                { success ->
-                    if(success){
-                        runOnUiThread {
-                            Toast.makeText(this, getString(R.string.settings_pins_downloaded), Toast.LENGTH_LONG).show()
-                            pins_downloading_progress.visibility = View.INVISIBLE
-                            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))){
-                                pinsUpdated.setValue(true)
+                updateFiles(
+                    listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
+                    this,
+                    { success ->
+                        if (success) {
+                            runOnUiThread {
+                                Toast.makeText(
+                                    this,
+                                    getString(R.string.settings_pins_downloaded),
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                pins_downloading_progress.visibility = View.INVISIBLE
+                                pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))) {
+                                    pinsUpdated.setValue(true)
+                                    updating = false
+                                }
+                            }
+                        } else {
+                            runOnUiThread {
+                                pins_downloading_progress.visibility = View.INVISIBLE
+                                updating = false
+                                Toast.makeText(
+                                    this,
+                                    getString(R.string.download_failed),
+                                    Toast.LENGTH_LONG
+                                ).show()
                             }
                         }
+                    },
+                    { progress ->
+                        runOnUiThread { pins_downloading_progress.progress = progress }
                     }
-                    else{
-                        runOnUiThread{
-                            pins_downloading_progress.visibility = View.INVISIBLE
-                            Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG).show()
-                        }
-                    }
-                },
-                {
-                    progress -> runOnUiThread { pins_downloading_progress.progress = progress }
-                }
-            )
+                )
+            }
         }
     }
 }
