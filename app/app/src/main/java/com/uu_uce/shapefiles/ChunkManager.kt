@@ -34,6 +34,7 @@ class ChunkManager(
     private var lastViewport: Pair<p2,p2> = Pair(p2Zero,p2Zero)
     private var lastZoomLevel: Int = -1
     private val nrOfLODs = nrCuts.size
+    private var camzoom = 0f
 
     private var chunkLoader: Job? = null
     private var chunkloaderName = ""
@@ -62,7 +63,8 @@ class ChunkManager(
     viewport: current viewport of the camera
     camzoom: current zoom of the camera
      */
-    fun update(viewport: Pair<p2, p2>, camzoom: Float): ChunkUpdateResult {
+    fun update(viewport: Pair<p2, p2>, cameraZoom: Float): ChunkUpdateResult {
+        camzoom = cameraZoom
         if(camzoom > zoomCutoff) {
             synchronized(chunks){
                 chunks.clear()
@@ -87,7 +89,7 @@ class ChunkManager(
 
         if(chunksChanged) {
             val activeChunks = getActiveChunks()
-            addChunks(activeChunks, camzoom, viewport)
+            addChunks(activeChunks)
             return ChunkUpdateResult.LOADING
         }
 
@@ -107,27 +109,26 @@ class ChunkManager(
     chunkIndices: the chunks to load
     zoom: the current zoom level
      */
-    private fun addChunks(chunkIndices: List<ChunkIndex>, camzoom: Float, viewport: Pair<p2,p2>){
+    private fun addChunks(chunkIndices: List<ChunkIndex>){
         loading = true
 
         chunkLoader?.cancel()
         chunkLoader = GlobalScope.launch{
             chunkloaderName = Thread.currentThread().name
             synchronized(chunks) {
-                clearUnusedChunks(camzoom)
+                clearUnusedChunks()
             }
 
             for(i in chunkIndices.indices){
                 val chunkIndex = chunkIndices[i]
                 if(!chunks.containsKey(chunkIndex)) {
-                    if(shouldGetLoaded(chunkIndex, camzoom)) {
+                    if(shouldGetLoaded(chunkIndex)) {
                         val c: Chunk = chunkGetter.getChunk(chunkIndex)
-                        //checking again if the chunk should be loaded, to prevent flickering
-                        if(shouldGetLoaded(chunkIndex, camzoom)) {
-                            synchronized(chunks) {
+                        synchronized(chunks) {
+                            if(shouldGetLoaded(chunkIndex)) {
                                 chunks[chunkIndex] = c
+                                Logger.log(LogType.Info, "ChunkManager", "loaded chunk $chunkIndex")
                             }
-                            Logger.log(LogType.Info, "ChunkManager", "loaded chunk $chunkIndex")
                         }
                     }
                 }
@@ -137,7 +138,7 @@ class ChunkManager(
                 return@launch
             }
             synchronized(chunks) {
-                clearUnusedChunks(camzoom)
+                clearUnusedChunks()
             }
 
             changed = true
@@ -145,9 +146,9 @@ class ChunkManager(
         }
     }
 
-    private fun clearUnusedChunks(camzoom: Float){
+    private fun clearUnusedChunks(){
         chunks.keys.removeAll { index ->
-            !shouldGetLoaded(index, camzoom)
+            !shouldGetLoaded(index)
         }
     }
 
@@ -200,7 +201,7 @@ class ChunkManager(
     }
 
     //whether a chunk should be loaded witht he current viewport and zoom
-    private fun shouldGetLoaded(chunkIndex: ChunkIndex, camzoom: Float): Boolean{
+    private fun shouldGetLoaded(chunkIndex: ChunkIndex): Boolean{
         val (x,y,z) = chunkIndex
         return camzoom < zoomCutoff && z == zoomLevel && x >= xmin && y >= ymin && x <= xmax && y <= ymax
     }

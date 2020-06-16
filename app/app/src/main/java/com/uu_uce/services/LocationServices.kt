@@ -40,15 +40,9 @@ data class UTMCoordinate(val zone : Int, val letter : Char, val east : Float, va
     override fun toString(): String {
         return  "$zone" +
                 "$letter" +
-                "${north.run{ 
-                    this
-        }.toInt()
-                }" +
+                "${north.toInt()}" +
                 "N" +
-                "${east.run{ 
-                    this
-        }.toInt()
-                }" +
+                "${east.toInt()}" +
                 "E"
     }
 }
