@@ -69,7 +69,7 @@ class Camera(
 
     //get matrix for drawing lines
     fun getScaleTrans(): Pair<FloatArray,FloatArray>{
-        val trans = floatArrayOf(-x.toFloat(), -y.toFloat())
+        val trans = floatArrayOf(-x, -y)
 
         val w = viewMax.first - viewMin.first
         val h = viewMax.second - viewMin.second

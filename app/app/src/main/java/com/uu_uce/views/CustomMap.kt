@@ -5,15 +5,17 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Paint
+import android.icu.lang.UCharacter
 import android.opengl.GLES20
 import android.os.Build
 import android.util.AttributeSet
+import android.view.Gravity
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.PopupWindow
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -28,19 +30,20 @@ import com.uu_uce.fieldbook.FieldbookViewModel
 import com.uu_uce.fieldbook.FullRoute
 import com.uu_uce.fieldbook.Route
 import com.uu_uce.gestureDetection.*
+import com.uu_uce.gestureDetection.Scroller
 import com.uu_uce.mapOverlay.Location
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.pointDistance
-import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.misc.ListenableBoolean
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.pins.FinalPin
 import com.uu_uce.pins.MergedPin
 import com.uu_uce.pins.Pin
+import com.uu_uce.pins.SinglePin
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
 import kotlinx.android.synthetic.main.activity_geo_map.*
+import kotlinx.android.synthetic.main.quiz_complete_popup.view.*
 import org.jetbrains.annotations.TestOnly
 import java.time.LocalDate
 import kotlin.math.abs
@@ -48,6 +51,8 @@ import kotlin.math.pow
 import kotlin.system.measureTimeMillis
 
 var pinsUpdated = ListenableBoolean()
+
+// The view displayed in the app that holds the map
 class CustomMap : ViewTouchParent {
 
     constructor(context: Context): super(context)
@@ -73,7 +78,7 @@ class CustomMap : ViewTouchParent {
     private var fieldbookViewModel          : FieldbookViewModel? = null
     private lateinit var lfOwner            : LifecycleOwner
 
-    private var pins                        : MutableMap<String, FinalPin>   = mutableMapOf()
+    private var pins                        : MutableMap<String, SinglePin>   = mutableMapOf()
     private var fieldbook                   : List<FieldbookEntry>      = listOf()
     private var mergedPins: Pin? = null
     private var mergedPinsLock: Any = Object()
@@ -140,21 +145,58 @@ class CustomMap : ViewTouchParent {
     }
 
     // Add a new layer to the map, and generate a button to toggle it
-    fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout?, zoomCutoff: Float = Float.MAX_VALUE, buttonSize: Int = 0){
+    fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout?, zoomCutoff: Float = Float.MAX_VALUE, buttonSize: Int = 0, layerName: String){
         smap.addLayer(lt, chunkGetter, zoomCutoff)
         val curLayers = nrLayers
         nrLayers++
 
         if (buttonSize > 0) {
+            val buttonLayout = LinearLayout(context, null).apply {
+                layoutParams = ViewGroup.LayoutParams(buttonSize, LinearLayout.LayoutParams.WRAP_CONTENT)
+                orientation = LinearLayout.VERTICAL
+            }
+            val buttonFrame = FrameLayout(context, null).apply{
+                layoutParams = ViewGroup.LayoutParams(buttonSize, buttonSize)
+            }
+
+            val btnBackground = CardView(context, null).apply{
+                val params = FrameLayout.LayoutParams(
+                    (buttonSize * 0.9).toInt(),
+                    (buttonSize * 0.9).toInt()
+                )
+                params.gravity = Gravity.CENTER
+                layoutParams = params
+                setCardBackgroundColor(ResourcesCompat.getColor(context.resources, R.color.BeniukonBronze, null))
+                radius = 10f
+            }
+
             val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle).apply {
                 setImageResource(R.drawable.ic_sprite_toggle_layer)
                 setOnClickListener {
                     toggleLayer(curLayers)
+                    if(layerVisible(curLayers)){
+                        btnBackground.setCardBackgroundColor(ResourcesCompat.getColor(context.resources, R.color.BeniukonBronze, null))
+                    }
+                    else{
+                        btnBackground.setCardBackgroundColor(ResourcesCompat.getColor(context.resources, R.color.TextGrey, null))
+                    }
                 }
-                layoutParams = ViewGroup.LayoutParams(buttonSize, buttonSize)
+                elevation = 6.5f
             }
 
-            scrollLayout!!.addView(btn)
+            buttonFrame.addView(btnBackground)
+            buttonFrame.addView(btn)
+
+            val layerTitle = TextView(context, null).apply{
+                text = layerName
+                gravity = Gravity.CENTER_HORIZONTAL
+                layoutParams = ViewGroup.LayoutParams(buttonSize, LinearLayout.LayoutParams.WRAP_CONTENT)
+            }
+
+            buttonLayout.addView(buttonFrame)
+            buttonLayout.addView(layerTitle)
+
+            scrollLayout!!.addView(buttonLayout)
         }
 
         mods = smap.getMods()
@@ -358,7 +400,7 @@ class CustomMap : ViewTouchParent {
                     val newPin = PinConversion(activity).pinDataToPin(pin, pinViewModel!!)
                     newPin.tryUnlock {
                         Logger.log(LogType.Info, "CustomMap", "Adding pin")
-                        synchronized(pins) {
+                        synchronized(pins){
                             pins[pin.pinId] = newPin
                         }
                         pinStatuses[newPin.id] = pin.status
@@ -393,7 +435,9 @@ class CustomMap : ViewTouchParent {
     }
 
     fun updatePins(){
-        pins = mutableMapOf()
+        synchronized(pins) {
+            pins = mutableMapOf()
+        }
         pinStatuses = mutableMapOf()
         pinViewModel!!.reloadPins { newPinData -> updatePinStatuses(newPinData) }
         pinsUpdated.setValue(false)
@@ -530,6 +574,10 @@ class CustomMap : ViewTouchParent {
     // Turn a layer on or off
     private fun toggleLayer(l: Int){
         smap.toggleLayer(l)
+    }
+
+    private fun layerVisible(l: Int): Boolean {
+        return smap.layerVisible(l)
     }
 
     fun setPinViewModel(vm: PinViewModel){

@@ -12,61 +12,50 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp">
+        android:layout_height="match_parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/searchLayout"
-            android:layout_width="match_parent"
+        <EditText
+            android:id="@+id/pins_searchbar"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:background="@drawable/custom_border_search"
+            android:drawableStart="@drawable/ic_sprite_search"
+            android:ems="10"
+            android:hint="@android:string/search_go"
+            android:importantForAutofill="no"
+            android:inputType="textPersonName"
+            android:textColorHint="@color/HighBlue"
+            app:layout_constraintBottom_toBottomOf="@+id/sortButton"
+            app:layout_constraintEnd_toStartOf="@+id/sortButton"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/sortButton" />
+
+        <ImageView
+            android:id="@+id/sortButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="15dp"
+            android:contentDescription="@string/allpins_sortbutton_description"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:focusable="true"
-            android:focusableInTouchMode="true">
-
-            <EditText
-                android:id="@+id/pins_searchbar"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:background="@drawable/custom_border_search"
-                android:drawableStart="@drawable/ic_sprite_search"
-                android:ems="10"
-                android:hint="@android:string/search_go"
-                android:importantForAutofill="no"
-                android:inputType="textPersonName"
-                android:textColorHint="@color/HighBlue"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            app:srcCompat="@drawable/ic_sprite_allpins_sortpins" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/allpins_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_margin="15dp"
             android:layout_marginTop="15dp"
             android:scrollbars="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/searchLayout"
+            app:layout_constraintTop_toBottomOf="@+id/sortButton"
             tools:listitem="@layout/allpins_recyclerview_item" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end|bottom"
-            android:layout_margin="16dp"
-            android:onClick="openDialog"
-            android:backgroundTint="?colorAccentRef"
-            android:src="@drawable/ic_sprite_sort_white"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>

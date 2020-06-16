@@ -22,7 +22,7 @@ fun coordToScreen(coordinate  : UTMCoordinate, viewport : Pair<p2, p2>, viewWidt
     val screenX = mapX / coordRangeX * viewWidth
     val screenY = viewHeight - mapY / coordRangeY * viewHeight
 
-    return Pair(screenX.toFloat(), screenY.toFloat())
+    return Pair(screenX, screenY)
 }
 
 /*

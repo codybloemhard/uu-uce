@@ -123,6 +123,10 @@ class ShapeMap(
         invalidate()
     }
 
+    fun layerVisible(l : Int) : Boolean {
+        return layerMask[l]
+    }
+
     private fun invalidate(){
         camera.forceChanged()
         view.requestRender()

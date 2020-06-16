@@ -2,10 +2,8 @@ package com.uu_uce.pins
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.opengl.GLES20
@@ -14,16 +12,13 @@ import android.view.*
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.OpenGL.coordsPerVertex
 import com.uu_uce.R
-import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinListAdapter
 import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.defaultPinSize
@@ -45,12 +40,11 @@ import kotlin.math.roundToInt
 
 //abstract pin class includes functionality for drawing the pin, and some abstract methods
 abstract class Pin(
-    val coordinate: UTMCoordinate,
-    protected var background      : Bitmap,
-    protected var icon            : Drawable,
-    var pinWidth: Float = defaultPinSize.toFloat()
+    val coordinate              : UTMCoordinate,
+    protected var background    : Bitmap,
+    private var icon            : Drawable,
+    var pinWidth                : Float = defaultPinSize.toFloat()
 ){
-    private var madeProgress = false
     protected var completeRange = 100
     //opengl stuff
     private var backgroundHandle: Int = -1
@@ -81,8 +75,8 @@ abstract class Pin(
     private var iconHeight : Double = 0.0
 
     // Initialize variables used in checking for clicks
-    var inScreen: Boolean = true
-    var boundingBox: Pair<p2, p2> = Pair(p2Zero, p2Zero)
+    private var inScreen: Boolean = true
+    private var boundingBox: Pair<p2, p2> = Pair(p2Zero, p2Zero)
 
     init {
         // Calculate icon measurements
@@ -210,7 +204,7 @@ abstract class Pin(
         GLES20.glEnableVertexAttribArray(positionHandle)
         GLES20.glVertexAttribPointer(positionHandle, coordsPerVertex, GLES20.GL_FLOAT, false, vertexStride, vertexBuffer)
 
-        val localtrans = floatArrayOf(trans[0] + coordinate.east.toFloat(), trans[1] + coordinate.north.toFloat())
+        val localtrans = floatArrayOf(trans[0] + coordinate.east, trans[1] + coordinate.north)
         val transHandle = GLES20.glGetUniformLocation(program, "trans")
         GLES20.glUniform2fv(transHandle, 1, localtrans, 0)
 
@@ -297,7 +291,7 @@ abstract class Pin(
 }
 
 //normal singular pin, which shows its information when tapped
-class FinalPin(
+class SinglePin(
     var id                      : String = "",
     coordinate              : UTMCoordinate,
     var title           : String,
@@ -305,9 +299,9 @@ class FinalPin(
     background      : Bitmap,
     icon            : Drawable,
     var status          : Int,              //-1 : recalculating, 0 : locked, 1 : unlocked, 2 : completed
-    protected var predecessorIds  : List<String>,
-    protected var followIds       : List<String>,
-    protected val viewModel       : ViewModel
+    private var predecessorIds  : List<String>,
+    private var followIds       : List<String>,
+    private val viewModel       : ViewModel
 ): Pin(coordinate, background, icon) {
     // Used to determine if warning should show when closing pin
     private var madeProgress = false
@@ -644,7 +638,7 @@ class MergedPin(
         var popupWindow: PopupWindow? = null
         // Build an custom view (to be inflated on top of our current view & build it's popup window)
         val customView = layoutInflater.inflate(R.layout.merged_pin_popup, view.parent as ViewGroup, false)
-        customView.setOnKeyListener { v, keyCode, event ->
+        customView.setOnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_BACK && event.repeatCount == 0 && popupWindow?.isShowing == true) {
                 popupWindow?.dismiss()
                 true

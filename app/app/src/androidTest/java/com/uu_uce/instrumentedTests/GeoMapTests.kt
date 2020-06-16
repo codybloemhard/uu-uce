@@ -27,7 +27,9 @@ import org.junit.runner.RunWith
 @LargeTest
 class GeoMapTests {
     private lateinit var pinLocation : Pair<Float, Float>
-    private var wifi : WifiManager? = null
+    init{
+        testing = true
+    }
 
     @get:Rule
     var activityRule: ActivityTestRule<GeoMap>
@@ -44,7 +46,6 @@ class GeoMapTests {
 
     @Before
     fun init(){
-        wifi = activityRule.activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager?
         val pinList: MutableList<PinData> = mutableListOf()
         pinList.add(
             PinData(
@@ -67,7 +68,7 @@ class GeoMapTests {
                 2,
                 "IMAGE",
                 "B",
-                "[{\"tag\":\"IMAGE\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/images/1afccc95-a809-4992-8e89-4f35c7e0b453.png\"}]",
+                "[{\"tag\":\"IMAGE\", \"file_path\":\"Images/74a60c4d-a70a-4bd7-90e3-b4b8550112a6.png\"}]",
                 1,
                 1,
                 "-1",
@@ -81,7 +82,7 @@ class GeoMapTests {
                 3,
                 "VIDEO",
                 "C",
-                "[{\"tag\":\"VIDEO\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/videos/7fd7ee4c-62ac-4a55-a3aa-30cc91cdaf27.mp4\", \"title\":\"zoo video\"}]",
+                "[{\"tag\":\"VIDEO\", \"file_path\":\"Videos/f0ef5e9a-ef06-4ef9-bc45-0b2f4f04415b.mp4\", \"title\":\"zoo video\"}]",
                 1,
                 1,
                 "-1",
@@ -91,7 +92,7 @@ class GeoMapTests {
         pinList.add(
             PinData(
                 "3",
-                "31N313468E4671533N",
+                "31N3134680E46715335N",
                 3,
                 "MCQUIZ",
                 "D",

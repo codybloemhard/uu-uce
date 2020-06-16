@@ -5,19 +5,12 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Rect
 import android.util.AttributeSet
-import android.view.View
-import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
-import com.uu_uce.GeoMap
 import com.uu_uce.R
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.shapefiles.p2
-import com.uu_uce.shapefiles.p3
-import com.uu_uce.shapefiles.p3NaN
-import kotlinx.android.synthetic.main.activity_geo_map.*
 
 class ScaleWidget: AppCompatTextView {
     constructor(context: Context): super(context)

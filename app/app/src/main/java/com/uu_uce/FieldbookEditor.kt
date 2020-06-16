@@ -452,7 +452,7 @@ class FieldbookEditor: AppCompatActivity() {
                 }
             }
         } else if (resultCode == Activity.RESULT_CANCELED) {
-            Toast.makeText(this,"Failed to select media",Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.fieldbook_mediaselection_failed), Toast.LENGTH_SHORT).show()
         }
     }
 

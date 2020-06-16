@@ -72,7 +72,7 @@ class Location(var utm: UTMCoordinate, context: Context){
         GLES20.glUseProgram(program)
 
         //set different shader arguments
-        val localTrans = floatArrayOf(trans[0] + utm.east.toFloat(), trans[1] + utm.north.toFloat())
+        val localTrans = floatArrayOf(trans[0] + utm.east, trans[1] + utm.north)
         val transHandle = GLES20.glGetUniformLocation(program, "trans")
         GLES20.glUniform2fv(transHandle, 1, localTrans, 0)
 

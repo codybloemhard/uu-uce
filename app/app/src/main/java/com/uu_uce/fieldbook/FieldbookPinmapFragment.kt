@@ -9,8 +9,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
-import android.widget.PopupWindow
-import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
@@ -145,23 +143,30 @@ class FieldbookPinmapFragment : Fragment() {
         try{readStyles(mydir)}
         catch(e: Exception){Logger.error("GeoMap", "no style file available: "+ e.message)}
         try {
-        val polygons = File(mydir, "Polygons")
+        val layerName = "Polygons"
+        val polygons = File(mydir, layerName)
         customMap.addLayer(
             LayerType.Water,
             PolygonReader(polygons, true, styles),
             toggle_layer_layout,
-            0.5f
+            0.5f,
+            0,
+            layerName
         )
         Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
         }catch(e: Exception){
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
         try {
-        val heightlines = File(mydir, "Heightlines")
+        val layerName = "Heightlines"
+        val heightlines = File(mydir, layerName)
         customMap.addLayer(
             LayerType.Height,
             HeightLineReader(heightlines),
-            toggle_layer_layout
+            toggle_layer_layout,
+            Float.MAX_VALUE,
+            0,
+            layerName
         )
         Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
 

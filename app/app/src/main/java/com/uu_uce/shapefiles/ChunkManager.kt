@@ -4,12 +4,10 @@ import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
 import kotlin.math.log
 import kotlin.math.pow
-import kotlin.system.measureTimeMillis
 
 enum class ChunkUpdateResult{NOTHING, REDRAW, LOADING}
 
@@ -42,7 +40,7 @@ class ChunkManager(
     private var loading = false
     private var changed = false
 
-    var factor = 0.0f
+    private var factor = 0.0f
 
     private var xmin = 0
     private var xmax = 0
@@ -170,7 +168,7 @@ class ChunkManager(
             val topok = top == midy+ring
 
             if(topok) {
-                for (x in left + 1..right - 1) {
+                for (x in left + 1 until right) {
                     res.add(ChunkIndex(x, top, zoomLevel))
                 }
             }
@@ -191,7 +189,7 @@ class ChunkManager(
             if(leftok||botok)res.add(ChunkIndex(left, bot, zoomLevel))
 
             if(leftok){
-                for(y in bot+1..top-1){
+                for(y in bot+1 until top){
                     res.add(ChunkIndex(left, y, zoomLevel))
                 }
             }

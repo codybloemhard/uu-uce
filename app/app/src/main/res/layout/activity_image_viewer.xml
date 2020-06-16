@@ -15,14 +15,15 @@
 
         <TextView
             android:id="@+id/image_title_text"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="29dp"
             android:gravity="center"
             android:text="@string/pin_image_title_placeholder"
             android:textColor="?textColorDarkRef"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/close_image_viewer"
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button

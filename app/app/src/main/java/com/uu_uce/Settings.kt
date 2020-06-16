@@ -34,7 +34,7 @@ const val mapsName = "50016551-7038-4305-b717-17bd9f93fb34.zip"
 const val mapsFolderName = "Maps"
 const val contentFolderName = "PinContent"
 const val legendName = "legend.png"
-const val pinDatabaseFile = "a6659236-273f-4eaf-b92d-d11231fd43aa.json"
+const val pinDatabaseFile = "75aa95dd-b74b-467e-a7db-5d0677d7da7b.json"
 const val mergedPinBackground = 5
 const val mergedPinIcon = "MERGEDPIN"
 
@@ -179,10 +179,7 @@ class Settings : AppCompatActivity() {
             }
             else{
                 with(sharedPref.edit()) {
-                    putBoolean(
-                        "com.uu_uce.NETWORK_DOWNLOADING",
-                        false
-                    )
+                    putBoolean("com.uu_uce.NETWORK_DOWNLOADING", false)
                     apply()
                 }
             }
@@ -192,10 +189,7 @@ class Settings : AppCompatActivity() {
         darktheme_switch.isChecked = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
         darktheme_switch.setOnClickListener {
             with(sharedPref.edit()) {
-                putBoolean(
-                    "com.uu_uce.DARKMODE",
-                    darktheme_switch.isChecked
-                )
+                putBoolean("com.uu_uce.DARKMODE", darktheme_switch.isChecked)
                 apply()
             }
 
@@ -213,23 +207,31 @@ class Settings : AppCompatActivity() {
             updateFiles(
                 maps,
                 this,
-                {
-                    runOnUiThread {
-                        Toast.makeText(this, getString(R.string.settings_zip_download_complete), Toast.LENGTH_LONG)
-                            .show()
-                    }
-                    val result = unpackZip(maps.first()) { progress ->
+                { success ->
+                    if(success){
                         runOnUiThread {
-                            maps_downloading_progress.progress = progress
+                            Toast.makeText(this, getString(R.string.settings_zip_download_complete), Toast.LENGTH_LONG)
+                                .show()
+                        }
+                        val result = unpackZip(maps.first()) { progress ->
+                            runOnUiThread {
+                                maps_downloading_progress.progress = progress
+                            }
+                        }
+                        runOnUiThread {
+                            if(result) Toast.makeText(this, getString(R.string.settings_zip_unpacked), Toast.LENGTH_LONG).show()
+                            else Toast.makeText(this, getString(R.string.settings_zip_not_unpacked), Toast.LENGTH_LONG).show()
+                            maps_downloading_progress.visibility = View.INVISIBLE
+                            needsReload.setValue(true)
+                            delete_maps_button.visibility = View.VISIBLE
+                            maps_storage_size.text = writableSize(dirSize(File(mapsDir)))
                         }
                     }
-                    runOnUiThread {
-                        if(result) Toast.makeText(this, getString(R.string.settings_zip_unpacked), Toast.LENGTH_LONG).show()
-                        else Toast.makeText(this, getString(R.string.settings_zip_not_unpacked), Toast.LENGTH_LONG).show()
-                        maps_downloading_progress.visibility = View.INVISIBLE
-                        needsReload.setValue(true)
-                        delete_maps_button.visibility = View.VISIBLE
-                        maps_storage_size.text = writableSize(dirSize(File(mapsDir)))
+                    else{
+                        runOnUiThread{
+                            maps_downloading_progress.visibility = View.INVISIBLE
+                            Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG).show()
+                        }
                     }
                 },
                 { progress -> runOnUiThread { maps_downloading_progress.progress = progress } }
@@ -300,12 +302,20 @@ class Settings : AppCompatActivity() {
                 updateFiles(
                     pathList,
                     this,
-                    {
-                        runOnUiThread {
-                            Toast.makeText(this, getString(R.string.settings_download_complete), Toast.LENGTH_LONG).show()
-                            content_downloading_progress.visibility = View.INVISIBLE
-                            content_storage_size.text = writableSize(dirSize(File(contentDir)))
-                            delete_content_button.visibility = View.VISIBLE
+                    { success ->
+                        if(success){
+                            runOnUiThread {
+                                Toast.makeText(this, getString(R.string.settings_download_complete), Toast.LENGTH_LONG).show()
+                                content_downloading_progress.visibility = View.INVISIBLE
+                                content_storage_size.text = writableSize(dirSize(File(contentDir)))
+                                delete_content_button.visibility = View.VISIBLE
+                            }
+                        }
+                        else{
+                            runOnUiThread{
+                                content_downloading_progress.visibility = View.INVISIBLE
+                                Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG).show()
+                            }
                         }
                     },
                     {
@@ -349,12 +359,20 @@ class Settings : AppCompatActivity() {
             updateFiles(
                 listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
                 this,
-                {
-                    runOnUiThread {
-                        Toast.makeText(this, getString(R.string.settings_download_complete), Toast.LENGTH_LONG).show()
-                        pins_downloading_progress.visibility = View.INVISIBLE
-                        pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))){
-                            pinsUpdated.setValue(true)
+                { success ->
+                    if(success){
+                        runOnUiThread {
+                            Toast.makeText(this, getString(R.string.settings_pins_downloaded), Toast.LENGTH_LONG).show()
+                            pins_downloading_progress.visibility = View.INVISIBLE
+                            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))){
+                                pinsUpdated.setValue(true)
+                            }
+                        }
+                    }
+                    else{
+                        runOnUiThread{
+                            pins_downloading_progress.visibility = View.INVISIBLE
+                            Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG).show()
                         }
                     }
                 },
@@ -363,17 +381,5 @@ class Settings : AppCompatActivity() {
                 }
             )
         }
-
-        /*databasetest.setOnClickListener{
-            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + "database.json"))){
-                pinsUpdated.setValue(true)
-            }
-        }
-
-        databasetest2.setOnClickListener{
-            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + "database (1).json"))){
-                pinsUpdated.setValue(true)
-            }
-        }*/
     }
 }

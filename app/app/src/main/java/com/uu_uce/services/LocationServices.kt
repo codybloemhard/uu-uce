@@ -142,9 +142,8 @@ class LocationServices{
         context: Context,
         pollTimeMs: Long,
         minDist: Float,
-        action: (p2) -> Unit)
-        : LocationPollStartResult
-    {
+        action: (p2) -> Unit
+    ): LocationPollStartResult {
         //Check if the network is running, might not be the best way to do this.
         if(networkRunning) {
             Logger.log(LogType.Info,"LocationServices", "LocationNetwork already running")
@@ -162,10 +161,10 @@ class LocationServices{
         var networkProvider : String? = null
 
         // No providers available
-        if (!hasGps && !hasNetwork)
-            return LocationPollStartResult.LOCATION_UNAVAILABLE
+        if (!hasGps && !hasNetwork) return LocationPollStartResult.LOCATION_UNAVAILABLE
 
-        Logger.log( LogType.Info,
+        Logger.log(
+            LogType.Info,
             "LocationServices",
             "gpsEnabled: $hasGps, networkEnabled: $hasNetwork"
         )
@@ -180,8 +179,7 @@ class LocationServices{
         }
 
         // Stop if permissions are not granted
-        if (result != PackageManager.PERMISSION_GRANTED)
-            return LocationPollStartResult.PERMISSIONS_DENIED
+        if (result != PackageManager.PERMISSION_GRANTED) return LocationPollStartResult.PERMISSIONS_DENIED
 
         // Create locationListener
         val locationListener = object : LocationListener {
