@@ -326,9 +326,9 @@ class GeoMap : AppCompatActivity() {
         catch(e: Exception){Logger.error("GeoMap", "no polystyle file available: "+ e.message)}
         try{readLineStyles(mydir)}
         catch(e: Exception){Logger.error("GeoMap", "no linestyle file available: "+ e.message)}
+        var layerName = "Polygons"
+        val polygons = File(mydir, layerName)
         try {
-            val layerName = "Polygons"
-            val polygons = File(mydir, layerName)
             val layerType = LayerType.Water
             customMap.addLayer(
                 layerType,
@@ -338,13 +338,13 @@ class GeoMap : AppCompatActivity() {
                 size,
                 layerName
             )
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $polygons")
         }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
+            Logger.error("GeoMap", "Could not load layer at $polygons.\nError: " + e.message)
         }
+        layerName = "Heightlines"
+        val heightlines = File(mydir, layerName)
         try {
-            val layerName = "Heightlines"
-            val heightlines = File(mydir, layerName)
             val layerType = LayerType.Height
             customMap.addLayer(
                 LayerType.Height,
@@ -356,11 +356,11 @@ class GeoMap : AppCompatActivity() {
             )
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
         }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
+            Logger.error("GeoMap", "Could not load layer at $heightlines.\nError: " + e.message)
         }
+        layerName = "Coloredlines"
+        val coloredLines = File(mydir, layerName)
         try {
-            val layerName = "Coloredlines"
-            val coloredLines = File(mydir, layerName)
             val layerType = LayerType.Lines
             customMap.addLayer(
                 LayerType.Lines,
@@ -372,7 +372,7 @@ class GeoMap : AppCompatActivity() {
             )
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $coloredLines")
         }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
+            Logger.error("GeoMap", "Could not load layer at $coloredLines.\nError: " + e.message)
         }
 
         //create camera based on layers

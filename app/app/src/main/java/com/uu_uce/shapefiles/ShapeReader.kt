@@ -161,7 +161,6 @@ class ColoredLineReader(
     private val lineStyles: List<LineStyle>,
     layerType: LayerType
 ): ChunkGetter(dir, layerType) {
-    private var readValue: (reader: FileReader) -> Float = {reader -> reader.readUShort().toFloat()}
 
     override fun getChunk(cIndex: ChunkIndex): Chunk {
         //find the correct file and read all information inside
@@ -192,19 +191,19 @@ class ColoredLineReader(
             val style = lineStyles[reader.readULong().toInt()]
 
             val bb1 = p3(
-                readValue(reader)/mult + xoff,
-                readValue(reader)/mult + yoff,
-                readValue(reader)
+                readValue()/mult + xoff,
+                readValue()/mult + yoff,
+                readValue()
             )
             val bb2 = p3(
-                readValue(reader)/mult + xoff,
-                readValue(reader)/mult + yoff,
-                readValue(reader)
+                readValue()/mult + xoff,
+                readValue()/mult + yoff,
+                readValue()
             )
 
             val nrPoints = reader.readULong()
             val points: List<p2> = List(nrPoints.toInt()) {
-                p2(readValue(reader)/mult + xoff, readValue(reader)/mult + yoff)
+                p2(readValue()/mult + xoff, readValue()/mult + yoff)
             }
 
             ColoredLineShape(points, style)
