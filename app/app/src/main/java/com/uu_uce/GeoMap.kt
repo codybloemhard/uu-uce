@@ -358,7 +358,7 @@ class GeoMap : AppCompatActivity() {
         }catch(e: Exception){
             Logger.error("GeoMap", "Could not load layer at $heightlines.\nError: " + e.message)
         }
-        layerName = "Geolines"
+        layerName = "Coloredlines"
         val coloredLines = File(mydir, layerName)
         try {
             val layerType = LayerType.Lines
@@ -409,7 +409,7 @@ class GeoMap : AppCompatActivity() {
     }
 
     private fun readLineStyles(dir: File){
-        val file = File(dir, "geolinestyles")
+        val file = File(dir, "linestyles")
         val reader = FileReader(file)
 
         val nrStyles = reader.readULong()
