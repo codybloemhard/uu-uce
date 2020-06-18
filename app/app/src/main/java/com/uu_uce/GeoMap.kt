@@ -34,7 +34,7 @@ import java.io.File
 var needsReload = ListenableBoolean()
 var testing = false
 
-//main activity in which the map and menu are displayed
+// Main activity in which the map and menu are displayed
 class GeoMap : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel
     private var screenDim = Point(0,0)
@@ -94,11 +94,12 @@ class GeoMap : AppCompatActivity() {
         }
     }
 
+    // Activity startup
     private fun start(){
         setContentView(R.layout.activity_geo_map)
         customMap.setActivity(this)
 
-        // Set settings
+        // Set pin size
         customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
         customMap.resizePins()
 
@@ -108,7 +109,7 @@ class GeoMap : AppCompatActivity() {
         this.customMap.setLifeCycleOwner(this)
         this.customMap.setPins(pinViewModel.allPinData)
 
-        // Update pins when not testing
+        // Get newest database from server and update pins (when not testing)
         if(!testing){
             queryServer("pin", this) { s -> updateDatabase(s) }
         }
