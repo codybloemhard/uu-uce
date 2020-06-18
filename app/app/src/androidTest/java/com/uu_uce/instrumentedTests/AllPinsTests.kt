@@ -14,13 +14,16 @@ import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ActivityTestRule
+import androidx.test.uiautomator.UiDevice
 import com.uu_uce.AllPins
 import com.uu_uce.R
 import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.childAtPosition
 import com.uu_uce.clickChildViewWithId
+import com.uu_uce.views.pinsUpdated
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.not
 import org.junit.Before
@@ -49,7 +52,7 @@ class AllPinsTests {
         pinList.add(
             PinData(
                 "0",
-                "31N46777336N3149680E",
+                "31N314968E4677733N",
                 1,
                 "TEXT",
                 "A",
@@ -63,11 +66,11 @@ class AllPinsTests {
         pinList.add(
             PinData(
                 "1",
-                "31N46718336N3133680E",
+                "31N313368E4671833N",
                 2,
                 "IMAGE",
                 "B",
-                "[{\"tag\":\"IMAGE\", \"file_path\":\"/sdcard/Android/data/com.uu_uce/files/PinContent/Images/test.png\"}]",
+                "[{\"tag\":\"IMAGE\", \"file_path\":\"Images/74a60c4d-a70a-4bd7-90e3-b4b8550112a6.png\"}]",
                 1,
                 1,
                 "-1",
@@ -77,11 +80,11 @@ class AllPinsTests {
         pinList.add(
             PinData(
                 "2",
-                "31N46710000N3130000E",
+                "31N313000E4671000N",
                 3,
                 "VIDEO",
                 "C",
-                "[{\"tag\":\"VIDEO\", \"file_path\":\"/sdcard/Android/data/com.uu_uce/files/PinContent/Videos/zoo.mp4\", \"thumbnail\":\"/sdcard/Android/data/com.uu_uce/files/PinContent/Videos/Thumbnails/zoothumbnail.png\", \"title\":\"zoo video\"}]",
+                "[{\"tag\":\"VIDEO\", \"file_path\":\"Videos/f0ef5e9a-ef06-4ef9-bc45-0b2f4f04415b.mp4\", \"title\":\"zoo video\"}]",
                 1,
                 1,
                 "-1",
@@ -91,7 +94,7 @@ class AllPinsTests {
         pinList.add(
             PinData(
                 "3",
-                "31N46715335N3134680E",
+                "31N3134680E46715335N",
                 3,
                 "MCQUIZ",
                 "D",
@@ -111,6 +114,7 @@ class AllPinsTests {
         }
 
         pinViewModel.setPins(pinList)
+        pinsUpdated.setValue(true)
     }
 
     @Test
@@ -133,9 +137,6 @@ class AllPinsTests {
         onView(withId(R.id.popup_window_view))
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
-
-        onView(withId(R.id.allpins_recyclerview))
-            .check(matches(not(hasFocus())))
 
         // Close pin content with close button
         onView(withId(R.id.popup_window_close_button))
@@ -161,11 +162,9 @@ class AllPinsTests {
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
 
-        onView(withId(R.id.allpins_recyclerview))
-            .check(matches(not(hasFocus())))
-
         // Close pin content with back button
-        pressBack()
+        val mDevice: UiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        mDevice.pressBack()
 
         // Check if pin closed successfully
         onView(withId(R.id.allpins_recyclerview))
@@ -185,9 +184,6 @@ class AllPinsTests {
         onView(withId(R.id.video_block))
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
-
-        onView(withId(R.id.allpins_recyclerview))
-            .check(matches(not(hasFocus())))
 
         // Open video player
         onView(withId(R.id.video_block))
@@ -224,9 +220,6 @@ class AllPinsTests {
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
 
-        onView(withId(R.id.allpins_recyclerview))
-            .check(matches(not(hasFocus())))
-
         // Open video player
         onView(withId(R.id.video_block))
             .inRoot(isPlatformPopup())
@@ -238,7 +231,8 @@ class AllPinsTests {
             .check(matches(isDisplayed()))
 
         // Close video player using back button
-        pressBack()
+        val mDevice: UiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        mDevice.pressBack()
 
         // Check if the player was closed successfully
         onView(withId(R.id.video_block))
@@ -259,9 +253,6 @@ class AllPinsTests {
         onView(withId(R.id.multiple_choice_table))
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
-
-        onView(withId(R.id.allpins_recyclerview))
-            .check(matches(not(hasFocus())))
 
         // Select correct answer
         onView(
@@ -309,9 +300,6 @@ class AllPinsTests {
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
 
-        onView(withId(R.id.allpins_recyclerview))
-            .check(matches(not(hasFocus())))
-
         // Select wrong answer
         onView(
             allOf(
@@ -358,9 +346,6 @@ class AllPinsTests {
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
 
-        onView(withId(R.id.allpins_recyclerview))
-            .check(matches(not(hasFocus())))
-
         // Select an answer
         onView(
             allOf(
@@ -387,9 +372,6 @@ class AllPinsTests {
         onView(withId(R.id.multiple_choice_table))
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
-
-        onView(withId(R.id.allpins_recyclerview))
-            .check(matches(not(hasFocus())))
 
         // Attempt to close pin
         onView(withId(R.id.popup_window_close_button))
@@ -419,9 +401,6 @@ class AllPinsTests {
             .inRoot(isPlatformPopup())
             .check(matches(isDisplayed()))
 
-        onView(withId(R.id.allpins_recyclerview))
-            .check(matches(not(hasFocus())))
-
         // Attempt to close pin
         onView(withId(R.id.popup_window_close_button))
             .inRoot(isPlatformPopup())
@@ -441,7 +420,7 @@ class AllPinsTests {
     @Test
     fun pinSorting(){
         // Open sorting popup
-        onView(withId(R.id.fab))
+        onView(withId(R.id.sortButton))
             .perform(click())
 
         // Sort by title
@@ -457,7 +436,7 @@ class AllPinsTests {
         ).check(matches(withText("A")))
 
         // Open sorting popup
-        onView(withId(R.id.fab))
+        onView(withId(R.id.sortButton))
             .perform(click())
 
         // Sort by title reversed
@@ -473,7 +452,7 @@ class AllPinsTests {
         ).check(matches(withText("D")))
 
         // Open sorting popup
-        onView(withId(R.id.fab))
+        onView(withId(R.id.sortButton))
             .perform(click())
 
         // Sort by difficulty
@@ -489,7 +468,7 @@ class AllPinsTests {
         ).check(matches(withText("A")))
 
         // Open sorting popup
-        onView(withId(R.id.fab))
+        onView(withId(R.id.sortButton))
             .perform(click())
 
         // Sort by difficulty reversed
@@ -505,7 +484,7 @@ class AllPinsTests {
         ).check(matches(withText("C")))
 
         // Open sorting popup
-        onView(withId(R.id.fab))
+        onView(withId(R.id.sortButton))
             .perform(click())
 
         // Sort by type
@@ -521,7 +500,7 @@ class AllPinsTests {
         ).check(matches(withText("B")))
 
         // Open sorting popup
-        onView(withId(R.id.fab))
+        onView(withId(R.id.sortButton))
             .perform(click())
 
         // Sort by type reversed
@@ -559,7 +538,7 @@ class AllPinsTests {
 
         sleep(100)
 
-        // Check if sorting was stopped
+        // Check if searching was stopped
         onView(
             allOf(
                 isDescendantOfA(childAtPosition(withId(R.id.allpins_recyclerview), 0)),

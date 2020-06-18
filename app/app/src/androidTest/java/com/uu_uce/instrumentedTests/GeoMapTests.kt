@@ -1,7 +1,5 @@
 package com.uu_uce.instrumentedTests
 
-import android.content.Context
-import android.net.wifi.WifiManager
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.doubleClick
@@ -27,7 +25,9 @@ import org.junit.runner.RunWith
 @LargeTest
 class GeoMapTests {
     private lateinit var pinLocation : Pair<Float, Float>
-    private var wifi : WifiManager? = null
+    init{
+        testing = true
+    }
 
     @get:Rule
     var activityRule: ActivityTestRule<GeoMap>
@@ -44,12 +44,11 @@ class GeoMapTests {
 
     @Before
     fun init(){
-        wifi = activityRule.activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager?
         val pinList: MutableList<PinData> = mutableListOf()
         pinList.add(
             PinData(
                 "0",
-                "31N46777336N3149680E",
+                "31N314968E4677733N",
                 1,
                 "TEXT",
                 "A",
@@ -63,11 +62,11 @@ class GeoMapTests {
         pinList.add(
             PinData(
                 "1",
-                "31N46718336N3133680E",
+                "31N313368E4671833N",
                 2,
                 "IMAGE",
                 "B",
-                "[{\"tag\":\"IMAGE\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/images/test.png\"}]",
+                "[{\"tag\":\"IMAGE\", \"file_path\":\"Images/74a60c4d-a70a-4bd7-90e3-b4b8550112a6.png\"}]",
                 1,
                 1,
                 "-1",
@@ -77,11 +76,11 @@ class GeoMapTests {
         pinList.add(
             PinData(
                 "2",
-                "31N46710000N3130000E",
+                "31N313000E4671000N",
                 3,
                 "VIDEO",
                 "C",
-                "[{\"tag\":\"VIDEO\", \"file_path\":\"file:///data/data/com.uu_uce/files/pin_content/videos/zoo.mp4\", \"thumbnail\":\"file:///data/data/com.uu_uce/files/pin_content/videos/thumbnails/zoothumbnail.png\", \"title\":\"zoo video\"}]",
+                "[{\"tag\":\"VIDEO\", \"file_path\":\"Videos/f0ef5e9a-ef06-4ef9-bc45-0b2f4f04415b.mp4\", \"title\":\"zoo video\"}]",
                 1,
                 1,
                 "-1",
@@ -91,7 +90,7 @@ class GeoMapTests {
         pinList.add(
             PinData(
                 "3",
-                "31N46715335N3134680E",
+                "31N3134680E46715335N",
                 3,
                 "MCQUIZ",
                 "D",

@@ -56,11 +56,11 @@ class FieldbookTests {
         fieldbookViewmodel.deleteAll()
 
         intending(hasAction(Intent.ACTION_GET_CONTENT))
-            .respondWith(setFile(Uri.parse("/sdcard/Android/data/com.uu_uce/files/PinContent/Images/test.png")))
+            .respondWith(setFile(Uri.parse("/sdcard/Android/data/com.uu_uce/files/PinContent/Images/75751e73-4864-41cf-a667-e4202269eca6.png")))
         intending(hasAction(MediaStore.ACTION_IMAGE_CAPTURE))
-            .respondWith(setFile(Uri.parse("/sdcard/Android/data/com.uu_uce/files/PinContent/Images/test.png")))
+            .respondWith(setFile(Uri.parse("/sdcard/Android/data/com.uu_uce/files/PinContent/Images/75751e73-4864-41cf-a667-e4202269eca6.png")))
         intending(hasAction(MediaStore.ACTION_VIDEO_CAPTURE))
-            .respondWith(setFile(Uri.parse("/sdcard/Android/data/com.uu_uce/files/PinContent/Videos/zoo.mp4")))
+            .respondWith(setFile(Uri.parse("/sdcard/Android/data/com.uu_uce/files/PinContent/Videos/c5a553b5-a682-49ee-ae58-a898a987cb44.mp4")))
     }
 
     @Test
