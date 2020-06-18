@@ -366,7 +366,7 @@ class GeoMap : AppCompatActivity() {
                 LayerType.Lines,
                 ColoredLineReader(coloredLines,lineStyles,layerType),
                 toggle_layer_layout,
-                Float.MAX_VALUE,
+                0.5f,
                 size,
                 layerName
             )
