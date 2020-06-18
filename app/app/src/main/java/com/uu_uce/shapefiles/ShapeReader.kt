@@ -12,7 +12,8 @@ see documentation at shapefile-linter for file specific information
 unsigned types are marked as experimental, but they are perfectly safe to use
  */
 abstract class ChunkGetter(
-    protected var dir: File){
+    protected var dir: File,
+    protected val layerType: LayerType){
     abstract fun getChunk(cIndex: ChunkIndex):Chunk
     protected var xoff = 0.0f
     protected var yoff = 0.0f
@@ -78,8 +79,9 @@ class FileReader{
 
 @ExperimentalUnsignedTypes
 class HeightLineReader(
-    dir: File
-): ChunkGetter(dir) {
+    dir: File,
+    layerType: LayerType
+): ChunkGetter(dir,layerType) {
     private var readValue: (reader: FileReader) -> Float = {reader -> reader.readUShort().toFloat()}
 
     override fun getChunk(cIndex: ChunkIndex): Chunk {
@@ -111,15 +113,13 @@ class HeightLineReader(
                 p2(readValue(reader)/mult + xoff, readValue(reader)/mult + yoff)
             }
 
-            val style = Style(floatArrayOf(Random.nextFloat(), Random.nextFloat(), Random.nextFloat()))
-
-            Heightline(points, style)
+            Heightline(points)
         }
 
         val time1 = System.currentTimeMillis() - time
         Logger.log(LogType.Continuous, "BinShapeReader", "loadtime: $time1")
 
-        return Chunk(shapes, LayerType.Height)
+        return Chunk(shapes, layerType)
     }
 
     override fun readInfo(): Pair<p3,p3>{
@@ -156,14 +156,87 @@ class HeightLineReader(
     }
 }
 
-class Style(val color: FloatArray)
+@ExperimentalUnsignedTypes
+class ColoredLineReader(
+    dir: File,
+    private val lineStyles: List<LineStyle>,
+    layerType: LayerType
+): ChunkGetter(dir, layerType) {
+
+    override fun getChunk(cIndex: ChunkIndex): Chunk {
+        //find the correct file and read all information inside
+        val time = System.currentTimeMillis()
+        val file = File(dir, geolineChunkName(cIndex))
+        val reader = FileReader(file)
+
+        val xoff = reader.readULong().toFloat()
+        val yoff = reader.readULong().toFloat()
+        val zoff = reader.readULong().toFloat()
+        val mult = reader.readULong().toFloat()
+
+        val compression = reader.readUByte().toInt()
+        val readValue: () -> Float = {
+            when(compression){
+                1 -> reader.readUByte().toFloat()
+                2 -> reader.readUShort().toFloat()
+                4 -> reader.readUInt().toFloat()
+                else -> reader.readULong().toFloat()
+            }
+        }
+
+        val cbmin = p3(readValue()/mult + xoff, readValue()/mult + yoff, readValue())
+        val cbmax = p3(readValue()/mult + xoff, readValue()/mult + yoff, readValue())
+
+        val nrShapes = reader.readULong()
+        val shapes = List(nrShapes.toInt()) {
+            val style = lineStyles[reader.readULong().toInt()]
+
+            val bb1 = p3(
+                readValue()/mult + xoff,
+                readValue()/mult + yoff,
+                readValue()
+            )
+            val bb2 = p3(
+                readValue()/mult + xoff,
+                readValue()/mult + yoff,
+                readValue()
+            )
+
+            val nrPoints = reader.readULong()
+            val points: List<p2> = List(nrPoints.toInt()) {
+                p2(readValue()/mult + xoff, readValue()/mult + yoff)
+            }
+
+            ColoredLineShape(points, style)
+        }
+
+        val time1 = System.currentTimeMillis() - time
+        Logger.log(LogType.Continuous, "BinShapeReader", "loadtime: $time1")
+
+        return Chunk(shapes, layerType)
+    }
+
+    override fun readInfo(): Pair<p3,p3>{
+        val reader = FileReader(File(dir, "chunks.geolineinfo"))
+
+        bmin = p3(reader.readUInt().toFloat(), reader.readUInt().toFloat(), reader.readUInt().toFloat())
+        bmax = p3(reader.readUInt().toFloat(), reader.readUInt().toFloat(), reader.readUInt().toFloat())
+
+        val cuts = reader.readUByte()
+
+        nrCuts = listOf(cuts.toInt())
+
+        return Pair(bmin, bmax)
+    }
+}
 
 @ExperimentalUnsignedTypes
 class PolygonReader(
     dir: File,
+    layerType: LayerType,
     private var hasStyles: Boolean,
-    private val styles: List<Style>
-): ChunkGetter(dir){
+    private val polyStyles: List<PolyStyle>
+): ChunkGetter(dir,layerType){
     override fun getChunk(cIndex: ChunkIndex): Chunk {
         val file = File(dir, polyChunkName(cIndex))
 
@@ -201,21 +274,20 @@ class PolygonReader(
             val style  =
                 if(hasStyles) {
                     val styleIndex = reader.readULong().toInt()
-                    styles[styleIndex]
+                    polyStyles[styleIndex]
                 }
-                else Style(floatArrayOf(0.2f,0.2f,0.8f))
+                else PolyStyle(false, floatArrayOf(0.2f,0.2f,0.8f))
 
             /* Read shape bounding boxes
             val bmi = p3(readValue()/mult + xoff, readValue()/mult + yoff, readValue())
             val bma = p3(readValue()/mult + xoff, readValue()/mult + yoff, readValue())*/
-
             // Discard shape bounding boxes
-            for(i in 0 .. 5) readValue()
+            for(i in 0 until 6) readValue()
 
             Polygon(vertices, indices.toMutableList(), style)
         }
 
-        return Chunk(shapes, LayerType.Water)
+        return Chunk(shapes, layerType)
     }
 
     override fun readInfo(): Pair<p3,p3>{

@@ -27,7 +27,7 @@ import kotlin.math.min
 const val defaultPinSize = 60
 const val defaultUnlockRange = 100
 var needsRestart = false
-const val mapsName = "50016551-7038-4305-b717-17bd9f93fb34.zip"
+const val mapsName = "0170ec79-1beb-4e7e-9d45-cb78dbb01092.zip"
 const val mapsFolderName = "Maps"
 const val contentFolderName = "PinContent"
 const val legendName = "legend.png"

@@ -10,6 +10,13 @@ import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
 
+//style for polygons/polylyes
+class PolyStyle(val outline: Boolean, val color: FloatArray)
+class LineStyle(val thickness: Float, val color: FloatArray)
+
+const val defaultThickness = 1f
+const val lineThickness = 3f
+
 //abstract class for drawing shapes
 abstract class DrawInfo{
     abstract fun draw(lineProgram: Int, varyingColorProgram: Int, scale: FloatArray, trans: FloatArray, color: FloatArray)
@@ -25,6 +32,7 @@ class HeightlineDrawInfo: DrawInfo(){
     private var nrIndices = 0
     private var curIndex = 0
 
+    //add a single HeightLine shape
     fun addLine(line: Heightline){
         for(k in 0 until line.points.size-1){
             indices.add(curIndex)
@@ -68,7 +76,6 @@ class HeightlineDrawInfo: DrawInfo(){
 
     override fun finalize() {
         vertexBuffer =
-            // (# of coordinate values * 4 bytes per float)
             ByteBuffer.allocateDirect(vertices.size * 4).run {
                 order(ByteOrder.nativeOrder())
                 asFloatBuffer().apply {
@@ -77,7 +84,6 @@ class HeightlineDrawInfo: DrawInfo(){
                 }
             }
         indexBuffer=
-            // (# of coordinate values * 2 bytes per short)
             ByteBuffer.allocateDirect(indices.size * 4).run {
                 order(ByteOrder.nativeOrder())
                 asIntBuffer().apply {
@@ -114,14 +120,15 @@ class ColoredLineDrawInfo: DrawInfo(){
             vertices.add(line.points[k].second)
         }
         for(i in line.points.indices){
-            colors.add(line.style.color[0])
-            colors.add(line.style.color[1])
-            colors.add(line.style.color[2])
+            colors.add(line.polyStyle.color[0])
+            colors.add(line.polyStyle.color[1])
+            colors.add(line.polyStyle.color[2])
         }
     }
 
     override fun draw(lineProgram: Int, varyingColorProgram: Int, scale: FloatArray, trans: FloatArray, color: FloatArray) {
         GLES20.glUseProgram(varyingColorProgram)
+        GLES20.glLineWidth(lineThickness)
 
         val positionHandle = GLES20.glGetAttribLocation(varyingColorProgram, "vPosition")
 
@@ -142,7 +149,7 @@ class ColoredLineDrawInfo: DrawInfo(){
             colorsPerVertex,
             GLES20.GL_FLOAT,
             false,
-            colorsPerVertex * 4, //4 bytes per float
+            colorsPerVertex * 4,
             colorBuffer
         )
 
@@ -156,11 +163,11 @@ class ColoredLineDrawInfo: DrawInfo(){
 
         GLES20.glDisableVertexAttribArray(positionHandle)
         GLES20.glDisableVertexAttribArray(colorHandle)
+        GLES20.glLineWidth(defaultThickness)
     }
 
     override fun finalize() {
         vertexBuffer =
-                // (# of coordinate values * 4 bytes per float)
             ByteBuffer.allocateDirect(vertices.size * 4).run {
                 order(ByteOrder.nativeOrder())
                 asFloatBuffer().apply {
@@ -169,7 +176,6 @@ class ColoredLineDrawInfo: DrawInfo(){
                 }
             }
         indexBuffer=
-                // (# of coordinate values * 2 bytes per short)
             ByteBuffer.allocateDirect(indices.size * 4).run {
                 order(ByteOrder.nativeOrder())
                 asIntBuffer().apply {
@@ -208,9 +214,9 @@ class PolygonDrawInfo: DrawInfo(){
         for(index in polygon.indices) indices.add(indexOffset + index)
 
         for(i in polygon.vertices.indices){
-            colors.add(polygon.style.color[0])
-            colors.add(polygon.style.color[1])
-            colors.add(polygon.style.color[2])
+            colors.add(polygon.polyStyle.color[0])
+            colors.add(polygon.polyStyle.color[1])
+            colors.add(polygon.polyStyle.color[2])
         }
 
         for ((x,y) in polygon.vertices) {
@@ -235,7 +241,7 @@ class PolygonDrawInfo: DrawInfo(){
             coordsPerVertex,
             GLES20.GL_FLOAT,
             false,
-            coordsPerVertex*4, //4 bytes per float
+            coordsPerVertex*4,
             vertexBuffer
         )
 
@@ -246,7 +252,7 @@ class PolygonDrawInfo: DrawInfo(){
             colorsPerVertex,
             GLES20.GL_FLOAT,
             false,
-            colorsPerVertex * 4, //4 bytes per float
+            colorsPerVertex * 4,
             colorBuffer
         )
 
@@ -264,7 +270,6 @@ class PolygonDrawInfo: DrawInfo(){
 
     override fun finalize() {
         vertexBuffer =
-                // (# of coordinate values * 4 bytes per float)
             ByteBuffer.allocateDirect(vertices.size * 4).run {
                 order(ByteOrder.nativeOrder())
                 asFloatBuffer().apply {
@@ -283,7 +288,6 @@ class PolygonDrawInfo: DrawInfo(){
             }
 
         indexBuffer=
-                // (# of coordinate values * 4 bytes per int)
             ByteBuffer.allocateDirect(indices.size * 4).run {
                 order(ByteOrder.nativeOrder())
                 asIntBuffer().apply {
@@ -301,13 +305,13 @@ class PolygonDrawInfo: DrawInfo(){
 }
 
 //generic shape
-abstract class Shape(val style: Style){
+abstract class Shape(){
     abstract fun initDrawInfo(drawInfo: DrawInfo)
     abstract val nrPoints: Int
 }
 
 //shape consisting of just lines on the same height
-class Heightline(var points: List<p2>, style: Style): Shape(style) {
+class Heightline(var points: List<p2>): Shape() {
     override val nrPoints = points.size
 
     override fun initDrawInfo(
@@ -318,11 +322,12 @@ class Heightline(var points: List<p2>, style: Style): Shape(style) {
         if(drawInfo is HeightlineDrawInfo) {
             drawInfo.addLine(this)
         }
-        else Logger.error("ShapeZ", "wrong draw information for heightshape")
+        else Logger.error("ShapeZ", "wrong draw information for heightline")
     }
 }
 
-class ColoredLineShape(var points: List<p2>, style: Style): Shape(style) {
+//shape consisting of colored lines
+class ColoredLineShape(var points: List<p2>, val polyStyle: LineStyle): Shape() {
     override val nrPoints = points.size
 
     override fun initDrawInfo(
@@ -332,12 +337,12 @@ class ColoredLineShape(var points: List<p2>, style: Style): Shape(style) {
 
         if (drawInfo is ColoredLineDrawInfo) {
             drawInfo.addLine(this)
-        } else Logger.error("ShapeZ", "wrong draw information for heightshape")
+        } else Logger.error("ShapeZ", "wrong draw information for coloredlineshape")
     }
 }
 
-        //shape consisting of polygons that need to be colorized
-class Polygon(var vertices: List<p2>, var indices: MutableList<Short>, style: Style): Shape(style){
+//shape consisting of colored polygons
+class Polygon(var vertices: List<p2>, var indices: MutableList<Short>, val polyStyle: PolyStyle): Shape(){
     override val nrPoints: Int = vertices.size
 
     override fun initDrawInfo(

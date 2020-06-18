@@ -50,7 +50,8 @@ class GeoMap : AppCompatActivity() {
 
     private lateinit var maps : List<String>
 
-    private var styles: List<Style> = listOf()
+    private var polyStyles: List<PolyStyle> = listOf()
+    private var lineStyles: List<LineStyle> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Set logger settings
@@ -278,31 +279,37 @@ class GeoMap : AppCompatActivity() {
 
         customMap.removeLayers(toggle_layer_layout)
 
+        Logger.log(LogType.Event, "GeoMap", "loading maps")
+
         val mydir = File(getExternalFilesDir(null)?.path + "/Maps/")
 
-        try{readStyles(mydir)}
-        catch(e: Exception){Logger.error("GeoMap", "no style file available: "+ e.message)}
+        try{readPolyStyles(mydir)}
+        catch(e: Exception){Logger.error("GeoMap", "no polystyle file available: "+ e.message)}
+        try{readLineStyles(mydir)}
+        catch(e: Exception){Logger.error("GeoMap", "no linestyle file available: "+ e.message)}
+        var layerName = "Polygons"
+        val polygons = File(mydir, layerName)
         try {
-            val layerName = "Polygons"
-            val polygons = File(mydir, layerName)
+            val layerType = LayerType.Water
             customMap.addLayer(
-                LayerType.Water,
-                PolygonReader(polygons, true, styles),
+                layerType,
+                PolygonReader(polygons, layerType, true, polyStyles),
                 toggle_layer_layout,
                 0.5f,
                 size,
                 layerName
             )
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $polygons")
         }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
+            Logger.error("GeoMap", "Could not load layer at $polygons.\nError: " + e.message)
         }
+        layerName = "Heightlines"
+        val heightlines = File(mydir, layerName)
         try {
-            val layerName = "Heightlines"
-            val heightlines = File(mydir, layerName)
+            val layerType = LayerType.Height
             customMap.addLayer(
                 LayerType.Height,
-                HeightLineReader(heightlines),
+                HeightLineReader(heightlines,layerType),
                 toggle_layer_layout,
                 Float.MAX_VALUE,
                 size,
@@ -310,7 +317,23 @@ class GeoMap : AppCompatActivity() {
             )
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
         }catch(e: Exception){
-            Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
+            Logger.error("GeoMap", "Could not load layer at $heightlines.\nError: " + e.message)
+        }
+        layerName = "Coloredlines"
+        val coloredLines = File(mydir, layerName)
+        try {
+            val layerType = LayerType.Lines
+            customMap.addLayer(
+                LayerType.Lines,
+                ColoredLineReader(coloredLines,lineStyles,layerType),
+                toggle_layer_layout,
+                0.5f,
+                size,
+                layerName
+            )
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $coloredLines")
+        }catch(e: Exception){
+            Logger.error("GeoMap", "Could not load layer at $coloredLines.\nError: " + e.message)
         }
 
         //create camera based on layers
@@ -382,24 +405,42 @@ class GeoMap : AppCompatActivity() {
         )
     }
 
-    private fun readStyles(dir: File){
+
+    private fun readPolyStyles(dir: File){
         val file = File(dir, "styles")
         val reader = FileReader(file)
 
         val nrStyles = reader.readULong()
-        styles = List(nrStyles.toInt()) {
+        polyStyles = List(nrStyles.toInt()) {
             val outline = reader.readUByte()
             val b = reader.readUByte()
             val g = reader.readUByte()
             val r = reader.readUByte()
 
-            Style(
-                floatArrayOf(
-                    r.toFloat()/255,
-                    g.toFloat()/255,
-                    b.toFloat()/255
-                )
-            )
+            PolyStyle(outline.toInt() == 1, floatArrayOf(
+                r.toFloat()/255,
+                g.toFloat()/255,
+                b.toFloat()/255
+            ))
+        }
+    }
+
+    private fun readLineStyles(dir: File){
+        val file = File(dir, "linestyles")
+        val reader = FileReader(file)
+
+        val nrStyles = reader.readULong()
+        lineStyles = List(nrStyles.toInt()) {
+            val width = reader.readUByte()
+            val b = reader.readUByte()
+            val g = reader.readUByte()
+            val r = reader.readUByte()
+
+            LineStyle(width.toFloat(), floatArrayOf(
+                r.toFloat()/255,
+                g.toFloat()/255,
+                b.toFloat()/255
+            ))
         }
     }
 

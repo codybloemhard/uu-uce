@@ -164,6 +164,6 @@ class ShapeMap(
 }
 
 enum class LayerType(val value: Int){
-    Vegetation(0), Height(1), Water(2)
+    Vegetation(0), Height(1), Water(2),Lines(3)
 }
 

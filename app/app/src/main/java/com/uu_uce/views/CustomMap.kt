@@ -69,8 +69,8 @@ class CustomMap : ViewTouchParent {
     private val deviceLocEdgePaint  : Paint = Paint()
 
     private lateinit var activity           : Activity
-    private lateinit var pinViewModel       : PinViewModel
-    private lateinit var fieldbookViewModel : FieldbookViewModel
+    private var pinViewModel                : PinViewModel? = null
+    private var fieldbookViewModel          : FieldbookViewModel? = null
     private lateinit var lfOwner            : LifecycleOwner
 
     private var pins                        : MutableMap<String, SinglePin>   = mutableMapOf()
@@ -225,7 +225,6 @@ class CustomMap : ViewTouchParent {
 
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
 
-
         val (scale,trans) = camera.getScaleTrans()
 
         val timeDraw = measureTimeMillis {
@@ -254,8 +253,6 @@ class CustomMap : ViewTouchParent {
                 }
                 gm.scaleWidget.update(viewport, gm)
             }
-
-            Logger.log(LogType.Event, "DrawOverlay", "east: ${loc.utm.east}, north: ${loc.utm.north}")
 
             // Draw device location
             val deviceScreenLoc = coordToScreen(loc.utm, viewport, width, height)
@@ -310,9 +307,9 @@ class CustomMap : ViewTouchParent {
         if(distance > locationDeadZone){
             redrawMap()
             Logger.log(LogType.Event,"CustomMap", "Redrawing, distance: $distance")
+            return
         }
-        Logger.log(LogType.Event,"CustomMap", "No redraw needed")
-        Logger.log(LogType.Event,"CustomMap", "${loc.utm.east}, ${loc.utm.north}")
+        Logger.log(LogType.Event,"CustomMap", "No redraw needed, current loc ${loc.utm.east}, ${loc.utm.north}")
     }
 
     fun startLocServices(){
@@ -392,7 +389,7 @@ class CustomMap : ViewTouchParent {
             when {
                 pinStatuses[pin.pinId] == null -> {
                     // Pin was not yet present
-                    val newPin = PinConversion(activity).pinDataToPin(pin, pinViewModel)
+                    val newPin = PinConversion(activity).pinDataToPin(pin, pinViewModel!!)
                     newPin.tryUnlock {
                         Logger.log(LogType.Info, "CustomMap", "Adding pin")
                         synchronized(pins){
@@ -434,7 +431,7 @@ class CustomMap : ViewTouchParent {
             pins = mutableMapOf()
         }
         pinStatuses = mutableMapOf()
-        pinViewModel.reloadPins { newPinData -> updatePinStatuses(newPinData) }
+        pinViewModel!!.reloadPins { newPinData -> updatePinStatuses(newPinData) }
         pinsUpdated.setValue(false)
         synchronized(mergedPinsLock){
             mergedPins = mergePins()
@@ -450,7 +447,7 @@ class CustomMap : ViewTouchParent {
 
     fun setFieldbook (fieldbook: List<FieldbookEntry>) {
         for (entry in fieldbook) {
-            val pin = PinConversion(activity).fieldbookEntryToPin(entry,fieldbookViewModel)
+            val pin = PinConversion(activity).fieldbookEntryToPin(entry,fieldbookViewModel!!)
             pins[pin.id] = pin.apply{
                 resize(pinSize)
             }
@@ -471,6 +468,7 @@ class CustomMap : ViewTouchParent {
         }
     }
 
+    //pre-calculate all distances between all pins, and merge them optimally
     private fun mergePins(): Pin?{
         val finalpins: MutableList<Pin> = pins.values.filter{pin -> pin.status > 0}.toMutableList()
         
@@ -519,7 +517,7 @@ class CustomMap : ViewTouchParent {
             val background = PinConversion.difficultyToBackground(mergedPinBackground, (context as Activity), context.resources)
             val icon = PinConversion.typeToIcon(mergedPinIcon, context.resources)
 
-            val newMergedPin = MergedPin(finalpins[mini], finalpins[minj], actualDis, pixeldis, pinViewModel, coordinate, background, icon, pinSize.toFloat())
+            val newMergedPin = MergedPin(finalpins[mini], finalpins[minj], actualDis, pixeldis, pinViewModel, fieldbookViewModel, coordinate, background, icon, pinSize.toFloat())
 
             finalpins.removeAt(minj)
             finalpins.removeAt(mini)

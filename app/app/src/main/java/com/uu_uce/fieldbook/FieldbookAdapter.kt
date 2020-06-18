@@ -29,6 +29,8 @@ class FieldbookAdapter(
     private var fieldbook: List<FieldbookEntry> = emptyList()
     private lateinit var parentView : ViewGroup
 
+    var view: View? = null
+
     class FieldbookViewHolder(val parentView: View) : RecyclerView.ViewHolder(parentView) {
         val titleFb     : TextView      = itemView.findViewById(R.id.title)
         val numberFb    : TextView      = itemView.findViewById(R.id.number)
@@ -104,7 +106,7 @@ class FieldbookAdapter(
         holder.parentView.setOnClickListener {
             openFieldbookPopup(
                 activity,
-                rootView,
+                view ?: rootView,
                 entry,
                 content
             )

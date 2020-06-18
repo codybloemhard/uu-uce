@@ -9,6 +9,9 @@ fun chunkName(c: ChunkIndex): String{
 fun polyChunkName(c: ChunkIndex): String{
     return "${c.first}-${c.second}.polychunk"
 }
+fun geolineChunkName(c: ChunkIndex): String{
+    return "${c.first}-${c.second}.geolinechunk"
+}
 
 /*
 a chunk holds all shapes of a layer that are in a specific AABB
@@ -26,6 +29,9 @@ class Chunk(
         }
         LayerType.Water -> {
             PolygonDrawInfo()
+        }
+        LayerType.Lines -> {
+            ColoredLineDrawInfo()
         }
         else -> throw Exception("chunk type not implemented")
     }

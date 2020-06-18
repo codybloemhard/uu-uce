@@ -45,7 +45,7 @@ class FieldbookPinmapFragment : Fragment() {
     private val mapsName = "maps.zip"
     private lateinit var maps : List<String>
 
-    private var styles: List<Style> = listOf()
+    private var polyStyles: List<PolyStyle> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,6 +102,7 @@ class FieldbookPinmapFragment : Fragment() {
 
         // Start database and get pins from database
         this.customMap.setFieldbookViewModel(viewModel)
+
         this.customMap.setLifeCycleOwner(this)
         viewModel.allFieldbookEntries.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
             this.customMap.setFieldbook(it)
@@ -155,9 +156,10 @@ class FieldbookPinmapFragment : Fragment() {
         try {
         val layerName = "Polygons"
         val polygons = File(mydir, layerName)
+        val layerType = LayerType.Water
         customMap.addLayer(
-            LayerType.Water,
-            PolygonReader(polygons, true, styles),
+            layerType,
+            PolygonReader(polygons, layerType, true, polyStyles),
             toggle_layer_layout,
             0.5f,
             0,
@@ -170,9 +172,10 @@ class FieldbookPinmapFragment : Fragment() {
         try {
         val layerName = "Heightlines"
         val heightlines = File(mydir, layerName)
+        val layerType = LayerType.Height
         customMap.addLayer(
-            LayerType.Height,
-            HeightLineReader(heightlines),
+            layerType,
+            HeightLineReader(heightlines,layerType),
             toggle_layer_layout,
             Float.MAX_VALUE,
             0,
@@ -201,19 +204,17 @@ class FieldbookPinmapFragment : Fragment() {
         val reader = FileReader(file)
 
         val nrStyles = reader.readULong()
-        styles = List(nrStyles.toInt()) {
+        polyStyles = List(nrStyles.toInt()) {
             val outline = reader.readUByte()
             val b = reader.readUByte()
             val g = reader.readUByte()
             val r = reader.readUByte()
 
-            Style(
-                floatArrayOf(
-                    r.toFloat()/255,
-                    g.toFloat()/255,
-                    b.toFloat()/255
-                )
-            )
+            PolyStyle(outline.toInt() == 1, floatArrayOf(
+                r.toFloat()/255,
+                g.toFloat()/255,
+                b.toFloat()/255
+            ))
         }
     }
 }
