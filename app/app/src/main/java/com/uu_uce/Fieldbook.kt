@@ -110,9 +110,9 @@ fun openFieldbookPopup (activity: Activity, rootView: View, entry: FieldbookEntr
 
     var popupWindow: PopupWindow? = null
 
-
     val viewGroup: ViewGroup
     var newViewGroup: ViewParent = if(rootView is ViewParent) rootView else rootView.parent
+
     while(true){
         if(newViewGroup is ViewGroup){
             viewGroup = newViewGroup

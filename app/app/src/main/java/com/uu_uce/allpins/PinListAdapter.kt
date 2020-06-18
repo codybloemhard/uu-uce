@@ -78,7 +78,10 @@ class PinListAdapter internal constructor(
 
         holder.fullView.setOnClickListener{
             val pinConverter = PinConversion(activity)
-            val pin = pinConverter.pinDataToPin(current, pinViewModel)
+            val pin = pinConverter.pinDataToPin(
+                current,
+                pinViewModel
+            )
             pin.content.parent = pin
             pin.openContent(view ?: holder.parentView, activity)
         }

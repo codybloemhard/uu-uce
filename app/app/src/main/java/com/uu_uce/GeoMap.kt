@@ -149,7 +149,7 @@ class GeoMap : AppCompatActivity() {
                     if(success){
                         runOnUiThread {
                             Toast.makeText(this, getString(R.string.settings_pins_downloaded), Toast.LENGTH_LONG).show()
-                            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))){
+                            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))) {
                                 pinsUpdated.setValue(true)
                             }
                         }

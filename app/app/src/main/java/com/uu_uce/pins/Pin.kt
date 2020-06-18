@@ -293,12 +293,12 @@ abstract class Pin(
 //normal singular pin, which shows its information when tapped
 class SinglePin(
     var id                      : String = "",
-    coordinate              : UTMCoordinate,
-    var title           : String,
-    var content         : PinContent,
-    background      : Bitmap,
-    icon            : Drawable,
-    var status          : Int,              //-1 : recalculating, 0 : locked, 1 : unlocked, 2 : completed
+    coordinate                  : UTMCoordinate,
+    var title                   : String,
+    var content                 : PinContent,
+    background                  : Bitmap,
+    icon                        : Drawable,
+    var status                  : Int, //-1 : recalculating, 0 : locked, 1 : unlocked, 2 : completed
     private var predecessorIds  : List<String>,
     private var followIds       : List<String>,
     private val viewModel       : ViewModel
@@ -310,6 +310,8 @@ class SinglePin(
     private var answered : Array<Boolean>       = Array(content.contentBlocks.count()) { true }
     private var questionRewards : Array<Int>    = Array(content.contentBlocks.count()) { 0 }
     private var totalReward                     = 0
+
+    var tapAction : ((Activity) -> Unit) = {}
 
     init{
         // Check if predecessors contain self
@@ -329,7 +331,9 @@ class SinglePin(
     override fun tap(tapLocation: p2, activity: Activity, view: View, disPerPixel: Float){
         if(status <1) return
         if(isInside(tapLocation)) {
-            openContent(view, activity)
+            run{
+                tapAction(activity)
+            }
         }
     }
 
@@ -645,6 +649,7 @@ class MergedPin(
         val layoutInflater = activity.layoutInflater
 
         var popupWindow: PopupWindow? = null
+
         // Build an custom view (to be inflated on top of our current view & build it's popup window)
         val customView = layoutInflater.inflate(R.layout.merged_pin_popup, view.parent as ViewGroup, false)
         customView.setOnKeyListener { _, keyCode, event ->

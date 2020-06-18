@@ -12,7 +12,7 @@ import com.uu_uce.R
 import com.uu_uce.fieldbook.FieldbookEntry
 import com.uu_uce.fieldbook.FieldbookViewModel
 import com.uu_uce.mergedPinBackground
-import com.uu_uce.pins.Pin
+import com.uu_uce.pins.ContentBlockInterface
 import com.uu_uce.pins.SinglePin
 import com.uu_uce.pins.PinContent
 import com.uu_uce.services.UTMCoordinate
@@ -173,7 +173,10 @@ class PinConversion(val activity: Activity) {
      * @param[viewModel] used for accessing the database
      * @return a drawable pin, with the necessary functions
      */
-    fun pinDataToPin(pinData : PinData, viewModel : PinViewModel): SinglePin {
+    fun pinDataToPin(
+        pinData: PinData,
+        viewModel: PinViewModel
+    ): SinglePin {
         val pin = SinglePin(
             pinData.pinId,
             stringToUtm(pinData.location), //location
@@ -197,7 +200,10 @@ class PinConversion(val activity: Activity) {
      * @param[viewModel] used for accessing the database
      * @return a drawable pin, with the necessary functions
      */
-    fun fieldbookEntryToPin(entry: FieldbookEntry, viewModel: FieldbookViewModel) : SinglePin {
+    fun fieldbookEntryToPin(
+        entry: FieldbookEntry,
+        viewModel: FieldbookViewModel
+    ) : SinglePin {
         return SinglePin(
             entry.id.toString(),
             stringToUtm(entry.location),
@@ -210,7 +216,7 @@ class PinConversion(val activity: Activity) {
             listOf(),
             viewModel
         ).apply {
-            content.parent = this
+            this.content.parent = this
         }
     }
 }

@@ -43,16 +43,14 @@ class FieldbookEditor: AppCompatActivity() {
 
     private lateinit var mediaServices  : MediaServices
 
-    private lateinit var content        :  MutableList<ContentBlockInterface>
+    private lateinit var content        : MutableList<ContentBlockInterface>
 
     private lateinit var rootView       : View
     private lateinit var scrollView     : ScrollView
     private lateinit var layout         : LinearLayout
     private lateinit var title          : EditText
 
-    private var currentName = ""
-    private var currentPath = ""
-
+    private var currentName         = ""
     private var latestBlockIndex    = 0
     private var currentBlockIndex   = 0
     private var fieldbookIndex      = -1
@@ -61,7 +59,9 @@ class FieldbookEditor: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+
         val darkMode = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
+
         // Set desired theme
         if(darkMode) setTheme(R.style.DarkTheme)
 
@@ -72,6 +72,7 @@ class FieldbookEditor: AppCompatActivity() {
         else if(!darkMode){
             window.statusBarColor = Color.BLACK// set status background white
         }
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_fieldbook_editor)
 
@@ -97,8 +98,6 @@ class FieldbookEditor: AppCompatActivity() {
         }
 
         resetVariables()
-        content = mutableListOf()
-
 
         rootView    = findViewById(android.R.id.content)
         layout      = findViewById(R.id.fieldbook_content_container)
@@ -114,17 +113,6 @@ class FieldbookEditor: AppCompatActivity() {
                 false
             })
             inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
-        }
-
-        // Fill layout
-        if (fieldbookIndex >= 0) {
-            viewModel.getContent(fieldbookIndex) {
-                title.setText(it.title)
-                content = PinContent(it.content,this, true).contentBlocks
-                for (c in content)
-                    content[content.indexOf(c)] =
-                        c.makeEditable(latestBlockIndex++,layout,rootView,::onLongClick)
-            }
         }
 
         findViewById<ConstraintLayout>(R.id.add_text_block).apply{
@@ -146,36 +134,48 @@ class FieldbookEditor: AppCompatActivity() {
             }
         }
 
-        var location : Location? = null
-
-        try{
-            location = LocationServices.lastKnownLocation
+        findViewById<Button>(R.id.add_fieldbook_pin).apply {
+            setOnClickListener {
+                if (fieldbookIndex >= 0)
+                    viewModel.update(
+                        title.text.toString(),
+                        buildJSONContent(content),
+                        fieldbookIndex
+                    )
+                else
+                    insertIntoFieldbook(
+                        title.text.toString(),
+                        content,
+                        getCurrentDateTime(DateTimeFormat.FIELDBOOK_ENTRY),
+                        location()
+                    )
+                finish()
+            }
         }
-        catch(e : Exception) {
+
+        content = mutableListOf()
+
+        // Fill layout
+        if (fieldbookIndex >= 0) {
+            viewModel.getContent(fieldbookIndex) {
+                title.setText(it.title)
+                content = PinContent(it.content,this, true).contentBlocks
+                for (c in content)
+                    content[content.indexOf(c)] =
+                        c.makeEditable(latestBlockIndex++,layout,rootView,::changeBlock)
+            }
+        }
+    }
+
+    private fun location(): Location? {
+        var location: Location? = null
+
+        try {
+            location = LocationServices.lastKnownLocation
+        } catch (e: Exception) {
             Logger.log(LogType.Event, "Fieldbook", "No last known location")
         }
-
-        val savePinButton = findViewById<Button>(R.id.add_fieldbook_pin)
-        savePinButton.setOnClickListener{
-            if (fieldbookIndex >= 0)
-                viewModel.update(title.text.toString(), buildJSONContent(content),fieldbookIndex)
-            else
-                saveFieldbookEntry(
-                    title.text.toString(),
-                    content,
-                    getCurrentDateTime(DateTimeFormat.FIELDBOOK_ENTRY),
-                    location
-                )
-            finish()
-        }
-
-        // Set statusbar text color
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
-        }
-        else{
-            window.statusBarColor = Color.BLACK// set status background white
-        }
+        return location
     }
 
     override fun onBackPressed() {
@@ -192,7 +192,6 @@ class FieldbookEditor: AppCompatActivity() {
     }
 
     private fun resetVariables () {
-        currentPath = ""
         currentUri = Uri.EMPTY
         currentName = ""
     }
@@ -211,7 +210,7 @@ class FieldbookEditor: AppCompatActivity() {
         dialog.setItems(options) { dialogInterface, which ->
 
             when (which) {
-                0 -> { // Choose (picture) from gallery
+                0 -> { // Choose from gallery
                         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
                             (
                                     this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
@@ -270,7 +269,7 @@ class FieldbookEditor: AppCompatActivity() {
         dialog.setItems(options) { dialogInterface, which ->
 
             when (which) {
-                0 -> { // Choose (video) from gallery
+                0 -> { // Choose from gallery
                     if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
                         (
                                 this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
@@ -381,7 +380,7 @@ class FieldbookEditor: AppCompatActivity() {
         TextBlock(
             this
         ).also {
-            it.makeEditable(currentBlockIndex,layout,rootView,::onLongClick)
+            it.makeEditable(currentBlockIndex,layout,rootView,::changeBlock)
             content.add(it)
         }
         scrollToView(currentBlockIndex)
@@ -400,7 +399,7 @@ class FieldbookEditor: AppCompatActivity() {
             } else {
                 content.add(it)
             }
-            it.makeEditable(currentBlockIndex,layout,rootView,::onLongClick)
+            it.makeEditable(currentBlockIndex,layout,rootView,::changeBlock)
         }
         editing = false
         scrollToView(currentBlockIndex)
@@ -419,13 +418,13 @@ class FieldbookEditor: AppCompatActivity() {
             } else {
                 content.add(it)
             }
-            it.makeEditable(currentBlockIndex,layout,rootView,::onLongClick)
+            it.makeEditable(currentBlockIndex,layout,rootView,::changeBlock)
         }
         editing = false
         scrollToView(currentBlockIndex)
     }
 
-    private fun onLongClick(cbi: ContentBlockInterface) : Boolean {
+    private fun changeBlock(cbi: ContentBlockInterface) : Boolean {
         currentBlockIndex = content.indexOf(cbi)
 
         // Set options for this block
@@ -495,7 +494,7 @@ class FieldbookEditor: AppCompatActivity() {
         scrollToView(newIndex)
     }
 
-    private fun saveFieldbookEntry(
+    private fun insertIntoFieldbook(
         title: String,
         content: List<ContentBlockInterface>,
         currentDate: String,
@@ -505,7 +504,8 @@ class FieldbookEditor: AppCompatActivity() {
             UTMCoordinate(0, 'N', 0.0f, 0.0f).toString()
         }
         else{
-            degreeToUTM(Pair(location.latitude.toFloat(),location.longitude.toFloat())).toString()
+            UTMCoordinate(31,'N',313000.0f,4677733.6f).toString()
+            //degreeToUTM(Pair(location.latitude.toFloat(),location.longitude.toFloat())).toString()
         }
 
         FieldbookEntry(

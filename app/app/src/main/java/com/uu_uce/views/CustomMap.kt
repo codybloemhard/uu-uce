@@ -36,6 +36,7 @@ import com.uu_uce.mapOverlay.pointDistance
 import com.uu_uce.misc.ListenableBoolean
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
+import com.uu_uce.pins.ContentBlockInterface
 import com.uu_uce.pins.MergedPin
 import com.uu_uce.pins.Pin
 import com.uu_uce.pins.SinglePin
@@ -78,8 +79,8 @@ class CustomMap : ViewTouchParent {
 
     private var pins                        : MutableMap<String, SinglePin>   = mutableMapOf()
     private var fieldbook                   : List<FieldbookEntry>      = listOf()
-    private var mergedPins: Pin? = null
-    private var mergedPinsLock: Any = Object()
+    private var mergedPins                  : Pin? = null
+    private var mergedPinsLock              : Any = Object()
     private var pinStatuses                 : MutableMap<String, Int>   = mutableMapOf()
 
     var pinSize: Int
@@ -395,13 +396,19 @@ class CustomMap : ViewTouchParent {
             when {
                 pinStatuses[pin.pinId] == null -> {
                     // Pin was not yet present
-                    val newPin = PinConversion(activity).pinDataToPin(pin, pinViewModel!!)
+                    val newPin = PinConversion(activity).pinDataToPin(
+                        pin,
+                        pinViewModel!!
+                    )
                     newPin.tryUnlock {
                         Logger.log(LogType.Info, "CustomMap", "Adding pin")
                         synchronized(pins){
                             pins[pin.pinId] = newPin
                         }
                         pinStatuses[newPin.id] = pin.status
+                    }
+                    newPin.tapAction = {activity: Activity ->
+                        (newPin::openContent)(this,activity)
                     }
                     newPin.resize(pinSize)
                     renderer.pinsChanged = true
@@ -453,9 +460,15 @@ class CustomMap : ViewTouchParent {
 
     fun setFieldbook (fieldbook: List<FieldbookEntry>) {
         for (entry in fieldbook) {
-            val pin = PinConversion(activity).fieldbookEntryToPin(entry,fieldbookViewModel!!)
+            val pin = PinConversion(activity).fieldbookEntryToPin(
+                entry,
+                fieldbookViewModel!!
+            )
             pins[pin.id] = pin.apply{
                 resize(pinSize)
+                tapAction = { activity: Activity ->
+                    (::openFieldbookPopup)(activity,rootView,entry,pin.content.contentBlocks)
+                }
             }
         }
         synchronized(mergedPinsLock){
