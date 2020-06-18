@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Point
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.*
@@ -12,23 +13,28 @@ import android.widget.PopupWindow
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.marginBottom
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinViewModel
+import com.uu_uce.allpins.parsePins
 import com.uu_uce.misc.ListenableBoolean
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
+import com.uu_uce.pins.openImageView
 import com.uu_uce.services.*
-import com.uu_uce.shapefiles.HeightLineReader
-import com.uu_uce.shapefiles.LayerType
-import com.uu_uce.shapefiles.PolygonReader
+import com.uu_uce.shapefiles.*
 import com.uu_uce.views.DragStatus
+import com.uu_uce.views.pinsUpdated
 import kotlinx.android.synthetic.main.activity_geo_map.*
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 
 var needsReload = ListenableBoolean()
+var testing = false
+
+const val defaultLineWidth = 1f
 
 //main activity in which the map and menu are displayed
 class GeoMap : AppCompatActivity() {
@@ -43,9 +49,10 @@ class GeoMap : AppCompatActivity() {
     // Popup for showing download progress
     private var popupWindow: PopupWindow? = null
     private lateinit var progressBar : ProgressBar
-    private var downloadResult = false
 
     private lateinit var maps : List<String>
+
+    private var styles: List<Style> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Set logger settings
@@ -72,40 +79,12 @@ class GeoMap : AppCompatActivity() {
         maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapsName)
 
         // Alert that notifies the user that maps need to be downloaded TODO: remove when streaming is implemented
-        if(!File(getExternalFilesDir(null)?.path + File.separator + "Maps").exists()){
+        if(!File(getExternalFilesDir(null)?.path + File.separator + mapsFolderName).exists()){
             AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setIcon(R.drawable.ic_sprite_question)
                 .setTitle(getString(R.string.geomap_download_warning_head))
                 .setMessage(getString(R.string.geomap_download_warning_body))
-                .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
-                    openProgressPopup(window.decorView.rootView)
-                    downloadResult = updateFiles(
-                        maps,
-                        this,
-                        {
-                            if(downloadResult){
-                                runOnUiThread{
-                                    Toast.makeText(this, getString(R.string.zip_download_completed), Toast.LENGTH_LONG).show()
-                                }
-                                val unzipResult = unpackZip(maps.first()) { progress -> runOnUiThread { progressBar.progress = progress } }
-                                runOnUiThread{
-                                    if(unzipResult) Toast.makeText(this, getString(R.string.zip_unpack_completed), Toast.LENGTH_LONG).show()
-                                    else Toast.makeText(this, getString(R.string.zip_unpacking_failed), Toast.LENGTH_LONG).show()
-                                    popupWindow?.dismiss()
-                                    start()
-                                }
-                            }
-                            else{
-                                runOnUiThread{
-                                    Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG).show()
-                                    popupWindow?.dismiss()
-                                    start()
-                                }
-                            }
-                        },
-                        { progress -> runOnUiThread { progressBar.progress = progress } }
-                    )
-                }
+                .setPositiveButton(getString(R.string.positive_button_text)) { _, _ -> downloadMaps() }
                 .setNegativeButton(getString(R.string.negative_button_text)) { _, _ ->
                     start()
                     Toast.makeText(this, getString(R.string.geomap_maps_download_instructions), Toast.LENGTH_LONG).show()
@@ -115,6 +94,36 @@ class GeoMap : AppCompatActivity() {
         else{
             start()
         }
+    }
+
+    private fun downloadMaps(){
+        openProgressPopup(window.decorView.rootView)
+        updateFiles(
+            maps,
+            this,
+            { success ->
+                if(success){
+                    runOnUiThread{
+                        Toast.makeText(this, getString(R.string.zip_download_completed), Toast.LENGTH_LONG).show()
+                    }
+                    val unzipResult = unpackZip(maps.first()) { progress -> runOnUiThread { progressBar.progress = progress } }
+                    runOnUiThread{
+                        if(unzipResult) Toast.makeText(this, getString(R.string.zip_unpack_completed), Toast.LENGTH_LONG).show()
+                        else Toast.makeText(this, getString(R.string.zip_unpacking_failed), Toast.LENGTH_LONG).show()
+                        popupWindow?.dismiss()
+                        start()
+                    }
+                }
+                else{
+                    runOnUiThread{
+                        Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG).show()
+                        popupWindow?.dismiss()
+                        start()
+                    }
+                }
+            },
+            { progress -> runOnUiThread { progressBar.progress = progress } }
+        )
     }
 
     private fun start(){
@@ -131,6 +140,27 @@ class GeoMap : AppCompatActivity() {
         this.customMap.setLifeCycleOwner(this)
         this.customMap.setPins(pinViewModel.allPinData)
 
+        // Update pins when not testing
+        if(!testing){
+            updateFiles(
+                listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
+                this,
+                { success ->
+                    if(success){
+                        runOnUiThread {
+                            Toast.makeText(this, getString(R.string.settings_pins_downloaded), Toast.LENGTH_LONG).show()
+                            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))){
+                                pinsUpdated.setValue(true)
+                            }
+                        }
+                    }
+                    else{
+                        runOnUiThread { Toast.makeText(this, getString(R.string.geomap_pins_download_instructions), Toast.LENGTH_LONG).show() }
+                    }
+                }
+            )
+        }
+
         // Get statusbar height
         resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
         if (resourceId > 0) {
@@ -146,9 +176,11 @@ class GeoMap : AppCompatActivity() {
             with(sharedPref.edit()) {
                 putString("com.uu_uce.USERNAME", "")
                 putString("com.uu_uce.PASSWORD", "")
+                putString("com.uu_uce.WEBTOKEN", "")
                 apply()
             }
             customMap.startLogin()
+            finish()
         }
 
         // Set menu controls
@@ -173,6 +205,11 @@ class GeoMap : AppCompatActivity() {
             }
         }
 
+        // Set legend button
+        legend_button.setOnClickListener{
+            openLegend()
+        }
+
         needsReload.setListener(object : ListenableBoolean.ChangeListener {
             override fun onChange() {
                 if(needsReload.getValue()){
@@ -180,6 +217,12 @@ class GeoMap : AppCompatActivity() {
                 }
             }
         })
+        
+        customMap.post {
+            scaleWidget.post {
+                scaleWidget.setScreenWidth(customMap.width)
+            }
+        }
 
         started = true
     }
@@ -202,9 +245,6 @@ class GeoMap : AppCompatActivity() {
             menu.down()
             return
         }
-        if (customMap.activePopup != null) {
-            customMap.activePopup!!.dismiss()
-        }
         else {
             moveTaskToBack(true)
         }
@@ -221,8 +261,12 @@ class GeoMap : AppCompatActivity() {
         }
         if(needsReload.getValue()) loadMap()
         if(started){
-            customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
-            customMap.resizePins()
+            val newSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
+            customMap.updatePins()
+            if(newSize != customMap.pinSize) {
+                customMap.pinSize = newSize
+                customMap.resizePins()
+            }
             customMap.redrawMap()
         }
         super.onResume()
@@ -235,6 +279,14 @@ class GeoMap : AppCompatActivity() {
         else{
             menu.setScreenHeight(customMap.height, dragBar.height, 0, lower_menu_layout.height)
         }
+        val heightlineY = menu.downY - heightline_diff_text.height - heightline_diff_text.marginBottom - heightline_diff_text.paddingBottom
+        val centerY = menu.downY - center_button.height - center_button.marginBottom - center_button.paddingBottom
+        val scaleY = heightlineY - scaleWidget.height - scaleWidget.marginBottom - scaleWidget.paddingBottom
+        val legendY = centerY - legend_button.height - legend_button.marginBottom - legend_button.paddingBottom
+        heightline_diff_text.y = heightlineY
+        center_button.y = centerY
+        scaleWidget.y = scaleY
+        legend_button.y = legendY
     }
 
     // Respond to permission request result
@@ -265,30 +317,39 @@ class GeoMap : AppCompatActivity() {
 
         customMap.removeLayers(toggle_layer_layout)
 
+        Logger.log(LogType.Event, "GeoMap", "loading maps")
+
         val mydir = File(getExternalFilesDir(null)?.path + "/Maps/")
+
+        try{readStyles(mydir)}
+        catch(e: Exception){Logger.error("GeoMap", "no style file available: "+ e.message)}
         try {
-            val heightlines = File(mydir, "Heightlines")
+            val layerName = "Polygons"
+            val polygons = File(mydir, layerName)
             customMap.addLayer(
-                LayerType.Height,
-                HeightLineReader(heightlines),
+                LayerType.Water,
+                PolygonReader(polygons, true, styles),
                 toggle_layer_layout,
-                true,
-                size
+                0.5f,
+                size,
+                layerName
             )
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
         }catch(e: Exception){
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
         try {
-            val polygons = File(mydir, "Polygons")
+            val layerName = "Heightlines"
+            val heightlines = File(mydir, layerName)
             customMap.addLayer(
-                LayerType.Water,
-                PolygonReader(polygons),
+                LayerType.Height,
+                HeightLineReader(heightlines),
                 toggle_layer_layout,
-                false,
-                size
+                Float.MAX_VALUE,
+                size,
+                layerName
             )
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
         }catch(e: Exception){
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
@@ -297,18 +358,37 @@ class GeoMap : AppCompatActivity() {
         customMap.initializeCamera()
 
         //more menu initialization which needs its width/height
-        menu.post{
-            initMenu()
+        scaleWidget.post {
+            menu.post {
+                initMenu()
+            }
         }
 
-        customMap.setCameraWAspect()
+        //customMap.setCameraWAspect()
         needsReload.setValue(false)
         customMap.redrawMap()
     }
+    private fun readStyles(dir: File){
+        val file = File(dir, "styles")
+        val reader = FileReader(file)
+
+        val nrStyles = reader.readULong()
+        styles = List(nrStyles.toInt()) {
+            val outline = reader.readUByte()
+            val b = reader.readUByte()
+            val g = reader.readUByte()
+            val r = reader.readUByte()
+
+            Style(outline.toInt() == 1, floatArrayOf(
+                r.toFloat()/255,
+                g.toFloat()/255,
+                b.toFloat()/255
+            ))
+        }
+    }
+
 
     private fun openProgressPopup(currentView: View){
-        val layoutInflater = layoutInflater
-
         // Build an custom view (to be inflated on top of our current view & build it's popup window)
         val customView = layoutInflater.inflate(R.layout.progress_popup, geoMapLayout, false)
 
@@ -322,6 +402,12 @@ class GeoMap : AppCompatActivity() {
 
         // Open popup
         popupWindow?.showAtLocation(currentView, Gravity.CENTER, 0, 0)
+    }
+
+    private fun openLegend(){
+        val uri = getExternalFilesDir(null)?.path + File.separator + mapsFolderName + File.separator + legendName
+
+        openImageView(this, Uri.parse(uri), "Legend")
     }
 
     @TestOnly

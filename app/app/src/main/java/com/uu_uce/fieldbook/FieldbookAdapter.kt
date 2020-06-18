@@ -33,6 +33,8 @@ class FieldbookAdapter(
     private var fieldbook: List<FieldbookEntry> = emptyList()
     private lateinit var parentView : ViewGroup
 
+    var view: View? = null
+
     /**
      * Represents one item of the RecyclerView
      *
@@ -78,7 +80,7 @@ class FieldbookAdapter(
         holder.parentView.setOnClickListener {
             openFieldbookPopup(
                 activity,
-                rootView,
+                view ?: rootView,
                 entry,
                 content
             )

@@ -25,30 +25,30 @@ import java.io.StringReader
 class PinContent(
     private val contentString: String,
     private val activity: Activity,
-    private val fieldbookPin : Boolean
-) {
-    val contentBlocks : MutableList<ContentBlockInterface>
-    private var canCompletePin = false
+    private val fieldbookPin: Boolean
+)
+{
+    val contentBlocks: MutableList<ContentBlockInterface>
 
-    lateinit var parent : Pin
+
+    lateinit var parent : SinglePin
     init{
         contentBlocks = getContent()
     }
 
-    private fun getContent() : MutableList<ContentBlockInterface>{
+    private fun getContent(): MutableList<ContentBlockInterface>{
             val reader = JsonReader(StringReader(contentString))
 
             return readContentBlocks(reader)
         }
 
-    private fun readContentBlocks(reader: JsonReader) :  MutableList<ContentBlockInterface>{
-        val contentBlocks : MutableList<ContentBlockInterface> = mutableListOf()
+    private fun readContentBlocks(reader: JsonReader):  MutableList<ContentBlockInterface> {
+        val contentBlocks: MutableList<ContentBlockInterface> = mutableListOf()
 
         reader.beginArray()
         while (reader.hasNext()) {
             val curBlock = readBlock(reader)
             if(curBlock != null) {
-                if(curBlock.canCompleteBlock) canCompletePin = true
                 contentBlocks.add(curBlock)
             }
         }
@@ -60,16 +60,18 @@ class PinContent(
     private fun readBlock(reader: JsonReader): ContentBlockInterface? {
         var blockTag                                    = BlockTag.UNDEFINED
         var textString                                  = ""
-        val filePath                                    = StringBuilder()
+        var filePath                                    = ""
+        val filePathBuilder                             = StringBuilder()
         var title                                       = ""
-        val thumbnailURI                                = StringBuilder()
-        val mcCorrectOptions : MutableList<String>      = mutableListOf()
-        val mcIncorrectOptions : MutableList<String>    = mutableListOf()
+        var thumbnailURI                                = ""
+        val thumbnailURIBuilder                         = StringBuilder()
+        val mcCorrectOptions: MutableList<String>       = mutableListOf()
+        val mcIncorrectOptions: MutableList<String>     = mutableListOf()
         var reward                                      = 0
 
         if(!fieldbookPin){
-            filePath.append(activity.getExternalFilesDir(null)?.path + File.separator + contentFolderName + File.separator)
-            thumbnailURI.append(activity.getExternalFilesDir(null)?.path + File.separator + contentFolderName + File.separator)
+            filePathBuilder.append(activity.getExternalFilesDir(null)?.path + File.separator + contentFolderName + File.separator)
+            thumbnailURIBuilder.append(activity.getExternalFilesDir(null)?.path + File.separator + contentFolderName + File.separator)
         }
 
         reader.beginObject()
@@ -90,8 +92,8 @@ class PinContent(
                             Logger.log(LogType.NotImplemented, "PinContent", "file reading not implemented")
                             reader.nextString()
                         }
-                        BlockTag.IMAGE      -> filePath.append(reader.nextString()).toString()
-                        BlockTag.VIDEO      -> filePath.append(reader.nextString()).toString()
+                        BlockTag.IMAGE      -> filePath = reader.nextString()
+                        BlockTag.VIDEO      -> filePath = reader.nextString()
                         BlockTag.MCQUIZ     -> {
                             Logger.error("PinContent", "multiple choice quiz can not be read from file")
                             reader.nextString()
@@ -103,7 +105,7 @@ class PinContent(
                     title = reader.nextString()
                 }
                 "thumbnail" -> {
-                    thumbnailURI.append(reader.nextString())
+                    thumbnailURI = reader.nextString()
                 }
                 "mc_correct_option" -> {
                     mcCorrectOptions.add(reader.nextString())
@@ -111,7 +113,7 @@ class PinContent(
                 "mc_incorrect_option" -> {
                     mcIncorrectOptions.add(reader.nextString())
                 }
-                "reward" ->{
+                "reward" -> {
                     reward = reader.nextInt()
                 }
                 else -> {
@@ -122,17 +124,35 @@ class PinContent(
             }
         }
         reader.endObject()
+        if(thumbnailURI != ""){
+            thumbnailURI = thumbnailURIBuilder.append(thumbnailURI).toString()
+        }
+        if(filePath != ""){
+            filePath = filePathBuilder.append(filePath).toString()
+        }
         return when(blockTag){
             BlockTag.UNDEFINED  -> {
                 Logger.error("PinContent", "No BlockTag specified")
                 return null
             }
-            BlockTag.TEXT       -> TextContentBlock(textString, activity)
-            BlockTag.IMAGE      -> ImageContentBlock(Uri.parse(filePath.toString()), Uri.parse(thumbnailURI.toString()), activity, title)
-            BlockTag.VIDEO      -> VideoContentBlock(Uri.parse(filePath.toString()), Uri.parse(thumbnailURI.toString()), activity, title)
-            BlockTag.MCQUIZ     -> {
+            BlockTag.TEXT   -> TextContentBlock(textString, activity)
+            BlockTag.IMAGE  -> {
+                if(filePath != "") {
+                    ImageContentBlock(Uri.parse(filePath), Uri.parse(thumbnailURI), activity, title)
+                }
+                else null
+            }
+            BlockTag.VIDEO  -> {
+                if(filePath != ""){
+                    VideoContentBlock(Uri.parse(filePath), Uri.parse(thumbnailURI), activity, title)
+                }
+                else null
+            }
+            BlockTag.MCQUIZ -> {
                 if(mcIncorrectOptions.count() < 1 && mcCorrectOptions.count() < 1) {
-                    Logger.error("PinContent", "Mutliple choice questions require at least one correct and one incorrect answer")
+                    Logger.error(
+                        "PinContent",
+                        "Mutliple choice questions require at least one correct and one incorrect answer")
                     return null
                 }
                 MCContentBlock( mcCorrectOptions, mcIncorrectOptions, reward, activity)
@@ -144,8 +164,7 @@ class PinContent(
 interface ContentBlockInterface {
     val content: View
     val tag : BlockTag
-    val canCompleteBlock : Boolean
-    fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?)
+    fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : SinglePin?)
     fun makeEditable(blockId : Int, layout : LinearLayout, view : View, action : ((ContentBlockInterface) -> Boolean)) : ContentBlockInterface {
         showContent(blockId,layout,view,null)
         content.setOnLongClickListener{
@@ -154,21 +173,16 @@ interface ContentBlockInterface {
         return this
     }
     fun removeContent(layout : LinearLayout) = layout.removeView(content)
-    fun getFilePath() : List<String> {
+    fun getFilePath(): List<String> {
         return listOf()
     }
-    override fun toString() : String
+    override fun toString(): String
 }
 
-class TextBlock(
-    private val activity: Activity
-)
-    : ContentBlockInterface
-{
+class TextBlock(private val activity: Activity): ContentBlockInterface {
     override var content = EditText(activity)
     override val tag = BlockTag.TEXT
-    override val canCompleteBlock = false
-    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?) {
+    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : SinglePin?) {
         content = EditText(activity).apply {
             inputType = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
             isSingleLine = false
@@ -181,27 +195,23 @@ class TextBlock(
             ).apply {
                 setMargins(0, 0, 0, 10)
             }
-        }.also{
-            layout.addView(it,blockId)
         }
+
+        layout.addView(content,blockId)
     }
 
     override fun toString() : String {
-        return "{${tagToJsonString(tag)}," +
-                "${textToJsonString(content.text.toString())}}"
+        return "{${tagToJsonString(tag)}," + "${textToJsonString(content.text.toString())}}"
     }
 }
 
 class TextContentBlock(
     private val textContent : String,
     private val activity: Activity
-)
-    : ContentBlockInterface
-{
+): ContentBlockInterface {
     override var content = TextView(activity)
     override val tag = BlockTag.TEXT
-    override val canCompleteBlock = false
-    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?){
+    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : SinglePin?){
         content = TextView(activity).apply {
             text = textContent
             setPadding(12, 12, 12, 20)
@@ -223,34 +233,31 @@ class TextContentBlock(
         return editable
     }
 
-    override fun toString() : String {
+    override fun toString(): String {
         return "{${tagToJsonString(tag)}," +
                 "${textToJsonString(textContent)}}"
     }
 
-    fun getTextContent() : String{
+    fun getTextContent(): String {
         return textContent
     }
 }
 
 class ImageContentBlock(
-    private val imageURI : Uri,
+    private val imageURI: Uri,
     private val thumbnailURI: Uri,
     private val activity: Activity,
     private val title: String? = null
-)
-    : ContentBlockInterface
-{
+): ContentBlockInterface {
     override var content = ImageView(activity)
     override val tag = BlockTag.IMAGE
-    override val canCompleteBlock = false
-    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?){
+    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : SinglePin?){
         content = ImageView(activity)
         try {
             content.apply {
                 setImageURI(imageURI)
                 content.setOnClickListener{
-                    openImageView(imageURI, title)
+                    openImageView(activity, imageURI, title)
                 }
                 scaleType = ImageView.ScaleType.FIT_CENTER
                 adjustViewBounds = true
@@ -258,7 +265,7 @@ class ImageContentBlock(
         } catch (e: Exception) {
             Logger.error("PinContent","Couldn't load $imageURI, so loaded the thumbnail $thumbnailURI instead")
             content.setOnClickListener{
-                openImageView(thumbnailURI, title)
+                openImageView(activity, thumbnailURI, title)
             }
             content.setImageURI(thumbnailURI)
         }
@@ -279,23 +286,14 @@ class ImageContentBlock(
         totallyExterminateFileExistence(activity, thumbnailURI)
     }
 
-    override fun getFilePath() : List<String>{
+    override fun getFilePath(): List<String> {
         return listOf(imageURI.toString())
     }
 
-    override fun toString() : String {
+    override fun toString(): String {
         return "{${tagToJsonString(tag)}," +
                 "${fileToJsonString(imageURI)}," +
                 "${thumbnailToJsonString(thumbnailURI)}}"
-    }
-
-    private fun openImageView(imageURI: Uri, imageTitle : String?){
-        val intent = Intent(activity, ImageViewer::class.java)
-
-        intent.putExtra("uri", imageURI)
-        if(imageTitle != null)
-            intent.putExtra("title", imageTitle)
-        activity.startActivity(intent)
     }
 
     fun getThumbnailURI() : Uri{
@@ -304,18 +302,15 @@ class ImageContentBlock(
 }
 
 class VideoContentBlock(
-    private val videoURI : Uri,
-    private val thumbnailURI : Uri,
+    private val videoURI: Uri,
+    private val thumbnailURI: Uri,
     private val activity: Activity,
-    private val title : String? = null
-)
-    : ContentBlockInterface
+    private val title: String? = null
+): ContentBlockInterface
 {
     override var content = FrameLayout(activity)
     override val tag = BlockTag.VIDEO
-    override val canCompleteBlock = false
-
-    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : Pin?){
+    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : SinglePin?){
         content = FrameLayout(activity)
 
         // Create thumbnail image
@@ -349,7 +344,7 @@ class VideoContentBlock(
         // Add thumbnail and button
         content.addView(playButton)
         content.setOnClickListener{
-            openVideoView(videoURI, title)
+            openVideoView(activity, videoURI, title)
         }
         layout.addView(content,blockId)
     }
@@ -359,46 +354,34 @@ class VideoContentBlock(
         totallyExterminateFileExistence(activity, thumbnailURI)
     }
 
-    override fun getFilePath() : List<String>{
+    override fun getFilePath(): List<String>{
         if(thumbnailURI == Uri.EMPTY) return listOf(videoURI.toString())
         return listOf(thumbnailURI.toString(), videoURI.toString())
     }
 
-    override fun toString() : String {
+    override fun toString(): String {
         return "{${tagToJsonString(tag)}," +
                 "${fileToJsonString(videoURI)}," +
                 "${thumbnailToJsonString(thumbnailURI)}}"
     }
 
-    private fun openVideoView(videoURI: Uri, videoTitle : String?){
-        val intent = Intent(activity, VideoViewer::class.java)
-
-        intent.putExtra("uri", videoURI)
-        if(videoTitle != null)
-            intent.putExtra("title", videoTitle)
-        activity.startActivity(intent)
-    }
-
-    fun getThumbnailURI() : Uri{
+    fun getThumbnailURI(): Uri{
         return thumbnailURI
     }
 }
 
 class MCContentBlock(
-    private val correctAnswers : List<String>,
-    private val incorrectAnswers : List<String>,
-    private val reward : Int,
-    private val activity : Activity
-)
-    : ContentBlockInterface
+    private val correctAnswers: List<String>,
+    private val incorrectAnswers: List<String>,
+    private val reward: Int,
+    private val activity: Activity
+): ContentBlockInterface
 {
     override var content = TableLayout(activity)
     override val tag = BlockTag.MCQUIZ
-    override val canCompleteBlock = true
-    private var selectedAnswer : Int = -1
-    private lateinit var selectedBackground : CardView
-
-    override fun showContent(blockId : Int, layout: LinearLayout, view : View, parent : Pin?) {
+    private var selectedAnswer: Int = -1
+    private lateinit var selectedBackground: CardView
+    override fun showContent(blockId : Int, layout: LinearLayout, view : View, parent : SinglePin?) {
         content = TableLayout(activity)
 
         if(parent == null) {
@@ -453,7 +436,7 @@ class MCContentBlock(
 
             currentRow.addView(currentFrame)
 
-            if(parent.getStatus() < 2){
+            if(parent.status < 2){
                 background.setCardBackgroundColor(ContextCompat.getColor(activity, R.color.Boyzone))
                 currentFrame.setOnClickListener {
                     selectedBackground.setCardBackgroundColor(ContextCompat.getColor(activity, R.color.Boyzone))
@@ -515,7 +498,7 @@ enum class BlockTag{
     VIDEO;
 }
 
-fun blockTagFromString(tagString : String) : BlockTag{
+fun blockTagFromString(tagString: String) : BlockTag{
     return when (tagString) {
         "TEXT"      -> BlockTag.TEXT
         "IMAGE"     -> BlockTag.IMAGE
@@ -533,23 +516,23 @@ fun buildJSONContent(content: List<ContentBlockInterface>): String {
     )
 }
 
-fun tagToJsonString(tag: BlockTag) : String {
+fun tagToJsonString(tag: BlockTag): String {
     return "\"tag\":\"$tag\""
 }
 
-fun textToJsonString(text: String) : String {
+fun textToJsonString(text: String): String {
     return "\"text\":\"$text\""
 }
 
-fun fileToJsonString(filePath: Uri) : String {
+fun fileToJsonString(filePath: Uri): String {
     return "\"file_path\":\"$filePath\""
 }
 
-fun thumbnailToJsonString(thumbnail: Uri) : String {
+fun thumbnailToJsonString(thumbnail: Uri): String {
     return "\"thumbnail\":\"$thumbnail\""
 }
 
-fun totallyExterminateFileExistence(activity : Activity, thumbnail : Uri) {
+fun totallyExterminateFileExistence(activity: Activity, thumbnail: Uri) {
     val toBeDeleted = File(thumbnail.path!!)
     if(toBeDeleted.exists()) {
         if (toBeDeleted.delete()) {
@@ -565,6 +548,24 @@ fun totallyExterminateFileExistence(activity : Activity, thumbnail : Uri) {
     } else {
         Logger.log(LogType.Info,"PinContent","This thumbnail doesn't exist")
     }
+}
+
+fun openImageView(activity: Activity, imageURI: Uri, imageTitle : String?){
+    val intent = Intent(activity, ImageViewer::class.java)
+
+    intent.putExtra("uri", imageURI)
+    if(imageTitle != null)
+        intent.putExtra("title", imageTitle)
+    activity.startActivity(intent)
+}
+
+fun openVideoView(activity: Activity, videoURI: Uri, videoTitle: String?){
+    val intent = Intent(activity, VideoViewer::class.java)
+
+    intent.putExtra("uri", videoURI)
+    if(videoTitle != null)
+        intent.putExtra("title", videoTitle)
+    activity.startActivity(intent)
 }
 
 

@@ -6,45 +6,34 @@ chunkGetter: means of getting chunks associated with this layer
 map: the map this layer is part of
 hasInfo: temporary indicator whether this layer has an info file associated with it
  */
-class ShapeLayer(private val chunkGetter: ChunkGetter, hasInfo: Boolean){
+class ShapeLayer(private val chunkGetter: ChunkGetter, zoomCutoff: Float){
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk> = mutableMapOf()
     private val chunkManager: ChunkManager
 
-    var bmin: p3
+    var bmin: Triple<Float,Float,Float>
         private set
-    var bmax: p3
+    var bmax: Triple<Float,Float,Float>
         private set
-
 
     //setup the chunk and bounding box information
     init{
-        if(hasInfo) {
-            val info = chunkGetter.readInfo()
-            bmin = info.first
-            bmax = info.second
-        }
-        else {
-            val index = ChunkIndex(0, 0, 0)
-            val chunk = chunkGetter.getChunk(index)
-            chunks[index] = chunk
-            bmin = chunk.bmin
-            bmax = chunk.bmax
-            chunkGetter.nrCuts = listOf(1)
-        }
+        val info = chunkGetter.readInfo()
+        bmin = info.first
+        bmax = info.second
 
-        chunkManager = ChunkManager(chunks, chunkGetter, bmin, bmax, chunkGetter.nrCuts)
+        chunkManager = ChunkManager(chunks, chunkGetter, bmin, bmax, chunkGetter.nrCuts, zoomCutoff)
     }
 
-    fun setzooms(minzoom: Double, maxzoom: Double){
+    fun setzooms(minzoom: Float, maxzoom: Float){
         chunkManager.setZooms(minzoom, maxzoom)
     }
 
-    fun updateChunks(viewport: Pair<p2,p2>, zoom: Double): ChunkUpdateResult {
+    fun updateChunks(viewport: Pair<p2,p2>, zoom: Float): ChunkUpdateResult {
         return chunkManager.update(viewport, zoom)
     }
 
     fun getZoomLevel() : Int {
-        return chunkManager.getZoomLevel()
+        return chunkManager.zoomLevel
     }
 
     fun getMods() : List<Int> {
@@ -52,18 +41,11 @@ class ShapeLayer(private val chunkGetter: ChunkGetter, hasInfo: Boolean){
     }
 
     //draw all chunks associated with this layer
-    fun draw(program: Int, scale: FloatArray, trans: FloatArray, color: FloatArray){
+    fun draw(lineProgram: Int, varyingColorProgram: Int, scale: FloatArray, trans: FloatArray, color: FloatArray){
 
         synchronized(chunks) {
-            var nrShapes = 0
-            var nrLines = 0
             for(chunk in chunks.values) {
-                chunk.draw(program, scale, trans, color)
-
-                nrShapes += chunk.shapes.size
-                for(shape in chunk.shapes){
-                    nrLines+=shape.nrPoints-1
-                }
+                chunk.draw(lineProgram, varyingColorProgram, scale, trans, color)
             }
         }
     }

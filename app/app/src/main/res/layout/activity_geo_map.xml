@@ -11,8 +11,6 @@
         android:id="@+id/customMap"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clickable="true"
-        android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -24,12 +22,26 @@
         android:id="@+id/heightline_diff_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginBottom="38dp"
+        android:layout_marginStart="5dp"
+        android:paddingBottom="2dp"
         android:fontFamily="@font/roboto_bold"
-        android:text="@string/geomap_heightline_diff_text"
+        android:text="@string/geomap_default_distance"
+        android:textSize="12sp"
         android:textColor="@color/TextDarkGrey"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.uu_uce.mapOverlay.ScaleWidget
+        android:id="@+id/scaleWidget"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:paddingBottom="2dp"
+        android:text="@string/geomap_default_distance"
+        android:fontFamily="@font/roboto_bold"
+        android:textSize="12sp"
+        android:textColor="@color/TextDarkGrey"
+        app:layout_constraintBottom_toTopOf="@id/heightline_diff_text"
         app:layout_constraintStart_toStartOf="parent" />
 
     <com.uu_uce.views.Menu
@@ -103,38 +115,38 @@
             android:orientation="vertical">
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/profile_button"
+                android:id="@+id/allpins_button"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_margin="5dp">
 
                 <ImageView
-                    android:id="@+id/profile_image"
+                    android:id="@+id/allpins_image"
                     android:layout_width="wrap_content"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
                     android:adjustViewBounds="false"
-                    android:contentDescription="@string/menu_fieldbook_image_description"
+                    android:contentDescription="@string/menu_allpins_button_image"
                     android:cropToPadding="false"
                     android:scaleType="fitEnd"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/profile_button_text"
+                    app:layout_constraintEnd_toStartOf="@+id/allpins_button_text"
                     app:layout_constraintHorizontal_chainStyle="packed"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/ic_menu_symbol_profile" />
+                    app:srcCompat="@drawable/ic_menu_symbol_allpins" />
 
                 <TextView
-                    android:id="@+id/profile_button_text"
+                    android:id="@+id/allpins_button_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
                     android:fontFamily="@font/roboto_bold"
-                    android:text="@string/menu_profile_button_text"
+                    android:text="@string/menu_allpins_button_text"
                     android:textAllCaps="false"
                     android:textColor="#767676"
                     android:textSize="20sp"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/profile_image"
+                    app:layout_constraintStart_toEndOf="@id/allpins_image"
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -175,38 +187,38 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/allpins_button"
+                android:id="@+id/profile_button"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_margin="5dp">
 
                 <ImageView
-                    android:id="@+id/allpins_image"
+                    android:id="@+id/profile_image"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
                     android:adjustViewBounds="false"
-                    android:contentDescription="@string/menu_allpins_button_image"
+                    android:contentDescription="@string/menu_fieldbook_image_description"
                     android:cropToPadding="false"
                     android:scaleType="fitEnd"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/allpins_button_text"
+                    app:layout_constraintEnd_toStartOf="@+id/profile_button_text"
                     app:layout_constraintHorizontal_chainStyle="packed"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/ic_menu_symbol_allpins" />
+                    app:srcCompat="@drawable/ic_menu_symbol_profile" />
 
                 <TextView
-                    android:id="@+id/allpins_button_text"
+                    android:id="@+id/profile_button_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
                     android:fontFamily="@font/roboto_bold"
-                    android:text="@string/menu_allpins_button_text"
+                    android:text="@string/menu_profile_button_text"
                     android:textAllCaps="false"
                     android:textColor="#767676"
                     android:textSize="20sp"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/allpins_image"
+                    app:layout_constraintStart_toEndOf="@id/profile_image"
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -289,12 +301,25 @@
         android:id="@+id/center_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="38dp"
-        android:src="@drawable/ic_sprite_center"
-        app:backgroundTint="#FFFFFF"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        android:src="@drawable/ic_sprite_center"
+        app:backgroundTint="#FFFFFF"
+        app:elevation="5dp"
+        android:elevation="5dp"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/legend_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="2dp"
+        app:layout_constraintBottom_toTopOf="@id/center_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:src="@android:drawable/ic_menu_mapmode"
+        app:backgroundTint="#FFFFFF"
         app:elevation="5dp"
         android:elevation="5dp"/>
 

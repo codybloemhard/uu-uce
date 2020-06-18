@@ -8,12 +8,13 @@ import android.graphics.Paint
 import android.opengl.GLES20
 import android.os.Build
 import android.util.AttributeSet
+import android.view.Gravity
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.PopupWindow
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -28,26 +29,28 @@ import com.uu_uce.fieldbook.FieldbookViewModel
 import com.uu_uce.fieldbook.FullRoute
 import com.uu_uce.fieldbook.Route
 import com.uu_uce.gestureDetection.*
+import com.uu_uce.gestureDetection.Scroller
 import com.uu_uce.mapOverlay.Location
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.pointDistance
-import com.uu_uce.mapOverlay.pointInAABoundingBox
 import com.uu_uce.misc.ListenableBoolean
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
+import com.uu_uce.pins.MergedPin
 import com.uu_uce.pins.Pin
+import com.uu_uce.pins.SinglePin
 import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
 import kotlinx.android.synthetic.main.activity_geo_map.*
 import org.jetbrains.annotations.TestOnly
 import java.time.LocalDate
 import kotlin.math.abs
+import kotlin.math.pow
 import kotlin.system.measureTimeMillis
 
-/*
-the view displayed in the app that holds the map
- */
 var pinsUpdated = ListenableBoolean()
+
+// The view displayed in the app that holds the map
 class CustomMap : ViewTouchParent {
 
     constructor(context: Context): super(context)
@@ -59,28 +62,32 @@ class CustomMap : ViewTouchParent {
     // Location
     private val locationServices                            = LocationServices()
     private val locationDeadZone    : Float                 = 5f // How much does the location have to change on the screen to warrant a redraw
-    private var loc                 : Location              = Location(UTMCoordinate(31, 'N', 0.0, 0.0), context)
+    private var loc                 : Location              = Location(UTMCoordinate(31, 'N', 0.0f, 0.0f), context)
     private var lastDrawnLoc        : Pair<Float, Float>    = Pair(0f, 0f)
     var locationAvailable           : Boolean               = false
-    private var locAtCenterPress    : UTMCoordinate         = UTMCoordinate(31, 'N', 0.0, 0.0)
+    private var locAtCenterPress    : UTMCoordinate         = UTMCoordinate(31, 'N', 0.0f, 0.0f)
 
     // Paints
     private val deviceLocPaint      : Paint = Paint()
     private val deviceLocEdgePaint  : Paint = Paint()
 
     private lateinit var activity           : Activity
-    private lateinit var pinViewModel       : PinViewModel
-    private lateinit var fieldbookViewModel : FieldbookViewModel
+    private var pinViewModel                : PinViewModel? = null
+    private var fieldbookViewModel          : FieldbookViewModel? = null
     private lateinit var lfOwner            : LifecycleOwner
 
-    private var pins                        : MutableMap<String, Pin>   = mutableMapOf()
+    private var pins                        : MutableMap<String, SinglePin>   = mutableMapOf()
     private var fieldbook                   : List<FieldbookEntry>      = listOf()
-    private var sortedPins                  : List<Pin>                 = listOf()
+    private var mergedPins: Pin? = null
+    private var mergedPinsLock: Any = Object()
     private var pinStatuses                 : MutableMap<String, Int>   = mutableMapOf()
-    var activePopup                         : PopupWindow?              = null
 
     var pinSize: Int
     private var locSizeFactor = 0.5f
+
+    //pin merging
+    private val minPinChunks = 4
+    private val pinChunksDepth = 4
 
     // Map
     private var smap = ShapeMap(this)
@@ -123,8 +130,8 @@ class CustomMap : ViewTouchParent {
                 }
             }
         })
-        //width and height are not set in the init{} yet
-        //we delay calculations that use them by using post
+        // Width and height are not set in the init{} yet
+        // We delay calculations that use them by using post
         post{
             setCameraWAspect()
         }
@@ -132,25 +139,62 @@ class CustomMap : ViewTouchParent {
 
     //to be called after all addLayer calls
     fun initializeCamera(){
-        camera = smap.initialize()
+        camera = smap.createCamera()
     }
 
     // Add a new layer to the map, and generate a button to toggle it
-    fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout?, hasInfo: Boolean, buttonSize: Int = 0){
-        smap.addLayer(lt, chunkGetter, hasInfo)
+    fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout?, zoomCutoff: Float = Float.MAX_VALUE, buttonSize: Int = 0, layerName: String){
+        smap.addLayer(lt, chunkGetter, zoomCutoff)
         val curLayers = nrLayers
         nrLayers++
 
         if (buttonSize > 0) {
+            val buttonLayout = LinearLayout(context, null).apply {
+                layoutParams = ViewGroup.LayoutParams(buttonSize, LinearLayout.LayoutParams.WRAP_CONTENT)
+                orientation = LinearLayout.VERTICAL
+            }
+            val buttonFrame = FrameLayout(context, null).apply{
+                layoutParams = ViewGroup.LayoutParams(buttonSize, buttonSize)
+            }
+
+            val btnBackground = CardView(context, null).apply{
+                val params = FrameLayout.LayoutParams(
+                    (buttonSize * 0.9).toInt(),
+                    (buttonSize * 0.9).toInt()
+                )
+                params.gravity = Gravity.CENTER
+                layoutParams = params
+                setCardBackgroundColor(ResourcesCompat.getColor(context.resources, R.color.BeniukonBronze, null))
+                radius = 10f
+            }
+
             val btn = ImageButton(context, null, R.attr.buttonBarButtonStyle).apply {
                 setImageResource(R.drawable.ic_sprite_toggle_layer)
                 setOnClickListener {
                     toggleLayer(curLayers)
+                    if(layerVisible(curLayers)){
+                        btnBackground.setCardBackgroundColor(ResourcesCompat.getColor(context.resources, R.color.BeniukonBronze, null))
+                    }
+                    else{
+                        btnBackground.setCardBackgroundColor(ResourcesCompat.getColor(context.resources, R.color.TextGrey, null))
+                    }
                 }
-                layoutParams = ViewGroup.LayoutParams(buttonSize, buttonSize)
+                elevation = 6.5f
             }
 
-            scrollLayout!!.addView(btn)
+            buttonFrame.addView(btnBackground)
+            buttonFrame.addView(btn)
+
+            val layerTitle = TextView(context, null).apply{
+                text = layerName
+                gravity = Gravity.CENTER_HORIZONTAL
+                layoutParams = ViewGroup.LayoutParams(buttonSize, LinearLayout.LayoutParams.WRAP_CONTENT)
+            }
+
+            buttonLayout.addView(buttonFrame)
+            buttonLayout.addView(layerTitle)
+
+            scrollLayout!!.addView(buttonLayout)
         }
 
         mods = smap.getMods()
@@ -163,38 +207,42 @@ class CustomMap : ViewTouchParent {
         scrollLayout.removeAllViewsInLayout()
     }
 
-    fun onDrawFrame(standardProgram: Int, pinProgram: Int, locProgram: Int){
+    fun onDrawFrame(lineProgram: Int, varyingColorProgram: Int, pinProgram: Int, locProgram: Int){
         //if both the camera and the map have no updates, don't redraw
         val res = camera.update()
-        val chunkRes = smap.updateChunks()
+        val viewport = camera.getViewport()
+        if(viewport == p2ZeroPair){
+            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+            Logger.error("CustomMap", "Camera could not be initialized")
+            return
+        }
+
+        val chunkRes = smap.updateChunks(viewport)
 
         if(res == UpdateResult.NOOP && chunkRes == ChunkUpdateResult.NOTHING){
             //bufferframes to make sure everything is redrawn when returning from a different activity
             curBufferFrame++
-            if(curBufferFrame >= bufferFrames)
+            if(curBufferFrame >= bufferFrames) {
+                Logger.log(LogType.Event, "CustomMap", "All updates done, no longer redrawing")
                 return
+            }
         }
         else curBufferFrame = 0
 
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
 
-        val viewport = camera.getViewport()
         val (scale,trans) = camera.getScaleTrans()
-
-        if(viewport == p2ZeroPair){
-            Logger.error("CustomMap", "Camera could not be initialized")
-            return
-        }
 
         val timeDraw = measureTimeMillis {
             // Draw map
-            smap.draw(standardProgram, scale, trans)
+            smap.draw(lineProgram, varyingColorProgram, scale, trans)
 
             if (context is GeoMap) {
-                (context as GeoMap).runOnUiThread {
+                val gm = context as GeoMap
+                gm.runOnUiThread {
                     val zoomLevel = smap.getZoomLevel()
                     if (zoomLevel >= 0 && mods.count() > 0) {
-                        (context as GeoMap).heightline_diff_text.text =
+                        gm.heightline_diff_text.text =
                             (context as Activity).getString(
                                 R.string.geomap_heightline_diff_text,
                                 mods[zoomLevel]
@@ -202,16 +250,15 @@ class CustomMap : ViewTouchParent {
 
                     } else {
                         val standardValue = 0
-                        (context as GeoMap).heightline_diff_text.text =
+                        gm.heightline_diff_text.text =
                             (context as Activity).getString(
                                 R.string.geomap_heightline_diff_text,
                                 standardValue
                             )
                     }
                 }
+                gm.scaleWidget.update(viewport, gm)
             }
-
-            Logger.log(LogType.Event, "DrawOverlay", "east: ${loc.utm.east}, north: ${loc.utm.north}")
 
             // Draw device location
             val deviceScreenLoc = coordToScreen(loc.utm, viewport, width, height)
@@ -223,11 +270,10 @@ class CustomMap : ViewTouchParent {
                 lastDrawnLoc = deviceScreenLoc
             }
 
-            // Draw pin
-            synchronized(sortedPins) {
-                for(pin in sortedPins) {
-                    //pins are drawn at increasing height, lowest at 0, highest at (almost) 1
-                    pin.draw(pinProgram, scale, trans, viewport, width, height, this)
+            synchronized(mergedPinsLock){
+                val disPerPixel = (viewport.second.first - viewport.first.first)/width
+                if(mergedPins?.draw(pinProgram, scale, trans, viewport, width, height, this, disPerPixel) == true){
+                    renderer.pinsChanged = true
                 }
             }
 
@@ -238,14 +284,13 @@ class CustomMap : ViewTouchParent {
         Logger.log(LogType.Continuous, "CustomMap", "Draw MS: $timeDraw")
 
         //invalidate so onDraw is called again next frame if necessary
-        if(res == UpdateResult.ANIM || chunkRes == ChunkUpdateResult.LOADING)
+        //if(res == UpdateResult.ANIM || chunkRes == ChunkUpdateResult.LOADING)
             requestRender()
     }
 
     fun initPinsGL(){
-        synchronized(pins) {
-            for ((_, pin) in pins)
-                pin.initGL()
+        synchronized(mergedPinsLock){
+            mergedPins?.initGL()
         }
     }
 
@@ -268,9 +313,9 @@ class CustomMap : ViewTouchParent {
         if(distance > locationDeadZone){
             redrawMap()
             Logger.log(LogType.Event,"CustomMap", "Redrawing, distance: $distance")
+            return
         }
-        Logger.log(LogType.Event,"CustomMap", "No redraw needed")
-        Logger.log(LogType.Event,"CustomMap", "${loc.utm.east}, ${loc.utm.north}")
+        Logger.log(LogType.Event,"CustomMap", "No redraw needed, current loc ${loc.utm.east}, ${loc.utm.north}")
     }
 
     fun startLocServices(){
@@ -290,16 +335,14 @@ class CustomMap : ViewTouchParent {
 
     //used to zoom the camera in and out
     private fun zoomMap(zoom: Float){
-        val deltaOne = 1.0 - zoom.toDouble().coerceIn(0.5, 1.5)
-        camera.zoomIn(1.0 + deltaOne)
+        val deltaOne = 1.0f - zoom.coerceIn(0.5f, 1.5f)
+        camera.zoomIn(1.0f + deltaOne)
         if(camera.needsInvalidate())
             requestRender()
     }
 
     //used to scroll the camera
-    private fun moveMap(dxpxf: Float, dypxf: Float){
-        val dxpx = dxpxf.toDouble()
-        val dypx = dypxf.toDouble()
+    private fun moveMap(dxpx: Float, dypx: Float){
         val dx = dxpx / width * 2
         val dy = dypx / height * 2
         camera.moveCamera(dx, -dy)
@@ -313,14 +356,14 @@ class CustomMap : ViewTouchParent {
 
     //zoomout until the whole map is visible
     private fun zoomOutMax(){
-        camera.zoomOutMax(500.0)
+        camera.zoomOutMax(500.0f)
         if(camera.needsInvalidate())
             requestRender()
     }
 
     //zoom in to the blue dot, at some arbitrary height
     fun zoomToDevice(){
-        camera.startAnimation(Triple(loc.utm.east, loc.utm.north, 0.02), 1500.0)
+        camera.startAnimation(Triple(loc.utm.east, loc.utm.north, 0.02f), 1500.0f)
         if(camera.needsInvalidate())
             requestRender()
     }
@@ -352,13 +395,14 @@ class CustomMap : ViewTouchParent {
             when {
                 pinStatuses[pin.pinId] == null -> {
                     // Pin was not yet present
-                    val newPin = PinConversion(activity).pinDataToPin(pin, pinViewModel)
+                    val newPin = PinConversion(activity).pinDataToPin(pin, pinViewModel!!)
                     newPin.tryUnlock {
                         Logger.log(LogType.Info, "CustomMap", "Adding pin")
-                        pins[pin.pinId] = newPin
+                        synchronized(pins){
+                            pins[pin.pinId] = newPin
+                        }
                         pinStatuses[newPin.id] = pin.status
                     }
-                    newPin.tapAction = {activity: Activity -> (newPin::openContent)(this,activity) {activePopup = null}}
                     newPin.resize(pinSize)
                     renderer.pinsChanged = true
                 }
@@ -367,7 +411,7 @@ class CustomMap : ViewTouchParent {
                     val changedPin = pins[pin.pinId]
 
                     changedPin?.tryUnlock {
-                        changedPin.setStatus(1)
+                        changedPin.status =1
                         pinStatuses[changedPin.id] = 1
                     }
                 }
@@ -376,41 +420,46 @@ class CustomMap : ViewTouchParent {
                     val changedPin = pins[pin.pinId]
 
                     if (changedPin != null) {
-                        changedPin.setStatus(pin.status)
+                        changedPin.status = pin.status
                         pinStatuses[changedPin.id] = pin.status
                     }
                 }
             }
         }
-        synchronized(sortedPins) {
-            sortedPins = pins.values.sortedByDescending { pin -> pin.coordinate.north }
+        synchronized(mergedPinsLock){
+            mergedPins = mergePins()
         }
         redrawMap()
     }
 
-    private fun updatePins(){
-        pins = mutableMapOf()
+    fun updatePins(){
+        synchronized(pins) {
+            pins = mutableMapOf()
+        }
         pinStatuses = mutableMapOf()
-        pinViewModel.reloadPins { newPinData -> updatePinStatuses(newPinData) }
+        pinViewModel!!.reloadPins { newPinData -> updatePinStatuses(newPinData) }
         pinsUpdated.setValue(false)
+        synchronized(mergedPinsLock){
+            mergedPins = mergePins()
+        }
     }
 
     fun resizePins(){
-        for(pin in pins.values){
-            pin.resize(pinSize)
+        mergedPins?.resize(pinSize)
+        synchronized(mergedPinsLock){
+            mergedPins = mergePins()
         }
     }
 
     fun setFieldbook (fieldbook: List<FieldbookEntry>) {
         for (entry in fieldbook) {
-            val pin = PinConversion(activity).fieldbookEntryToPin(entry,fieldbookViewModel)
+            val pin = PinConversion(activity).fieldbookEntryToPin(entry,fieldbookViewModel!!)
             pins[pin.id] = pin.apply{
                 resize(pinSize)
-                tapAction = {activity: Activity ->  (::openFieldbookPopup)(activity,rootView,entry,pin.getContent().contentBlocks) }
             }
         }
-        synchronized(sortedPins) {
-            sortedPins = pins.values.sortedByDescending { pin -> pin.coordinate.north }
+        synchronized(mergedPinsLock){
+            mergedPins = mergePins()
         }
 
         redrawMap()
@@ -418,18 +467,70 @@ class CustomMap : ViewTouchParent {
 
     //called when the screen is tapped at tapLocation
     private fun tapPin(tapLocation : p2, activity : Activity){
-        if(activePopup != null) return
-        for(pin in sortedPins.reversed()){
-            if(!pin.inScreen || pin.getStatus() < 1) continue
-            if(pointInAABoundingBox(pin.boundingBox.first, pin.boundingBox.second, tapLocation, 0)) {
-                pin.run{
-                    tapAction(activity)
-                }
-                activePopup = pin.popupWindow
-                Logger.log(LogType.Info, "CustomMap", "${pin.getTitle()}: I have been tapped.")
-                return
-            }
+        val viewport = camera.getViewport()
+        synchronized(mergedPinsLock){
+            val disPerPixel = (viewport.second.first - viewport.first.first)/width
+            mergedPins?.tap(tapLocation, activity, this, disPerPixel)
         }
+    }
+
+    //pre-calculate all distances between all pins, and merge them optimally
+    private fun mergePins(): Pin?{
+        val finalpins: MutableList<Pin> = pins.values.filter{pin -> pin.status > 0}.toMutableList()
+        
+        while(finalpins.size > 1) {
+            //find two closest pins
+            var mini = -1
+            var minj = -1
+            var mindis2 = Float.MAX_VALUE
+            for (i in finalpins.indices) for (j in i+1 until finalpins.size) {
+                val dis2 = (finalpins[i].coordinate.east - finalpins[j].coordinate.east).pow(2) + (finalpins[i].coordinate.north - finalpins[j].coordinate.north).pow(2)
+                if (dis2 < mindis2) {
+                    mini = i
+                    minj = j
+                    mindis2 = dis2
+                }
+            }
+
+            //calculate minimum distance in pixels between the two pins
+            //depending on if they hit each other horizontally or vertically
+            val xdisabs = abs(finalpins[minj].coordinate.east - finalpins[mini].coordinate.east)
+            val ydis = finalpins[minj].coordinate.north - finalpins[mini].coordinate.north
+
+            val (top,bot) = if(ydis < 0){
+                Pair(finalpins[mini],finalpins[minj])
+            }else{
+                Pair(finalpins[minj],finalpins[mini])
+            }
+
+            val slope = abs(ydis)/xdisabs
+            val width = (bot.pinWidth + top.pinWidth)/2
+            val slopeSwitch = bot.pinHeight/width
+            val pixeldis = if(slope > slopeSwitch) bot.pinHeight else width
+            val actualDis = abs(
+                if(slope > slopeSwitch) bot.coordinate.north - top.coordinate.north
+                else bot.coordinate.east - top.coordinate.east
+            )
+
+            //coordinate is average of two pins
+            val coordinate = UTMCoordinate(
+                bot.coordinate.zone,
+                bot.coordinate.letter,
+                (bot.coordinate.east + top.coordinate.east)/2,
+                (bot.coordinate.north + top.coordinate.north)/2
+            )
+
+            val background = PinConversion.difficultyToBackground(mergedPinBackground, (context as Activity), context.resources)
+            val icon = PinConversion.typeToIcon(mergedPinIcon, context.resources)
+
+            val newMergedPin = MergedPin(finalpins[mini], finalpins[minj], actualDis, pixeldis, pinViewModel, fieldbookViewModel, coordinate, background, icon, pinSize.toFloat())
+
+            finalpins.removeAt(minj)
+            finalpins.removeAt(mini)
+            finalpins.add(newMergedPin)
+        }
+
+        return finalpins.getOrNull(0)
     }
 
     fun setRoute() : Route {
@@ -460,10 +561,10 @@ class CustomMap : ViewTouchParent {
     }
 
     fun setCameraWAspect(){
-        camera.wAspect = width.toDouble()/height
+        camera.wAspect = width.toFloat()/height
 
-        val z = 1.0 / (camera.wAspect)
-        camera.maxZoom = maxOf(1.0,z)
+        val z = 1.0f / (camera.wAspect)
+        camera.maxZoom = maxOf(1.0f,z)
         camera.setZoom(z)
         smap.setzooms(camera.minZoom, camera.maxZoom)
     }
@@ -471,6 +572,10 @@ class CustomMap : ViewTouchParent {
     // Turn a layer on or off
     private fun toggleLayer(l: Int){
         smap.toggleLayer(l)
+    }
+
+    private fun layerVisible(l: Int): Boolean {
+        return smap.layerVisible(l)
     }
 
     fun setPinViewModel(vm: PinViewModel){

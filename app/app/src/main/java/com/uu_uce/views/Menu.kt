@@ -20,7 +20,7 @@ class Menu : RelativeLayout {
 
     //various height variables
     val buttonPercent = 0.1f
-    private var downY = 0f
+    var downY = 0f
     private var barY = 0f
     private var upY = 0f
     private var screenHeight = 0

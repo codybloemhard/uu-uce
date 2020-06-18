@@ -9,6 +9,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -16,7 +17,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinListAdapter
 import com.uu_uce.allpins.PinViewModel
@@ -30,7 +30,7 @@ class AllPins : AppCompatActivity() {
     private lateinit var pinViewModel   : PinViewModel
     private lateinit var sharedPref     : SharedPreferences
     private lateinit var viewAdapter    : PinListAdapter
-    private var sortmode : Int = 0
+    private var sortmode                : Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
@@ -64,10 +64,10 @@ class AllPins : AppCompatActivity() {
             pins?.let { viewAdapter.setPins(sortList(pins, sharedPref.getInt("com.uu_uce.SORTMODE", 0)), pinViewModel) }
         })
 
-        val filterButton : FloatingActionButton = findViewById(R.id.fab)
-        registerForContextMenu(filterButton)
-
-
+        val sortButton = findViewById<ImageView>(R.id.sortButton)
+        sortButton.setOnClickListener{
+            openDialog()
+        }
 
         val searchBar = findViewById<EditText>(R.id.pins_searchbar)
 
@@ -91,11 +91,7 @@ class AllPins : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if(viewAdapter.activePopup != null) {
-            viewAdapter.activePopup?.dismiss()
-            return
-        }
-        else if(pins_searchbar.text.toString().count() > 0){
+        if(pins_searchbar.text.toString().count() > 0){
             pins_searchbar.text.clear()
             searchPins("")
             return
@@ -103,7 +99,7 @@ class AllPins : AppCompatActivity() {
         super.onBackPressed()
     }
 
-    fun openDialog(view : View) {
+    private fun openDialog() {
         val filterOptions : Array<String> = arrayOf(
             getString(R.string.allpins_sorting_title_az),
             getString(R.string.allpins_sorting_title_za),

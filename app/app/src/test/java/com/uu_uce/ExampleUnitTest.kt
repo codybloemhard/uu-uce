@@ -18,16 +18,16 @@ class ExampleUnitTest {
     @Test
     fun test_aabb_inter(){
         assertEquals(aaBoundingBoxContains(
-            Pair(1.0, 1.0),
-            Pair(2.0, 2.0),
-            Pair(2.1, 0.0),
-            Pair(3.0, 9.0)
+            Pair(1.0f, 1.0f),
+            Pair(2.0f, 2.0f),
+            Pair(2.1f, 0.0f),
+            Pair(3.0f, 9.0f)
         ), false)
         assertEquals(aaBoundingBoxContains(
-            Pair(1.0, 1.0),
-            Pair(2.0, 2.0),
-            Pair(2.0, 0.0),
-            Pair(3.0, 9.0)
+            Pair(1.0f, 1.0f),
+            Pair(2.0f, 2.0f),
+            Pair(2.0f, 0.0f),
+            Pair(3.0f, 9.0f)
         ), true)
     }
 }

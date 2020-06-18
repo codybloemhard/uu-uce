@@ -13,12 +13,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.allpins.PinViewModel
+import com.uu_uce.allpins.parsePins
 import com.uu_uce.pins.PinContent
 import com.uu_uce.services.dirSize
 import com.uu_uce.services.unpackZip
 import com.uu_uce.services.updateFiles
 import com.uu_uce.services.writableSize
 import com.uu_uce.ui.createTopbar
+import com.uu_uce.views.pinsUpdated
 import kotlinx.android.synthetic.main.activity_settings.*
 import java.io.File
 import kotlin.math.max
@@ -26,15 +28,22 @@ import kotlin.math.min
 
 // Default settings
 const val defaultPinSize = 60
+const val defaultUnlockRange = 100
 var needsRestart = false
-const val mapsName = "maps.zip"
+const val mapsName = "50016551-7038-4305-b717-17bd9f93fb34.zip"
 const val mapsFolderName = "Maps"
 const val contentFolderName = "PinContent"
+const val legendName = "legend.png"
+const val pinDatabaseFile = "75aa95dd-b74b-467e-a7db-5d0677d7da7b.json"
+const val mergedPinBackground = 5
+const val mergedPinIcon = "MERGEDPIN"
 
 class Settings : AppCompatActivity() {
     // private variables
     private val minPinSize = 10
     private val maxPinSize = 200
+    private val minRange = 10
+    private val maxRange = 200
 
     private lateinit var maps : List<String>
     private lateinit var mapsDir : String
@@ -42,7 +51,6 @@ class Settings : AppCompatActivity() {
 
     private lateinit var sharedPref : SharedPreferences
     private lateinit var pinViewModel: PinViewModel
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         sharedPref = getDefaultSharedPreferences(this)
@@ -109,6 +117,45 @@ class Settings : AppCompatActivity() {
             false
         })
 
+        // Unlock range
+        val curRange = sharedPref.getInt("com.uu_uce.UNLOCKRANGE", defaultUnlockRange)
+        unlockrange_seekbar.max = maxRange - minRange
+        unlockrange_seekbar.progress = curRange - minRange
+        unlockrange_numberview.setText(curRange.toString())
+
+        unlockrange_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
+                // Display the pinSize
+                unlockrange_numberview.setText((seekBar.progress + minRange).toString())
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                val range = seekBar.progress + minRange
+                with(sharedPref.edit()) {
+                    putInt("com.uu_uce.UNLOCKRANGE", range)
+                    apply()
+                }
+            }
+        })
+
+        unlockrange_numberview.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
+                //Perform Code
+                val progress = min(max(unlockrange_numberview.text.toString().toInt(), minRange), maxRange)
+                unlockrange_seekbar.progress = progress - minRange
+                unlockrange_numberview.setText(progress.toString())
+                with(sharedPref.edit()) {
+                    putInt("com.uu_uce.UNLOCKRANGE", progress)
+                    apply()
+                }
+                return@OnKeyListener true
+            }
+            false
+        })
+
         // Network downloading
         val curNetworkDownloading = sharedPref.getBoolean("com.uu_uce.NETWORK_DOWNLOADING", false)
         networkdownload_switch.isChecked = curNetworkDownloading
@@ -132,10 +179,7 @@ class Settings : AppCompatActivity() {
             }
             else{
                 with(sharedPref.edit()) {
-                    putBoolean(
-                        "com.uu_uce.NETWORK_DOWNLOADING",
-                        false
-                    )
+                    putBoolean("com.uu_uce.NETWORK_DOWNLOADING", false)
                     apply()
                 }
             }
@@ -145,10 +189,7 @@ class Settings : AppCompatActivity() {
         darktheme_switch.isChecked = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
         darktheme_switch.setOnClickListener {
             with(sharedPref.edit()) {
-                putBoolean(
-                    "com.uu_uce.DARKMODE",
-                    darktheme_switch.isChecked
-                )
+                putBoolean("com.uu_uce.DARKMODE", darktheme_switch.isChecked)
                 apply()
             }
 
@@ -166,23 +207,31 @@ class Settings : AppCompatActivity() {
             updateFiles(
                 maps,
                 this,
-                {
-                    runOnUiThread {
-                        Toast.makeText(this, getString(R.string.settings_zip_download_complete), Toast.LENGTH_LONG)
-                            .show()
-                    }
-                    val result = unpackZip(maps.first()) { progress ->
+                { success ->
+                    if(success){
                         runOnUiThread {
-                            maps_downloading_progress.progress = progress
+                            Toast.makeText(this, getString(R.string.settings_zip_download_complete), Toast.LENGTH_LONG)
+                                .show()
+                        }
+                        val result = unpackZip(maps.first()) { progress ->
+                            runOnUiThread {
+                                maps_downloading_progress.progress = progress
+                            }
+                        }
+                        runOnUiThread {
+                            if(result) Toast.makeText(this, getString(R.string.settings_zip_unpacked), Toast.LENGTH_LONG).show()
+                            else Toast.makeText(this, getString(R.string.settings_zip_not_unpacked), Toast.LENGTH_LONG).show()
+                            maps_downloading_progress.visibility = View.INVISIBLE
+                            needsReload.setValue(true)
+                            delete_maps_button.visibility = View.VISIBLE
+                            maps_storage_size.text = writableSize(dirSize(File(mapsDir)))
                         }
                     }
-                    runOnUiThread {
-                        if(result) Toast.makeText(this, getString(R.string.settings_zip_unpacked), Toast.LENGTH_LONG).show()
-                        else Toast.makeText(this, getString(R.string.settings_zip_not_unpacked), Toast.LENGTH_LONG).show()
-                        maps_downloading_progress.visibility = View.INVISIBLE
-                        needsReload.setValue(true)
-                        delete_maps_button.visibility = View.VISIBLE
-                        maps_storage_size.text = writableSize(dirSize(File(mapsDir)))
+                    else{
+                        runOnUiThread{
+                            maps_downloading_progress.visibility = View.INVISIBLE
+                            Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG).show()
+                        }
                     }
                 },
                 { progress -> runOnUiThread { maps_downloading_progress.progress = progress } }
@@ -253,12 +302,20 @@ class Settings : AppCompatActivity() {
                 updateFiles(
                     pathList,
                     this,
-                    {
-                        runOnUiThread {
-                            Toast.makeText(this, getString(R.string.settings_download_complete), Toast.LENGTH_LONG).show()
-                            content_downloading_progress.visibility = View.INVISIBLE
-                            content_storage_size.text = writableSize(dirSize(File(contentDir)))
-                            delete_content_button.visibility = View.VISIBLE
+                    { success ->
+                        if(success){
+                            runOnUiThread {
+                                Toast.makeText(this, getString(R.string.settings_download_complete), Toast.LENGTH_LONG).show()
+                                content_downloading_progress.visibility = View.INVISIBLE
+                                content_storage_size.text = writableSize(dirSize(File(contentDir)))
+                                delete_content_button.visibility = View.VISIBLE
+                            }
+                        }
+                        else{
+                            runOnUiThread{
+                                content_downloading_progress.visibility = View.INVISIBLE
+                                Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG).show()
+                            }
                         }
                     },
                     {
@@ -295,16 +352,34 @@ class Settings : AppCompatActivity() {
                 .show()
         }
 
-        /*databasetest.setOnClickListener{
-            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + "database.json"))){
-                pinsUpdated.setValue(true)
-            }
-        }
+        // Download pins
+        download_pins_button.setOnClickListener{
+            pins_downloading_progress.visibility = View.VISIBLE
 
-        databasetest2.setOnClickListener{
-            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + "database (1).json"))){
-                pinsUpdated.setValue(true)
-            }
-        }*/
+            updateFiles(
+                listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
+                this,
+                { success ->
+                    if(success){
+                        runOnUiThread {
+                            Toast.makeText(this, getString(R.string.settings_pins_downloaded), Toast.LENGTH_LONG).show()
+                            pins_downloading_progress.visibility = View.INVISIBLE
+                            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))){
+                                pinsUpdated.setValue(true)
+                            }
+                        }
+                    }
+                    else{
+                        runOnUiThread{
+                            pins_downloading_progress.visibility = View.INVISIBLE
+                            Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG).show()
+                        }
+                    }
+                },
+                {
+                    progress -> runOnUiThread { pins_downloading_progress.progress = progress }
+                }
+            )
+        }
     }
 }

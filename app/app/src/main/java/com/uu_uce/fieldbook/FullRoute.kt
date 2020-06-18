@@ -73,7 +73,7 @@ class FullRoute (routeString: String) {
     }
 
     private fun readRoutePoint(reader: JsonReader): RoutePoint {
-        var coordinate = UTMCoordinate(31, 'N', 0.0, 0.0)
+        var coordinate = UTMCoordinate(31, 'N', 0f, 0f)
         var localtime  = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             LocalTime.MIDNIGHT
         } else {

@@ -9,8 +9,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
-import android.widget.PopupWindow
-import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
@@ -21,9 +19,7 @@ import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.needsReload
 import com.uu_uce.services.LOCATION_REQUEST
-import com.uu_uce.shapefiles.HeightLineReader
-import com.uu_uce.shapefiles.LayerType
-import com.uu_uce.shapefiles.PolygonReader
+import com.uu_uce.shapefiles.*
 import kotlinx.android.synthetic.main.activity_geo_map.*
 import java.io.File
 
@@ -45,13 +41,11 @@ class FieldbookPinmapFragment : Fragment() {
 
     private lateinit var sharedPref : SharedPreferences
 
-    // Popup for showing download progress
-    private var popupWindow: PopupWindow? = null
-    private lateinit var progressBar : ProgressBar
-
     // TODO: Remove temporary hardcoded map information
     private val mapsName = "maps.zip"
     private lateinit var maps : List<String>
+
+    private var styles: List<Style> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,6 +94,7 @@ class FieldbookPinmapFragment : Fragment() {
 
         // Start database and get pins from database
         this.customMap.setFieldbookViewModel(viewModel)
+
         this.customMap.setLifeCycleOwner(this)
         viewModel.allFieldbookEntries.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
             this.customMap.setFieldbook(it)
@@ -151,27 +146,36 @@ class FieldbookPinmapFragment : Fragment() {
      */
     private fun loadMap(){
         val mydir = File(frContext.getExternalFilesDir(null)?.path + "/Maps/")
+        try{readStyles(mydir)}
+        catch(e: Exception){Logger.error("GeoMap", "no style file available: "+ e.message)}
         try {
-            val heightlines = File(mydir, "Heightlines")
-            customMap.addLayer(
-                LayerType.Height,
-                HeightLineReader(heightlines),
-                toggle_layer_layout,
-                true
-            )
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
+        val layerName = "Polygons"
+        val polygons = File(mydir, layerName)
+        customMap.addLayer(
+            LayerType.Water,
+            PolygonReader(polygons, true, styles),
+            toggle_layer_layout,
+            0.5f,
+            0,
+            layerName
+        )
+        Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
         }catch(e: Exception){
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
         try {
-            val polygons = File(mydir, "Polygons")
-            customMap.addLayer(
-                LayerType.Water,
-                PolygonReader(polygons),
-                toggle_layer_layout,
-                false
-            )
-            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $mydir")
+        val layerName = "Heightlines"
+        val heightlines = File(mydir, layerName)
+        customMap.addLayer(
+            LayerType.Height,
+            HeightLineReader(heightlines),
+            toggle_layer_layout,
+            Float.MAX_VALUE,
+            0,
+            layerName
+        )
+        Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
+
         }catch(e: Exception){
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
@@ -184,4 +188,22 @@ class FieldbookPinmapFragment : Fragment() {
         customMap.redrawMap()
     }
 
+    private fun readStyles(dir: File){
+        val file = File(dir, "styles")
+        val reader = FileReader(file)
+
+        val nrStyles = reader.readULong()
+        styles = List(nrStyles.toInt()) {
+            val outline = reader.readUByte()
+            val b = reader.readUByte()
+            val g = reader.readUByte()
+            val r = reader.readUByte()
+
+            Style(outline.toInt() == 1, floatArrayOf(
+                r.toFloat()/255,
+                g.toFloat()/255,
+                b.toFloat()/255
+            ))
+        }
+    }
 }

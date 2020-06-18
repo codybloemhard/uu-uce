@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
@@ -21,6 +20,7 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mikhaellopez.circleview.CircleView
 import com.uu_uce.R
+import com.uu_uce.misc.Logger
 
 /**
  * The adapter manages the RecyclerView
@@ -37,8 +37,9 @@ class PinListAdapter internal constructor(
     private val inflater: LayoutInflater = LayoutInflater.from(activity)
     private var pinDataList = emptyList<PinData>()
     private val pinViewModel: PinViewModel = ViewModelProvider(activity as ViewModelStoreOwner).get(PinViewModel::class.java)
-    var activePopup: PopupWindow? = null
     private lateinit var sharedPref : SharedPreferences
+
+    var view: View? = null
 
     /**
      * Represents one item of the RecyclerView
@@ -78,9 +79,8 @@ class PinListAdapter internal constructor(
         holder.fullView.setOnClickListener{
             val pinConverter = PinConversion(activity)
             val pin = pinConverter.pinDataToPin(current, pinViewModel)
-            pin.getContent().parent = pin
-            pin.openContent(holder.parentView, activity) {activePopup = null}
-            activePopup = pin.popupWindow
+            pin.content.parent = pin
+            pin.openContent(view ?: holder.parentView, activity)
         }
 
         when(current.difficulty){
@@ -95,7 +95,11 @@ class PinListAdapter internal constructor(
             "IMAGE"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image, null) ?: error ("Image not found")
             "VIDEO"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video, null) ?: error ("Image not found")
             "MCQUIZ"    -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz, null) ?: error ("Image not found")
-            else -> error("Missing drawable")
+            "TASK"      -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null) ?: error ("Image not found")
+            else        -> {
+                Logger.error("PinlistAdapter", "Unknown type")
+                ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null) ?: error ("Image not found")
+            }
         }
 
         val color =

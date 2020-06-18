@@ -12,8 +12,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.preference.PreferenceManager
 import com.uu_uce.services.login
-import kotlinx.android.synthetic.main.activity_login_screen.*
+import kotlinx.android.synthetic.main.activity_login.*
 import java.math.BigInteger
+import java.net.HttpURLConnection
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
@@ -37,7 +38,7 @@ class Login : AppCompatActivity() {
         }
 
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login_screen)
+        setContentView(R.layout.activity_login)
 
         //TODO: Get this information from server
         val orgToIp = mutableMapOf(Pair("Utrecht University", "http://131.211.31.176:8080"))
@@ -72,18 +73,38 @@ class Login : AppCompatActivity() {
                     // Hash password for sending and storing
                     password = bin2hex(getHash(password))
 
-                    val loginResult = login(username, password, ip)
-                    if(loginResult){
-                        with(sharedPref.edit()) {
-                            putString("com.uu_uce.USERNAME", username)
-                            putString("com.uu_uce.PASSWORD", password)
-                            putString("com.uu_uce.SERVER_IP", ip)
-                            putString("com.uu_uce.ORGNAME", orgselector.selectedItem.toString())
-                            apply()
+                    login(username, password, ip, this){ response ->
+                        when (response) {
+                            HttpURLConnection.HTTP_OK -> {
+                                with(sharedPref.edit()) {
+                                    putString("com.uu_uce.USERNAME", username)
+                                    putString("com.uu_uce.PASSWORD", password)
+                                    putString("com.uu_uce.SERVER_IP", ip)
+                                    putString("com.uu_uce.ORGNAME", orgselector.selectedItem.toString())
+                                    apply()
+                                }
+                                this.runOnUiThread{
+                                    Toast.makeText(this, getString(R.string.login_successfullogin), Toast.LENGTH_SHORT).show()
+                                    val intent = Intent(this, GeoMap::class.java)
+                                    startActivity(intent)
+                                    finish()
+                                }
+                            }
+                            HttpURLConnection.HTTP_NOT_FOUND -> {
+                                this.runOnUiThread{
+                                    Toast.makeText(this, getString(R.string.login_wrongcredentials_message), Toast.LENGTH_SHORT).show()
+                                    username_field.text.clear()
+                                    username_field.setHintTextColor(ResourcesCompat.getColor(resources, R.color.FusionRed, null))
+                                    password_field.text.clear()
+                                    password_field.setHintTextColor(ResourcesCompat.getColor(resources, R.color.FusionRed, null))
+                                }
+                            }
+                            HttpURLConnection.HTTP_INTERNAL_ERROR -> {
+                                this.runOnUiThread{
+                                    Toast.makeText(this, getString(R.string.login_serverdown), Toast.LENGTH_LONG).show()
+                                }
+                            }
                         }
-                        val intent = Intent(this, GeoMap::class.java)
-                        startActivity(intent)
-                        finish()
                     }
                 }
             }
@@ -98,7 +119,8 @@ class Login : AppCompatActivity() {
         var digest: MessageDigest? = null
         try {
             digest = MessageDigest.getInstance("SHA-256")
-        } catch (e1: NoSuchAlgorithmException) {
+        }
+        catch (e1: NoSuchAlgorithmException) {
             e1.printStackTrace()
         }
         digest!!.reset()

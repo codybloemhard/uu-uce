@@ -6,11 +6,13 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.preference.PreferenceManager
 import com.uu_uce.gestureDetection.TouchParent
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.services.login
+import java.net.HttpURLConnection
 
 //currently used only to switch to the GeoMap activity
 class MainActivity : TouchParent() {
@@ -33,32 +35,45 @@ class MainActivity : TouchParent() {
             window.statusBarColor = Color.BLACK// set status background white
         }
 
-        if (checkLogin()) {
-            val intent = Intent(this, GeoMap::class.java)
-            startActivity(intent)
-        }
-        else{
-            val intent = Intent(this, Login::class.java)
-            startActivity(intent)
-            Logger.setTypeEnabled(LogType.Continuous, true)
-        }
-    }
-
-    @Suppress("UnnecessaryVariable") // TODO: remove when result is received which is a webtoken
-    private fun checkLogin() : Boolean{
         val username = sharedPref.getString("com.uu_uce.USERNAME", "").toString()
         val password = sharedPref.getString("com.uu_uce.PASSWORD", "").toString()
         val ip       = sharedPref.getString("com.uu_uce.SERVER_IP", "").toString()
 
-        return if(username.isNotEmpty() && password.isNotEmpty() && ip.isNotEmpty()){
-            val result = login(
+        if(username.isNotEmpty() && password.isNotEmpty() && ip.isNotEmpty()){
+            login(
                 username,
                 password,
-                ip
+                ip,
+                this
             )
-            result
-        } else{
-            false
+            { response ->
+                when(response){
+                    HttpURLConnection.HTTP_OK -> {
+                        val intent = Intent(this, GeoMap::class.java)
+                        startActivity(intent)
+                    }
+                    HttpURLConnection.HTTP_NOT_FOUND -> {
+                        openLogin()
+                    }
+                    HttpURLConnection.HTTP_INTERNAL_ERROR -> {
+                        this.runOnUiThread{
+                            Toast.makeText(this, getString(R.string.login_serverdown), Toast.LENGTH_LONG).show()
+                        }
+                    }
+                    else -> {
+                        openLogin()
+                    }
+                }
+            }
         }
+        else{
+            openLogin()
+        }
+    }
+
+    private fun openLogin(){
+        val intent = Intent(this, Login::class.java)
+        startActivity(intent)
+        Logger.setTypeEnabled(LogType.Continuous, true)
     }
 }

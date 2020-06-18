@@ -52,12 +52,18 @@ class PinViewModel(application: Application) : AndroidViewModel(application) {
         pinRepository.getContent(list, action)
     }
 
-    fun updatePins(pinList : List<PinData>, onCompleteAction : (() -> Unit)) = viewModelScope.launch {
-        pinRepository.updatePins(pinList, onCompleteAction)
+    fun updatePins(pinList : List<PinData>?, onCompleteAction : (() -> Unit)) = viewModelScope.launch {
+        if(pinList != null){
+            pinRepository.updatePins(pinList, onCompleteAction)
+        }
     }
 
     fun reloadPins(action : ((List<PinData>) -> (Unit))) = viewModelScope.launch {
         pinRepository.reloadPins(action)
+    }
+
+    fun getPins(pinIds : List<String>, action : ((List<PinData>) -> (Unit))) = viewModelScope.launch {
+        pinRepository.getPins(pinIds, action)
     }
 
     @TestOnly

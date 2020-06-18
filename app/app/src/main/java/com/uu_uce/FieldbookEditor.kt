@@ -372,7 +372,7 @@ class FieldbookEditor: AppCompatActivity() {
                 }
             }
         } else if (resultCode == Activity.RESULT_CANCELED) {
-            Toast.makeText(this,"Failed to select media",Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.fieldbook_mediaselection_failed), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -502,11 +502,10 @@ class FieldbookEditor: AppCompatActivity() {
         location: Location?
     ) {
         val utm = if(location == null){
-            UTMCoordinate(0, 'N', 0.0, 0.0).toString()
+            UTMCoordinate(0, 'N', 0.0f, 0.0f).toString()
         }
         else{
-            degreeToUTM(Pair(location.latitude,location.longitude)).toString()
-            //UTMCoordinate(31,'N',313000.0,4677733.6).toString()
+            degreeToUTM(Pair(location.latitude.toFloat(),location.longitude.toFloat())).toString()
         }
 
         FieldbookEntry(

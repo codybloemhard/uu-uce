@@ -41,6 +41,9 @@ interface PinDao {
     @Insert
     suspend fun insertAll(pins: List<PinData>)
 
+    @Query("SELECT * from pins where pinId in (:pids)")
+    suspend fun getPins(pids: List<String>) : List<PinData>
+
     @Query("DELETE from pins")
     suspend fun deleteAllPins()
 

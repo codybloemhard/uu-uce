@@ -16,6 +16,7 @@ import androidx.preference.PreferenceManager
 import com.github.chrisbanes.photoview.PhotoView
 import com.github.chrisbanes.photoview.PhotoViewAttacher
 
+
 class ImageViewer : AppCompatActivity() {
 
     private lateinit var sharedPref : SharedPreferences
@@ -44,7 +45,9 @@ class ImageViewer : AppCompatActivity() {
         // Load image
         val imageViewer = findViewById<PhotoView>(R.id.image_photoview)
         imageViewer.setImageURI(intent.getParcelableExtra("uri"))
-        PhotoViewAttacher(imageViewer)
+        val attacher = PhotoViewAttacher(imageViewer)
+        attacher.maximumScale = 5f
+        attacher.maximumScale = 20f
 
         val color =
             if(sharedPref.getBoolean("com.uu_uce.DARKMODE", false))
