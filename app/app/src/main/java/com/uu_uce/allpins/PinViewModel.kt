@@ -8,6 +8,13 @@ import com.uu_uce.database.UceRoomDatabase
 import kotlinx.coroutines.launch
 import org.jetbrains.annotations.TestOnly
 
+/**
+ * Manages and stores data from the database
+ * and makes sure it survives through the entire LifeCycle
+ *
+ * @param[application] the context for the ViewModel
+ * @constructor makes a ViewModel
+ */
 class PinViewModel(application: Application) : AndroidViewModel(application) {
 
     private val pinRepository: PinRepository

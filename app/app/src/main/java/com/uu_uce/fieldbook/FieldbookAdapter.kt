@@ -14,11 +14,15 @@ import androidx.core.net.toFile
 import androidx.recyclerview.widget.RecyclerView
 import com.uu_uce.R
 import com.uu_uce.openFieldbookPopup
-import com.uu_uce.pins.ImageContentBlock
-import com.uu_uce.pins.PinContent
-import com.uu_uce.pins.TextContentBlock
-import com.uu_uce.pins.VideoContentBlock
+import com.uu_uce.pins.*
 
+/**
+ * The adapter manages the RecyclerView
+ *
+ * @property[activity] the associated activity
+ * @property[viewModel] the viewModel of the Fieldbook
+ * @property[rootView] the (root of the) currently opened view
+ */
 class FieldbookAdapter(
     private val activity    : Activity,
     private val viewModel   : FieldbookViewModel,
@@ -29,6 +33,12 @@ class FieldbookAdapter(
     private var fieldbook: List<FieldbookEntry> = emptyList()
     private lateinit var parentView : ViewGroup
 
+    /**
+     * Represents one item of the RecyclerView
+     *
+     * @property[parentView] the surrounding/entire View of one RecyclerView item
+     * @constructor makes an PinViewHolder object
+     */
     class FieldbookViewHolder(val parentView: View) : RecyclerView.ViewHolder(parentView) {
         val titleFb     : TextView      = itemView.findViewById(R.id.title)
         val numberFb    : TextView      = itemView.findViewById(R.id.number)
@@ -50,25 +60,52 @@ class FieldbookAdapter(
 
     override fun onBindViewHolder(holder: FieldbookViewHolder, position: Int) {
         holder.frameFb.removeAllViews()
+
         val entry : FieldbookEntry = fieldbook[position]
         val index = entry.id
+
         holder.apply {
-            titleFb.text = entry.title
-            numberFb.text = addLeadingZeros(index)
+            titleFb.text    = entry.title
+            numberFb.text   = addLeadingZeros(index)
             locationFb.text = entry.location
             datetimeFb.text = entry.dateTime
         }
 
+        val content = PinContent(entry.content, activity, true).contentBlocks
+
+        setPreview(content, holder)
+
+        holder.parentView.setOnClickListener {
+            openFieldbookPopup(
+                activity,
+                rootView,
+                entry,
+                content
+            )
+        }
+
+        holder.parentView.setOnLongClickListener {
+            deleteFromFieldbook(entry, content)
+        }
+    }
+
+    /**
+     * Sets the preview of one Recycler Item. Uses the first available TextBlock,
+     * else the thumbnail of the first Video- or ImageBlock
+     *
+     * @param[content] all ContentBlocks of this FieldbookEntry
+     * @param[holder] holds the view of one RecyclerView item
+     */
+    private fun setPreview(content: List<ContentBlockInterface>, holder: FieldbookViewHolder) {
         val params = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT
         )
 
-        val content = PinContent(entry.content, activity, true).contentBlocks
-
-        var isThumbnail = false
+        var selectedThumbnail = false
         var thumbnailUri = Uri.EMPTY
 
+        // Try to find the first text block in the list and show it as preview
         loop@ for (cB in content) {
             when (cB) {
                 is TextContentBlock -> {
@@ -82,17 +119,18 @@ class FieldbookAdapter(
                     break@loop
                 }
                 else -> {
-                    if (!isThumbnail) {
+                    if (!selectedThumbnail) {
                         if (cB is ImageContentBlock)
                             thumbnailUri = cB.getThumbnailURI()
                         else if (cB is VideoContentBlock)
                             thumbnailUri = cB.getThumbnailURI()
-                        isThumbnail = true
+                        selectedThumbnail = true
                     }
                 }
             }
         }
 
+        // When no text block was found, show the first image or video as preview
         if (holder.frameFb.childCount == 0)
             ImageView(activity).apply {
                 scaleType = ImageView.ScaleType.CENTER_CROP
@@ -100,55 +138,60 @@ class FieldbookAdapter(
             }.also {
                 holder.frameFb.addView(it, params)
             }
+    }
 
-        holder.parentView.setOnClickListener {
-            openFieldbookPopup(
-                activity,
-                rootView,
-                entry,
-                content
-            )
-        }
-
-        holder.parentView.setOnLongClickListener(
-            View.OnLongClickListener(
-                fun (_): Boolean {
-                    AlertDialog.Builder(activity)
-                        .setTitle(activity.getString(R.string.delete_popup_title))
-                        .setMessage(activity.getString(R.string.fieldbook_pindeletion_popup_text))
-                        .setPositiveButton(activity.getString(R.string.positive_button_text)) { _: DialogInterface, _: Int ->
-                            viewModel.delete(entry)
-                            for (cB in content) {
-                                when (cB) {
-                                    is ImageContentBlock ->
-                                        cB.getThumbnailURI().apply {
-                                            if (this!=Uri.EMPTY)
-                                                toFile().delete()
-                                        }
-                                    is VideoContentBlock ->
-                                        cB.getThumbnailURI().apply {
-                                            if (this!=Uri.EMPTY)
-                                                toFile().delete()
-                                        }
-                                }
+    /**
+     * Asks if you want to delete this FieldbookEntry. When you choose yes it:
+     * Deletes the ContentBlock
+     * Deletes the thumbnail for an Image- or a VideoBlock
+     *
+     * @param[entry] the FieldbookEntry that we long pressed
+     * @param[content] all ContentBlocks of this FieldbookEntry
+     */
+    private fun deleteFromFieldbook(entry: FieldbookEntry, content: List<ContentBlockInterface>) : Boolean {
+        AlertDialog.Builder(activity)
+            .setTitle(activity.getString(R.string.delete_popup_title))
+            .setMessage(activity.getString(R.string.fieldbook_pindeletion_popup_text))
+            .setPositiveButton(activity.getString(R.string.positive_button_text)) { _: DialogInterface, _: Int ->
+                viewModel.delete(entry)
+                for (cB in content) {
+                    when (cB) {
+                        is ImageContentBlock ->
+                            cB.getThumbnailURI().apply {
+                                if (this!=Uri.EMPTY)
+                                    toFile().delete()
                             }
-                        }
-                        .setNegativeButton(activity.getString(R.string.negative_button_text)) { _: DialogInterface, _: Int -> }
-                        .show()
-                    return true
+                        is VideoContentBlock ->
+                            cB.getThumbnailURI().apply {
+                                if (this!=Uri.EMPTY)
+                                    toFile().delete()
+                            }
+                    }
                 }
-            )
-        )
+            }
+            .setNegativeButton(activity.getString(R.string.negative_button_text)) { _: DialogInterface, _: Int -> }
+            .show()
+        return true
     }
 
-    fun setFieldbook(fieldbook: List<FieldbookEntry>) {
-        this.fieldbook = fieldbook
-        notifyDataSetChanged()
-    }
-
+    /**
+     * Adds zeros in front of the id, for a notation with a uniform amount of digits
+     *
+     * @param[id] the index of the FieldbookEntry
+     */
     private fun addLeadingZeros(id: Int) : String {
         val s = id.toString()
         val zero : String = "0".repeat(3-s.length)
         return "#$zero$id"
+    }
+
+    /**
+     * Sets the property fieldbook
+     *
+     * @param[fieldbook] a list of all FieldbookEntries
+     */
+    fun setFieldbook(fieldbook: List<FieldbookEntry>) {
+        this.fieldbook = fieldbook
+        notifyDataSetChanged()
     }
 }

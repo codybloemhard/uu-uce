@@ -22,10 +22,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.mikhaellopez.circleview.CircleView
 import com.uu_uce.R
 
+/**
+ * The adapter manages the RecyclerView
+ *
+ * @property[activity] the associated activity
+ * @constructor makes an PinListAdapter object
+ */
 class PinListAdapter internal constructor(
     private val activity: Activity
-) : RecyclerView.Adapter<PinListAdapter.PinViewHolder>() {
-
+)
+    : RecyclerView.Adapter<PinListAdapter.PinViewHolder>()
+{
     private val resource = activity.resources
     private val inflater: LayoutInflater = LayoutInflater.from(activity)
     private var pinDataList = emptyList<PinData>()
@@ -33,6 +40,12 @@ class PinListAdapter internal constructor(
     var activePopup: PopupWindow? = null
     private lateinit var sharedPref : SharedPreferences
 
+    /**
+     * Represents one item of the RecyclerView
+     *
+     * @property[itemView] the surrounding/entire View of one RecyclerView item
+     * @constructor makes an PinViewHolder object
+     */
     inner class PinViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         val parentView : View = itemView
         val fullView : LinearLayout = itemView.findViewById(R.id.recyclerview_item)

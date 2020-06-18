@@ -5,6 +5,12 @@ import com.uu_uce.database.PinDao
 import org.jetbrains.annotations.TestOnly
 import kotlin.math.max
 
+/**
+ * A communication layer between the ViewModel and the database
+ *
+ * @property[pinDao] the data access object for the pin table
+ * @constructor creates the PinRepository
+ */
 class PinRepository(private val pinDao : PinDao){
 
     val allPins: LiveData<List<PinData>> = pinDao.getAllLivePins()

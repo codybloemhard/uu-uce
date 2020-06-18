@@ -3,6 +3,12 @@ package com.uu_uce.fieldbook
 import androidx.lifecycle.LiveData
 import com.uu_uce.database.FieldbookDao
 
+/**
+ * A communication layer between the ViewModel and the database
+ *
+ * @property[fieldbookDao] the data access object for the pin table
+ * @constructor creates the FieldbookRepository
+ */
 class FieldbookRepository(private val fieldbookDao: FieldbookDao) {
 
     val allEntries: LiveData<List<FieldbookEntry>> = fieldbookDao.getAll()

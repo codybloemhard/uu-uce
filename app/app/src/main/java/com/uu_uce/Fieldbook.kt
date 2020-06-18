@@ -26,9 +26,8 @@ import com.uu_uce.ui.createTopbar
 
 class Fieldbook : AppCompatActivity() {
 
-    lateinit var text: EditText
-    private lateinit var sharedPref     : SharedPreferences
-
+    lateinit var text : EditText
+    private lateinit var sharedPref : SharedPreferences
 
     companion object;
 
@@ -96,6 +95,14 @@ class Fieldbook : AppCompatActivity() {
     }
 }
 
+/**
+ * Global function, that opens the popup specific to the Fieldbook Pins
+ *
+ * @param[activity] the currently opened activity
+ * @param[rootView] the currently opened view
+ * @param[entry] the selected FieldbookEntry
+ * @param[content] the content of the mentioned entry
+ */
 fun openFieldbookPopup (activity: Activity, rootView: View, entry: FieldbookEntry, content: List<ContentBlockInterface>) {
     val layoutInflater = activity.layoutInflater
 

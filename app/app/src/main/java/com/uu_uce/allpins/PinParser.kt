@@ -5,7 +5,7 @@ import com.uu_uce.misc.Logger
 import java.io.File
 import java.io.FileReader
 
-
+//TODO
 fun parsePins(pinFile : File) : List<PinData> {
     val reader = JsonReader(FileReader(pinFile))
     val pinList = mutableListOf<PinData>()

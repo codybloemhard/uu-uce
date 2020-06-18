@@ -77,6 +77,11 @@ class FieldbookHomeFragment(view: View) : Fragment() {
         }
     }
 
+    /**
+     * Filters on entries with a title that contains or is the given string
+     *
+     * @param[search] the title we query on
+     */
     private fun searchFieldbook(search : String){
         viewModel.search(search){ fieldbook ->
             fieldbook?.let {
@@ -86,6 +91,12 @@ class FieldbookHomeFragment(view: View) : Fragment() {
         }
     }
 
+    /**
+     * Hides the keyboard, after text input
+     *
+     * @param[activity] the currently opened activity
+     * @param[currentView] the currently opened view
+     */
     private fun hideKeyboard(activity: Activity, currentView : View? = null) {
         val imm: InputMethodManager =
             activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager

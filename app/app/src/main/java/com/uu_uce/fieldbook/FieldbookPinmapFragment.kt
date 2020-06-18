@@ -79,7 +79,10 @@ class FieldbookPinmapFragment : Fragment() {
         super.onStart()
         start()
     }
-    
+
+    /**
+     * Initiates the map
+     */
     private fun start(){
         // Get preferences
         sharedPref = PreferenceManager.getDefaultSharedPreferences(frContext)
@@ -143,6 +146,9 @@ class FieldbookPinmapFragment : Fragment() {
         }
     }
 
+    /**
+     * Loads the different layers
+     */
     private fun loadMap(){
         val mydir = File(frContext.getExternalFilesDir(null)?.path + "/Maps/")
         try {

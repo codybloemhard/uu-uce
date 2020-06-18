@@ -20,6 +20,9 @@ abstract class UceRoomDatabase : RoomDatabase() {
 
     abstract fun fieldbookDao(): FieldbookDao
 
+    /**
+     * TODO
+     */
     private class UceDatabaseCallback(private val scope: CoroutineScope) : RoomDatabase.Callback() {
         override fun onOpen(db: SupportSQLiteDatabase) {
             super.onOpen(db)
@@ -30,6 +33,7 @@ abstract class UceRoomDatabase : RoomDatabase() {
             }
         }
 
+        // TODO: remove
         suspend fun populatePinTable(pinDao: PinDao) {
             val pinList: MutableList<PinData> = mutableListOf()
             pinList.add(
@@ -97,6 +101,14 @@ abstract class UceRoomDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: UceRoomDatabase? = null
 
+        /**
+         * Returns the database in a CoroutineScope
+         *
+         * TODO
+         *
+         * @param[context]
+         * @param[scope]
+         */
         fun getDatabase(context: Context, scope: CoroutineScope): UceRoomDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
