@@ -54,6 +54,7 @@ class FieldbookEditor: AppCompatActivity() {
     private var latestBlockIndex    = 0
     private var currentBlockIndex   = 0
     private var fieldbookIndex      = -1
+    private val thumbnailDirectory  = "Fieldbook/Thumbnails"
 
     private var editing = false
 
@@ -333,14 +334,20 @@ class FieldbookEditor: AppCompatActivity() {
 
                         addImage(
                             image       = currentUri,
-                            thumbnail   = mediaServices.makeImageThumbnail(currentUri)
+                            thumbnail   = mediaServices.makeImageThumbnail(
+                                currentUri,
+                                thumbnailDirectory
+                            )
                         )
                     }
                 }
                 REQUEST_IMAGE_CAPTURE -> {
                     addImage(
                         image       = currentUri,
-                        thumbnail   = mediaServices.makeImageThumbnail(currentUri)
+                        thumbnail   = mediaServices.makeImageThumbnail(
+                            currentUri,
+                            thumbnailDirectory
+                        )
                     )
 
                     if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
@@ -356,14 +363,20 @@ class FieldbookEditor: AppCompatActivity() {
 
                         addVideo(
                             video       = currentUri,
-                            thumbnail   = mediaServices.makeVideoThumbnail(currentUri)
+                            thumbnail   = mediaServices.makeVideoThumbnail(
+                                currentUri,
+                                thumbnailDirectory
+                            )
                         )
                     }
                 }
                 REQUEST_VIDEO_CAPTURE -> {
                     addVideo(
                         video       = currentUri,
-                        thumbnail   = mediaServices.makeVideoThumbnail(currentUri)
+                        thumbnail   = mediaServices.makeVideoThumbnail(
+                            currentUri,
+                            thumbnailDirectory
+                        )
                     )
                     if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
                         mediaServices.addVideoToGallery(currentUri.path!!)
@@ -550,7 +563,7 @@ class FieldbookEditor: AppCompatActivity() {
     }
 
     private fun imageCaptureIntent() {
-        currentUri = mediaServices.imageLocation()
+        currentUri = mediaServices.fieldbookImageLocation()
 
         startActivityForResult(
             Intent(
@@ -579,7 +592,7 @@ class FieldbookEditor: AppCompatActivity() {
     }
 
     private fun videoCaptureIntent() {
-        currentUri = mediaServices.videoLocation()
+        currentUri = mediaServices.fieldbookVideoLocation()
 
         startActivityForResult(
             Intent(

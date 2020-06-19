@@ -60,13 +60,16 @@ fun findMissingFilePaths(requestedFilePaths : List<String>) : List<Pair<String, 
     for(filePath in requestedFilePaths){
         val file = File(filePath)
         if((!file.exists() || !file.canRead()) && !adding.containsKey(filePath)){
-            val fileName = filePath.split('/').last().split('.').first() // Because we use UUID4 names there can never be a / or . in the file name
+            val fileName =
+                getFileName(filePath) // Because we use UUID4 names there can never be a / or . in the file name
             missingFilePaths.add(Pair(filePath, fileName))
             adding[fileName] = true
         }
     }
     return missingFilePaths
 }
+
+fun getFileName(filePath: String) = filePath.split('/').last().split('.').first()
 
 /*
 Downloads specified files and executes action when all requested files are present.

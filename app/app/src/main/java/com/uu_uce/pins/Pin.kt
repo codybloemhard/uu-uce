@@ -410,7 +410,9 @@ class SinglePin(
             fileList,
             activity,
             {
+                //TODO: add thumbnail generation
                 activity.runOnUiThread{
+
                     // Generate content
                     for(i in 0 until content.contentBlocks.count()){
                         val current = content.contentBlocks[i]

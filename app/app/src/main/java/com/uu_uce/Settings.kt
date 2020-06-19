@@ -3,6 +3,7 @@ package com.uu_uce
 import android.app.AlertDialog
 import android.content.SharedPreferences
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
@@ -15,10 +16,8 @@ import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.allpins.parsePins
 import com.uu_uce.pins.PinContent
-import com.uu_uce.services.dirSize
-import com.uu_uce.services.unpackZip
-import com.uu_uce.services.updateFiles
-import com.uu_uce.services.writableSize
+import com.uu_uce.pins.VideoContentBlock
+import com.uu_uce.services.*
 import com.uu_uce.ui.createTopbar
 import com.uu_uce.views.pinsUpdated
 import kotlinx.android.synthetic.main.activity_settings.*
@@ -285,14 +284,17 @@ class Settings : AppCompatActivity() {
         // Download pin content
         download_content_button.setOnClickListener{
             val list = mutableListOf<String>()
+            val missingThumbnails = mutableListOf<String>()
 
             pinViewModel.getContent(list){
                 val pathList = mutableListOf<String>()
 
                 for (data in list){
                     for (block in PinContent(data, this, false).contentBlocks){
-                        for (path in block.getFilePath()){
-                            pathList.add(path)
+                        val filePaths = block.getFilePath()
+                        list.addAll(filePaths)
+                        if (block is VideoContentBlock && filePaths.count() == 1) {
+                            missingThumbnails.addAll(filePaths)
                         }
                     }
                 }
@@ -310,8 +312,20 @@ class Settings : AppCompatActivity() {
                                 content_storage_size.text = writableSize(dirSize(File(contentDir)))
                                 delete_content_button.visibility = View.VISIBLE
                             }
-                        }
-                        else{
+                            fun generateMissingThumbnails (filePaths: List<String>) {
+                                val uriList = mutableListOf<Uri>()
+                                for (path in filePaths) {
+                                    uriList.add(
+                                        MediaServices(this).makeVideoThumbnail(
+                                            Uri.parse(path),
+                                            "$contentFolderName/Videos/Thumbnails",
+                                            getFileName(path)
+                                        )
+                                    )
+                                }
+                                //TODO: insert in database
+                            }
+                        } else{
                             runOnUiThread{
                                 content_downloading_progress.visibility = View.INVISIBLE
                                 Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG).show()

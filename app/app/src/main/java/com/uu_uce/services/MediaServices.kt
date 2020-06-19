@@ -28,7 +28,7 @@ class MediaServices(private val activity: Activity) {
         ).also { it.mkdirs() }
     }
 
-    fun imageLocation(): Uri {
+    fun fieldbookImageLocation(): Uri {
 
         val outputUri: Uri
         val fileName = "IMG_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}_UCE"
@@ -65,7 +65,7 @@ class MediaServices(private val activity: Activity) {
         return outputUri
     }
 
-    fun videoLocation() : Uri {
+    fun fieldbookVideoLocation() : Uri {
         val outputUri: Uri
         val fileName = "VID_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}_UCE"
 
@@ -221,19 +221,21 @@ class MediaServices(private val activity: Activity) {
         return Uri.parse(filePath)
     }
 
-    fun makeImageThumbnail(uri: Uri?): Uri {
+    fun makeImageThumbnail(uri: Uri?, directory: String, fileName: String? = null): Uri {
         return try {
             saveThumbnail(
                 activity.contentResolver.openInputStream(uri!!).let {
                     BitmapFactory.decodeStream(it)
-                }
+                },
+                directory,
+                fileName
             )
         } catch (e: Exception) {
             Uri.EMPTY
         }
     }
 
-    fun makeVideoThumbnail(uri: Uri?): Uri {
+    fun makeVideoThumbnail(uri: Uri?, directory: String, fileName: String? = null): Uri {
         val retriever = MediaMetadataRetriever().apply {
             try {
                 setDataSource(activity, uri)
@@ -243,22 +245,31 @@ class MediaServices(private val activity: Activity) {
         }
 
         return saveThumbnail(
-            retriever.getFrameAtTime(1000, 0)
+            retriever.getFrameAtTime(1000, 0),
+            directory,
+            fileName
         )
     }
 
-    private fun saveThumbnail(bitmap: Bitmap): Uri {
+    private fun saveThumbnail(bitmap: Bitmap, directory: String, fileName: String?): Uri {
         val dir = File(
             activity.getExternalFilesDir(null),
-            "Fieldbook/Thumbnails"
+            directory
         ).apply {
             mkdirs()
         }
 
-        val file = File(
-            dir,
-            "thumbnail_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}.jpg"
-        )
+        val file = if (fileName == null) {
+            File(
+                dir,
+                "thumbnail_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}.jpg"
+            )
+        } else {
+            File(
+                dir,
+                "thumbnail_$fileName.jpg"
+            )
+        }
 
         FileOutputStream(file).also {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 10, it)
