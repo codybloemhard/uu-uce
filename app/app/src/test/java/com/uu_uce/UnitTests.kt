@@ -114,6 +114,4 @@ class UnitTests {
             assertEquals(short.toUShort(), reader.readUShort())
         }
     }
-
-
 }
