@@ -312,19 +312,7 @@ class Settings : AppCompatActivity() {
                                 content_storage_size.text = writableSize(dirSize(File(contentDir)))
                                 delete_content_button.visibility = View.VISIBLE
                             }
-                            fun generateMissingThumbnails (filePaths: List<String>) {
-                                val uriList = mutableListOf<Uri>()
-                                for (path in filePaths) {
-                                    uriList.add(
-                                        MediaServices(this).makeVideoThumbnail(
-                                            Uri.parse(path),
-                                            "$contentFolderName/Videos/Thumbnails",
-                                            getFileName(path)
-                                        )
-                                    )
-                                }
-                                //TODO: insert in database
-                            }
+
                         } else{
                             runOnUiThread{
                                 content_downloading_progress.visibility = View.INVISIBLE
@@ -395,5 +383,19 @@ class Settings : AppCompatActivity() {
                 }
             )
         }
+    }
+
+    fun generateMissingThumbnails (filePaths: List<String>) {
+        val uriList = mutableListOf<Uri>()
+        for (path in filePaths) {
+            uriList.add(
+                MediaServices(this).makeVideoThumbnail(
+                    Uri.parse(path),
+                    "$contentFolderName/Videos/Thumbnails",
+                    getFileName(path)
+                )
+            )
+        }
+        //TODO: insert in database
     }
 }
