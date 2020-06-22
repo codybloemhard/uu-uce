@@ -7,17 +7,17 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
-import com.uu_uce.gestureDetection.TouchParent
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import com.uu_uce.services.login
 import java.net.HttpURLConnection
 
 //currently used only to switch to the GeoMap activity
-class MainActivity : TouchParent() {
+class MainActivity : AppCompatActivity() {
 
-    private lateinit var sharedPref : SharedPreferences
+    private lateinit var sharedPref: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,7 +25,7 @@ class MainActivity : TouchParent() {
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
         val darkMode = sharedPref.getBoolean("com.uu_uce.DARKMODE", false)
         // Set desired theme
-        if(darkMode) setTheme(R.style.DarkTheme)
+        if (darkMode) setTheme(R.style.DarkTheme)
 
         // Set statusbar text color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !darkMode) {

@@ -1,6 +1,7 @@
 package com.uu_uce.fieldbook
 
-import android.os.Bundle
+// TODO: Implement route
+/*import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,4 +28,4 @@ class FieldbookRouteFragment : Fragment() {
     companion object {
         fun newInstance(param1: String, param2: String) = FieldbookRouteFragment()
     }
-}
+}*/

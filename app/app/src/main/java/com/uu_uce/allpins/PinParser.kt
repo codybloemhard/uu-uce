@@ -4,8 +4,12 @@ import android.util.JsonReader
 import com.uu_uce.misc.Logger
 import java.io.File
 import java.io.FileReader
-import java.lang.Exception
 
+/**
+ * Parse PinData from a json file.
+ * @param[pinFile] a json file containing pins.
+ * @return a list of PinData which was parsed from the json file.
+ */
 fun parsePins(pinFile : File) : List<PinData>? {
     val reader = JsonReader(FileReader(pinFile))
     val pinList = mutableListOf<PinData>()
@@ -22,13 +26,17 @@ fun parsePins(pinFile : File) : List<PinData>? {
 
         pinFile.delete()
         return pinList
-    }
-    catch(e : Exception){
+    } catch(e : Exception){
         e.printStackTrace()
         return null
     }
 }
 
+/**
+ * Parse a single PinData object.
+ * @param[reader] the current reader.
+ * @return a single PinData object if it was successfully parsed.
+ */
 private fun parsePin(reader: JsonReader) : PinData? {
     var pinId          = ""
     var location       = ""
@@ -61,12 +69,10 @@ private fun parsePin(reader: JsonReader) : PinData? {
         return if(pinId == "" || location == "" || content == ""){
             Logger.error("PinParser", "Essential part of pin was missing")
             null
-        }
-        else{
+        } else{
             PinData(pinId, location, difficulty, type, title, content, status, status, predecessorIds, followIds)
         }
-    }
-    catch(e : Exception){
+    } catch(e : Exception){
         e.printStackTrace()
         return null
     }

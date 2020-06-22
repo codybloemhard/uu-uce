@@ -15,51 +15,77 @@ class PinRepository(private val pinDao : PinDao){
 
     val allPins: LiveData<List<PinData>> = pinDao.getAllLivePins()
 
-    suspend fun insert(pindata: PinData){
+    /**
+     * Insert a pinData object into the database
+     * @param pindata the PinData object to be inserted
+     */
+    suspend fun insert(pindata: PinData) {
         pinDao.insert(pindata)
     }
 
-    suspend fun tryUnlock(pid : String, predPids : List<String>, action : (() -> Unit)){
-        if(pinDao.getStatus(pid) > 0) {
+    /**
+     * Unlocks a pin if all its predecessors are completed and executes an action upon unlocking.
+     * @param pid the id of the pin which should be unlocked.
+     * @param predPids the id's of the predecessors of the pin that is to be unlocked.
+     * @param action the action to be executed if the pin was successfully unlocked.
+     */
+    suspend fun tryUnlock(pid: String, predPids: List<String>, action: (() -> Unit)) {
+        if (pinDao.getStatus(pid) > 0) {
             action()
             return
         }
         val statuses = pinDao.getStatuses(predPids)
 
-        if(statuses.all{ i -> i == 2}){
+        if (statuses.all { i -> i == 2 }) {
             // Set unlocked
             pinDao.setStatus(pid, 1)
-        }
-        else{
+        } else {
             // Set locked
             pinDao.setStatus(pid, 0)
         }
         action()
     }
 
-    suspend fun setStatus(pid : String, value : Int){
+    /**
+     * Sets the status of a pin in the database.
+     * @param[pid] the id of the pin whose status is to be set.
+     * @param value the value which the pin's status will be set to.
+     */
+    suspend fun setStatus(pid: String, value: Int) {
         pinDao.setStatus(pid, value)
     }
 
-    suspend fun setStatuses(pids : List<String>, value : Int){
+    /**
+     * Sets the status of multiple pins to a single value at the same time.
+     * @param[pids] the ids of the pins whose status is to be set.
+     * @param[value] the value which the pins' statuses will be set to.
+     */
+    suspend fun setStatuses(pids: List<String>, value: Int) {
         pinDao.setStatuses(pids, value)
     }
 
-    suspend fun searchPins(searchText : String, action : ((List<PinData>?) -> Unit)){
-        if(searchText.count() > 0){
+    /**
+     * Find pins whose titles match the queried string.
+     * @param[searchText] the string that was queried.
+     * @param[action] the action to be executed with the PinData that matched the query.
+     */
+    suspend fun searchPins(searchText: String, action: ((List<PinData>?) -> Unit)) {
+        if (searchText.count() > 0) {
             action(pinDao.searchPins("%$searchText%"))
-        }
-        else{
+        } else {
             action(pinDao.getAllPins())
         }
     }
 
-    suspend fun getPins(pinIds : List<String>, action: (List<PinData>) -> Unit){
+    /**
+     * The
+     */
+    suspend fun getPins(pinIds: List<String>, action: (List<PinData>) -> Unit) {
         action(pinDao.getPins(pinIds))
     }
 
-    suspend fun getContent(list : MutableList<String>, action : (() -> Unit)){
-        for(content in pinDao.getContent()){
+    suspend fun getContent(list: MutableList<String>, action: (() -> Unit)) {
+        for (content in pinDao.getContent()) {
             list.add(content)
         }
         action()

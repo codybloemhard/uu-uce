@@ -1,6 +1,7 @@
 package com.uu_uce.fieldbook
 
-import android.graphics.Canvas
+// TODO: implement route
+/*import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.view.View
@@ -28,4 +29,4 @@ class Route (
             paint
         )
     }
-}
+}*/

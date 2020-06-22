@@ -4,7 +4,6 @@ import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
 import java.io.File
 import java.io.FileInputStream
-import kotlin.random.Random
 
 /*
 a way of getting chunks, possibly from storage or a server
@@ -112,13 +111,14 @@ class HeightLineReader(
             val points: List<p2> = List(nrPoints.toInt()) {
                 p2(readValue(reader)/mult + xoff, readValue(reader)/mult + yoff)
             }
+
             Heightline(points)
         }
 
         val time1 = System.currentTimeMillis() - time
         Logger.log(LogType.Continuous, "BinShapeReader", "loadtime: $time1")
 
-        return Chunk(shapes, bmin, bmax, layerType)
+        return Chunk(shapes, layerType)
     }
 
     override fun readInfo(): Pair<p3,p3>{
@@ -212,7 +212,7 @@ class ColoredLineReader(
         val time1 = System.currentTimeMillis() - time
         Logger.log(LogType.Continuous, "BinShapeReader", "loadtime: $time1")
 
-        return Chunk(shapes, cbmin, cbmax, layerType)
+        return Chunk(shapes, layerType)
     }
 
     override fun readInfo(): Pair<p3,p3>{
@@ -286,7 +286,7 @@ class PolygonReader(
             Polygon(vertices, indices.toMutableList(), style)
         }
 
-        return Chunk(shapes, bmin, bmax, layerType)
+        return Chunk(shapes, layerType)
     }
 
     override fun readInfo(): Pair<p3,p3>{

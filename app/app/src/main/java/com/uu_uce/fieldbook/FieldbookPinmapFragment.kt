@@ -74,10 +74,21 @@ class FieldbookPinmapFragment : Fragment() {
         start()
     }
 
+    override fun onResume() {
+        super.onResume()
+        needsReload.setListener(object : ListenableBoolean.ChangeListener {
+            override fun onChange() {
+                if (needsReload.getValue()) {
+                    loadMap()
+                }
+            }
+        })
+    }
+
     /**
      * Initiates the map
      */
-    private fun start(){
+    private fun start() {
         // Get preferences
         sharedPref = PreferenceManager.getDefaultSharedPreferences(frContext)
 
@@ -176,14 +187,18 @@ class FieldbookPinmapFragment : Fragment() {
             0,
             layerName
         )
-        Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
+            Logger.log(LogType.Info, "GeoMap", "Loaded layer at $heightlines")
 
-        }catch(e: Exception){
+        } catch (e: Exception) {
             Logger.error("GeoMap", "Could not load layer at $mydir.\nError: " + e.message)
         }
 
         //create camera based on layers
         customMap.initializeCamera()
+        customMap.post {
+            customMap.setCameraWAspect()
+            customMap.redrawMap()
+        }
 
         customMap.setCameraWAspect()
         needsReload.setValue(false)

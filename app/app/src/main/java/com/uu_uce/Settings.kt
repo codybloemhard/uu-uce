@@ -33,7 +33,7 @@ const val mapsName = "0170ec79-1beb-4e7e-9d45-cb78dbb01092.zip"
 const val mapsFolderName = "Maps"
 const val contentFolderName = "PinContent"
 const val legendName = "legend.png"
-const val pinDatabaseFile = "75aa95dd-b74b-467e-a7db-5d0677d7da7b.json"
+//const val pinDatabaseFile = "75aa95dd-b74b-467e-a7db-5d0677d7da7b.json"
 const val mergedPinBackground = 5
 const val mergedPinIcon = "MERGEDPIN"
 
@@ -345,7 +345,6 @@ class Settings : AppCompatActivity() {
                 .setMessage(getString(R.string.settings_delete_content_warning_body))
                 .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
                     File(contentDir).deleteRecursively()
-                    needsReload.setValue(true)
                     delete_content_button.visibility = View.INVISIBLE
                     content_storage_size.text = writableSize(dirSize(File(contentDir)))
                     Toast.makeText(this, getString(R.string.settings_content_deleted_text), Toast.LENGTH_LONG).show()
@@ -355,33 +354,49 @@ class Settings : AppCompatActivity() {
         }
 
         // Download pins
-        download_pins_button.setOnClickListener{
-            pins_downloading_progress.visibility = View.VISIBLE
-
-            updateFiles(
-                listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
-                this,
-                { success ->
-                    if(success){
-                        runOnUiThread {
-                            Toast.makeText(this, getString(R.string.settings_pins_downloaded), Toast.LENGTH_LONG).show()
-                            pins_downloading_progress.visibility = View.INVISIBLE
-                            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))){
-                                pinsUpdated.setValue(true)
+        var updating = false
+        download_pins_button.setOnClickListener {
+            fun updateDatabase(pinDatabaseFile: String) {
+                updateFiles(
+                    listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
+                    this,
+                    { success ->
+                        if (success) {
+                            runOnUiThread {
+                                Toast.makeText(
+                                    this,
+                                    getString(R.string.settings_pins_downloaded),
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                pins_downloading_progress.visibility = View.INVISIBLE
+                                pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))) {
+                                    pinsUpdated.setValue(true)
+                                    updating = false
+                                }
+                            }
+                        } else {
+                            runOnUiThread {
+                                pins_downloading_progress.visibility = View.INVISIBLE
+                                updating = false
+                                Toast.makeText(
+                                    this,
+                                    getString(R.string.download_failed),
+                                    Toast.LENGTH_LONG
+                                ).show()
                             }
                         }
+                    },
+                    { progress ->
+                        runOnUiThread { pins_downloading_progress.progress = progress }
                     }
-                    else{
-                        runOnUiThread{
-                            pins_downloading_progress.visibility = View.INVISIBLE
-                            Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG).show()
-                        }
-                    }
-                },
-                {
-                    progress -> runOnUiThread { pins_downloading_progress.progress = progress }
-                }
-            )
+                )
+            }
+
+            if (!updating) {
+                pins_downloading_progress.visibility = View.VISIBLE
+                updating = true
+                queryServer("pin", this) { s -> updateDatabase(s) }
+            }
         }
     }
 

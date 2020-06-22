@@ -1,4 +1,4 @@
-@file:Suppress("BlockingMethodInNonBlockingContext") //TODO: Look into this
+@file:Suppress("BlockingMethodInNonBlockingContext") // Downloads can not be suspended
 
 package com.uu_uce.services
 
@@ -7,6 +7,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.wifi.WifiManager
+import android.util.JsonReader
 import android.widget.Toast
 import androidx.preference.PreferenceManager
 import com.uu_uce.R
@@ -16,9 +17,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.*
-import java.lang.Exception
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLEncoder
 import java.util.zip.ZipEntry
 import java.util.zip.ZipException
 import java.util.zip.ZipFile
@@ -151,10 +152,78 @@ fun downloadFile(targetUrl : URL, fileDestination : String, progressAction : (In
                 }
             }
         }
-    }
-    catch(e : Exception){
+    } catch (e: Exception) {
         e.printStackTrace()
         return false
+    }
+}
+
+/*
+Gets id of first file that matches query from server.
+type: The type of content that is queried.
+activity: the current activity, used for getting preferences.
+onCompleteAction: function that uses takes the found id.
+ */
+fun queryServer(type: String, activity: Activity, onCompleteAction: ((result: String) -> Unit)) {
+    sharedPref = PreferenceManager.getDefaultSharedPreferences(activity)
+    val serverURL = sharedPref.getString("com.uu_uce.SERVER_IP", "").toString()
+    val queryApi = URL("$serverURL/api/files/query")
+    val reqParam =
+        "{\"" +
+                URLEncoder.encode("type", "UTF-8") +
+                "\":\"" +
+                URLEncoder.encode(type, "UTF-8") +
+                "\"}"
+
+    GlobalScope.launch {
+        with(queryApi.openConnection() as HttpURLConnection) {
+            // optional default is GET
+            requestMethod = "POST"
+
+            val wr = OutputStreamWriter(outputStream)
+            wr.write(reqParam)
+            wr.flush()
+
+            println("URL : $url")
+            println("Response Code : $responseCode")
+
+            when (responseCode) {
+                HttpURLConnection.HTTP_OK -> {
+                    val reader = JsonReader(InputStreamReader(this.inputStream))
+                    var idRead = false
+                    reader.beginArray()
+                    try {
+                        while (reader.hasNext()) {
+                            if (idRead) {
+                                reader.skipValue()
+                                continue
+                            }
+                            reader.beginObject()
+                            while (reader.hasNext()) {
+                                if (idRead) {
+                                    reader.skipValue()
+                                    continue
+                                }
+                                when (reader.nextName()) {
+                                    "id" -> {
+                                        onCompleteAction(reader.nextString())
+                                        idRead = true
+                                    }
+                                    else -> reader.skipValue()
+                                }
+                            }
+                            reader.endObject()
+                        }
+                        reader.endArray()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+                else -> {
+                    Logger.error("CotentServices", "Query failed, response: $responseCode")
+                }
+            }
+        }
     }
 }
 
@@ -163,9 +232,10 @@ Unzips specified file in place.
 zipPath: The file path to the file that will be unzipped
 progressAction: The action that takes the progress of unzipping.
  */
-fun unpackZip(zipPath: String, progressAction : (Int) -> Unit = {}): Boolean {
+fun unpackZip(zipPath: String, progressAction: (Int) -> Unit = {}): Boolean {
     val splitPath = zipPath.split('/')
-    val destinationPath = splitPath.take(splitPath.count() - 1).fold(splitPath.first()){s1, s2 -> "$s1${File.separator}$s2"}.drop(1)
+    val destinationPath = splitPath.take(splitPath.count() - 1)
+        .fold(splitPath.first()) { s1, s2 -> "$s1${File.separator}$s2" }.drop(1)
 
     try{
         val zipSize =  ZipFile(zipPath).size()

@@ -69,7 +69,7 @@
     <string name="fieldbook_default_id">#000</string>
     <string name="fieldbook_main_title">Fieldbook</string>
     <string name="fieldbook_map_title">Pinmap</string>
-    <string name="fieldbook_route_title">Route</string>
+    <!--TODO: implement route <string name="fieldbook_route_title">Route</string>-->
     <string name="fieldbook_edit_content_button">Edit</string>
     <string name="fieldbook_add_video_description">Add video block to pin</string>
     <string name="fieldbook_video_button">Video</string>

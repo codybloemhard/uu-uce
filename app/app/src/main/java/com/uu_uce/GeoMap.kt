@@ -34,9 +34,7 @@ import java.io.File
 var needsReload = ListenableBoolean()
 var testing = false
 
-const val defaultLineWidth = 1f
-
-//main activity in which the map and menu are displayed
+// Main activity in which the map and menu are displayed
 class GeoMap : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel
     private var screenDim = Point(0,0)
@@ -97,41 +95,12 @@ class GeoMap : AppCompatActivity() {
         }
     }
 
-    private fun downloadMaps(){
-        openProgressPopup(window.decorView.rootView)
-        updateFiles(
-            maps,
-            this,
-            { success ->
-                if(success){
-                    runOnUiThread{
-                        Toast.makeText(this, getString(R.string.zip_download_completed), Toast.LENGTH_LONG).show()
-                    }
-                    val unzipResult = unpackZip(maps.first()) { progress -> runOnUiThread { progressBar.progress = progress } }
-                    runOnUiThread{
-                        if(unzipResult) Toast.makeText(this, getString(R.string.zip_unpack_completed), Toast.LENGTH_LONG).show()
-                        else Toast.makeText(this, getString(R.string.zip_unpacking_failed), Toast.LENGTH_LONG).show()
-                        popupWindow?.dismiss()
-                        start()
-                    }
-                }
-                else{
-                    runOnUiThread{
-                        Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG).show()
-                        popupWindow?.dismiss()
-                        start()
-                    }
-                }
-            },
-            { progress -> runOnUiThread { progressBar.progress = progress } }
-        )
-    }
-
+    // Activity startup
     private fun start(){
         setContentView(R.layout.activity_geo_map)
         customMap.setActivity(this)
 
-        // Set settings
+        // Set pin size
         customMap.pinSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
         customMap.resizePins()
 
@@ -141,25 +110,9 @@ class GeoMap : AppCompatActivity() {
         this.customMap.setLifeCycleOwner(this)
         this.customMap.setPins(pinViewModel.allPinData)
 
-        // Update pins when not testing
+        // Get newest database from server and update pins (when not testing)
         if(!testing){
-            updateFiles(
-                listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
-                this,
-                { success ->
-                    if(success){
-                        runOnUiThread {
-                            Toast.makeText(this, getString(R.string.settings_pins_downloaded), Toast.LENGTH_LONG).show()
-                            pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))) {
-                                pinsUpdated.setValue(true)
-                            }
-                        }
-                    }
-                    else{
-                        runOnUiThread { Toast.makeText(this, getString(R.string.geomap_pins_download_instructions), Toast.LENGTH_LONG).show() }
-                    }
-                }
-            )
+            queryServer("pin", this) { s -> updateDatabase(s) }
         }
 
         // Get statusbar height
@@ -260,14 +213,22 @@ class GeoMap : AppCompatActivity() {
             startActivity(intent)
             needsRestart = false
         }
-        if(needsReload.getValue()) loadMap()
-        if(started){
+        if(started) {
             val newSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
             customMap.updatePins()
-            if(newSize != customMap.pinSize) {
+            if (newSize != customMap.pinSize) {
                 customMap.pinSize = newSize
                 customMap.resizePins()
             }
+
+            needsReload.setListener(object : ListenableBoolean.ChangeListener {
+                override fun onChange() {
+                    if (needsReload.getValue()) {
+                        loadMap()
+                    }
+                }
+            })
+
             customMap.redrawMap()
         }
         super.onResume()
@@ -371,12 +332,16 @@ class GeoMap : AppCompatActivity() {
                 layerName
             )
             Logger.log(LogType.Info, "GeoMap", "Loaded layer at $coloredLines")
-        }catch(e: Exception){
+        } catch (e: Exception) {
             Logger.error("GeoMap", "Could not load layer at $coloredLines.\nError: " + e.message)
         }
 
         //create camera based on layers
         customMap.initializeCamera()
+        customMap.post {
+            customMap.setCameraWAspect()
+            customMap.redrawMap()
+        }
 
         //more menu initialization which needs its width/height
         scaleWidget.post {
@@ -389,7 +354,84 @@ class GeoMap : AppCompatActivity() {
         needsReload.setValue(false)
         customMap.redrawMap()
     }
-    private fun readPolyStyles(dir: File){
+
+    private fun downloadMaps() {
+        openProgressPopup(window.decorView.rootView)
+        updateFiles(
+            maps,
+            this,
+            { success ->
+                if (success) {
+                    runOnUiThread {
+                        Toast.makeText(
+                            this,
+                            getString(R.string.zip_download_completed),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    val unzipResult = unpackZip(maps.first()) { progress ->
+                        runOnUiThread {
+                            progressBar.progress = progress
+                        }
+                    }
+                    runOnUiThread {
+                        if (unzipResult) Toast.makeText(
+                            this,
+                            getString(R.string.zip_unpack_completed),
+                            Toast.LENGTH_LONG
+                        ).show()
+                        else Toast.makeText(
+                            this,
+                            getString(R.string.zip_unpacking_failed),
+                            Toast.LENGTH_LONG
+                        ).show()
+                        popupWindow?.dismiss()
+                        start()
+                    }
+                } else {
+                    runOnUiThread {
+                        Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG)
+                            .show()
+                        popupWindow?.dismiss()
+                        start()
+                    }
+                }
+            },
+            { progress -> runOnUiThread { progressBar.progress = progress } }
+        )
+    }
+
+    private fun updateDatabase(pinDatabaseFile: String) {
+        updateFiles(
+            listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
+            this,
+            { success ->
+                if (success) {
+                    runOnUiThread {
+                        Toast.makeText(
+                            this,
+                            getString(R.string.settings_pins_downloaded),
+                            Toast.LENGTH_LONG
+                        ).show()
+                        pinViewModel.updatePins(parsePins(File(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile))) {
+                            pinsUpdated.setValue(true)
+                        }
+                    }
+                } else {
+                    runOnUiThread {
+                        Toast.makeText(
+                            this,
+                            getString(R.string.geomap_pins_download_instructions),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+        )
+    }
+
+
+    private fun readPolyStyles(dir: File) {
         val file = File(dir, "styles")
         val reader = FileReader(file)
 

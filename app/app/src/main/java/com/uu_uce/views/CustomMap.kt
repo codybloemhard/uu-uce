@@ -6,11 +6,14 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.Paint
 import android.opengl.GLES20
-import android.os.Build
+import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat.startActivity
@@ -26,17 +29,13 @@ import com.uu_uce.allpins.PinData
 import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.fieldbook.FieldbookEntry
 import com.uu_uce.fieldbook.FieldbookViewModel
-import com.uu_uce.fieldbook.FullRoute
-import com.uu_uce.fieldbook.Route
 import com.uu_uce.gestureDetection.*
-import com.uu_uce.gestureDetection.Scroller
 import com.uu_uce.mapOverlay.Location
 import com.uu_uce.mapOverlay.coordToScreen
 import com.uu_uce.mapOverlay.pointDistance
 import com.uu_uce.misc.ListenableBoolean
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
-import com.uu_uce.pins.ContentBlockInterface
 import com.uu_uce.pins.MergedPin
 import com.uu_uce.pins.Pin
 import com.uu_uce.pins.SinglePin
@@ -44,7 +43,6 @@ import com.uu_uce.services.*
 import com.uu_uce.shapefiles.*
 import kotlinx.android.synthetic.main.activity_geo_map.*
 import org.jetbrains.annotations.TestOnly
-import java.time.LocalDate
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.system.measureTimeMillis
@@ -77,18 +75,13 @@ class CustomMap : ViewTouchParent {
     private var fieldbookViewModel          : FieldbookViewModel? = null
     private lateinit var lfOwner            : LifecycleOwner
 
-    private var pins                        : MutableMap<String, SinglePin>   = mutableMapOf()
-    private var fieldbook                   : List<FieldbookEntry>      = listOf()
-    private var mergedPins                  : Pin? = null
-    private var mergedPinsLock              : Any = Object()
-    private var pinStatuses                 : MutableMap<String, Int>   = mutableMapOf()
+    private var pins: MutableMap<String, SinglePin> = mutableMapOf()
+    private var mergedPins: Pin? = null
+    private var mergedPinsLock: Any = Object()
+    private var pinStatuses: MutableMap<String, Int> = mutableMapOf()
 
     var pinSize: Int
     private var locSizeFactor = 0.5f
-
-    //pin merging
-    private val minPinChunks = 4
-    private val pinChunksDepth = 4
 
     // Map
     private var smap = ShapeMap(this)
@@ -189,7 +182,10 @@ class CustomMap : ViewTouchParent {
             val layerTitle = TextView(context, null).apply{
                 text = layerName
                 gravity = Gravity.CENTER_HORIZONTAL
-                layoutParams = ViewGroup.LayoutParams(buttonSize, LinearLayout.LayoutParams.WRAP_CONTENT)
+                layoutParams =
+                    ViewGroup.LayoutParams(buttonSize, LinearLayout.LayoutParams.WRAP_CONTENT)
+                maxLines = 1
+                ellipsize = TextUtils.TruncateAt.END
             }
 
             buttonLayout.addView(buttonFrame)
@@ -533,10 +529,22 @@ class CustomMap : ViewTouchParent {
                 (bot.coordinate.north + top.coordinate.north)/2
             )
 
-            val background = PinConversion.difficultyToBackground(mergedPinBackground, (context as Activity), context.resources)
+            val background =
+                PinConversion.difficultyToBackground(mergedPinBackground, (context as Activity))
             val icon = PinConversion.typeToIcon(mergedPinIcon, context.resources)
 
-            val newMergedPin = MergedPin(finalpins[mini], finalpins[minj], actualDis, pixeldis, pinViewModel, fieldbookViewModel, coordinate, background, icon, pinSize.toFloat())
+            val newMergedPin = MergedPin(
+                finalpins[mini],
+                finalpins[minj],
+                actualDis,
+                pixeldis,
+                pinViewModel,
+                fieldbookViewModel,
+                coordinate,
+                background,
+                icon,
+                pinSize.toFloat()
+            )
 
             finalpins.removeAt(minj)
             finalpins.removeAt(mini)
@@ -546,7 +554,8 @@ class CustomMap : ViewTouchParent {
         return finalpins.getOrNull(0)
     }
 
-    fun setRoute() : Route {
+    // TODO: Implement route in fieldbook
+    /*fun setRoute() : Route {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Route(
                 0,
@@ -571,7 +580,7 @@ class CustomMap : ViewTouchParent {
         } else {
             TODO("VERSION.SDK_INT < O")
         }
-    }
+    }*/
 
     fun setCameraWAspect(){
         camera.wAspect = width.toFloat()/height

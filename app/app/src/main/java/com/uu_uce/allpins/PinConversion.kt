@@ -12,16 +12,15 @@ import com.uu_uce.R
 import com.uu_uce.fieldbook.FieldbookEntry
 import com.uu_uce.fieldbook.FieldbookViewModel
 import com.uu_uce.mergedPinBackground
-import com.uu_uce.pins.ContentBlockInterface
-import com.uu_uce.pins.SinglePin
 import com.uu_uce.pins.PinContent
+import com.uu_uce.pins.SinglePin
 import com.uu_uce.services.UTMCoordinate
 
 /**
  * Converts a Drawable to a Bitmap
  *
- * @param[drawable] the background for a pin, as a Drawable
- * @return the background for a pin, as a Bitmap
+ * @param[drawable] a drawable which is to be converted to a bitmap.
+ * @return A bitmap which can be drawn using openGL.
  */
 private fun drawableToBitmap(drawable: Drawable): Bitmap {
     if (drawable is BitmapDrawable) {
@@ -71,70 +70,76 @@ class PinConversion(val activity: Activity) {
                 s.elementAt(0).value.toInt(),
                 s.elementAt(1).value.first(),
                 s.elementAt(2).value.toFloat(),
-                s.elementAt(4).value.toFloat())
+                s.elementAt(4).value.toFloat()
+            )
         }
 
-    /**
-     * Returns the background for a pin, representing its difficulty
-     *
-     * @param[difficulty] the difficulty for a pin, ranging from 0 (Neutral), 1 (Easy) to 3 (Hard)
-     * @return the background for a pin, colored according to the difficulty
-     */
-    fun difficultyToBackground(difficulty: Int, activity: Activity, resource: Resources): Bitmap {
-        val color = when (difficulty) {
-            0 -> ContextCompat.getColor(activity, R.color.HighBlue) // Neutral
-            1 -> ContextCompat.getColor(activity, R.color.ReptileGreen) // Easy
-            2 -> ContextCompat.getColor(activity, R.color.OrangeHibiscus) // Medium
-            3 -> ContextCompat.getColor(activity, R.color.Desire) // Hard
-            mergedPinBackground -> ContextCompat.getColor(activity, R.color.Boyzone)
-            else -> {
-                ContextCompat.getColor(activity, R.color.TextGrey)
+        /**
+         * Returns the background for a pin, representing its difficulty
+         *
+         * @param[difficulty] the difficulty of the pin - ranging from 0 (Neutral), 1 (Easy) to 3 (Hard) - which the color of the pin will be based on.
+         * @param[activity] the current activity.
+         * @return a bitmap colored in according to the supplied difficulty.
+         */
+        fun difficultyToBackground(difficulty: Int, activity: Activity): Bitmap {
+            val color = when (difficulty) {
+                0 -> ContextCompat.getColor(activity, R.color.HighBlue) // Neutral
+                1 -> ContextCompat.getColor(activity, R.color.ReptileGreen) // Easy
+                2 -> ContextCompat.getColor(activity, R.color.OrangeHibiscus) // Medium
+                3 -> ContextCompat.getColor(activity, R.color.Desire) // Hard
+                mergedPinBackground -> ContextCompat.getColor(activity, R.color.Boyzone)
+                else -> {
+                    ContextCompat.getColor(activity, R.color.TextGrey)
+                }
             }
-        }
-        var background =  ResourcesCompat.getDrawable(resource, R.drawable.ic_pin, null) ?: error ("Image not found")
-        background = background.mutate()
+            var background =
+                ResourcesCompat.getDrawable(activity.resources, R.drawable.ic_pin, null)
+                    ?: error("Image not found")
+            background = background.mutate()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            background.colorFilter = BlendModeColorFilter(color, BlendMode.SRC_ATOP)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                background.colorFilter = BlendModeColorFilter(color, BlendMode.SRC_ATOP)
+            } else {
+                // Older versions will use depricated function
+                @Suppress("DEPRECATION")
+                background.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
+            }
+            return drawableToBitmap(background)
         }
-        else{
-            // Older versions will use depricated function
-            @Suppress("DEPRECATION")
-            background.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
-        }
-        return drawableToBitmap(background)
-    }
 
-    /**
-     * Returns the icon for a pin, representing its type
-     *
-     * @param[type] the type of a pin: could be "TEXT", "IMAGE", "VIDEO", "MCQUIZ"
-     * @return the icon to be drawn on a pin, according to its type
-     */
-    fun typeToIcon(type: String, resource: Resources): Drawable {
-        val image = when (type) {
-            "TEXT"      -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_text , null)
-                ?: error("image not found")
-            "IMAGE"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image, null)
-                ?: error("image not found")
-            "VIDEO"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video, null)
-                ?: error("image not found")
-            "MCQUIZ"    -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz , null)
-                ?: error("image not found")
-            "MERGEDPIN" -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_stack, null)
-                ?: error("image not found")
-            "TASK"      -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null)
-                ?: error("image not found")
-            else        -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null)
-                ?: error("image not found")
-        }
+        /**
+         * Returns the icon for a pin, representing its type
+         *
+         * @param[type] the type of the pin you wish to get an icon for.
+         * @param[resource] the resources to get drawables from.
+         * @return a drawable according to the pin type.
+         */
+        fun typeToIcon(type: String, resource: Resources): Drawable {
+            val image = when (type) {
+                "TEXT" -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_text, null)
+                    ?: error("image not found")
+                "IMAGE" -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image, null)
+                    ?: error("image not found")
+                "VIDEO" -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video, null)
+                    ?: error("image not found")
+                "MCQUIZ" -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz, null)
+                    ?: error("image not found")
+                "MERGEDPIN" -> ResourcesCompat.getDrawable(
+                    resource,
+                    R.drawable.ic_symbol_stack,
+                    null
+                ) ?: error("image not found")
+                "TASK" -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null)
+                    ?: error("image not found")
+                else -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null)
+                    ?: error("image not found")
+            }
 
             val color = Color.WHITE
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 image.colorFilter = BlendModeColorFilter(color, BlendMode.SRC_ATOP)
-            }
-            else{
+            } else {
                 // Older versions will use depricated function
                 @Suppress("DEPRECATION")
                 image.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
@@ -146,32 +151,23 @@ class PinConversion(val activity: Activity) {
     private val resource = activity.resources
 
     /**
+    <<<<<<< HEAD
      * Converts a JSON string to PinContent
      *
-     * @param[content] the content to be shown in the pin, as a JSON string
+     * @param[content] a JSON string containing the content of a pin.
      * @param[fieldbookPin]
-     * @return the content shown in the pin
+     * @return a parsed PinContent from the supplied content.
      */
     private fun stringToPinContent(content: String, fieldbookPin: Boolean): PinContent {
         return PinContent(content, activity, fieldbookPin)
     }
 
     /**
-     * Converts a String to a List of Strings
-     *
-     * @param[ids] the ids of following or preceding pins, all stored to one string
-     * @return the ids of following or preceding pins, as seperate Strings in a List
-     */
-    private fun stringToIds(ids : String) : List<String>{
-        return ids.split(',').map{s -> s}
-    }
-
-    /**
      * Converts the data from the database to a usable pin for the app
      *
-     * @param[pinData] the data for a pin, as stored in the database
-     * @param[viewModel] used for accessing the database
-     * @return a drawable pin, with the necessary functions
+     * @param[pinData] the PinData that is to be parsed into a Pin, as stored in the database
+     * @param[viewModel] the viewModel that the Pin is to have access to, used for accessing the database
+     * @return the Pin parsed from the supplied PinData.
      */
     fun pinDataToPin(
         pinData: PinData,
@@ -182,11 +178,11 @@ class PinConversion(val activity: Activity) {
             stringToUtm(pinData.location), //location
             pinData.title,
             stringToPinContent(pinData.content, false),
-            difficultyToBackground(pinData.difficulty, activity, resource),
+            difficultyToBackground(pinData.difficulty, activity),
             typeToIcon(pinData.type, resource),
             pinData.status,
-            stringToIds(pinData.predecessorIds),
-            stringToIds(pinData.followIds),
+            pinData.predecessorIds.split(','),
+            pinData.followIds.split(','),
             viewModel
         )
         pin.content.parent = pin
@@ -196,9 +192,9 @@ class PinConversion(val activity: Activity) {
     /**
      * Converts the data from the database to a usable pin for the app
      *
-     * @param[entry] the data of a fieldbook entry, as stored in the database
-     * @param[viewModel] used for accessing the database
-     * @return a drawable pin, with the necessary functions
+     * @param[entry] the FieldbookEntry that is to be parsed to a Pin, as stored in the database
+     * @param[viewModel] the viewModel that the Pin is to have access to, used for accessing the database
+     * @return a drawable Pin parsed from the FieldbookEntry
      */
     fun fieldbookEntryToPin(
         entry: FieldbookEntry,
@@ -208,8 +204,8 @@ class PinConversion(val activity: Activity) {
             entry.id.toString(),
             stringToUtm(entry.location),
             entry.title,
-            stringToPinContent(entry.content,  true),
-            difficultyToBackground(0, activity, resource),
+            PinContent(entry.content, activity, true),
+            difficultyToBackground(0, activity),
             typeToIcon("", resource),
             2,
             listOf(),

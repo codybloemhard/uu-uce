@@ -113,8 +113,7 @@ class PinListAdapter internal constructor(
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             drawable.colorFilter = BlendModeColorFilter(color, BlendMode.SRC_ATOP)
-        }
-        else{
+        } else {
             // Older versions will use depricated function
             @Suppress("DEPRECATION")
             drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
@@ -123,15 +122,19 @@ class PinListAdapter internal constructor(
         holder.pinType.setImageDrawable(drawable)
     }
 
+    /**
+     * Update pins in memory from database.
+     * @param[newPinData] list of new PinData which should be loaded in memory.
+     * @param[viewModel] the viewModel from which the database can be accessed.
+     */
     internal fun setPins(newPinData: List<PinData>, viewModel: PinViewModel) {
-        val tempPins : MutableList<PinData> = mutableListOf()
+        val tempPins: MutableList<PinData> = mutableListOf()
         // Update pins from new data
-        for(newPin in newPinData) {
-            if(newPin.status > 0){
+        for (newPin in newPinData) {
+            if (newPin.status > 0) {
                 // Pin is not unlocked yet
                 tempPins.add(newPin)
-            }
-            else if (newPin.status == -1) {
+            } else if (newPin.status == -1) {
                 // Pin needs recalculation
                 val predecessorIds = newPin.predecessorIds.split(',')
                 if (predecessorIds[0] != "") {
