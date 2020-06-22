@@ -96,7 +96,8 @@ class GeoMap : AppCompatActivity() {
         }
     }
 
-    // Activity startup
+
+
     private fun start(){
         setContentView(R.layout.activity_geo_map)
         customMap.setActivity(this)
