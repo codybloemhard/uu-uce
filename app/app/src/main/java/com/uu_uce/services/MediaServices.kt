@@ -22,6 +22,7 @@ import java.util.*
 class MediaServices(private val activity: Activity) {
 
     private fun fieldbookDir() : File {
+        @Suppress("DEPRECATION")
         return File(
             Environment.getExternalStorageDirectory(),
             "UU-UCE/Fieldbook"
@@ -103,6 +104,7 @@ class MediaServices(private val activity: Activity) {
 
     fun addImageToGallery(path: String) {
 
+        //todo
         MediaScannerConnection.scanFile(
             activity,
             arrayOf(path),
@@ -179,6 +181,7 @@ class MediaServices(private val activity: Activity) {
 
         // Split at colon, use second item in the array
         val id = wholeID.split(":").toTypedArray()[1]
+        //todo
         val column = arrayOf(MediaStore.Images.Media.DATA)
 
         // where id is equal to
@@ -236,19 +239,17 @@ class MediaServices(private val activity: Activity) {
     }
 
     fun makeVideoThumbnail(uri: Uri?, directory: String, fileName: String? = null): Uri {
-        val retriever = MediaMetadataRetriever().apply {
-            try {
-                setDataSource(activity, uri)
-            } catch (e: java.lang.Exception) {
-                return Uri.EMPTY
-            }
+        return try {
+            saveThumbnail(
+                MediaMetadataRetriever().apply {
+                    setDataSource(activity, uri)
+                }.getFrameAtTime(1000, 0),
+                directory,
+                fileName
+            )
+        } catch (e: Exception) {
+            Uri.EMPTY
         }
-
-        return saveThumbnail(
-            retriever.getFrameAtTime(1000, 0),
-            directory,
-            fileName
-        )
     }
 
     private fun saveThumbnail(bitmap: Bitmap, directory: String, fileName: String?): Uri {
@@ -259,16 +260,18 @@ class MediaServices(private val activity: Activity) {
             mkdirs()
         }
 
-        val file = if (fileName == null) {
-            File(
-                dir,
-                "thumbnail_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}.jpg"
-            )
-        } else {
+        val file = if (fileName != null) {
             File(
                 dir,
                 "thumbnail_$fileName.jpg"
             )
+        } else {
+            File(
+                dir,
+                "thumbnail_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}.jpg"
+            ).also {
+                println(it.toString())
+            }
         }
 
         FileOutputStream(file).also {

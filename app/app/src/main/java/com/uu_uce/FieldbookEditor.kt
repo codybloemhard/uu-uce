@@ -335,7 +335,7 @@ class FieldbookEditor: AppCompatActivity() {
                         addImage(
                             image       = currentUri,
                             thumbnail   = mediaServices.makeImageThumbnail(
-                                currentUri,
+                                uri,
                                 thumbnailDirectory
                             )
                         )
@@ -364,7 +364,7 @@ class FieldbookEditor: AppCompatActivity() {
                         addVideo(
                             video       = currentUri,
                             thumbnail   = mediaServices.makeVideoThumbnail(
-                                currentUri,
+                                uri,
                                 thumbnailDirectory
                             )
                         )
