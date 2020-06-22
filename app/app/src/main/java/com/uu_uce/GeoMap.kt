@@ -48,8 +48,6 @@ class GeoMap : AppCompatActivity() {
     private var popupWindow: PopupWindow? = null
     private lateinit var progressBar : ProgressBar
 
-    private lateinit var maps : List<String>
-
     private var polyStyles: List<PolyStyle> = listOf()
     private var lineStyles: List<LineStyle> = listOf()
 
@@ -75,15 +73,18 @@ class GeoMap : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapsName)
-
         // Alert that notifies the user that maps need to be downloaded TODO: remove when streaming is implemented
         if(!File(getExternalFilesDir(null)?.path + File.separator + mapsFolderName).exists()){
             AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setIcon(R.drawable.ic_sprite_question)
                 .setTitle(getString(R.string.geomap_download_warning_head))
                 .setMessage(getString(R.string.geomap_download_warning_body))
-                .setPositiveButton(getString(R.string.positive_button_text)) { _, _ -> downloadMaps() }
+                .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
+                    queryServer("map", this){ mapid ->
+                        val maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapid)
+                        downloadMaps(maps)
+                    }
+                }
                 .setNegativeButton(getString(R.string.negative_button_text)) { _, _ ->
                     start()
                     Toast.makeText(this, getString(R.string.geomap_maps_download_instructions), Toast.LENGTH_LONG).show()
@@ -355,7 +356,7 @@ class GeoMap : AppCompatActivity() {
         customMap.redrawMap()
     }
 
-    private fun downloadMaps() {
+    private fun downloadMaps(maps : List<String>) {
         openProgressPopup(window.decorView.rootView)
         updateFiles(
             maps,

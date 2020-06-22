@@ -29,7 +29,6 @@ import kotlin.math.min
 const val defaultPinSize = 60
 const val defaultUnlockRange = 100
 var needsRestart = false
-const val mapsName = "0170ec79-1beb-4e7e-9d45-cb78dbb01092.zip"
 const val mapsFolderName = "Maps"
 const val contentFolderName = "PinContent"
 const val legendName = "legend.png"
@@ -44,7 +43,6 @@ class Settings : AppCompatActivity() {
     private val minRange = 10
     private val maxRange = 200
 
-    private lateinit var maps : List<String>
     private lateinit var mapsDir : String
     private lateinit var contentDir : String
 
@@ -70,8 +68,6 @@ class Settings : AppCompatActivity() {
 
         mapsDir = getExternalFilesDir(null)?.path + File.separator + mapsFolderName
         contentDir = getExternalFilesDir(null)?.path + File.separator + contentFolderName
-
-        maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapsName)
 
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
 
@@ -201,7 +197,7 @@ class Settings : AppCompatActivity() {
         }
 
         // Download maps
-        fun downloadMaps(){
+        fun downloadMaps(maps : List<String>){
             maps_downloading_progress.visibility = View.VISIBLE
             updateFiles(
                 maps,
@@ -239,7 +235,10 @@ class Settings : AppCompatActivity() {
 
         download_maps_button.setOnClickListener{
             if (!File(getExternalFilesDir(null)?.path + File.separator + mapsFolderName).exists()) {
-                downloadMaps()
+                queryServer("map", this){ mapid ->
+                    val maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapid)
+                    downloadMaps(maps)
+                }
             }
             else{
                 AlertDialog.Builder(this, R.style.AlertDialogStyle)
@@ -247,7 +246,10 @@ class Settings : AppCompatActivity() {
                     .setTitle(getString(R.string.settings_redownload_map_head))
                     .setMessage(getString(R.string.settings_redownload_map_body))
                     .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
-                        downloadMaps()
+                        queryServer("map", this){ mapid ->
+                            val maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapid)
+                            downloadMaps(maps)
+                        }
                     }
                     .setNegativeButton(getString(R.string.negative_button_text), null)
                     .show()
