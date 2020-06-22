@@ -220,7 +220,7 @@ fun queryServer(type: String, activity: Activity, onCompleteAction: ((result: St
                     }
                 }
                 else -> {
-                    Logger.error("CotentServices", "Query failed, response: $responseCode")
+                    Logger.error("ContentServices", "Query failed, response: $responseCode")
                 }
             }
         }
