@@ -25,19 +25,17 @@ import java.util.zip.ZipException
 import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 
-
 val permissionsNeeded = listOf(Manifest.permission.INTERNET)
 
 private const val downloadURL = "/api/files/download/"
 
 private lateinit var sharedPref : SharedPreferences
 
-/*
-Gets missing files by calling missingFiles and gets them by calling getFiles
-requiredPaths: A list of file paths to all files that are required to run onCompleteAction.
-activity: The activity from which this function is called.
-onCompleteAction : A function to be executed when all files are present.
-It will call getFiles for all missing files.
+/**
+ * Gets missing files by calling missingFiles and gets them by calling getFiles.
+ * @param[requiredFilePaths] a list of file paths to all files that are required to run onCompleteAction.
+ * @param[activity] the activity from which this function is called.
+ * @param[onCompleteAction] a function to be executed when all files are present.
  */
 fun updateFiles(requiredFilePaths : List<String>, activity : Activity, onCompleteAction : ((success : Boolean) -> Unit)= {}, progressAction : (Int) -> Unit = {}) {
     val missingFiles = findMissingFilePaths(requiredFilePaths)
@@ -50,10 +48,10 @@ fun updateFiles(requiredFilePaths : List<String>, activity : Activity, onComplet
     }
 }
 
-/*
-Gets a list of the filepaths of missing files.
-requestedPaths: A list of file paths to all files that are requested.
-It will return a list of the file paths of all missing files in String format.
+/**
+ * Gets a list of the filepaths of missing files.
+ * @param[requestedFilePaths] a list of file paths to all files that are requested.
+ * @return a list of the file paths of all missing files in String format.
  */
 fun findMissingFilePaths(requestedFilePaths : List<String>) : List<Pair<String, String>>{
     val missingFilePaths : MutableList<Pair<String, String>> = mutableListOf()
@@ -70,14 +68,18 @@ fun findMissingFilePaths(requestedFilePaths : List<String>) : List<Pair<String, 
     return missingFilePaths
 }
 
+/**
+ * Gets the file name from a file path.
+ * @param[filePath] the file path the file name will be extracted from.
+ * @return the file name.
+ */
 fun getFileName(filePath: String) = filePath.split('/').last().split('.').first()
 
-/*
-Downloads specified files and executes action when all requested files are present.
-requiredPaths: A list of file paths to all files that are to be downloaded.
-activity: The activity from which this function is called.
-onCompleteAction : A function to be executed when all files are present.
-It will download all files and start onCompleteAction.
+/**
+ * Downloads specified files and executes action when all requested files are present.
+ * @param[requiredFilePaths] a list of file paths to all files that are to be downloaded.
+ * @param[activity] the activity from which this function is called.
+ * @param[onCompleteAction] a function to be executed when all files are present.
  */
 fun getFiles (
     requiredFilePaths : List<Pair<String, String>>,
@@ -115,10 +117,11 @@ fun getFiles (
     }
 }
 
-/*
-Downloads specified file from URL.
-targetUrl: The URL from which a file needs to be downloaded
-fileDestination: The filepath to which the downloaded file will be downloaded.
+/**
+ * Downloads specified file from URL.
+ * @param[targetUrl] the URL from which a file needs to be downloaded.
+ * @param[fileDestination] the filepath to which the downloaded file will be downloaded.
+ * @return a boolean representing if downloading was successful.
  */
 fun downloadFile(targetUrl : URL, fileDestination : String, progressAction : (Int) -> Unit = {}) : Boolean {
     try{
@@ -158,11 +161,11 @@ fun downloadFile(targetUrl : URL, fileDestination : String, progressAction : (In
     }
 }
 
-/*
-Gets id of first file that matches query from server.
-type: The type of content that is queried.
-activity: the current activity, used for getting preferences.
-onCompleteAction: function that uses takes the found id.
+/**
+ * Gets id of first file that matches query from server.
+ * @param[type] the type of content that is queried.
+ * @param[activity] the current activity, used for getting preferences.
+ * @param[onCompleteAction] function that uses takes the found id.
  */
 fun queryServer(type: String, activity: Activity, onCompleteAction: ((result: String) -> Unit)) {
     sharedPref = PreferenceManager.getDefaultSharedPreferences(activity)
@@ -227,10 +230,11 @@ fun queryServer(type: String, activity: Activity, onCompleteAction: ((result: St
     }
 }
 
-/*
-Unzips specified file in place.
-zipPath: The file path to the file that will be unzipped
-progressAction: The action that takes the progress of unzipping.
+/**
+ * Unzips specified file in place.
+ * @param[zipPath] the file path to the file that will be unzipped
+ * @param[progressAction] the action that takes the progress of unzipping.
+ * @return a boolean representing if unzipping was successful.
  */
 fun unpackZip(zipPath: String, progressAction: (Int) -> Unit = {}): Boolean {
     val splitPath = zipPath.split('/')
@@ -287,9 +291,10 @@ fun unpackZip(zipPath: String, progressAction: (Int) -> Unit = {}): Boolean {
     }
 }
 
-/*
-Recursively calculates the size of all files in a directory.
-dir: The filepath to the directory whichs size will be calculated.
+/**
+ * Recursively calculates the size of all files in a directory.
+ * @param[dir] the filepath to the directory whichs size will be calculated.
+ * @return the directory size in bytes.
  */
 fun dirSize(dir: File): Long {
     if (dir.exists()) {
@@ -312,9 +317,10 @@ fun dirSize(dir: File): Long {
     return 0
 }
 
-/*
-Converts a number of bytes to a the largest appropriate unit with the unit attached.
-bytes: The amount of bytes that should be displayed.
+/**
+ * Converts a number of bytes to a the largest appropriate unit with the unit attached.
+ * @param[bytes] the amount of bytes that should be displayed.
+ * @return a human readable size in string format.
  */
 fun writableSize(bytes : Long) : String {
     val units = listOf("B", "KB", "MB", "GB")

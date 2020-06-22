@@ -3,8 +3,6 @@ package com.uu_uce.views
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.Paint
 import android.opengl.GLES20
 import android.text.TextUtils
 import android.util.AttributeSet
@@ -312,7 +310,7 @@ class CustomMap : ViewTouchParent {
     }
 
     fun tryStartLocServices(activity: Activity){
-        val missingPermissions = checkPermissions(activity, LocationServices.permissionsNeeded)
+        val missingPermissions = missingPermissions(activity, LocationServices.permissionsNeeded)
         if(missingPermissions.count() > 0){
             getPermissions(activity, missingPermissions, LOCATION_REQUEST)
         }

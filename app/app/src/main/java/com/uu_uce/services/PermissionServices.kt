@@ -15,12 +15,11 @@ const val LOCATION_REQUEST          = 3
 const val PHOTOSTORAGE_REQUEST      = 4
 const val VIDEOSTORAGE_REQUEST      = 5
 
-/*
-Takes: a context and activity and a list of strings describing permissions.
-Usually, context = activity = this.
-Permissions of the form of Manifest.permission.ACCESS_COARSE_LOCATION.
-Does:
-Asks for permission to use those permissions.
+/**
+ * Asks the user for missing permissions.
+ * @param[activity] the current activity.
+ * @param[permissions] a list of strings describing permissions. (e.g. Manifest.permission.ACCESS_COARSE_LOCATION)
+ * @param[requestCode] a code by which the onRequestPermissionsResult listener knows what to do with the response.
 */
 fun getPermissions(activity: Activity, permissions: List<String>, requestCode : Int) {
     val neededPermissions: MutableList<String> = mutableListOf()
@@ -35,14 +34,13 @@ fun getPermissions(activity: Activity, permissions: List<String>, requestCode : 
     }
 }
 
-/*
-Takes: a context and activity and a list of strings describing permissions.
-Usually, context = this.
-Permissions of the form of Manifest.permission.ACCESS_COARSE_LOCATION.
-Does:
-Returns a list of missing permissions.
+/**
+ * Finds which permissions have not been granted.
+ * @param[context] the current context.
+ * @param[permissions] a list of required permissions.
+ * @return a list of all missing permissions.
 */
-fun checkPermissions(context: Context, permissions: List<String>) : List<String>{
+fun missingPermissions(context: Context, permissions: List<String>) : List<String>{
     val neededPermissions: MutableList<String> = mutableListOf()
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return emptyList()
     for (i in permissions) {

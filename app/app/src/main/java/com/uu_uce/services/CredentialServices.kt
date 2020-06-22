@@ -12,6 +12,14 @@ import java.util.*
 
 
 @Suppress("BlockingMethodInNonBlockingContext")
+/**
+ * Send POST containing user credentials to specified server in attempt to log in.
+ * @param[username] the username with which to log in.
+ * @param[password] a SHA256 hash of the password with which to log in.
+ * @param[ip] the ip of the server to which the login POST should be sent.
+ * @param[activity] the current activity.
+ * @param[onCompleteAction] action to be executed when login result is received.
+ */
 fun login(username : String, password : String, ip : String, activity: Activity, onCompleteAction : ((responseCode : Int) -> Unit)){
     val loginApi = URL("$ip/api/user/login")
     val reqParam =

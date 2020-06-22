@@ -15,6 +15,9 @@ import com.uu_uce.misc.Logger
 import com.uu_uce.shapefiles.p2
 import kotlin.math.*
 
+/**
+ * The possible results when calling the startPollThread function.
+ */
 enum class LocationPollStartResult{
     ALREADY_LIVE,
     LOCATION_UNAVAILABLE,
@@ -35,6 +38,13 @@ enum class LocationPollStartResult{
     }
 }
 
+/**
+ * A UTM coordinate, https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system
+ * @property[zone] the number of the zone in which the coordinate is located.
+ * @property[letter] the letter of the zone in which the coordinate is located.
+ * @property[east] the easting of the coordinate.
+ * @property[north] the northing of the coordinate.
+ */
 data class UTMCoordinate(val zone : Int, val letter : Char, val east : Float, val north : Float)
 {
     override fun toString(): String {
@@ -47,16 +57,22 @@ data class UTMCoordinate(val zone : Int, val letter : Char, val east : Float, va
     }
 }
 
+/**
+ * Calculates the distance between two UTMCoordinates.
+ * @Param[location1] the first location.
+ * @param[location2] the second location.
+ * @return the distance between two UTMCoordinates.
+ */
 fun calculateDistance(location1 : UTMCoordinate, location2 : UTMCoordinate) : Float {
     // TODO: Make this work over multiple zones : https://gis.stackexchange.com/questions/151505/measuring-distances-when-crossing-utm-zones
     return abs(((location1.east - location2.east).pow(2) + (location1.north - location2.north).pow(2)).pow(0.5f))
 }
 
-/*
-Will convert latitude, longitude coordinate to UTM.
-degPos: a pair of doubles of the form (latitude, longitude).
-It will provide you with a triple of UTM coordinates of the form (letter, easting, northing).
-Source: https://stackoverflow.com/a/28224544
+/**
+ * Will convert latitude, longitude coordinate to UTM.
+ * @param[degPos] a pair of doubles of the form (latitude, longitude).
+ * @return a UTMCoordinate.
+ * Source: https://stackoverflow.com/a/28224544
  */
 fun degreeToUTM(degPos : p2) : UTMCoordinate{
     var easting : Double
@@ -107,6 +123,11 @@ fun degreeToUTM(degPos : p2) : UTMCoordinate{
     return UTMCoordinate(zone, letter, easting.toFloat(), northing.toFloat())
 }
 
+/**
+ * Calculates a utm zone letter based on the latitude of a lat-long coordinate.
+ * @param[lat] the latitude for which a utm letter is to be calculated.
+ * @return a utm letter.
+ */
 fun latToUTMLetter(lat: Double): Char{
     val letters = listOf('C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M',
         'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W')
@@ -119,8 +140,8 @@ fun latToUTMLetter(lat: Double): Char{
     return 'X'
 }
 
-/*
-Will poll the location for you.
+/**
+ * A class for location polling.
  */
 class LocationServices{
     companion object {
@@ -130,13 +151,13 @@ class LocationServices{
 
     private var networkRunning = false
     private var networkKilled = false
-    /*
-    Will start polling the location.
-    context: the activity that uses this.
-    pollTimeMs: how long to wait to poll the location again.
-    minDist: minimum distance parameter of android.location.LocationManager.requestLocationUpdates.
-    action: a lambda function that will be called when a location is received.
-    It will provide you with the location as a tuple of Double.
+    /**
+     * Will start polling the location.
+     * @param[context] the activity that uses this.
+     * @param[pollTimeMs] polling interval.
+     * minDist: minimum distance parameter of android.location.LocationManager.requestLocationUpdates.
+     * action: a lambda function that will be called when a location is received.
+     * It will provide you with the location as a tuple of Double.
      */
     fun startPollThread(
         context: Context,
