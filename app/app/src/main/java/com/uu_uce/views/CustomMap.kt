@@ -514,7 +514,7 @@ class CustomMap : ViewTouchParent {
                 (bot.coordinate.north + top.coordinate.north)/2
             )
 
-            val background = PinConversion.difficultyToBackground(mergedPinBackground, (context as Activity), context.resources)
+            val background = PinConversion.difficultyToBackground(mergedPinBackground, (context as Activity))
             val icon = PinConversion.typeToIcon(mergedPinIcon, context.resources)
 
             val newMergedPin = MergedPin(finalpins[mini], finalpins[minj], actualDis, pixeldis, pinViewModel, fieldbookViewModel, coordinate, background, icon, pinSize.toFloat())
