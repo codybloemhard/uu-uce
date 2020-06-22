@@ -22,6 +22,7 @@ import java.util.*
 class MediaServices(private val activity: Activity) {
 
     private fun fieldbookDir() : File {
+        @Suppress("DEPRECATION") // Used for older API levels
         return File(
             Environment.getExternalStorageDirectory(),
             "UU-UCE/Fieldbook"
