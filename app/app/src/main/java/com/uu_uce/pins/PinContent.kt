@@ -19,6 +19,7 @@ import com.uu_uce.VideoViewer
 import com.uu_uce.contentFolderName
 import com.uu_uce.misc.LogType
 import com.uu_uce.misc.Logger
+import com.uu_uce.services.MediaServices
 import java.io.File
 import java.io.StringReader
 
@@ -343,10 +344,12 @@ class VideoContentBlock(
 
         // Add thumbnail and button
         content.addView(playButton)
-        content.setOnClickListener{
+        content.setOnClickListener {
             openVideoView(activity, videoURI, title)
         }
-        layout.addView(content,blockId)
+        layout.addView(content, blockId)
+
+        MediaServices(activity).generateMissingVideoThumbnail(videoURI)
     }
 
     override fun removeContent(layout: LinearLayout) {

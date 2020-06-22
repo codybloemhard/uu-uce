@@ -214,7 +214,7 @@ class MediaServices(private val activity: Activity) {
             MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
             column, sel, arrayOf(id), null
         )
-        if(cursor != null){
+        if (cursor != null) {
             val columnIndex: Int = cursor.getColumnIndex(column[0])
             if (cursor.moveToFirst()) {
                 filePath = cursor.getString(columnIndex)
@@ -222,6 +222,28 @@ class MediaServices(private val activity: Activity) {
             cursor.close()
         }
         return Uri.parse(filePath)
+    }
+
+    fun generateMissingVideoThumbnail(videoUri: Uri): Uri {
+        val fileName = getFileName(videoUri.path.toString())
+
+        val filePath =
+            activity.getExternalFilesDir(null).toString() +
+                    "/PinContent/Videos/Thumbnails/thumbnail_" +
+                    fileName +
+                    ".jpeg"
+
+        val file = File(filePath)
+
+        return if (!file.exists() || !file.canRead()) {
+            makeVideoThumbnail(
+                videoUri,
+                "PinContent/Videos/Thumbnails",
+                fileName
+            )
+        } else {
+            Uri.parse(filePath)
+        }
     }
 
     fun makeImageThumbnail(uri: Uri?, directory: String, fileName: String? = null): Uri {
@@ -263,12 +285,12 @@ class MediaServices(private val activity: Activity) {
         val file = if (fileName != null) {
             File(
                 dir,
-                "thumbnail_$fileName.jpg"
+                "thumbnail_$fileName.jpeg"
             )
         } else {
             File(
                 dir,
-                "thumbnail_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}.jpg"
+                "thumbnail_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}.jpeg"
             ).also {
                 println(it.toString())
             }

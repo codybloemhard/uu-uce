@@ -3,7 +3,6 @@ package com.uu_uce
 import android.app.AlertDialog
 import android.content.SharedPreferences
 import android.graphics.Color
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
@@ -398,19 +397,5 @@ class Settings : AppCompatActivity() {
                 queryServer("pin", this) { s -> updateDatabase(s) }
             }
         }
-    }
-
-    fun generateMissingThumbnails (filePaths: List<String>) {
-        val uriList = mutableListOf<Uri>()
-        for (path in filePaths) {
-            uriList.add(
-                MediaServices(this).makeVideoThumbnail(
-                    Uri.parse(path),
-                    "$contentFolderName/Videos/Thumbnails",
-                    getFileName(path)
-                )
-            )
-        }
-        //TODO: insert in database
     }
 }
