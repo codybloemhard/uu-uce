@@ -186,6 +186,13 @@ abstract class Pin(
     abstract fun addContent(): MutableList<String>
 
     /**
+     * Create popup showing this pins content.
+     * @param[parentView] the view to which the popup should be added.
+     * @param[activity] the current activity.
+     */
+    abstract fun openContent(parentView: View, activity: Activity)
+
+    /**
      * Main drawing function, draws the pin and recalculates the bounding box
      * @param[program]
      * @param[scale]
@@ -394,12 +401,8 @@ class SinglePin(
         }
     }
 
-    /**
-     * Create popup showing this pins content.
-     * @param[parentView] the view to which the popup should be added.
-     * @param[activity] the current activity.
-     */
-    fun openContent(parentView: View, activity : Activity) {
+
+    override fun openContent(parentView: View, activity : Activity) {
         val layoutInflater = activity.layoutInflater
 
         var popupWindow: PopupWindow? = null
@@ -714,13 +717,13 @@ class MergedPin(
     }
 
     //create a popup containing all of the pins inside this pin, in the same style as AllPins
-    private fun openContent(view: View, activity: Activity){
+    override fun openContent(parentView: View, activity: Activity){
         val layoutInflater = activity.layoutInflater
 
         var popupWindow: PopupWindow? = null
 
         // Build an custom view (to be inflated on top of our current view & build it's popup window)
-        val customView = layoutInflater.inflate(R.layout.merged_pin_popup, view.parent as ViewGroup, false)
+        val customView = layoutInflater.inflate(R.layout.merged_pin_popup, parentView.parent as ViewGroup, false)
         customView.setOnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_BACK && event.repeatCount == 0 && popupWindow?.isShowing == true) {
                 popupWindow?.dismiss()
@@ -752,7 +755,7 @@ class MergedPin(
         val viewManager = LinearLayoutManager(activity)
         if(pinViewModel != null) {
             val pinViewAdapter = PinListAdapter(activity)
-            pinViewAdapter.view = view
+            pinViewAdapter.view = parentView
 
             customView.findViewById<RecyclerView>(R.id.allpins_recyclerview).apply {
                 layoutManager = viewManager
@@ -764,8 +767,8 @@ class MergedPin(
             }
         }
         if(fieldbookViewModel != null) {
-            val fieldbookViewAdapter = FieldbookAdapter(activity, fieldbookViewModel, view)
-            fieldbookViewAdapter.view = view
+            val fieldbookViewAdapter = FieldbookAdapter(activity, fieldbookViewModel, parentView)
+            fieldbookViewAdapter.view = parentView
 
             customView.findViewById<RecyclerView>(R.id.allpins_recyclerview).apply {
                 layoutManager = viewManager
@@ -777,7 +780,7 @@ class MergedPin(
             }
         }
 
-        popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0)
+        popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
     }
 
     //resize a b and this

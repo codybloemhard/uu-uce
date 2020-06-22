@@ -66,10 +66,6 @@ class CustomMap : ViewTouchParent {
     var locationAvailable           : Boolean               = false
     private var locAtCenterPress    : UTMCoordinate         = UTMCoordinate(31, 'N', 0.0f, 0.0f)
 
-    // Paints
-    private val deviceLocPaint      : Paint = Paint()
-    private val deviceLocEdgePaint  : Paint = Paint()
-
     private lateinit var activity           : Activity
     private var pinViewModel                : PinViewModel? = null
     private var fieldbookViewModel          : FieldbookViewModel? = null
@@ -112,10 +108,6 @@ class CustomMap : ViewTouchParent {
         addChild(Scroller(context, ::moveMap, ::flingMap))
         addChild(DoubleTapper(context, ::zoomOutMax))
         addChild(SingleTapper(context as AppCompatActivity, ::tapPin))
-
-        // Init paints
-        deviceLocPaint.color = Color.BLUE
-        deviceLocEdgePaint.color = Color.WHITE
 
         pinsUpdated.setListener(object : ListenableBoolean.ChangeListener {
             override fun onChange() {

@@ -10,7 +10,14 @@ import javax.microedition.khronos.opengles.GL10
 const val coordsPerVertex= 2
 const val colorsPerVertex = 3
 
+/**
+ * Renderer for CustomMap view
+ *
+ * @param[map] the map this renderer is attached to
+ * @constructor creates a GLSurfaceView.Renderer for CustomMap
+ */
 class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
+    //shadercode
     private val lineVertexShaderCode =
                 "uniform vec2 trans;\n" +
                 "uniform vec2 scale;\n" +
