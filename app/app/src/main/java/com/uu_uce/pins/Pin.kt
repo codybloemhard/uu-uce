@@ -394,7 +394,11 @@ class SinglePin(
         }
     }
 
-    //create popup showing this pins content
+    /**
+     * Create popup showing this pins content.
+     * @param[parentView] the view to which the popup should be added.
+     * @param[activity] the current activity.
+     */
     fun openContent(parentView: View, activity : Activity) {
         val layoutInflater = activity.layoutInflater
 
@@ -495,7 +499,7 @@ class SinglePin(
                         buttonLayout.setMargins(parentView.width / 7, parentView.height / 50, parentView.width / 7, parentView.height / 50)
                         finishButton.layoutParams = buttonLayout
                         finishButton.setOnClickListener{
-                            finishQuiz(activity, parentView)
+                            finishQuizzes(activity, parentView)
                             popupWindow.dismiss()
                         }
                         layout.addView(finishButton)
@@ -528,22 +532,38 @@ class SinglePin(
         )
     }
 
+    /**
+     * Completes the current pin and informs following pins that it has been completed.
+     */
     private fun complete() {
         status = 2
         (viewModel as PinViewModel).completePin(id, followIds)
     }
 
+    /**
+     * Adds a pin to the current pin.
+     * @param[questionId] the id of the question to be added.
+     * @param[reward] the available reward for completing the new quiz.
+     */
     fun addQuestion(questionId : Int, reward: Int){
         answered[questionId] = false
         totalReward += reward
     }
 
+    /**
+     * Marks a quiz as answered.
+     * @param[questionId] the quiz to be marked as answered.
+     * @param[reward] the reward that has been earned by answering.
+     */
     fun answerQuestion(questionId : Int, reward : Int){
         questionRewards[questionId] = reward
         answered[questionId] = true
         madeProgress = true
     }
 
+    /**
+     * Resets all quizzes in the pin.
+     */
     private fun resetQuestions(){
         questionRewards.map{0}
         totalReward = 0
@@ -551,7 +571,12 @@ class SinglePin(
         answered.map{true}
     }
 
-    private fun finishQuiz(activity : Activity, parentView: View){
+    /**
+     * Finishes all quizzes in the pin.
+     * @param[activity] the current activity.
+     * @param[parentView] the view in which the result popup should be opened.
+     */
+    private fun finishQuizzes(activity : Activity, parentView: View){
         if(answered.all{b -> b}){
             // All questions answered
             val reward = questionRewards.sum()
