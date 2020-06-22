@@ -1,5 +1,8 @@
 package com.uu_uce.misc
 
+/**
+ * A boolean with a listener attached.
+ */
 class ListenableBoolean {
     private var boo = false
     private var listener: ChangeListener? = null

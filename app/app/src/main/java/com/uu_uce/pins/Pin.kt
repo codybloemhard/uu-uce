@@ -38,7 +38,13 @@ import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 import kotlin.math.roundToInt
 
-//abstract pin class includes functionality for drawing the pin, and some abstract methods
+/**
+ * Abstract pin class includes functionality for drawing the pin, and some abstract methods.
+ * @property[coordinate] the utm-coordinate at which the pin is located.
+ * @property[background] a bitmap of the pin that is to be drawn on the map.
+ * @property[icon] a drawable of the icon that is to be drawn on the background.
+ * @property[pinWidth] the width of the pin on the map, this is set automatically from settings.
+ */
 abstract class Pin(
     val coordinate              : UTMCoordinate,
     protected var background    : Bitmap,
@@ -90,7 +96,9 @@ abstract class Pin(
         }
     }
 
-    //to be called once by the GL thread, to initialize all buffers related to this pin
+    /**
+     * To be called once by the GL thread, initializes all buffers related to this pin
+     */
     open fun initGL(){
         if(this::vertexBuffer.isInitialized) return
         //initialize opengl drawing
@@ -157,19 +165,32 @@ abstract class Pin(
         backgroundHandle = loadTexture(background)
     }
 
-    //whether tapLocation hits this pin or not
+    /**
+     * Determines whether tapLocation hits this pin or not.
+     * @param[tapLocation] the location where a tap occurs.
+     * @return a boolean representing if this pin was tapped or not.
+     */
     protected fun isInside(tapLocation: p2): Boolean{
         return pointInAABoundingBox(boundingBox.first, boundingBox.second, tapLocation, 0)
     }
 
-    //what to do when tapped
+    /**
+     * Function that is executed when this pin is tapped.
+     */
     abstract fun tap(tapLocation : p2, activity : Activity, view: View, disPerPixel: Float)
 
-    //should create a list of links to all content in this pin
-    //used to create the list when a mergedPin is clicked
+    /**
+     * Should create a list of links to all content in this pin
+     * Used to create the list when a mergedPin is clicked
+     */
     abstract fun addContent(): MutableList<String>
 
-    //main drawing function, draws the pin and recalculates the bounding box
+    /**
+     * Main drawing function, draws the pin and recalculates the bounding box
+     * @param[program]
+     * @param[scale]
+     * @param[trans]
+     */
     open fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2,p2>, width : Int, height : Int, view: View, disPerPixel: Float): Boolean {
 
         val screenLocation: Pair<Float, Float> = coordToScreen(coordinate, viewport, view.width, view.height)
@@ -237,8 +258,11 @@ abstract class Pin(
         return false
     }
 
-    //changes the width of the pin to pinSize, and the height accordingly
-    //also changes the icon's size
+    /**
+     * Changes the width of the pin to pinSize, the height changes accordingly.
+     * This also changes the icon's size.
+     * @param[pinSize] the desired width of the pin in pixels.
+     */
     open fun resize(pinSize : Int){
         pinWidth = pinSize.toFloat()
 
@@ -257,7 +281,11 @@ abstract class Pin(
         }
     }
 
-    //helper function to load a bitmap into a buffer
+    /**
+     * Helper function to load a bitmap into a buffer
+     * @param[bitmap]
+     * @return
+     */
     private fun loadTexture(bitmap: Bitmap): Int {
         val textureHandle = IntArray(1)
         GLES20.glGenTextures(1, textureHandle, 0)
@@ -290,7 +318,18 @@ abstract class Pin(
     }
 }
 
-//normal singular pin, which shows its information when tapped
+/**
+ * Singular pin, which shows its content when tapped.
+ * @property[id] the id of the pin, should be UUID4 format.
+ * @property[title] the title of the pin.
+ * @property[content] a json format string containing the content of the pin.
+ * @property[status] the current status of the pin.
+ * @property[predecessorIds] the ids of pins that need to be completed before this pin is unlocked,
+ *  in a string sepparated by commas(,).
+ * @property[followIds] the ids of pins that follow this pin, formatted the same way as predecessors.
+ * @property[viewModel] the viewModel the pin uses to acccess the database.
+ * @constructor creates a single pin.
+ */
 class SinglePin(
     var id                      : String = "",
     coordinate                  : UTMCoordinate,
@@ -342,7 +381,10 @@ class SinglePin(
         return mutableListOf(id)
     }
 
-    // Check if pin should be unlocked
+    /**
+     * Check if pin should be unlocked and execute funcion when it is unlocked.
+     * @param[action] the action to be executed when the pin is unlocked.
+     */
     fun tryUnlock(action : (() -> Unit)){
         if(predecessorIds[0] != "" && status < 1){
             (viewModel as PinViewModel).tryUnlock(id, predecessorIds, action)
