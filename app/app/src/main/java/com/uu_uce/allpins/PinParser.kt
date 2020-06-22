@@ -6,7 +6,11 @@ import java.io.File
 import java.io.FileReader
 import java.lang.Exception
 
-
+/**
+ * Parse PinData from a json file.
+ * @param[pinFile] a json file containing pins.
+ * @return a list of PinData which was parsed from the json file.
+ */
 fun parsePins(pinFile : File) : List<PinData>? {
     val reader = JsonReader(FileReader(pinFile))
     val pinList = mutableListOf<PinData>()
@@ -30,6 +34,11 @@ fun parsePins(pinFile : File) : List<PinData>? {
     }
 }
 
+/**
+ * Parse a single PinData object.
+ * @param[reader] the current reader.
+ * @return a single PinData object if it was successfully parsed.
+ */
 private fun parsePin(reader: JsonReader) : PinData? {
     var pinId          = ""
     var location       = ""

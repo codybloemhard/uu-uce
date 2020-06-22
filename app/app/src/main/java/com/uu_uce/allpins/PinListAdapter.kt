@@ -107,6 +107,11 @@ class PinListAdapter internal constructor(
         holder.pinType.setImageDrawable(drawable)
     }
 
+    /**
+     * Update pins in memory from database.
+     * @param[newPinData] list of new PinData which should be loaded in memory.
+     * @param[viewModel] the viewModel from which the database can be accessed.
+     */
     internal fun setPins(newPinData: List<PinData>, viewModel: PinViewModel) {
         val tempPins : MutableList<PinData> = mutableListOf()
         // Update pins from new data

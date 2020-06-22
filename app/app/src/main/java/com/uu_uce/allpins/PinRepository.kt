@@ -9,10 +9,20 @@ class PinRepository(private val pinDao : PinDao){
 
     val allPins: LiveData<List<PinData>> = pinDao.getAllLivePins()
 
+    /**
+     * Insert a pinData object into the database
+     * @param pindata the PinData object to be inserted
+     */
     suspend fun insert(pindata: PinData){
         pinDao.insert(pindata)
     }
 
+    /**
+     * Unlocks a pin if all its predecessors are completed and executes an action upon unlocking.
+     * @param pid the id of the pin which should be unlocked.
+     * @param predPids the id's of the predecessors of the pin that is to be unlocked.
+     * @param action the action to be executed if the pin was successfully unlocked.
+     */
     suspend fun tryUnlock(pid : String, predPids : List<String>, action : (() -> Unit)){
         if(pinDao.getStatus(pid) > 0) {
             action()
@@ -31,14 +41,29 @@ class PinRepository(private val pinDao : PinDao){
         action()
     }
 
+    /**
+     * Sets the status of a pin in the database.
+     * @param[pid] the id of the pin whose status is to be set.
+     * @param value the value which the pin's status will be set to.
+     */
     suspend fun setStatus(pid : String, value : Int){
         pinDao.setStatus(pid, value)
     }
 
+    /**
+     * Sets the status of multiple pins to a single value at the same time.
+     * @param[pids] the ids of the pins whose status is to be set.
+     * @param[value] the value which the pins' statuses will be set to.
+     */
     suspend fun setStatuses(pids : List<String>, value : Int){
         pinDao.setStatuses(pids, value)
     }
 
+    /**
+     * Find pins whose titles match the queried string.
+     * @param[searchText] the string that was queried.
+     * @param[action] the action to be executed with the PinData that matched the query.
+     */
     suspend fun searchPins(searchText : String, action : ((List<PinData>?) -> Unit)){
         if(searchText.count() > 0){
             action(pinDao.searchPins("%$searchText%"))
@@ -48,6 +73,9 @@ class PinRepository(private val pinDao : PinDao){
         }
     }
 
+    /**
+     * The
+     */
     suspend fun getPins(pinIds : List<String>, action: (List<PinData>) -> Unit){
         action(pinDao.getPins(pinIds))
     }

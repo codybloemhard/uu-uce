@@ -16,6 +16,10 @@ import com.uu_uce.pins.SinglePin
 import com.uu_uce.pins.PinContent
 import com.uu_uce.services.UTMCoordinate
 
+/**
+ * @param[drawable] a drawable which is to be converted to a bitmap.
+ * @return A bitmap which can be drawn using openGL.
+ */
 private fun drawableToBitmap(drawable: Drawable): Bitmap {
     if (drawable is BitmapDrawable) {
         if (drawable.bitmap != null) {
@@ -41,6 +45,9 @@ private fun drawableToBitmap(drawable: Drawable): Bitmap {
     return bitmap
 }
 
+/**
+ * @param[activity] the current activity in which you wish to convert PinData to a Pin.
+ */
 class PinConversion(val activity: Activity){
     companion object {
         fun stringToUtm(coord: String): UTMCoordinate {
@@ -53,7 +60,12 @@ class PinConversion(val activity: Activity){
                 s.elementAt(4).value.toFloat())
         }
 
-        fun difficultyToBackground(difficulty: Int, activity: Activity, resource: Resources): Bitmap {
+        /**
+         * @param[difficulty] the difficulty of the pin which the color of the pin will be based on.
+         * @param[activity] the current activity.
+         * @return a bitmap colored in according to the supplied difficulty.
+         */
+        fun difficultyToBackground(difficulty: Int, activity: Activity): Bitmap {
             val color = when (difficulty) {
                 0 -> ContextCompat.getColor(activity, R.color.HighBlue) //Neutral
                 1 -> ContextCompat.getColor(activity, R.color.ReptileGreen)
@@ -64,7 +76,7 @@ class PinConversion(val activity: Activity){
                     ContextCompat.getColor(activity, R.color.TextGrey)
                 }
             }
-            var background =  ResourcesCompat.getDrawable(resource, R.drawable.ic_pin, null) ?: error ("Image not found")
+            var background =  ResourcesCompat.getDrawable(activity.resources, R.drawable.ic_pin, null) ?: error ("Image not found")
             background = background.mutate()
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -78,14 +90,19 @@ class PinConversion(val activity: Activity){
             return drawableToBitmap(background)
         }
 
+        /**
+         * @param[type] the type of the pin you wish to get an icon for.
+         * @param[resource] the resources to get drawables from.
+         * @return a drawable according to the pin type.
+         */
         fun typeToIcon(type: String, resource: Resources): Drawable {
             val image = when (type) {
                 "TEXT"      -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_text, null)   ?: error("image not found")
                 "IMAGE"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_image, null)  ?: error("image not found")
                 "VIDEO"     -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_video, null)  ?: error("image not found")
                 "MCQUIZ"    -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quiz, null)   ?: error("image not found")
-                "MERGEDPIN" -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_stack, null)    ?: error("image not found")
-                "TASK"    -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null)      ?: error("image not found")
+                "MERGEDPIN" -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_stack, null)  ?: error("image not found")
+                "TASK"    -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null)    ?: error("image not found")
                 else        -> ResourcesCompat.getDrawable(resource, R.drawable.ic_symbol_quest, null)  ?: error("image not found")
             }
 
@@ -105,38 +122,48 @@ class PinConversion(val activity: Activity){
 
     private val resource = activity.resources
 
+    /**
+     * @param[content] a string containing the content of a pin.
+     * @return a parsed PinContent from the supplied content.
+     */
     private fun stringToPinContent(content: String): PinContent {
         return PinContent(content, activity, false)
     }
 
-    private fun stringToIds(ids : String) : List<String>{
-        return ids.split(',').map{s -> s}
-    }
-
+    /**
+     * @param[pinData] the PinData that is to be parsed into a Pin.
+     * @param[viewModel] the viewModel that the Pin is to have access to.
+     * @return the Pin parsed from the supplied PinData.
+     */
     fun pinDataToPin(pinData : PinData, viewModel : PinViewModel): SinglePin {
         val pin = SinglePin(
             pinData.pinId,
             stringToUtm(pinData.location), //location
             pinData.title,
             stringToPinContent(pinData.content),
-            difficultyToBackground(pinData.difficulty, activity, resource),
+            difficultyToBackground(pinData.difficulty, activity),
             typeToIcon(pinData.type, resource),
             pinData.status,
-            stringToIds(pinData.predecessorIds),
-            stringToIds(pinData.followIds),
+            pinData.predecessorIds.split(','),
+            pinData.followIds.split(','),
             viewModel
         )
         pin.content.parent = pin
         return pin
     }
 
+    /**
+     * @param[entry] the FieldbookEntry that is to be parsed to a Pin.
+     * @param[viewModel] the viewModel that the Pin is to have access to.
+     * @return the Pin parsed from the FieldbookEntry.
+     */
     fun fieldbookEntryToPin(entry: FieldbookEntry, viewModel: FieldbookViewModel) : SinglePin {
         return SinglePin(
             entry.id.toString(),
             stringToUtm(entry.location),
             entry.title,
             PinContent(entry.content, activity, true),
-            difficultyToBackground(0, activity, resource),
+            difficultyToBackground(0, activity),
             typeToIcon("", resource),
             2,
             listOf(),
