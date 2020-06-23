@@ -48,8 +48,12 @@ class Chunk(
 
     /**
      * draws all the shapes in this chunk
+     * @param[uniColorProgram] the GL program to draw unicolor shapes with
+     * @param[varyingColorProgram] the GL program to draw different colored shapes with
+     * @param[scale] scale vector used to draw everything at the right size
+     * @param[trans] translation vector to draw everything in the right place
      */
-    fun draw(lineProgram: Int, varyingColorProgram: Int, scale: FloatArray, trans: FloatArray, color: FloatArray){
-        drawInfo.draw(lineProgram, varyingColorProgram, scale, trans, color)
+    fun draw(uniColorProgram: Int, varyingColorProgram: Int, scale: FloatArray, trans: FloatArray){
+        drawInfo.draw(uniColorProgram, varyingColorProgram, scale, trans)
     }
 }

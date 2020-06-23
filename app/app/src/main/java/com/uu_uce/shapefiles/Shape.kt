@@ -10,20 +10,47 @@ import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
 
-//style for polygons/polylyes
-class PolyStyle(val outline: Boolean, val color: FloatArray)
+/**
+ * a style to draw a polygon/line in
+ */
+class PolyStyle(val color: FloatArray)
 class LineStyle(val thickness: Float, val color: FloatArray)
 
+//thickness of heightline
 const val defaultThickness = 1f
+//thickness of special line (breakline, outline etc)
 const val lineThickness = 3f
 
-//abstract class for drawing shapes
+/**
+ * abstract class for storing all information required for drawing, and then drawing it
+ */
 abstract class DrawInfo{
-    abstract fun draw(lineProgram: Int, varyingColorProgram: Int, scale: FloatArray, trans: FloatArray, color: FloatArray)
+
+    /**
+     * add a single shape to this draw info
+     * @param[shape] the shape to add
+     */
+    abstract fun addShape(shape: Shape)
+
+    /**
+     * draw all information inside this DrawInfo
+     * @param[uniColorProgram] the GL program to draw unicolor shapes with
+     * @param[varyingColorProgram] the GL program to draw different colored shapes with
+     * @param[scale] scale vector used to draw everything at the right size
+     * @param[trans] translation vector to draw everything in the right place
+     */
+    abstract fun draw(uniColorProgram: Int, varyingColorProgram: Int, scale: FloatArray, trans: FloatArray)
+
+    /**
+     * create all necessary GL buffers (needs to be called in the GL thread)
+     */
     abstract fun finalize()
 }
 
-//information for drawing a line
+/**
+ * DrawInfo for drawing heightlines
+ * @constructor creates a HeightlineDrawInfo
+ */
 class HeightlineDrawInfo: DrawInfo(){
     private var vertices: MutableList<Float> = mutableListOf()
     private var indices: MutableList<Int> = mutableListOf()
@@ -32,23 +59,26 @@ class HeightlineDrawInfo: DrawInfo(){
     private var nrIndices = 0
     private var curIndex = 0
 
-    //add a single HeightLine shape
-    fun addLine(line: Heightline){
-        for(k in 0 until line.points.size-1){
+    override fun addShape(shape: Shape){
+        if(shape !is Heightline) {
+            Logger.error("Shape", "Shape can't be added, is not a heightline")
+            return
+        }
+        for(k in 0 until shape.points.size-1){
             indices.add(curIndex)
             indices.add(++curIndex)
         }
         curIndex++
-        for (k in line.points.indices) {
-            vertices.add(line.points[k].first)
-            vertices.add(line.points[k].second)
+        for (k in shape.points.indices) {
+            vertices.add(shape.points[k].first)
+            vertices.add(shape.points[k].second)
         }
     }
 
-    override fun draw(lineProgram: Int, varyingColorProgram: Int, scale: FloatArray, trans: FloatArray, color: FloatArray) {
-        GLES20.glUseProgram(lineProgram)
+    override fun draw(uniColorProgram: Int, varyingColorProgram: Int, scale: FloatArray, trans: FloatArray) {
+        GLES20.glUseProgram(uniColorProgram)
 
-        val positionHandle = GLES20.glGetAttribLocation(lineProgram, "vPosition")
+        val positionHandle = GLES20.glGetAttribLocation(uniColorProgram, "vPosition")
 
         GLES20.glEnableVertexAttribArray(positionHandle)
         GLES20.glVertexAttribPointer(
@@ -60,13 +90,14 @@ class HeightlineDrawInfo: DrawInfo(){
             vertexBuffer
         )
 
-        val colorHandle = GLES20.glGetUniformLocation(lineProgram, "vColor")
+        val color = floatArrayOf(0f,0f,0f,1f)
+        val colorHandle = GLES20.glGetUniformLocation(uniColorProgram, "vColor")
         GLES20.glUniform4fv(colorHandle, 1, color, 0)
 
-        val scaleHandle = GLES20.glGetUniformLocation(lineProgram, "scale")
+        val scaleHandle = GLES20.glGetUniformLocation(uniColorProgram, "scale")
         GLES20.glUniform2fv(scaleHandle, 1, scale, 0)
 
-        val transHandle = GLES20.glGetUniformLocation(lineProgram, "trans")
+        val transHandle = GLES20.glGetUniformLocation(uniColorProgram, "trans")
         GLES20.glUniform2fv(transHandle, 1, trans, 0)
 
         GLES20.glDrawElements(GLES20.GL_LINES, nrIndices, GLES20.GL_UNSIGNED_INT, indexBuffer)
@@ -98,7 +129,10 @@ class HeightlineDrawInfo: DrawInfo(){
     }
 }
 
-//information for drawing a polygon
+/**
+ * DrawInfo for drawing colored lines
+ * @constructor creates a ColoredLineDrawInfo
+ */
 class ColoredLineDrawInfo: DrawInfo(){
     private var vertices: MutableList<Float> = mutableListOf()
     private var indices: MutableList<Int> = mutableListOf()
@@ -109,24 +143,28 @@ class ColoredLineDrawInfo: DrawInfo(){
     private var nrIndices = 0
     private var curIndex = 0
 
-    fun addLine(line: ColoredLineShape){
-        for(k in 0 until line.points.size-1){
+    override fun addShape(shape: Shape){
+        if(shape !is ColoredLine) {
+            Logger.error("Shape", "Shape can't be added, is not a colored line")
+            return
+        }
+        for(k in 0 until shape.points.size-1){
             indices.add(curIndex)
             indices.add(++curIndex)
         }
         curIndex++
-        for (k in line.points.indices) {
-            vertices.add(line.points[k].first)
-            vertices.add(line.points[k].second)
+        for (k in shape.points.indices) {
+            vertices.add(shape.points[k].first)
+            vertices.add(shape.points[k].second)
         }
-        for(i in line.points.indices){
-            colors.add(line.polyStyle.color[0])
-            colors.add(line.polyStyle.color[1])
-            colors.add(line.polyStyle.color[2])
+        for(i in shape.points.indices){
+            colors.add(shape.lineStyle.color[0])
+            colors.add(shape.lineStyle.color[1])
+            colors.add(shape.lineStyle.color[2])
         }
     }
 
-    override fun draw(lineProgram: Int, varyingColorProgram: Int, scale: FloatArray, trans: FloatArray, color: FloatArray) {
+    override fun draw(uniColorProgram: Int, varyingColorProgram: Int, scale: FloatArray, trans: FloatArray) {
         GLES20.glUseProgram(varyingColorProgram)
         GLES20.glLineWidth(lineThickness)
 
@@ -199,7 +237,10 @@ class ColoredLineDrawInfo: DrawInfo(){
     }
 }
 
-//information for drawing a polygon
+/**
+ * DrawInfo for drawing polygons
+ * @constructor creates a PolygonDrawInfo
+ */
 class PolygonDrawInfo: DrawInfo(){
     private var vertices: MutableList<Float> = mutableListOf()
     private var colors: MutableList<Float> = mutableListOf()
@@ -210,28 +251,28 @@ class PolygonDrawInfo: DrawInfo(){
     private lateinit var colorBuffer: FloatBuffer
     private var nrIndices = 0
 
-    fun addPolygon(polygon: Polygon){
-        for(index in polygon.indices) indices.add(indexOffset + index)
+    override fun addShape(shape: Shape){
+        if(shape !is Polygon) {
+            Logger.error("Shape", "Shape can't be added, is not a polygon")
+            return
+        }
+        for(index in shape.indices) indices.add(indexOffset + index)
 
-        for(i in polygon.vertices.indices){
-            colors.add(polygon.polyStyle.color[0])
-            colors.add(polygon.polyStyle.color[1])
-            colors.add(polygon.polyStyle.color[2])
+        for(i in shape.vertices.indices){
+            colors.add(shape.polyStyle.color[0])
+            colors.add(shape.polyStyle.color[1])
+            colors.add(shape.polyStyle.color[2])
         }
 
-        for ((x,y) in polygon.vertices) {
+        for ((x,y) in shape.vertices) {
             vertices.add(x)
             vertices.add(y)
         }
 
-        indexOffset += polygon.vertices.size
+        indexOffset += shape.vertices.size
     }
 
-    override fun draw(lineProgram: Int, varyingColorProgram: Int, scale: FloatArray, trans: FloatArray, color: FloatArray) {
-        drawPolygon(varyingColorProgram, scale, trans)
-    }
-
-    private fun drawPolygon(varyingColorProgram: Int, scale: FloatArray, trans: FloatArray){
+    override fun draw(uniColorProgram: Int, varyingColorProgram: Int, scale: FloatArray, trans: FloatArray) {
         GLES20.glUseProgram(varyingColorProgram)
 
         val positionHandle = GLES20.glGetAttribLocation(varyingColorProgram, "vPosition")
@@ -304,53 +345,38 @@ class PolygonDrawInfo: DrawInfo(){
     }
 }
 
-//generic shape
-abstract class Shape(){
-    abstract fun initDrawInfo(drawInfo: DrawInfo)
-    abstract val nrPoints: Int
-}
-
-//shape consisting of just lines on the same height
-class Heightline(var points: List<p2>): Shape() {
-    override val nrPoints = points.size
-
-    override fun initDrawInfo(
-        drawInfo: DrawInfo
-    ) {
-        if (points.size < 2) return
-
-        if(drawInfo is HeightlineDrawInfo) {
-            drawInfo.addLine(this)
-        }
-        else Logger.error("ShapeZ", "wrong draw information for heightline")
+/**
+ * abstract class for all shapes
+ */
+abstract class Shape{
+    /**
+     * add all information regarding this shape to the DrawInfo
+     */
+    fun initDrawInfo(drawInfo: DrawInfo){
+        drawInfo.addShape(this)
     }
 }
 
-//shape consisting of colored lines
-class ColoredLineShape(var points: List<p2>, val polyStyle: LineStyle): Shape() {
-    override val nrPoints = points.size
+/**
+ * shape consisting of black lines, all on the same height
+ * @param[points] the points that make up this heightline
+ * @constructor creates a new Heightline
+ */
+class Heightline(var points: List<p2>): Shape()
 
-    override fun initDrawInfo(
-        drawInfo: DrawInfo
-    ) {
-        if (points.size < 2) return
+/**
+ * shape consisting of uni colored line
+ * @param[points] the points that make up this line
+ * @param[lineStyle] the style to draw this line with
+ * @constructor creates a new ColoredLine
+ */
+class ColoredLine(var points: List<p2>, val lineStyle: LineStyle): Shape()
 
-        if (drawInfo is ColoredLineDrawInfo) {
-            drawInfo.addLine(this)
-        } else Logger.error("ShapeZ", "wrong draw information for coloredlineshape")
-    }
-}
-
-//shape consisting of colored polygons
-class Polygon(var vertices: List<p2>, var indices: MutableList<Short>, val polyStyle: PolyStyle): Shape(){
-    override val nrPoints: Int = vertices.size
-
-    override fun initDrawInfo(
-        drawInfo: DrawInfo
-    ) {
-        if (drawInfo is PolygonDrawInfo) {
-            drawInfo.addPolygon(this)
-        }
-        else Logger.error("ShapeZ", "wrong draw information for polygon shape")
-    }
-}
+/**
+ * polygon with a color
+ * @param[vertices] the vertices that make up this polygon
+ * @param[indices] the indices to use to draw triangles
+ * @param[polyStyle] the style to draw this line with
+ * @constructor creates a new Polygon
+ */
+class Polygon(var vertices: List<p2>, var indices: MutableList<Short>, val polyStyle: PolyStyle): Shape()

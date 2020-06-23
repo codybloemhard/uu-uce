@@ -5,15 +5,17 @@ import com.uu_uce.misc.Logger
 import java.io.File
 import java.io.FileInputStream
 
-/*
-a way of getting chunks, possibly from storage or a server
-see documentation at shapefile-linter for file specific information
-unsigned types are marked as experimental, but they are perfectly safe to use
+/**
+ * a way of getting chunks, possibly from storage or a server
+ * see documentation at shapefile-linter for file specific information
+ * unsigned types are marked as experimental, but they are perfectly safe to use
+ * @param[dir] directory to get the chunks from
+ * @param[layerType] type of chunks this should retrieve
  */
 abstract class ChunkGetter(
     protected var dir: File,
     protected val layerType: LayerType){
-    abstract fun getChunk(cIndex: ChunkIndex):Chunk
+
     protected var xoff = 0.0f
     protected var yoff = 0.0f
     protected var zoff = 0.0f
@@ -21,46 +23,79 @@ abstract class ChunkGetter(
     protected var bmin = p3NaN
     protected var bmax = p3NaN
     var nrCuts: List<Int> = listOf()
-    // For each level, the modulo of the heigt lines
+    // For each level, the modulo of the heigtlines
     // Ex. mods[0] = 100
-    // Than level 0 has 100 meter between each heightline
+    // Then level 0 has 100 meter between each heightline
     // And every heightline height(z) is a multiple of 100
     var mods: List<Int> = listOf()
 
+    /**
+     * read the info file provided with the chunks
+     * @return the bounding box of the chunk
+     */
     abstract fun readInfo(): Pair<p3,p3>
+
+    /**
+     * read a chunk
+     * @param[cIndex] the chunk to read
+     * @return the read chunk
+     */
+    abstract fun getChunk(cIndex: ChunkIndex):Chunk
 }
 
-//simple reader that can read basic types from a binary file
+/**
+ * simple reader that can read basic types from a binary file
+ */
 @ExperimentalUnsignedTypes
 class FileReader{
     private var index = 0
     private var ubytes: UByteArray
 
+    /**
+     * creates a file reader based on a file
+     * @param[file] the file to read
+     */
     constructor(file: File){
         val inputStream = FileInputStream(file)
         ubytes = inputStream.readBytes().toUByteArray()
         inputStream.close()
     }
 
+    /**
+     * creates a file reader based on a bytestream
+     */
     constructor(us: UByteArray){
         ubytes = us
     }
 
+    /**
+     * @return next ubyte
+     */
     fun readUByte(): UByte{
         return  ubytes[index++].toUInt().toUByte()
     }
 
+    /**
+     * @return next two ubytes as ushort
+     */
     fun readUShort(): UShort{
         return  ((ubytes[index++].toUInt() shl 8) +
                 (ubytes[index++].toUInt())).toUShort()
     }
 
+    /**
+     * @return next four ubytes as uint
+     */
     fun readUInt(): UInt{
         return  (ubytes[index++].toUInt() shl 24) +
                 (ubytes[index++].toUInt() shl 16) +
                 (ubytes[index++].toUInt() shl 8) +
                 (ubytes[index++].toUInt())
     }
+
+    /**
+     * @return next eight ubytes as ulong
+     */
     fun readULong(): ULong{
         return  (ubytes[index++].toULong() shl 56) +
                 (ubytes[index++].toULong() shl 48) +
@@ -73,10 +108,10 @@ class FileReader{
     }
 }
 
-
-//reader for heightline chunks
-
 @ExperimentalUnsignedTypes
+/**
+ * reader for heightline chunks
+ */
 class HeightLineReader(
     dir: File,
     layerType: LayerType
@@ -156,6 +191,9 @@ class HeightLineReader(
 }
 
 @ExperimentalUnsignedTypes
+/**
+ * reader for colored line chunks
+ */
 class ColoredLineReader(
     dir: File,
     private val lineStyles: List<LineStyle>,
@@ -206,7 +244,7 @@ class ColoredLineReader(
                 p2(readValue()/mult + xoff, readValue()/mult + yoff)
             }
 
-            ColoredLineShape(points, style)
+            ColoredLine(points, style)
         }
 
         val time1 = System.currentTimeMillis() - time
@@ -230,6 +268,9 @@ class ColoredLineReader(
 }
 
 @ExperimentalUnsignedTypes
+/**
+ * reader for polygon chunks
+ */
 class PolygonReader(
     dir: File,
     layerType: LayerType,
@@ -275,7 +316,7 @@ class PolygonReader(
                     val styleIndex = reader.readULong().toInt()
                     polyStyles[styleIndex]
                 }
-                else PolyStyle(false, floatArrayOf(0.2f,0.2f,0.8f))
+                else PolyStyle(floatArrayOf(0.2f,0.2f,0.8f))
 
             /* Read shape bounding boxes
             val bmi = p3(readValue()/mult + xoff, readValue()/mult + yoff, readValue())
