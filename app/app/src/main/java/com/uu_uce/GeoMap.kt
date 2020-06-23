@@ -42,6 +42,7 @@ class GeoMap : AppCompatActivity() {
     private var statusBarHeight = 0
     private var resourceId = 0
     private var started = false
+    private var offline = false
 
     private lateinit var sharedPref : SharedPreferences
 
@@ -75,7 +76,7 @@ class GeoMap : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // Check whether a server is known
-        val offline = sharedPref.getString("com.uu_uce.SERVER_IP", "") == ""
+        offline = sharedPref.getString("com.uu_uce.SERVER_IP", "") == ""
 
         // Check whether maps are present
         val mapsPresent = File(getExternalFilesDir(null)?.path + File.separator + mapsFolderName).exists()
@@ -120,7 +121,7 @@ class GeoMap : AppCompatActivity() {
         this.customMap.setPins(pinViewModel.allPinData)
 
         // Get newest database from server and update pins (when not testing)
-        if(!testing){
+        if(!testing && !offline){
             queryServer("pin", this) { s -> updateDatabase(s) }
         }
 
