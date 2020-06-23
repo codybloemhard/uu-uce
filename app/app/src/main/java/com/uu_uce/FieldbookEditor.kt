@@ -31,12 +31,14 @@ import com.uu_uce.ui.createTopbar
 class FieldbookEditor: AppCompatActivity() {
 
     companion object {
-        const val REQUEST_IMAGE_UPLOAD  = 0
+        const val REQUEST_IMAGE_UPLOAD = 0
         const val REQUEST_IMAGE_CAPTURE = 1
-        const val REQUEST_VIDEO_UPLOAD  = 2
+        const val REQUEST_VIDEO_UPLOAD = 2
         const val REQUEST_VIDEO_CAPTURE = 3
 
         var currentUri: Uri = Uri.EMPTY
+
+        private const val THUMBNAIL_DIRECTORY = "Fieldbook/Thumbnails"
     }
 
     private lateinit var viewModel      : FieldbookViewModel
@@ -54,7 +56,6 @@ class FieldbookEditor: AppCompatActivity() {
     private var latestBlockIndex    = 0
     private var currentBlockIndex   = 0
     private var fieldbookIndex      = -1
-    private val thumbnailDirectory  = "Fieldbook/Thumbnails"
 
     private var editing = false
 
@@ -336,7 +337,7 @@ class FieldbookEditor: AppCompatActivity() {
                             image       = currentUri,
                             thumbnail   = mediaServices.makeImageThumbnail(
                                 uri,
-                                thumbnailDirectory
+                                THUMBNAIL_DIRECTORY
                             )
                         )
                     }
@@ -346,7 +347,7 @@ class FieldbookEditor: AppCompatActivity() {
                         image       = currentUri,
                         thumbnail   = mediaServices.makeImageThumbnail(
                             currentUri,
-                            thumbnailDirectory
+                            THUMBNAIL_DIRECTORY
                         )
                     )
 
@@ -365,7 +366,7 @@ class FieldbookEditor: AppCompatActivity() {
                             video       = currentUri,
                             thumbnail   = mediaServices.makeVideoThumbnail(
                                 uri,
-                                thumbnailDirectory
+                                THUMBNAIL_DIRECTORY
                             )
                         )
                     }
@@ -375,7 +376,7 @@ class FieldbookEditor: AppCompatActivity() {
                         video       = currentUri,
                         thumbnail   = mediaServices.makeVideoThumbnail(
                             currentUri,
-                            thumbnailDirectory
+                            THUMBNAIL_DIRECTORY
                         )
                     )
                     if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {

@@ -224,21 +224,22 @@ class MediaServices(private val activity: Activity) {
         return Uri.parse(filePath)
     }
 
-    fun generateMissingVideoThumbnail(videoUri: Uri): Uri {
+    fun generateMissingVideoThumbnail(videoUri: Uri, thumbnailDirectory: String): Uri {
         val fileName = getFileName(videoUri.path.toString())
 
         val filePath =
             activity.getExternalFilesDir(null).toString() +
-                    "/PinContent/Videos/Thumbnails/thumbnail_" +
-                    fileName +
-                    ".jpeg"
+                    File.separator +
+                    thumbnailDirectory +
+                    File.separator +
+                    "thumbnail_$fileName.jpeg"
 
         val file = File(filePath)
 
         return if (!file.exists() || !file.canRead()) {
             makeVideoThumbnail(
                 videoUri,
-                "PinContent/Videos/Thumbnails",
+                thumbnailDirectory,
                 fileName
             )
         } else {
@@ -265,7 +266,7 @@ class MediaServices(private val activity: Activity) {
             saveThumbnail(
                 MediaMetadataRetriever().apply {
                     setDataSource(activity, uri)
-                }.getFrameAtTime(1000, 0),
+                }.getFrameAtTime(20000000, 0),
                 directory,
                 fileName
             )

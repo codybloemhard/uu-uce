@@ -2,7 +2,6 @@ package com.uu_uce.pins
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.text.InputType
 import android.util.JsonReader
@@ -30,7 +29,6 @@ class PinContent(
 )
 {
     val contentBlocks: MutableList<ContentBlockInterface>
-
 
     lateinit var parent : SinglePin
     init{
@@ -304,27 +302,30 @@ class ImageContentBlock(
 
 class VideoContentBlock(
     private val videoURI: Uri,
-    private val thumbnailURI: Uri,
+    private var thumbnailURI: Uri,
     private val activity: Activity,
     private val title: String? = null
-): ContentBlockInterface
-{
+): ContentBlockInterface {
+    companion object {
+        private const val THUMBNAIL_DIRECTORY = "PinContent/Videos/Thumbnails"
+    }
+
     override var content = FrameLayout(activity)
     override val tag = BlockTag.VIDEO
-    override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : SinglePin?){
+    override fun showContent(blockId: Int, layout: LinearLayout, view: View, parent: SinglePin?) {
         content = FrameLayout(activity)
 
         // Create thumbnail image
-        if(thumbnailURI == Uri.EMPTY){
-            content.setBackgroundColor(Color.BLACK)
+        if (thumbnailURI == Uri.EMPTY) {
+            thumbnailURI =
+                MediaServices(activity).generateMissingVideoThumbnail(videoURI, THUMBNAIL_DIRECTORY)
         }
-        else{
-            val thumbnail = ImageView(activity)
-            thumbnail.setImageURI(thumbnailURI)
-            thumbnail.scaleType = ImageView.ScaleType.FIT_CENTER
-            thumbnail.adjustViewBounds = true
-            content.addView(thumbnail)
-        }
+
+        val thumbnail = ImageView(activity)
+        thumbnail.setImageURI(thumbnailURI)
+        thumbnail.scaleType = ImageView.ScaleType.FIT_CENTER
+        thumbnail.adjustViewBounds = true
+        content.addView(thumbnail)
 
         content.layoutParams = RelativeLayout.LayoutParams(
             RelativeLayout.LayoutParams.MATCH_PARENT,
@@ -348,8 +349,6 @@ class VideoContentBlock(
             openVideoView(activity, videoURI, title)
         }
         layout.addView(content, blockId)
-
-        MediaServices(activity).generateMissingVideoThumbnail(videoURI)
     }
 
     override fun removeContent(layout: LinearLayout) {
