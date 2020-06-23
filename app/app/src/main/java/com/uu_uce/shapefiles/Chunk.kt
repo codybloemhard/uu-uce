@@ -1,7 +1,8 @@
 package com.uu_uce.shapefiles
 
-//chunkindex (x,y,z) is the x'th chunk from the left, the y'th
-//from the bottom, in zoomlevel z
+/**
+ * chunkindex (x,y,z) is the x'th chunk from the left, the y'th from the bottom, in zoomlevel z
+ */
 typealias ChunkIndex = Triple<Int,Int,Int>
 fun chunkName(c: ChunkIndex): String{
     return "${c.third}-${c.first}-${c.second}.hlinechunk"
@@ -13,11 +14,11 @@ fun geolineChunkName(c: ChunkIndex): String{
     return "${c.first}-${c.second}.geolinechunk"
 }
 
-/*
-a chunk holds all shapes of a layer that are in a specific AABB
-shapes: all shapes present in the chunk
-bmin/bmax: the bounding box of all shapes
-type: what type of content is in this chunk
+/**
+ * a chunk holds all shapes of a layer that are in a specific AABB
+ * @param[shapes] all shapes present in the chunk
+ * @param[type] what type of content is in this chunk
+ * @constructor merge all shapes into the drawinfo
  */
 class Chunk(
     private var shapes: List<Shape>,
@@ -45,7 +46,9 @@ class Chunk(
         shapes = listOf()
     }
 
-    //display all chunks to the canvas
+    /**
+     * draws all the shapes in this chunk
+     */
     fun draw(lineProgram: Int, varyingColorProgram: Int, scale: FloatArray, trans: FloatArray, color: FloatArray){
         drawInfo.draw(lineProgram, varyingColorProgram, scale, trans, color)
     }

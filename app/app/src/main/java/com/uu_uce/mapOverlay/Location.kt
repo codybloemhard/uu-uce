@@ -13,6 +13,13 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
+/**
+ * location of the user, and potentially other users
+ *
+ * @param[utm] the current UTM location
+ * @param[context] the context this location is in
+ * @constructor initializes all buffers
+ */
 class Location(var utm: UTMCoordinate, context: Context){
     private var innerVertexBuffer: FloatBuffer
     private var outerVertexBuffer: FloatBuffer
@@ -22,20 +29,9 @@ class Location(var utm: UTMCoordinate, context: Context){
     private val outerColor: FloatArray
 
     init{
-        val col = ResourcesCompat.getColor(context.resources, R.color.HighBlue, null).toUInt()
-        color = floatArrayOf(
-            ((col and (255u shl 16)) shr 16).toFloat()/255,
-            ((col and (255u shl 8 )) shr 8 ).toFloat()/255,
-            ((col and (255u shl 0 )) shr 0 ).toFloat()/255,
-            ((col and (255u shl 24)) shr 24).toFloat()/255)
+        color = colorIntToFloatArray(ResourcesCompat.getColor(context.resources, R.color.HighBlue, null).toUInt())
 
-        val outcol = ResourcesCompat.getColor(context.resources, R.color.BestWhite, null).toUInt()
-        outerColor = floatArrayOf(
-            ((outcol and (255u shl 16)) shr 16).toFloat()/255,
-            ((outcol and (255u shl 8 )) shr 8 ).toFloat()/255,
-            ((outcol and (255u shl 0 )) shr 0 ).toFloat()/255,
-            ((outcol and (255u shl 24)) shr 24).toFloat()/255)
-
+        outerColor = colorIntToFloatArray(ResourcesCompat.getColor(context.resources, R.color.BestWhite, null).toUInt())
 
         val nrSegments = 20
         val verticesMutable: MutableList<Float> = mutableListOf()
@@ -68,6 +64,16 @@ class Location(var utm: UTMCoordinate, context: Context){
         vertexCount = innerVertices.size/ coordsPerVertex
     }
 
+    /**
+     * draws this location
+     *
+     * @param[program] the GL program to use while drawing
+     * @param[scale] scale vector used to draw everything at the right size
+     * @param[trans] translation vector to draw everything in the right place
+     * @param[radius] the radius of the circle to draw
+     * @param[width] width of view this location is in
+     * @param[height] height of view this location is in
+     */
     fun draw(program: Int, scale: FloatArray, trans: FloatArray, radius: Float, width: Int, height: Int){
         GLES20.glUseProgram(program)
 
@@ -114,5 +120,18 @@ class Location(var utm: UTMCoordinate, context: Context){
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(positionHandle)
+    }
+
+    /**
+     * helper function to turn standard Android Studio color into a GL floatarray
+     * @param[col] color in argb int format
+     * @return color in rgba float format
+     */
+    private fun colorIntToFloatArray(col: UInt): FloatArray{
+        return floatArrayOf(
+            ((col and (255u shl 16)) shr 16).toFloat()/255,
+            ((col and (255u shl 8 )) shr 8 ).toFloat()/255,
+            ((col and (255u shl 0 )) shr 0 ).toFloat()/255,
+            ((col and (255u shl 24)) shr 24).toFloat()/255)
     }
 }

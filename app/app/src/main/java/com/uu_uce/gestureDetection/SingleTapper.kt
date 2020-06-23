@@ -7,7 +7,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GestureDetectorCompat
 import com.uu_uce.shapefiles.p2
 
-//performs action(pos,act) when tapped at position pos in activity act
+/**
+ * performs action on single tap
+ * @param[parent] the context this lives in
+ * @param[action] action to be performed after a single tap
+ * @constructor creates a SingleTapper TouchChild
+ */
 class SingleTapper(
     val parent: AppCompatActivity,
     val action: (p2, Activity) -> Unit)

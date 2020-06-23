@@ -39,11 +39,11 @@ import java.nio.ShortBuffer
 import kotlin.math.roundToInt
 
 /**
- * Abstract pin class includes functionality for drawing the pin, and some abstract methods.
- * @property[coordinate] the utm-coordinate at which the pin is located.
- * @property[background] a bitmap of the pin that is to be drawn on the map.
- * @property[icon] a drawable of the icon that is to be drawn on the background.
- * @property[pinWidth] the width of the pin on the map, this is set automatically from settings.
+ * Abstract pin class includes functionality for drawing the pin, and some abstract methods
+ * @property[coordinate] the utm-coordinate at which the pin is located
+ * @property[background] a bitmap of the pin that is to be drawn on the map
+ * @property[icon] a drawable of the icon that is to be drawn on top of the background
+ * @property[pinWidth] the width of the pin on the map, this is set automatically from settings
  */
 abstract class Pin(
     val coordinate              : UTMCoordinate,
@@ -52,7 +52,7 @@ abstract class Pin(
     var pinWidth                : Float = defaultPinSize.toFloat()
 ){
     protected var completeRange = 100
-    //opengl stuff
+    //opengl variables
     private var backgroundHandle: Int = -1
     private lateinit var vertexBuffer: FloatBuffer
     private lateinit var indexBuffer: ShortBuffer
@@ -67,14 +67,14 @@ abstract class Pin(
     private val drawOrder = shortArrayOf(0, 1, 2, 0, 2, 3)
     private val vertexStride: Int = coordsPerVertex * 4
 
+    //some lengths are still needed after dismissing the icon/background, so we save them
     private val bitmapIconWidth = icon.intrinsicWidth.toFloat()
     private val bitmapIconHeight = icon.intrinsicHeight.toFloat()
     private val bitmapBackgroundWidth = background.width.toFloat()
     private val bitmapBackgroundHeight = background.height.toFloat()
 
     // Calculate pin height to maintain aspect ratio
-    var pinHeight =
-        pinWidth * (bitmapBackgroundHeight / bitmapBackgroundWidth)
+    var pinHeight = pinWidth * (bitmapBackgroundHeight / bitmapBackgroundWidth)
 
     // Declare variables for icon size
     private var iconWidth  : Double = 0.0
@@ -166,9 +166,10 @@ abstract class Pin(
     }
 
     /**
-     * Determines whether tapLocation hits this pin or not.
-     * @param[tapLocation] the location where a tap occurs.
-     * @return a boolean representing if this pin was tapped or not.
+     * Determines whether tapLocation hits this pin or not
+     *
+     * @param[tapLocation] the location where a tap occurs
+     * @return true if the tap hit the pin, false if it did not
      */
     protected fun isInside(tapLocation: p2): Boolean{
         return pointInAABoundingBox(boundingBox.first, boundingBox.second, tapLocation, 0)
@@ -186,19 +187,25 @@ abstract class Pin(
     abstract fun addContent(): MutableList<String>
 
     /**
-     * Create popup showing this pins content.
-     * @param[parentView] the view to which the popup should be added.
-     * @param[activity] the current activity.
+     * Create popup showing this pins content
+     *
+     * @param[parentView] the view that hosts the popup
+     * @param[activity] the current activity
      */
     abstract fun openContent(parentView: View, activity: Activity)
 
     /**
      * Main drawing function, draws the pin and recalculates the bounding box
-     * @param[program]
-     * @param[scale]
-     * @param[trans]
+     *
+     * @param[program] reference to the GL program to use
+     * @param[scale] scale vector used to draw everything at the right size
+     * @param[trans] translation vector to draw everything in the right place
+     * @param[viewport] current viewport of the camera
+     * @param[view] the view this is drawn in
+     * @param[disPerPixel] the number of UTM units (meters?) that one pixel is wide
+     * @return true if this pin still needs to be initialized, false if not
      */
-    open fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2,p2>, width : Int, height : Int, view: View, disPerPixel: Float): Boolean {
+    open fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2,p2>, view: View, disPerPixel: Float): Boolean {
 
         val screenLocation: Pair<Float, Float> = coordToScreen(coordinate, viewport, view.width, view.height)
 
@@ -214,7 +221,7 @@ abstract class Pin(
         val maxY = (screenLocation.second).roundToInt()
 
         // Check whether pin is out of screen
-        if (minX > width || maxX < 0 || minY > height || maxY < 0) {
+        if (minX > view.width || maxX < 0 || minY > view.height || maxY < 0) {
             Logger.log(LogType.Event, "Pin", "Pin outside of viewport")
             inScreen = false
             return false
@@ -239,7 +246,7 @@ abstract class Pin(
         val scaleHandle = GLES20.glGetUniformLocation(program, "scale")
         GLES20.glUniform2fv(scaleHandle, 1, scale, 0)
 
-        val pinScale = floatArrayOf(pinWidth / width * 2, pinHeight / height * 2)
+        val pinScale = floatArrayOf(pinWidth / view.width * 2, pinHeight / view.height * 2)
         val pinScaleHandle = GLES20.glGetUniformLocation(program, "pinScale")
         GLES20.glUniform2fv(pinScaleHandle, 1, pinScale, 0)
 
@@ -266,9 +273,10 @@ abstract class Pin(
     }
 
     /**
-     * Changes the width of the pin to pinSize, the height changes accordingly.
-     * This also changes the icon's size.
-     * @param[pinSize] the desired width of the pin in pixels.
+     * Changes the width of the pin to pinSize, the height changes accordingly
+     * This also changes the icon's size
+     *
+     * @param[pinSize] the desired width of the pin in pixels
      */
     open fun resize(pinSize : Int){
         pinWidth = pinSize.toFloat()
@@ -290,8 +298,8 @@ abstract class Pin(
 
     /**
      * Helper function to load a bitmap into a buffer
-     * @param[bitmap]
-     * @return
+     * @param[bitmap] the bitmap to be made into a texture
+     * @return integer reference to the new texture
      */
     private fun loadTexture(bitmap: Bitmap): Int {
         val textureHandle = IntArray(1)
@@ -366,11 +374,11 @@ class SinglePin(
         }
     }
 
-    override fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2, p2>, width: Int, height: Int, view: View, disPerPixel: Float): Boolean {
+    override fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2, p2>, view: View, disPerPixel: Float): Boolean {
         // Check whether pin is unlocked
         if (status == 0) return false
 
-        return super.draw(program, scale, trans, viewport, width, height, view, disPerPixel)
+        return super.draw(program, scale, trans, viewport, view, disPerPixel)
     }
 
     //show this pins content when tapped
@@ -661,13 +669,19 @@ class SinglePin(
     }
 }
 
-//merged pin, contains two pins a,b which can be merged pins too, creating a tree-structure
-//a and b are drawn/tapped seperately when their hitboxes don't collide
-//a merged pin is drawn/tapped when they do collide
-//nrPixels: minimum number of pixels needed between a and b until they collide
-//actualDis: distance between a and b, but only in the direction in which they will collide, which is the same direction as for nrPixels
-//      this will be difference in x coordinate if they  approach each other horizontally
-//      and difference in y coordinate if they approach each other vertically
+/**
+ * a merged pin contains two pins a,b which can be merged pins too, creating a tree-structure
+ * a and b are drawn/tapped seperately when their hitboxes don't collide
+ * a merged pin is drawn/tapped when they do collide
+ *
+ * @param[a] one of the two children
+ * @param[b] the other child
+ * @param[actualDis] distance between a and b, but only in the direction in which they will collide, which is the same direction as for nrPixels this will be difference in x coordinate if they approach each other horizontally and difference in y coordinate if they approach each other vertically
+ * @param[nrPixels] minimum number of pixels needed between a and b until they collide
+ * @param[pinViewModel] the viewModel used to access the database in GeoMap
+ * @param[fieldbookViewModel] the viewModel used to access the database in Fieldbook
+ * @constructor creates a MergedPin
+*/
 class MergedPin(
     private val a: Pin?,
     private val b: Pin?,
@@ -680,24 +694,32 @@ class MergedPin(
     icon: Drawable,
     pinSize: Float = defaultPinSize.toFloat()
 ): Pin(coordinate, background, icon, pinSize) {
-    //draw a and b if they don't collide, draw merge pin if they do
-    override fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2, p2>, width: Int, height: Int, view: View, disPerPixel: Float): Boolean {
+
+    /**
+     * draw both subpins if they don't collide, draw merge pin if they do
+     */
+    override fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2, p2>, view: View, disPerPixel: Float): Boolean {
         return if(nrPixels * disPerPixel < actualDis) {
-            var res = a?.draw(program,scale,trans,viewport,width,height,view,disPerPixel) ?: false
-            res = res || b?.draw(program,scale,trans,viewport,width,height,view,disPerPixel) ?: false
+            var res = a?.draw(program,scale,trans,viewport,view,disPerPixel) ?: false
+            res = res || b?.draw(program,scale,trans,viewport,view,disPerPixel) ?: false
             res
         }else{
-            super.draw(program,scale,trans,viewport,width,height,view,disPerPixel)
+            super.draw(program,scale,trans,viewport,view,disPerPixel)
         }
     }
 
+    /**
+     * initialize both subpins
+     */
     override fun initGL() {
         a?.initGL()
         b?.initGL()
         super.initGL()
     }
 
-    //tap a and b if they don't collide, tap merge pin if they do
+    /**
+     * tap both subpins if they don't collide, tap merge pin if they do
+     */
     override fun tap(tapLocation: p2, activity: Activity, view: View, disPerPixel: Float){
         if(nrPixels * disPerPixel < actualDis) {
             a?.tap(tapLocation, activity, view, disPerPixel)
@@ -708,7 +730,9 @@ class MergedPin(
         }
     }
 
-    //add content of both sub pins
+    /**
+     * add content of both subpins
+     */
     override fun addContent(): MutableList<String> {
         val alist = a?.addContent()?:mutableListOf()
         val blist = b?.addContent()?:mutableListOf()
@@ -716,7 +740,9 @@ class MergedPin(
         return alist
     }
 
-    //create a popup containing all of the pins inside this pin, in the same style as AllPins
+    /**
+     * create a popup containing all of the pins inside this pin, in the same style as AllPins
+     */
     override fun openContent(parentView: View, activity: Activity){
         val layoutInflater = activity.layoutInflater
 
@@ -783,7 +809,9 @@ class MergedPin(
         popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
     }
 
-    //resize a b and this
+    /**
+     * resize both subpins
+     */
     override fun resize(pinSize: Int) {
         a?.resize(pinSize)
         b?.resize(pinSize)

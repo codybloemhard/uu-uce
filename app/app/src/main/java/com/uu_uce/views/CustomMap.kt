@@ -261,7 +261,7 @@ class CustomMap : ViewTouchParent {
 
             synchronized(mergedPinsLock){
                 val disPerPixel = (viewport.second.first - viewport.first.first)/width
-                if(mergedPins?.draw(pinProgram, scale, trans, viewport, width, height, this, disPerPixel) == true){
+                if(mergedPins?.draw(pinProgram, scale, trans, viewport, this, disPerPixel) == true){
                     renderer.pinsChanged = true
                 }
             }
