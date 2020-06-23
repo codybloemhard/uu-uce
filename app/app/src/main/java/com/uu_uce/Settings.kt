@@ -198,7 +198,9 @@ class Settings : AppCompatActivity() {
 
         // Download maps
         fun downloadMaps(maps : List<String>){
-            maps_downloading_progress.visibility = View.VISIBLE
+            runOnUiThread{
+                maps_downloading_progress.visibility = View.VISIBLE
+            }
             updateFiles(
                 maps,
                 this,
@@ -284,7 +286,12 @@ class Settings : AppCompatActivity() {
         }
 
         // Download pin content
+        var downloadingContent = false
+
         download_content_button.setOnClickListener{
+            if(downloadingContent) return@setOnClickListener
+
+            downloadingContent = true
             val list = mutableListOf<String>()
             val missingThumbnails = mutableListOf<String>()
 
@@ -294,7 +301,7 @@ class Settings : AppCompatActivity() {
                 for (data in list){
                     for (block in PinContent(data, this, false).contentBlocks){
                         val filePaths = block.getFilePath()
-                        list.addAll(filePaths)
+                        pathList.addAll(filePaths)
                         if (block is VideoContentBlock && filePaths.count() == 1) {
                             missingThumbnails.addAll(filePaths)
                         }
@@ -321,6 +328,7 @@ class Settings : AppCompatActivity() {
                                 Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG).show()
                             }
                         }
+                        downloadingContent = false
                     },
                     {
                             progress -> runOnUiThread { content_downloading_progress.progress = progress }
@@ -359,6 +367,19 @@ class Settings : AppCompatActivity() {
         var updating = false
         download_pins_button.setOnClickListener {
             fun updateDatabase(pinDatabaseFile: String) {
+                if(pinDatabaseFile == ""){
+                    runOnUiThread {
+                        pins_downloading_progress.visibility = View.INVISIBLE
+                        updating = false
+                        Toast.makeText(
+                            this,
+                            getString(R.string.settings_queryfail),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    return
+                }
+
                 updateFiles(
                     listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
                     this,
