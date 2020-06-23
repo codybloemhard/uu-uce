@@ -172,5 +172,6 @@
     <!--ContentServices-->
     <string name="contentservices_nowifi_downloadblock">Enable wifi or allow network downloading</string>
     <string name="contentservices_downloading">Downloading</string>
+    <string name="contentservices_noserver">No server found, try logging in again</string>
 
 </resources>

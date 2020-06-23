@@ -92,6 +92,13 @@ fun getFiles (
     val wifiManager = activity.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager?
     sharedPref = PreferenceManager.getDefaultSharedPreferences(activity)
     val serverURL = sharedPref.getString("com.uu_uce.SERVER_IP", "").toString()
+
+    if(serverURL == ""){
+        Toast.makeText(activity, activity.getString(R.string.contentservices_noserver), Toast.LENGTH_LONG).show()
+        onCompleteAction(false)
+        return
+    }
+
     val networkDownloadAllowed = sharedPref.getBoolean("com.uu_uce.NETWORK_DOWNLOADING", false)
     if (!wifiManager!!.isWifiEnabled && !networkDownloadAllowed) {
         Toast.makeText(activity, activity.getString(R.string.contentservices_nowifi_downloadblock), Toast.LENGTH_LONG).show()

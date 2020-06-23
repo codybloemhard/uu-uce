@@ -100,8 +100,14 @@ class Login : AppCompatActivity() {
                                 }
                             }
                             HttpURLConnection.HTTP_INTERNAL_ERROR -> {
+
                                 this.runOnUiThread{
                                     Toast.makeText(this, getString(R.string.login_serverdown), Toast.LENGTH_LONG).show()
+
+                                    //TODO: when login is necessary remove this.
+                                    val intent = Intent(this, GeoMap::class.java)
+                                    startActivity(intent)
+                                    finish()
                                 }
                             }
                         }

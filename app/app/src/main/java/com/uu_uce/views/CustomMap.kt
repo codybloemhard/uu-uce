@@ -88,7 +88,6 @@ class CustomMap : ViewTouchParent {
     private var loc                 : Location              = Location(UTMCoordinate(31, 'N', 0.0f, 0.0f), context)
     private var lastDrawnLoc        : Pair<Float, Float>    = Pair(0f, 0f)
     var locationAvailable           : Boolean               = false
-    private var locAtCenterPress    : UTMCoordinate         = UTMCoordinate(31, 'N', 0.0f, 0.0f)
 
     private lateinit var activity           : Activity
     private var pinViewModel                : PinViewModel? = null
@@ -779,6 +778,7 @@ class CustomMap : ViewTouchParent {
 
     //functions used for testing
     private val eps = 0.001
+    private var locAtCenterPress: UTMCoordinate = UTMCoordinate(31, 'N', 0.0f, 0.0f)
 
     @TestOnly
     /**
