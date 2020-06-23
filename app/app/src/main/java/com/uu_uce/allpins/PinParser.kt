@@ -15,20 +15,20 @@ fun parsePins(pinFile : File) : List<PinData>? {
     val pinList = mutableListOf<PinData>()
 
     reader.beginArray()
-    try{
+    return try {
         while (reader.hasNext()) {
             val result = parsePin(reader)
-            if(result != null){
+            if (result != null) {
                 pinList.add(result)
             }
         }
         reader.endArray()
 
         pinFile.delete()
-        return pinList
+        pinList
     } catch(e : Exception){
         e.printStackTrace()
-        return null
+        null
     }
 }
 
