@@ -36,7 +36,19 @@ var needsReload = ListenableBoolean()
 var testing = false
 
 /**
- * Main activity in which the map and menu are displayed
+ * Main activity in which the map and menu are displayed.
+ * @property[pinViewModel] the ViewModel through which the pin database can be accessed.
+ * @property[screenDim] the dimensions of the screen.
+ * @property[statusBarHeight] the height of the statusbar.
+ * @property[resourceId] statusbar id.
+ * @property[started] variable representing if the GeoMap was successfully started.
+ * @property[offline] variable representing if there is a server known to the app.
+ * @property[sharedPref] shared preferences where app settings are saved.
+ * @property[popupWindow] the current popup window.
+ * @property[progressBar] the progressBar for showing the map downloading progress.
+ * @property[polyStyles] TODO
+ * @property[lineStyles] TODO
+ * @constructor the GeoMap activity.
  */
 class GeoMap : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel
@@ -56,7 +68,7 @@ class GeoMap : AppCompatActivity() {
     private var lineStyles: List<LineStyle> = listOf()
 
     /**
-     * when this activity is created set some settings, and check if maps are present
+     * When this activity is created set some settings, and check if maps are present.
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         // Set logger settings
@@ -110,7 +122,7 @@ class GeoMap : AppCompatActivity() {
     }
 
     /**
-     * initialize everything to do with the GeoMap
+     * Initialize everything to do with the GeoMap.
      */
     private fun start(){
         setContentView(R.layout.activity_geo_map)
@@ -198,7 +210,7 @@ class GeoMap : AppCompatActivity() {
     }
 
     /**
-     * intercept touch to move down the menu
+     * Intercept touch to move down the menu.
      */
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         //move the menu down when the map is tapped
@@ -213,7 +225,7 @@ class GeoMap : AppCompatActivity() {
     }
 
     /**
-     * intercept backpress to move down the menu
+     * Intercept backpress to move down the menu.
      */
     override fun onBackPressed() {
         //move the menu down when it's up, otherwise close the current popup
@@ -227,7 +239,7 @@ class GeoMap : AppCompatActivity() {
     }
 
     /**
-     * restart activity if necessary, or apply changes
+     * Restart activity if necessary, or apply changes.
      */
     override fun onResume() {
         // Get desired theme
@@ -260,7 +272,7 @@ class GeoMap : AppCompatActivity() {
     }
 
     /**
-     * initialize everything to do with the screens/menus height
+     * Initialize everything to do with the screens/menus height.
      */
     private fun initMenu(){
         if(customMap.getLayerCount() > 0){
@@ -281,8 +293,9 @@ class GeoMap : AppCompatActivity() {
 
     /**
      * Respond to permission request result
-     * @param[requestCode] type of request as integer code (see PermissionServices.kt)
-     * TODO
+     * @param[requestCode] type of request as integer code (see PermissionServices.kt).
+     * @param[permissions] the permissions that were requested.
+     * @param[grantResults] the results for each permission.
      */
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -303,7 +316,10 @@ class GeoMap : AppCompatActivity() {
             }
         }
     }
-    
+
+    /**
+     * Loads all present layers of the map from storage.
+     */
     private fun loadMap(){
         (Display::getSize)(windowManager.defaultDisplay, screenDim)
         val longest = maxOf(screenDim.x, screenDim.y)
@@ -387,6 +403,10 @@ class GeoMap : AppCompatActivity() {
         customMap.redrawMap()
     }
 
+    /**
+     * Starts a download for the maps.
+     * @param[maps] a list of strings containing all map file paths.
+     */
     private fun downloadMaps(maps : List<String>) {
         openProgressPopup(window.decorView.rootView)
         updateFiles(
@@ -420,7 +440,8 @@ class GeoMap : AppCompatActivity() {
                         popupWindow?.dismiss()
                         start()
                     }
-                } else {
+                }
+                else {
                     runOnUiThread {
                         Toast.makeText(this, getString(R.string.download_failed), Toast.LENGTH_LONG)
                             .show()
@@ -433,6 +454,10 @@ class GeoMap : AppCompatActivity() {
         )
     }
 
+    /**
+     * Starts a download for the database json file.
+     * @param[pinDatabaseFile] the id of a database file.
+     */
     private fun updateDatabase(pinDatabaseFile: String) {
         if(pinDatabaseFile == ""){
             runOnUiThread {
@@ -473,6 +498,9 @@ class GeoMap : AppCompatActivity() {
         )
     }
 
+    /**
+     * TODO
+     */
     private fun readPolyStyles(dir: File) {
         val file = File(dir, "styles")
         val reader = FileReader(file)
@@ -492,6 +520,9 @@ class GeoMap : AppCompatActivity() {
         }
     }
 
+    /**
+     * TODO
+     */
     private fun readLineStyles(dir: File){
         val file = File(dir, "linestyles")
         val reader = FileReader(file)
@@ -511,7 +542,10 @@ class GeoMap : AppCompatActivity() {
         }
     }
 
-
+    /**
+     * Opens a popup window to show a progressbar in.
+     * @param[currentView] the view that the popup should be opened in.
+     */
     private fun openProgressPopup(currentView: View){
         // Build an custom view (to be inflated on top of our current view & build it's popup window)
         val customView = layoutInflater.inflate(R.layout.progress_popup, geoMapLayout, false)
@@ -528,6 +562,9 @@ class GeoMap : AppCompatActivity() {
         popupWindow?.showAtLocation(currentView, Gravity.CENTER, 0, 0)
     }
 
+    /**
+     * Opens an ImageViewer with the legend of the map in it.
+     */
     private fun openLegend(){
         val uri = getExternalFilesDir(null)?.path + File.separator + mapsFolderName + File.separator + legendName
 
@@ -535,11 +572,19 @@ class GeoMap : AppCompatActivity() {
     }
 
     @TestOnly
+    /**
+     * Sets the pin database to the supplied data, used to make the database tests run on constant data.
+     * @param[newPinData] the new data that the current database should be replaced with.
+     */
     fun setPinData(newPinData : List<PinData>) {
         pinViewModel.setPins(newPinData)
     }
 
     @TestOnly
+    /**
+     * Gets the location of the first pin in the pins map.
+     * @return the location of the first pin.
+     */
     fun getPinLocation() : Pair<Float, Float> {
         return customMap.getPinLocation()
     }

@@ -819,9 +819,9 @@ class CustomMap : ViewTouchParent {
     }
 
     @TestOnly
-            /**
-             * Zooms the camera in to as far as possible.
-             */
+    /**
+     * Zooms the camera in to as far as possible.
+     */
     fun zoomIn(){
         camera.setZoom(camera.minZoom)
     }

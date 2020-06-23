@@ -170,7 +170,7 @@ fun downloadFile(targetUrl : URL, fileDestination : String, progressAction : (In
 
 /**
  * Gets id of first file that matches query from server.
- * @param[type] the type of content that is queried.
+ * @param[type] the type of content that is queried. [pin, map, content]
  * @param[activity] the current activity, used for getting preferences.
  * @param[onCompleteAction] function that uses takes the found id.
  */
