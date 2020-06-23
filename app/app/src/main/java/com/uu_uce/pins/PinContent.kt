@@ -22,13 +22,20 @@ import com.uu_uce.misc.Logger
 import java.io.File
 import java.io.StringReader
 
+/**
+ * The content of a pin.
+ * @property[contentString] a json format string containing the content of the pin.
+ * @property[activity] the current activity.
+ * @property[fieldbookPin] a boolean representing if the current pin is a fieldbook or regular pin.
+ * @constructor parses the contentString and creates a PinContent object with its contents.
+ */
 class PinContent(
     private val contentString: String,
     private val activity: Activity,
     private val fieldbookPin: Boolean
 )
 {
-    val contentBlocks: MutableList<ContentBlockInterface>
+    val contentBlocks: MutableList<ContentBlock>
 
 
     lateinit var parent : SinglePin
@@ -36,14 +43,23 @@ class PinContent(
         contentBlocks = getContent()
     }
 
-    private fun getContent(): MutableList<ContentBlockInterface>{
+    /**
+     * Parses the contentString and splits its content into multiple blocks.
+     * @return list of content blocks created from contentString.
+     */
+    private fun getContent(): MutableList<ContentBlock>{
             val reader = JsonReader(StringReader(contentString))
 
             return readContentBlocks(reader)
         }
 
-    private fun readContentBlocks(reader: JsonReader):  MutableList<ContentBlockInterface> {
-        val contentBlocks: MutableList<ContentBlockInterface> = mutableListOf()
+    /**
+     * Parse all ContentBlocks from the contentString
+     * @param[reader] the json reader that is reading the contentString.
+     * @return a list of all ContentBlocks parsed from the contentString.
+     */
+    private fun readContentBlocks(reader: JsonReader):  MutableList<ContentBlock> {
+        val contentBlocks: MutableList<ContentBlock> = mutableListOf()
 
         reader.beginArray()
         while (reader.hasNext()) {
@@ -56,8 +72,12 @@ class PinContent(
         return contentBlocks
     }
 
-    // Generate ContentBlock from JSON string
-    private fun readBlock(reader: JsonReader): ContentBlockInterface? {
+    /**
+     * Parse a single ContentBlock from json string.
+     * @param[reader] the json reader that is reading the contentString.
+     * @return a nullable ContentBlock that was parsed, null when an malformed block was parsed.
+      */
+    private fun readBlock(reader: JsonReader): ContentBlock? {
         var blockTag                                    = BlockTag.UNDEFINED
         var textString                                  = ""
         var filePath                                    = ""
@@ -161,25 +181,65 @@ class PinContent(
     }
 }
 
-interface ContentBlockInterface {
+/**
+ * An interface for ContentBlocks.
+ * @property[content] the view that is added to a pin popup when this block is present.
+ * @property[tag] the type of the ContentBlock.
+ */
+interface ContentBlock {
     val content: View
     val tag : BlockTag
+
+    /**
+     * Generates all views that will be shown in the pin popup.
+     * @param[blockId] the id that this block is assigned.
+     * @param[layout] the layout that this blocks content should be added to.
+     * @param[view] the current view of the app, used for scaling.
+     * @param[parent] the pin that this ContentBlock belongs to.
+     */
     fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : SinglePin?)
-    fun makeEditable(blockId : Int, layout : LinearLayout, view : View, action : ((ContentBlockInterface) -> Boolean)) : ContentBlockInterface {
+
+    /**
+     * Makes a ContentBlock in a fieldbook pin editable.
+     * @param[blockId] the id that this block is assigned.
+     * @param[layout] the layout that this blocks content should be added to.
+     * @param[view] the current view of the app, used for scaling.
+     * @param[action] the action to be exectuted with the editable ContentBlock.
+     * @return the editable ContentBlock.
+     */
+    fun makeEditable(blockId : Int, layout : LinearLayout, view : View, action : ((ContentBlock) -> Boolean)) : ContentBlock {
         showContent(blockId,layout,view,null)
         content.setOnLongClickListener{
             return@setOnLongClickListener action(this)
         }
         return this
     }
+
+    /**
+     * Removes this ContentBlock from the content of a pin.
+     * @param[layout] the layout this ContentBlock is currently in.
+     */
     fun removeContent(layout : LinearLayout) = layout.removeView(content)
+
+    /**
+     * Gets the file paths of all content in this ContentBlock.
+     * @return a list of file paths in string format.
+     */
     fun getFilePath(): List<String> {
         return listOf()
     }
+
+    /**
+     * Generates a string which can be stored in the database for fieldbook pins.
+     * @return the json string generated from this ContentBlock.
+     */
     override fun toString(): String
 }
 
-class TextBlock(private val activity: Activity): ContentBlockInterface {
+/**
+ * A ContentBlock which contains an editable textfield.
+ */
+class EditTextContentBlock(private val activity: Activity): ContentBlock {
     override var content = EditText(activity)
     override val tag = BlockTag.TEXT
     override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : SinglePin?) {
@@ -205,10 +265,16 @@ class TextBlock(private val activity: Activity): ContentBlockInterface {
     }
 }
 
+/**
+ * A ContentBlock which contains a textfield.
+ * @param[textContent] a string of text.
+ * @param[activity] the current activity.
+ * @constructor a TextContentBlock.
+ */
 class TextContentBlock(
     private val textContent : String,
     private val activity: Activity
-): ContentBlockInterface {
+): ContentBlock {
     override var content = TextView(activity)
     override val tag = BlockTag.TEXT
     override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : SinglePin?){
@@ -225,9 +291,9 @@ class TextContentBlock(
         blockId: Int,
         layout: LinearLayout,
         view: View,
-        action: (ContentBlockInterface) -> Boolean
-    ): ContentBlockInterface {
-        val editable = TextBlock(activity)
+        action: (ContentBlock) -> Boolean
+    ): ContentBlock {
+        val editable = EditTextContentBlock(activity)
         editable.makeEditable(blockId, layout, view, action)
         editable.content.setText(textContent)
         return editable
@@ -238,17 +304,29 @@ class TextContentBlock(
                 "${textToJsonString(textContent)}}"
     }
 
+    /**
+     * Returns the text that is in this block.
+     * @return the text contained in this TextContentBlock.
+     */
     fun getTextContent(): String {
         return textContent
     }
 }
 
+/**
+ * A ContentBlock which contains an image
+ * @param[imageURI] the Uri of the image on the device.
+ * @param[thumbnailURI] the thumbnail of the image, this is only used in the fieldbook when the original image is no longer available.
+ * @param[activity] the current activity.
+ * @param[title] the title of the image.
+ * @constructor an ImageContentBlock.
+ */
 class ImageContentBlock(
     private val imageURI: Uri,
     private val thumbnailURI: Uri,
     private val activity: Activity,
     private val title: String? = null
-): ContentBlockInterface {
+): ContentBlock {
     override var content = ImageView(activity)
     override val tag = BlockTag.IMAGE
     override fun showContent(blockId : Int, layout : LinearLayout, view : View, parent : SinglePin?){
@@ -296,17 +374,29 @@ class ImageContentBlock(
                 "${thumbnailToJsonString(thumbnailURI)}}"
     }
 
+    /**
+     * Returns the Uri of the thumbnail.
+     * @return thumbnail Uri.
+     */
     fun getThumbnailURI() : Uri{
         return thumbnailURI
     }
 }
 
+/**
+ * A ContentBlock which contains a video.
+ * @param[videoURI] the Uri of the video on the device.
+ * @param[thumbnailURI] the Uri of the video on the device.
+ * @param[activity] the current activity.
+ * @param[title] the title of the video.
+ * @constructor a VideoContentBlock.
+ */
 class VideoContentBlock(
     private val videoURI: Uri,
     private val thumbnailURI: Uri,
     private val activity: Activity,
     private val title: String? = null
-): ContentBlockInterface
+): ContentBlock
 {
     override var content = FrameLayout(activity)
     override val tag = BlockTag.VIDEO
@@ -365,17 +455,29 @@ class VideoContentBlock(
                 "${thumbnailToJsonString(thumbnailURI)}}"
     }
 
+    /**
+     * Returns the Uri of the thumbnail.
+     * @return thumbnail Uri.
+     */
     fun getThumbnailURI(): Uri{
         return thumbnailURI
     }
 }
 
+/**
+ * A ContentBlock which contains a multiple choice quiz.
+ * @param[correctAnswers] a list of correct answers to the question.
+ * @param[incorrectAnswers] a list of incorrect answers to the question.
+ * @param[reward] the reward the user recieves upon correctly answering the questions in this pin.
+ * @param[activity] the current activity.
+ * @constructor a MCContentBlock.
+ */
 class MCContentBlock(
     private val correctAnswers: List<String>,
     private val incorrectAnswers: List<String>,
     private val reward: Int,
     private val activity: Activity
-): ContentBlockInterface
+): ContentBlock
 {
     override var content = TableLayout(activity)
     override val tag = BlockTag.MCQUIZ
@@ -476,8 +578,8 @@ class MCContentBlock(
         blockId: Int,
         layout: LinearLayout,
         view: View,
-        action: (ContentBlockInterface) -> Boolean
-    ): ContentBlockInterface {
+        action: (ContentBlock) -> Boolean
+    ): ContentBlock {
         return this
     }
 
@@ -490,6 +592,9 @@ class MCContentBlock(
     }
 }
 
+/**
+ * The different types of pins.
+ */
 enum class BlockTag{
     UNDEFINED,
     TEXT,
@@ -498,6 +603,11 @@ enum class BlockTag{
     VIDEO;
 }
 
+/**
+ * Converts a string to a BlockTag.
+ * @param[tagString] a string which can be parsed to a BlockTag.
+ * @return the blocktag parsed from tagString.
+ */
 fun blockTagFromString(tagString: String) : BlockTag{
     return when (tagString) {
         "TEXT"      -> BlockTag.TEXT
@@ -508,7 +618,12 @@ fun blockTagFromString(tagString: String) : BlockTag{
     }
 }
 
-fun buildJSONContent(content: List<ContentBlockInterface>): String {
+/**
+ * Creates a json format string for a list of content which can be stored in the database.
+ * @param[content] the content that is to be converted to a json string.
+ * @return the json format string generated from the supplied content.
+ */
+fun buildJSONContent(content: List<ContentBlock>): String {
     return  content.joinToString(
         prefix      = "[",
         separator   = ",",
@@ -516,24 +631,49 @@ fun buildJSONContent(content: List<ContentBlockInterface>): String {
     )
 }
 
+/**
+ * Creates a partial json string for a BlockTag.
+ * @param[tag] the tag to be embedded into the json string.
+ * @return a partial json string containing the BlockTag.
+ */
 fun tagToJsonString(tag: BlockTag): String {
     return "\"tag\":\"$tag\""
 }
 
+/**
+ * Creates a partial json string for text content.
+ * @param[text] the text to be embedded into the json string.
+ * @return a partial json string containing the text content.
+ */
 fun textToJsonString(text: String): String {
     return "\"text\":\"$text\""
 }
 
+/**
+ * Creates a partial json string for a file path.
+ * @param[filePath] the file path to be embedded into the json string.
+ * @return a partial json string containing the file path.
+ */
 fun fileToJsonString(filePath: Uri): String {
     return "\"file_path\":\"$filePath\""
 }
 
+/**
+ * Creates a partial json string for a thumbnail file path.
+ * @param[thumbnail] the thumbnail file path to be embedded into the json string.
+ * @return a partial json string containing the thumbnail file path.
+ */
 fun thumbnailToJsonString(thumbnail: Uri): String {
     return "\"thumbnail\":\"$thumbnail\""
 }
 
-fun totallyExterminateFileExistence(activity: Activity, thumbnail: Uri) {
-    val toBeDeleted = File(thumbnail.path!!)
+/**
+ * Removes a file completely from device storage.
+ * @param[activity] the current activity.
+ * @param[filePath] the path to the file that is to be deleted.
+ */
+fun totallyExterminateFileExistence(activity: Activity, filePath: Uri) {
+    val toBeDeleted = File(filePath.path!!)
     if(toBeDeleted.exists()) {
         if (toBeDeleted.delete()) {
             if (toBeDeleted.exists()) {
@@ -541,15 +681,21 @@ fun totallyExterminateFileExistence(activity: Activity, thumbnail: Uri) {
                 if (toBeDeleted.exists())
                     activity.deleteFile(toBeDeleted.name)
             }
-            Logger.log(LogType.Event,"PinContent", "Thumbnail deleted $thumbnail")
+            Logger.log(LogType.Event,"PinContent", "Thumbnail deleted $filePath")
         } else {
-            Logger.log(LogType.Info,"PinContent", "Thumbnail not deleted $thumbnail")
+            Logger.log(LogType.Info,"PinContent", "Thumbnail not deleted $filePath")
         }
     } else {
         Logger.log(LogType.Info,"PinContent","This thumbnail doesn't exist")
     }
 }
 
+/**
+ * Opens the ImageViewer activity with the specified image.
+ * @param[activity] the current activity.
+ * @param[imageURI] the image to be shown in the ImageViewer.
+ * @param[imageTitle] the title of the image that is to be shown.
+ */
 fun openImageView(activity: Activity, imageURI: Uri, imageTitle : String?){
     val intent = Intent(activity, ImageViewer::class.java)
 
@@ -559,6 +705,12 @@ fun openImageView(activity: Activity, imageURI: Uri, imageTitle : String?){
     activity.startActivity(intent)
 }
 
+/**
+ * Opens the VideoViewer activity with the specified image.
+ * @param[activity] the current activity.
+ * @param[videoURI] the video to be shown in the VideoViewer.
+ * @param[videoTitle] the title of the video that is to be shown.
+ */
 fun openVideoView(activity: Activity, videoURI: Uri, videoTitle: String?){
     val intent = Intent(activity, VideoViewer::class.java)
 

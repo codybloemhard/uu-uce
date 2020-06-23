@@ -98,7 +98,7 @@ class FieldbookAdapter(
      * @param[content] all ContentBlocks of this FieldbookEntry
      * @param[holder] holds the view of one RecyclerView item
      */
-    private fun setPreview(content: List<ContentBlockInterface>, holder: FieldbookViewHolder) {
+    private fun setPreview(content: List<ContentBlock>, holder: FieldbookViewHolder) {
         val params = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT
@@ -150,7 +150,7 @@ class FieldbookAdapter(
      * @param[entry] the FieldbookEntry that we long pressed
      * @param[content] all ContentBlocks of this FieldbookEntry
      */
-    private fun deleteFromFieldbook(entry: FieldbookEntry, content: List<ContentBlockInterface>) : Boolean {
+    private fun deleteFromFieldbook(entry: FieldbookEntry, content: List<ContentBlock>) : Boolean {
         AlertDialog.Builder(activity)
             .setTitle(activity.getString(R.string.delete_popup_title))
             .setMessage(activity.getString(R.string.fieldbook_pindeletion_popup_text))
