@@ -5,6 +5,11 @@ package com.uu_uce.shapefiles
  * @param[chunkGetter] means of getting chunks associated with this layer
  * @param[zoomCutoff] the zoom level above which this layer should not be drawn
  * @constructor create a ShapeLayer, and setup chunk and boundingbox information
+ *
+ * @property[chunks] all chunks currently loaded
+ * @property[chunkManager] makes sure the right chunks are loaded
+ * @property[bmin] bottom left of bounding box]
+ * @property[bmax] top right of bounding box]
  */
 class ShapeLayer(private val chunkGetter: ChunkGetter, zoomCutoff: Float){
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk> = mutableMapOf()

@@ -20,6 +20,23 @@ enum class ChunkUpdateResult{NOTHING, REDRAW, LOADING}
  * @param[nrCuts] there are nrCuts.size different zoomlevels, where level i has nrCuts\[i] by nrCuts\[i] chunks
  * @param[zoomCutoff] the cutoff zoom level, when camzoom is above this value no chunks are shown
  * @constructor creates a ChunkManager
+ *
+ * @property[extraRenderFac] how much to render outside of camera
+ * @property[lastViewport] where the camera was last update
+ * @property[lastZoomLevel] how zoomed in the camera was last update
+ * @property[nrOfLODs] how many levels of detail there are
+ * @property[camzoom] current zoom of the camera
+ * @property[chunkLoader] current thread loading chunks
+ * @property[chunkloaderName] name of current chunkLoader
+ * @property[loading] whether there are still chunks getting loaded
+ * @property[changed] whether any chunks changed
+ * @property[factor] the speed at which the zoomlevel changes
+ * @property[xmin] bounding box of this layer
+ * @property[xmax] bounding box of this layer
+ * @property[ymin] bounding box of this layer
+ * @property[ymax] bounding box of this layer
+ * @property[maxzoom] how far the camera can zoom out
+ * @property[zoomLevel] what level of detail we are currently at
  */
 class ChunkManager(
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk>,
