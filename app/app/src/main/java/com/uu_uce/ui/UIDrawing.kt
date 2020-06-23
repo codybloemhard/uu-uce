@@ -5,10 +5,11 @@ import android.widget.ImageButton
 import android.widget.TextView
 import com.uu_uce.R
 
-/*
-create a generic bar at the top of the screen
-activity: the activity where the bar needs to be
-title: the title visible in the bar
+/**
+ * Create a generic bar at the top of the screen.
+ * @param[activity] the activity where the bar needs to be.
+ * @param[title] the title visible in the bar.
+ * @param[backPressAction] the action executed when the backbutton is pressed.
  */
 fun createTopbar(activity : Activity, title: String, backPressAction : (() -> Unit) = { activity.finish() })
 {

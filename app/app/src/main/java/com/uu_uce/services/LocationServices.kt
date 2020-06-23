@@ -152,12 +152,12 @@ class LocationServices{
     private var networkRunning = false
     private var networkKilled = false
     /**
-     * Will start polling the location.
+     * Will start polling the location and provide you with the location as a tuple of Double.
      * @param[context] the activity that uses this.
      * @param[pollTimeMs] polling interval.
-     * minDist: minimum distance parameter of android.location.LocationManager.requestLocationUpdates.
-     * action: a lambda function that will be called when a location is received.
-     * It will provide you with the location as a tuple of Double.
+     * @param[minDist] minimum distance parameter of android.location.LocationManager.requestLocationUpdates.
+     * @param[action] a function that takes the new location as a p2 which will be called when a location is received.
+     * @return a LocationPollStartResult informing what the result of the startup was.
      */
     fun startPollThread(
         context: Context,
@@ -260,10 +260,10 @@ class LocationServices{
             locationNetwork = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
         }
 
-        /*
-        Will call requestLocationUpdates with specified provider and start by entering the result of
-        lastKnownLocation into action.
-        provider: the type of location you want to use.
+        /**
+         * Will call requestLocationUpdates with specified provider and start by entering the result of
+         * lastKnownLocation into action.
+         * @param[provider] the type of location provider to be used.
          */
         fun startLocUpdates(provider : String){
             locationManager.requestLocationUpdates(provider, pollTimeMs, minDist, locationListener)

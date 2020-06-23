@@ -217,7 +217,7 @@ class GeoMap : AppCompatActivity() {
         }
         if(started) {
             val newSize = sharedPref.getInt("com.uu_uce.PIN_SIZE", defaultPinSize)
-            customMap.updatePins()
+            customMap.reloadPins()
             if (newSize != customMap.pinSize) {
                 customMap.pinSize = newSize
                 customMap.resizePins()

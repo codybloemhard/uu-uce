@@ -156,11 +156,6 @@ class ShapeMap(
             layer.draw(lineProgram, varyingColorProgram, scale, trans, layerColors[t.value])
         }
     }
-
-    @TestOnly
-    fun checkLayerVisibility(layer : Int) : Boolean{
-        return layerMask[layer]
-    }
 }
 
 enum class LayerType(val value: Int){

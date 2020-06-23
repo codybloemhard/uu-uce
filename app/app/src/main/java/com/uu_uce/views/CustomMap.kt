@@ -47,7 +47,33 @@ import kotlin.system.measureTimeMillis
 
 var pinsUpdated = ListenableBoolean()
 
-// The view displayed in the app that holds the map
+/**
+ * The view displayed in the app that holds the map.
+ * @property[renderer] TODO
+ * @property[locationServices] service used to get location updates.
+ * @property[locationDeadZone] how much does the location have to change on the screen to warrant a redraw.
+ * @property[loc] the most recent known location of the device.
+ * @property[lastDrawnLoc] the last location that was drawn on the map.
+ * @property[locationAvailable] whether or not the location of the user can be used.
+ * @property[locAtCenterPress] user location at the time of pressing the center button, used for testing.
+ * @property[activity] the activity the CustomMap is in.
+ * @property[pinViewModel] the ViewModel throught which the pin database is accessed.
+ * @property[fieldbookViewModel] the ViewModel throught which the fieldbook database is accessed.
+ * @property[lfOwner] the LifecycleOwner of the ViewModels.
+ * @property[pins] a map from pinId to the corresponding pin object.
+ * @property[pinSize] the size of pins on the map, this is changed from settings.
+ * @property[pinStatuses] the statuses of all pins in in pins.
+ * @property[mergedPins] TODO
+ * @property[mergedPinsLock] TODO
+ * @property[locSizeFactor] the size of the location marker compared to the pin size.
+ * @property[smap] TODO
+ * @property[nrLayers] TODO
+ * @property[mods] TODO
+ * @property[camera] TODO
+ * @property[bufferFrames] TODO
+ * @property[curBufferFrame] TODO
+ * @constructor creates a CustomMap view.
+  */
 class CustomMap : ViewTouchParent {
 
     constructor(context: Context): super(context)
@@ -58,7 +84,7 @@ class CustomMap : ViewTouchParent {
 
     // Location
     private val locationServices                            = LocationServices()
-    private val locationDeadZone    : Float                 = 5f // How much does the location have to change on the screen to warrant a redraw
+    private val locationDeadZone    : Float                 = 5f
     private var loc                 : Location              = Location(UTMCoordinate(31, 'N', 0.0f, 0.0f), context)
     private var lastDrawnLoc        : Pair<Float, Float>    = Pair(0f, 0f)
     var locationAvailable           : Boolean               = false
@@ -69,12 +95,13 @@ class CustomMap : ViewTouchParent {
     private var fieldbookViewModel          : FieldbookViewModel? = null
     private lateinit var lfOwner            : LifecycleOwner
 
+    // Pins
     private var pins: MutableMap<String, SinglePin> = mutableMapOf()
+    var pinSize: Int
+    private var pinStatuses: MutableMap<String, Int> = mutableMapOf()
     private var mergedPins: Pin? = null
     private var mergedPinsLock: Any = Object()
-    private var pinStatuses: MutableMap<String, Int> = mutableMapOf()
 
-    var pinSize: Int
     private var locSizeFactor = 0.5f
 
     // Map
@@ -110,7 +137,7 @@ class CustomMap : ViewTouchParent {
         pinsUpdated.setListener(object : ListenableBoolean.ChangeListener {
             override fun onChange() {
                 if(pinsUpdated.getValue()){
-                    updatePins()
+                    reloadPins()
                 }
             }
         })
@@ -121,12 +148,22 @@ class CustomMap : ViewTouchParent {
         }
     }
 
-    //to be called after all addLayer calls
+    /**
+     * Creates a new camera, to be called after all addLayer calls.
+     */
     fun initializeCamera(){
         camera = smap.createCamera()
     }
 
-    // Add a new layer to the map, and generate a button to toggle it
+    /**
+     * Add a new layer to the map, and generate a button to toggle it.
+     * @param[lt] the type of layer that is being added.
+     * @param[chunkGetter] TODO
+     * @param[scrollLayout] the layout to which the toggle layer button should be added.
+     * @param[zoomCutoff] TODO
+     * @param[buttonSize] the size of the toggle layer button that will be added.
+     * @param[layerName] the name of the layer taht is being added.
+      */
     fun addLayer(lt: LayerType, chunkGetter: ChunkGetter, scrollLayout: LinearLayout?, zoomCutoff: Float = Float.MAX_VALUE, buttonSize: Int = 0, layerName: String){
         smap.addLayer(lt, chunkGetter, zoomCutoff)
         val curLayers = nrLayers
@@ -187,13 +224,23 @@ class CustomMap : ViewTouchParent {
         mods = smap.getMods()
     }
 
-    // Remove all layers from map to avoid duplicates
+    /**
+     * Remove all layers from map to avoid duplicates, to be called before reloading all layers.
+     * @param[scrollLayout] the layout from which all toggle buttons should be removed.
+      */
     fun removeLayers(scrollLayout: LinearLayout){
         smap.removeLayers()
         nrLayers = 0
         scrollLayout.removeAllViewsInLayout()
     }
 
+    /**
+     * The draw function which draws the map, pins and location.
+     * @param[lineProgram] TODO
+     * @param[varyingColorProgram] TODO
+     * @param[pinProgram] TODO
+     * @param[locProgram] TODO
+     */
     fun onDrawFrame(lineProgram: Int, varyingColorProgram: Int, pinProgram: Int, locProgram: Int){
         //if both the camera and the map have no updates, don't redraw
         val res = camera.update()
@@ -275,12 +322,19 @@ class CustomMap : ViewTouchParent {
             requestRender()
     }
 
+    /**
+     * TODO
+     */
     fun initPinsGL(){
         synchronized(mergedPinsLock){
             mergedPins?.initGL()
         }
     }
 
+    /**
+     * Takes a new loction and calculates new information with it.
+     * @param[newLoc] the new loction that was observed.
+     */
     private fun updateLoc(newLoc : p2) {
         // Update called by locationManager
         // TODO: move location drawing to an overlaying transparent canvas to avoid unnecessary map drawing
@@ -305,10 +359,17 @@ class CustomMap : ViewTouchParent {
         Logger.log(LogType.Event,"CustomMap", "No redraw needed, current loc ${loc.utm.east}, ${loc.utm.north}")
     }
 
+    /**
+     * Starts polling device location, each location update will call updateLoc.
+     */
     fun startLocServices(){
         locationServices.startPollThread(context, 5000, locationDeadZone, ::updateLoc)
     }
 
+    /**
+     * Calls startLocServices when all permissions in LocationServices.permissionsNeeded have been granted.
+     * @param[activity] the current activity.
+     */
     fun tryStartLocServices(activity: Activity){
         val missingPermissions = missingPermissions(activity, LocationServices.permissionsNeeded)
         if(missingPermissions.count() > 0){
@@ -320,7 +381,10 @@ class CustomMap : ViewTouchParent {
         }
     }
 
-    //used to zoom the camera in and out
+    /**
+     * Used to zoom the camera in and out.
+     * @param[zoom] the desired zoom level.
+     */
     private fun zoomMap(zoom: Float){
         val deltaOne = 1.0f - zoom.coerceIn(0.5f, 1.5f)
         camera.zoomIn(1.0f + deltaOne)
@@ -328,7 +392,11 @@ class CustomMap : ViewTouchParent {
             requestRender()
     }
 
-    //used to scroll the camera
+    /**
+     * Used to scroll the camera.
+     * @param[dxpx] the amount of pixels the camera should move in the x direction.
+     * @param[dypx] the amount of pixels the camera should move in the y direction.
+     */
     private fun moveMap(dxpx: Float, dypx: Float){
         val dx = dxpx / width * 2
         val dy = dypx / height * 2
@@ -336,33 +404,45 @@ class CustomMap : ViewTouchParent {
         requestRender()
     }
 
+    /**
+     * TODO
+     */
     private fun flingMap(){
         camera.flingCamera()
         requestRender()
     }
 
-    //zoomout until the whole map is visible
+    /**
+     * Zoomout until the maximum zoom level is reached.
+     */
     private fun zoomOutMax(){
         camera.zoomOutMax(500.0f)
         if(camera.needsInvalidate())
             requestRender()
     }
 
-    //zoom in to the blue dot, at some arbitrary height
+    /**
+     * Zoom in to the users location (blue dot), at some arbitrary height.
+     */
     fun zoomToDevice(){
         camera.startAnimation(Triple(loc.utm.east, loc.utm.north, 0.02f), 1500.0f)
         if(camera.needsInvalidate())
             requestRender()
     }
 
-    //to be called when the map needs to be redrawn
+    /**
+     * To be called when the map needs to be redrawn
+     */
     fun redrawMap(){
         camera.forceChanged()
         requestRender()
     }
 
+    /**
+     * Sets the current database to get the pins from.
+     * @param[table] the table to get the pins from.
+     */
     fun setPins(table: LiveData<List<PinData>>){
-        // Set observer on pin database
         table.removeObservers(lfOwner)
         table.observe(lfOwner, Observer { pins ->
             // Update the cached copy of the words in the adapter.
@@ -371,8 +451,11 @@ class CustomMap : ViewTouchParent {
         })
     }
 
+    /**
+     * Updates pins in memory to a list of new PinData.
+     * @param[newPinData] the PinData which the pins in memory should match.
+     */
     private fun updatePinStatuses(newPinData: List<PinData>) {
-        // Update pins from new data
         for(pin in newPinData) {
             if(pinStatuses[pin.pinId] == pin.status){
                 // Pin is present and unchanged
@@ -425,7 +508,10 @@ class CustomMap : ViewTouchParent {
         redrawMap()
     }
 
-    fun updatePins(){
+    /**
+     * Clears pins from memory and does a reload from the database.
+     */
+    fun reloadPins(){
         synchronized(pins) {
             pins = mutableMapOf()
         }
@@ -437,6 +523,9 @@ class CustomMap : ViewTouchParent {
         }
     }
 
+    /**
+     * Resizes all pins to the value set in settings.
+     */
     fun resizePins(){
         mergedPins?.resize(pinSize)
         synchronized(mergedPinsLock){
@@ -444,6 +533,9 @@ class CustomMap : ViewTouchParent {
         }
     }
 
+    /**
+     * TODO
+     */
     fun setFieldbook (fieldbook: List<FieldbookEntry>) {
         for (entry in fieldbook) {
             val pin = PinConversion(activity).fieldbookEntryToPin(
@@ -464,7 +556,9 @@ class CustomMap : ViewTouchParent {
         redrawMap()
     }
 
-    //called when the screen is tapped at tapLocation
+    /**
+     * Called when the screen is tapped at tapLocation.
+     */
     private fun tapPin(tapLocation : p2, activity : Activity){
         val viewport = camera.getViewport()
         synchronized(mergedPinsLock){
@@ -473,7 +567,9 @@ class CustomMap : ViewTouchParent {
         }
     }
 
-    //pre-calculate all distances between all pins, and merge them optimally
+    /**
+     * Pre-calculate all distances between all pins, and merge them optimally.
+     */
     private fun mergePins(): Pin?{
         val finalpins: MutableList<Pin> = pins.values.filter{pin -> pin.status > 0}.toMutableList()
         
@@ -572,6 +668,9 @@ class CustomMap : ViewTouchParent {
         }
     }*/
 
+    /**
+     * Calculates and sets the wAspect for the camera.
+     */
     fun setCameraWAspect(){
         camera.wAspect = width.toFloat()/height
 
@@ -581,93 +680,156 @@ class CustomMap : ViewTouchParent {
         smap.setzooms(camera.minZoom, camera.maxZoom)
     }
 
-    // Turn a layer on or off
+    /**
+     * Turn a layer on or off.
+     * @param[l] the layer that is to be toggled.
+      */
     private fun toggleLayer(l: Int){
         smap.toggleLayer(l)
     }
 
+    /**
+     * Gets the current visibility of a layer.
+     * @param[l] the layer whose visibility will be returned.
+     * @return the visibility of a layer.
+     */
     private fun layerVisible(l: Int): Boolean {
         return smap.layerVisible(l)
     }
 
+    /**
+     * Sets the PinViewModel.
+     * @param[vm] the ViewModel through which the pin database can be accessed.
+     */
     fun setPinViewModel(vm: PinViewModel){
         pinViewModel = vm
     }
 
+    /**
+     * Sets the FieldbookViewModel.
+     * @param[vm] the ViewModel through which the fieldbook database can be accessed.
+     */
     fun setFieldbookViewModel(vm: FieldbookViewModel){
         fieldbookViewModel = vm
     }
 
+    /**
+     * Sets the LifecycleOwner.
+     * @param[lifecycleOwner] the LifecycleOwner of the ViewModel.
+     */
     fun setLifeCycleOwner(lifecycleOwner: LifecycleOwner){
         lfOwner = lifecycleOwner
     }
 
+    /**
+     * Set the activity that the CustomMap is in.
+     * @param[activity] the current activity.
+     */
     fun setActivity(activity: Activity){
         this.activity = activity
     }
 
-    //open the all pins activity
+    /**
+     * Open the AllPins activity.
+     */
     fun startAllPins() {
         val i = Intent(context, AllPins::class.java)
         startActivity(context, i, null)
     }
 
-    //open fieldbook activity
+    /**
+     * Open the FieldBook activity.
+     */
     fun startFieldBook() {
         val i = Intent(context, Fieldbook::class.java)
         startActivity(context, i,null)
     }
 
-    //open settings activity
+    /**
+     * Open the Settings activity.
+     */
     fun startSettings() {
         val i = Intent(context, Settings::class.java)
         startActivity(context, i,null)
     }
 
-    //open profile activity
+    /**
+     * Open the Profile activity.
+     */
     fun startProfile() {
         val i = Intent(context, Profile::class.java)
         startActivity(context, i,null)
     }
 
+    /**
+     * Open the Login activity.
+     */
     fun startLogin(){
         val i = Intent(context, Login::class.java)
         startActivity(context, i,null)
     }
 
+    /**
+     * Get the current amount of layers.
+     * @return the amount of layers.
+     */
     fun getLayerCount() : Int{
         return nrLayers
     }
 
-    private val eps = 0.001
     //functions used for testing
+    private val eps = 0.001
+
     @TestOnly
+    /**
+     * Gets the location of the first pin in the pins map.
+     * @return the location of the first pin.
+     */
     fun getPinLocation() : Pair<Float, Float>{
         return pins[pins.keys.first()]!!.getScreenLocation(camera.getViewport(), width, height)
     }
 
     @TestOnly
+    /**
+     * A public version of layerVisible.
+     * @param[layer] the layer whose visibility will be returned.
+     * @return the visibility of the requested layer.
+     */
     fun checkLayerVisibility(layer : Int) : Boolean {
-        return smap.checkLayerVisibility(layer)
+        return smap.layerVisible(layer)
     }
 
     @TestOnly
+    /**
+     * Checks whether the user location is at the center of the screen.
+     * @return whether the user location is (nearly) at the center of the screen.
+     */
     fun userLocCentral() : Boolean {
         val screenLoc = coordToScreen(locAtCenterPress, camera.getViewport(), width, height)
         return (abs(screenLoc.first.toInt() - width / 2) < eps && abs(screenLoc.second.toInt() - height / 2) < eps)
     }
 
     @TestOnly
+    /**
+     * Checks whether the camera is all the way zoomed out.
+     * @return whether the camera is (nearly) all the way zoomed out.
+     */
     fun cameraZoomedOut() : Boolean {
         return abs(camera.getZoom() - camera.maxZoom) < eps
     }
 
     @TestOnly
+            /**
+             * Zooms the camera in to as far as possible.
+             */
     fun zoomIn(){
         camera.setZoom(camera.minZoom)
     }
 
     @TestOnly
+    /**
+     * Sets the locAtCenterPress to the current location.
+     */
     fun setCenterPos(){
         locAtCenterPress = loc.utm
     }
