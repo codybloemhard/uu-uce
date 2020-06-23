@@ -17,7 +17,15 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.preference.PreferenceManager
 
-//activity in which videos from video pins are shown
+/**
+ * An activity in which a single video with title can be viewed.
+ * @property[uiVisible] represents whether or not the title bar is visible.
+ * @property[mediaController] the MediaController used to control the video playback.
+ * @property[videoPlayer] the view that the video is displayed in.
+ * @property[sharedPref] the shared preferences where the settings are stored.
+ * @property[prevVideoPos] the last position the video was on before closing the activity.
+ * @constructor an VideoViewer activity.
+ */
 class VideoViewer : Activity() {
     private var uiVisible                   : Boolean = true
     private lateinit var mediaController    : MediaController
@@ -104,17 +112,26 @@ class VideoViewer : Activity() {
         }
     }
 
+    /**
+     * Hide the media controller when the activity is closed to avoid leaking.
+     */
     override fun finish() {
         mediaController.hide()
         videoPlayer.stopPlayback()
         super.finish()
     }
 
+    /**
+     * Save the current video position to resume here when the screen is rotated.
+     */
     override fun onPause(){
         prevVideoPos = videoPlayer.currentPosition
         super.onPause()
     }
 
+    /**
+     * Save the current position to the outstate to resume from here after restart.
+     */
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putInt("prevVideoPos", prevVideoPos)
         super.onSaveInstanceState(outState)

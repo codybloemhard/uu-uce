@@ -16,8 +16,14 @@ import com.uu_uce.profile.ProfileStatistics
 import com.uu_uce.ui.createTopbar
 import kotlinx.android.synthetic.main.activity_profile.*
 
+/**
+ * An activity in which the user can see their personal information as well as unlockables.
+ * @property[selectedOptionText] the text view corresponding to the currently selected fragment.
+ * @property[selectedOptionBar] the bar under the text corresponding to the currently selected fragment.
+ * @property[sharedPref] the shared preferences where the settings are stored.
+ * @constructor a Profile Activity.
+ */
 class Profile : AppCompatActivity() {
-
     private lateinit var selectedOptionText : TextView
     private lateinit var selectedOptionBar : View
     private lateinit var sharedPref : SharedPreferences
@@ -96,6 +102,10 @@ class Profile : AppCompatActivity() {
         }
     }
 
+    /**
+     * Opens a fragment in the fragment holder.
+     * @param[fragment] the fragment to be opened.
+     */
     private fun openFragment(fragment: Fragment) {
         val transaction = supportFragmentManager.beginTransaction()
         transaction.replace(R.id.profile_container, fragment)

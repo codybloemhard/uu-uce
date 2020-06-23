@@ -18,7 +18,11 @@ import java.net.HttpURLConnection
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
-
+/**
+ * An activity in which the user can log into an acoount or choose to enter the app in offline mode.
+ * @property[sharedPref] the shared preferences where the settings are stored.
+ * @constructor a Login activity.
+ */
 class Login : AppCompatActivity() {
 
     private lateinit var sharedPref : SharedPreferences
@@ -131,7 +135,12 @@ class Login : AppCompatActivity() {
         moveTaskToBack(true)
     }
 
-    private fun getHash(password: String): ByteArray {
+    /**
+     * Calculates the SHA256 hash of a string.
+     * @param[clearText] the string to be hashed.
+     * @return the hash of the string.
+     */
+    private fun getHash(clearText: String): ByteArray {
         var digest: MessageDigest? = null
         try {
             digest = MessageDigest.getInstance("SHA-256")
@@ -140,9 +149,14 @@ class Login : AppCompatActivity() {
             e1.printStackTrace()
         }
         digest!!.reset()
-        return digest.digest(password.toByteArray())
+        return digest.digest(clearText.toByteArray())
     }
 
+    /**
+     * Converts a ByteArray to a hexadecimal value in string format.
+     * @param[data] a ByteArray to be converted to hexadecimal.
+     * @return a hexadecimal value in string format.
+     */
     private fun bin2hex(data: ByteArray): String {
         return java.lang.String.format("%0" + data.size * 2 + "X", BigInteger(1, data))
     }

@@ -14,7 +14,12 @@ import com.uu_uce.misc.Logger
 import com.uu_uce.services.login
 import java.net.HttpURLConnection
 
-//currently used only to switch to the GeoMap activity
+/**
+ * An Activity which the app starts on, it attemps to log in using previously entered credentials,
+ * if this fails the Login Activity will be started.
+ * @property[sharedPref] the shared preferences where the settings are stored.
+ * @constructor a MainActivity Activity.
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var sharedPref: SharedPreferences
@@ -71,6 +76,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Switch to the Login Activity.
+     */
     private fun openLogin(){
         val intent = Intent(this, Login::class.java)
         startActivity(intent)
