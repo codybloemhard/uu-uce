@@ -46,8 +46,8 @@ var testing = false
  * @property[sharedPref] shared preferences where app settings are saved.
  * @property[popupWindow] the current popup window.
  * @property[progressBar] the progressBar for showing the map downloading progress.
- * @property[polyStyles] TODO
- * @property[lineStyles] TODO
+ * @property[polyStyles] the styles for drawing polygons
+ * @property[lineStyles] the styles for drawing lines
  * @constructor the GeoMap activity.
  */
 class GeoMap : AppCompatActivity() {
@@ -499,7 +499,7 @@ class GeoMap : AppCompatActivity() {
     }
 
     /**
-     * TODO
+     * read all polygon styles
      */
     private fun readPolyStyles(dir: File) {
         val file = File(dir, "styles")
@@ -507,7 +507,9 @@ class GeoMap : AppCompatActivity() {
 
         val nrStyles = reader.readULong()
         polyStyles = List(nrStyles.toInt()) {
-            val outline = reader.readUByte()
+            //a style consists of a color in bgr format (for some reason)
+            //there is also an outline, which should be removed from the preprocessor eventually
+            reader.readUByte() //outline
             val b = reader.readUByte()
             val g = reader.readUByte()
             val r = reader.readUByte()
@@ -521,7 +523,7 @@ class GeoMap : AppCompatActivity() {
     }
 
     /**
-     * TODO
+     * read all line styles
      */
     private fun readLineStyles(dir: File){
         val file = File(dir, "linestyles")
@@ -529,6 +531,8 @@ class GeoMap : AppCompatActivity() {
 
         val nrStyles = reader.readULong()
         lineStyles = List(nrStyles.toInt()) {
+            //a linestyle has a linewidth and a color
+            //line width is currently not used
             val width = reader.readUByte()
             val b = reader.readUByte()
             val g = reader.readUByte()

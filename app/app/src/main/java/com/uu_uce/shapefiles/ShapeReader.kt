@@ -11,6 +11,13 @@ import java.io.FileInputStream
  * unsigned types are marked as experimental, but they are perfectly safe to use
  * @param[dir] directory to get the chunks from
  * @param[layerType] type of chunks this should retrieve
+ *
+ * @property[xoff] global offset in x direction (only used for heightlines)
+ * @property[yoff] global offset in y direction (only used for heightlines)
+ * @property[zoff] global offset in z direction (only used for heightlines)
+ * @property[mult] global multiplier (only used for heightlines)
+ * @property[nrCuts] how many chunks each LOD is cut into
+ * @property[mods] modulos of all LODs
  */
 abstract class ChunkGetter(
     protected var dir: File,
@@ -45,6 +52,9 @@ abstract class ChunkGetter(
 
 /**
  * simple reader that can read basic types from a binary file
+ *
+ * @property[index] current progression through file
+ * @property[ubytes] all file content
  */
 @ExperimentalUnsignedTypes
 class FileReader{
@@ -111,6 +121,8 @@ class FileReader{
 @ExperimentalUnsignedTypes
 /**
  * reader for heightline chunks
+ *
+ * @property[readValue] function used to read values, can be UByte..ULong
  */
 class HeightLineReader(
     dir: File,
@@ -270,6 +282,9 @@ class ColoredLineReader(
 @ExperimentalUnsignedTypes
 /**
  * reader for polygon chunks
+ *
+ * @param[hasStyles] whether these polygons have styles
+ * @param[polyStyles] all available polygon styles
  */
 class PolygonReader(
     dir: File,

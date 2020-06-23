@@ -41,6 +41,11 @@ fun mergeBBs(mins: List<p3>,maxs: List<p3>): Pair<p3,p3>{
  * a map to be displayed in the app, consisting of multiple layers
  * @param[customMap]: the customMap this is displayed in
  * @constructor creates a ShapeMap
+ *
+ * @property[layerMask] indicates which layers are visible and which are masked
+ * @property[layers] all currently present layers
+ * @property[bMin] bottom left of bounding box
+ * @property[bMax] top right of bounding box
  */
 class ShapeMap(private val customMap: CustomMap){
     private var layerMask = mutableListOf<Boolean>()

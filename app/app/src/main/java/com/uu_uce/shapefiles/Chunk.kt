@@ -19,6 +19,8 @@ fun geolineChunkName(c: ChunkIndex): String{
  * @param[shapes] all shapes present in the chunk
  * @param[type] what type of content is in this chunk
  * @constructor merge all shapes into the drawinfo
+ *
+ * @property[drawInfo] the drawInfo containing all information of shapes in this chunk
  */
 class Chunk(
     private var shapes: List<Shape>,

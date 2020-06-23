@@ -46,6 +46,24 @@ enum class UpdateResult{
  * @param[viewMin] lower left bound of the currently loaded layers, which the camera can't leave
  * @param[viewMax] upperright bound of the currently loaded layers, which the camera can't leave
  * @constructor creates a camera
+ *
+ * @property[mx] horizontal middle of the map
+ * @property[my] vertical middle of the map
+ * @property[maxDistXy] diagonal length of map
+ * @property[velo] current sliding velocity
+ * @property[maxZoom] farthest the camera can zoom out
+ * @property[minZoom] farthest the camera can zoom in
+ * @property[lastWoff] width of the camera in last update
+ * @property[lastHoff] height of the camera in last update
+ * @property[changed] whether the camera has changed
+ * @property[animType] what animation is currently playing
+ * @property[animBegin] start of the current animation
+ * @property[animTarget] target of the curretn animation
+ * @property[animDuration] duration of current animation
+ * @property[animStartT] when the animation started
+ * @property[animT] current time in the animation
+ * @property[decline] speed at which velocity decreases
+ * @property[declineLength] how many frames it should take to stop sliding
  */
 class Camera(
     private var x: Float,
