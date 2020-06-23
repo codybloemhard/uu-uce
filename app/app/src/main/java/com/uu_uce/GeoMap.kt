@@ -35,7 +35,9 @@ import java.io.File
 var needsReload = ListenableBoolean()
 var testing = false
 
-// Main activity in which the map and menu are displayed
+/**
+ * Main activity in which the map and menu are displayed
+ */
 class GeoMap : AppCompatActivity() {
     private lateinit var pinViewModel: PinViewModel
     private var screenDim = Point(0,0)
@@ -53,6 +55,9 @@ class GeoMap : AppCompatActivity() {
     private var polyStyles: List<PolyStyle> = listOf()
     private var lineStyles: List<LineStyle> = listOf()
 
+    /**
+     * when this activity is created set some settings, and check if maps are present
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         // Set logger settings
         Logger.setTagEnabled("CustomMap", false)
@@ -104,8 +109,9 @@ class GeoMap : AppCompatActivity() {
         }
     }
 
-
-
+    /**
+     * initialize everything to do with the GeoMap
+     */
     private fun start(){
         setContentView(R.layout.activity_geo_map)
         customMap.setActivity(this)
@@ -191,6 +197,9 @@ class GeoMap : AppCompatActivity() {
         started = true
     }
 
+    /**
+     * intercept touch to move down the menu
+     */
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         //move the menu down when the map is tapped
         //this needs to be done in dispatch so the touch can't be consumed by other views
@@ -203,6 +212,9 @@ class GeoMap : AppCompatActivity() {
         return super.dispatchTouchEvent(ev)
     }
 
+    /**
+     * intercept backpress to move down the menu
+     */
     override fun onBackPressed() {
         //move the menu down when it's up, otherwise close the current popup
         if (menu.dragStatus != DragStatus.Down) {
@@ -214,6 +226,9 @@ class GeoMap : AppCompatActivity() {
         }
     }
 
+    /**
+     * restart activity if necessary, or apply changes
+     */
     override fun onResume() {
         // Get desired theme
         if(needsRestart){
@@ -244,6 +259,9 @@ class GeoMap : AppCompatActivity() {
         super.onResume()
     }
 
+    /**
+     * initialize everything to do with the screens/menus height
+     */
     private fun initMenu(){
         if(customMap.getLayerCount() > 0){
             menu.setScreenHeight(customMap.height, dragBar.height, toggle_layer_scroll.height, lower_menu_layout.height)
@@ -261,7 +279,11 @@ class GeoMap : AppCompatActivity() {
         legend_button.y = legendY
     }
 
-    // Respond to permission request result
+    /**
+     * Respond to permission request result
+     * @param[requestCode] type of request as integer code (see PermissionServices.kt)
+     * TODO
+     */
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -281,7 +303,7 @@ class GeoMap : AppCompatActivity() {
             }
         }
     }
-
+    
     private fun loadMap(){
         (Display::getSize)(windowManager.defaultDisplay, screenDim)
         val longest = maxOf(screenDim.x, screenDim.y)
