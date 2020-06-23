@@ -50,6 +50,13 @@ abstract class DrawInfo{
 /**
  * DrawInfo for drawing heightlines
  * @constructor creates a HeightlineDrawInfo
+ *
+ * @property[vertices] all points of the lines
+ * @property[indices] indices into vertices to draw lines
+ * @property[vertexBuffer] buffer where vertices are stored
+ * @property[indexBuffer] buffer where indices are stored
+ * @property[nrIndices] number of indices
+ * @property[curIndex] used to keep track at what index we are
  */
 class HeightlineDrawInfo: DrawInfo(){
     private var vertices: MutableList<Float> = mutableListOf()
@@ -132,6 +139,15 @@ class HeightlineDrawInfo: DrawInfo(){
 /**
  * DrawInfo for drawing colored lines
  * @constructor creates a ColoredLineDrawInfo
+ *
+ * @property[vertices] all points of the lines
+ * @property[indices] indices into vertices to draw lines
+ * @property[colors] colors of all vertices
+ * @property[vertexBuffer] buffer where vertices are stored
+ * @property[indexBuffer] buffer where indices are stored
+ * @property[colorBuffer] buffer where colors are stored
+ * @property[nrIndices] number of indices
+ * @property[curIndex] used to keep track at what index we are
  */
 class ColoredLineDrawInfo: DrawInfo(){
     private var vertices: MutableList<Float> = mutableListOf()
@@ -240,6 +256,15 @@ class ColoredLineDrawInfo: DrawInfo(){
 /**
  * DrawInfo for drawing polygons
  * @constructor creates a PolygonDrawInfo
+ *
+ * @property[vertices] all points of the polygons
+ * @property[indices] indices into vertices to draw polygons
+ * @property[colors] colors of all vertices
+ * @property[vertexBuffer] buffer where vertices are stored
+ * @property[indexBuffer] buffer where indices are stored
+ * @property[colorBuffer] buffer where colors are stored
+ * @property[nrIndices] number of indices
+ * @property[indexOffset] used to keep track at what index we are
  */
 class PolygonDrawInfo: DrawInfo(){
     private var vertices: MutableList<Float> = mutableListOf()

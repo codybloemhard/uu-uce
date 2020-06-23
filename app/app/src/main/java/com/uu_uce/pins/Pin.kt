@@ -674,12 +674,12 @@ class SinglePin(
  * a and b are drawn/tapped seperately when their hitboxes don't collide
  * a merged pin is drawn/tapped when they do collide
  *
- * @param[a] one of the two children
- * @param[b] the other child
- * @param[actualDis] distance between a and b, but only in the direction in which they will collide, which is the same direction as for nrPixels this will be difference in x coordinate if they approach each other horizontally and difference in y coordinate if they approach each other vertically
- * @param[nrPixels] minimum number of pixels needed between a and b until they collide
- * @param[pinViewModel] the viewModel used to access the database in GeoMap
- * @param[fieldbookViewModel] the viewModel used to access the database in Fieldbook
+ * @property[a] one of the two children
+ * @property[b] the other child
+ * @property[actualDis] distance between a and b, but only in the direction in which they will collide, which is the same direction as for nrPixels this will be difference in x coordinate if they approach each other horizontally and difference in y coordinate if they approach each other vertically
+ * @property[nrPixels] minimum number of pixels needed between a and b until they collide
+ * @property[pinViewModel] the viewModel used to access the database in GeoMap
+ * @property[fieldbookViewModel] the viewModel used to access the database in Fieldbook
  * @constructor creates a MergedPin
 */
 class MergedPin(

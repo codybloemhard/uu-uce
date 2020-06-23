@@ -15,6 +15,12 @@ const val colorsPerVertex = 3
  *
  * @param[map] the map this renderer is attached to
  * @constructor creates a GLSurfaceView.Renderer for CustomMap
+ *
+ * @property[uniColorProgram] program for drawing unicolor lines
+ * @property[varyingColorProgram] program for drawing shapes of varying colors
+ * @property[pinProgram] program for drawing pins
+ * @property[locProgram] program for drawing location
+ * @property[pinsChanged] whether the pins have changed
  */
 class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
     //shadercode
@@ -81,7 +87,7 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
                 "    gl_Position = vec4(trans.x * scale.x + vPosition.x*locScale.x, trans.y * scale.y + vPosition.y*locScale.y, 0.0, 1.0);\n" +
                 "}\n"
 
-    private var lineProgram: Int = 0
+    private var uniColorProgram: Int = 0
     private var varyingColorProgram: Int = 0
     private var pinProgram: Int = 0
     private var locProgram: Int = 0
@@ -106,7 +112,7 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
 
         var vertexShader: Int = loadShader(GLES20.GL_VERTEX_SHADER, lineVertexShaderCode)
         var fragmentShader: Int = loadShader(GLES20.GL_FRAGMENT_SHADER, uniformColorFragmentShaderCode)
-        lineProgram = GLES20.glCreateProgram().also {
+        uniColorProgram = GLES20.glCreateProgram().also {
             GLES20.glAttachShader(it, vertexShader)
             GLES20.glAttachShader(it, fragmentShader)
             GLES20.glLinkProgram(it)
@@ -145,14 +151,14 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
      * @param[gl] old unused parameter
      */
     override fun onDrawFrame(gl: GL10?) {
-        GLES20.glUseProgram(lineProgram)
+        GLES20.glUseProgram(uniColorProgram)
 
         if(pinsChanged) {
             map.initPinsGL()
             pinsChanged = false
         }
 
-        map.onDrawFrame(lineProgram, varyingColorProgram, pinProgram, locProgram)
+        map.onDrawFrame(uniColorProgram, varyingColorProgram, pinProgram, locProgram)
     }
 
     /**
