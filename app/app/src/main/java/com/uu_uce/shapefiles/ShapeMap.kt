@@ -180,11 +180,6 @@ class ShapeMap(private val customMap: CustomMap){
             layer.draw(uniColorProgram, varyingColorProgram, scale, trans)
         }
     }
-
-    @TestOnly
-    fun checkLayerVisibility(layer : Int) : Boolean{
-        return layerMask[layer]
-    }
 }
 
 /**
