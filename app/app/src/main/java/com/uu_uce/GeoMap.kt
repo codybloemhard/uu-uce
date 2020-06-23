@@ -295,10 +295,7 @@ class GeoMap : AppCompatActivity() {
             }
         }
     }
-
-    /**
-     * 
-     */
+    
     private fun loadMap(){
         (Display::getSize)(windowManager.defaultDisplay, screenDim)
         val longest = maxOf(screenDim.x, screenDim.y)
