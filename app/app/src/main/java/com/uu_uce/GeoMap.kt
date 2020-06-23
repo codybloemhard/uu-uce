@@ -28,6 +28,7 @@ import com.uu_uce.shapefiles.*
 import com.uu_uce.views.DragStatus
 import com.uu_uce.views.pinsUpdated
 import kotlinx.android.synthetic.main.activity_geo_map.*
+import kotlinx.android.synthetic.main.activity_settings.*
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 
@@ -73,8 +74,14 @@ class GeoMap : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
+        // Check whether a server is known
+        val offline = sharedPref.getString("com.uu_uce.SERVER_IP", "") == ""
+
+        // Check whether maps are present
+        val mapsPresent = File(getExternalFilesDir(null)?.path + File.separator + mapsFolderName).exists()
+
         // Alert that notifies the user that maps need to be downloaded TODO: remove when streaming is implemented
-        if(!File(getExternalFilesDir(null)?.path + File.separator + mapsFolderName).exists()){
+        if(!mapsPresent && !offline){
             AlertDialog.Builder(this, R.style.AlertDialogStyle)
                 .setIcon(R.drawable.ic_sprite_question)
                 .setTitle(getString(R.string.geomap_download_warning_head))
@@ -404,6 +411,17 @@ class GeoMap : AppCompatActivity() {
     }
 
     private fun updateDatabase(pinDatabaseFile: String) {
+        if(pinDatabaseFile == ""){
+            runOnUiThread {
+                Toast.makeText(
+                    this,
+                    getString(R.string.settings_queryfail),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            return
+        }
+
         updateFiles(
             listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
             this,
@@ -431,7 +449,6 @@ class GeoMap : AppCompatActivity() {
             }
         )
     }
-
 
     private fun readPolyStyles(dir: File) {
         val file = File(dir, "styles")

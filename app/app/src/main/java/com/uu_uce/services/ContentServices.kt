@@ -177,6 +177,12 @@ fun downloadFile(targetUrl : URL, fileDestination : String, progressAction : (In
 fun queryServer(type: String, activity: Activity, onCompleteAction: ((result: String) -> Unit)) {
     sharedPref = PreferenceManager.getDefaultSharedPreferences(activity)
     val serverURL = sharedPref.getString("com.uu_uce.SERVER_IP", "").toString()
+
+    if(serverURL == "") {
+        onCompleteAction("")
+        return
+    }
+
     val queryApi = URL("$serverURL/api/files/query")
     val reqParam =
         "{\"" +
@@ -186,53 +192,58 @@ fun queryServer(type: String, activity: Activity, onCompleteAction: ((result: St
                 "\"}"
 
     GlobalScope.launch {
-        with(queryApi.openConnection() as HttpURLConnection) {
-            // optional default is GET
-            requestMethod = "POST"
+        try {
+            with(queryApi.openConnection() as HttpURLConnection) {
+                // optional default is GET
+                requestMethod = "POST"
 
-            val wr = OutputStreamWriter(outputStream)
-            wr.write(reqParam)
-            wr.flush()
+                val wr = OutputStreamWriter(outputStream)
+                wr.write(reqParam)
+                wr.flush()
 
-            println("URL : $url")
-            println("Response Code : $responseCode")
+                println("URL : $url")
+                println("Response Code : $responseCode")
 
-            when (responseCode) {
-                HttpURLConnection.HTTP_OK -> {
-                    val reader = JsonReader(InputStreamReader(this.inputStream))
-                    var idRead = false
-                    reader.beginArray()
-                    try {
-                        while (reader.hasNext()) {
-                            if (idRead) {
-                                reader.skipValue()
-                                continue
-                            }
-                            reader.beginObject()
+                when (responseCode) {
+                    HttpURLConnection.HTTP_OK -> {
+                        val reader = JsonReader(InputStreamReader(this.inputStream))
+                        var idRead = false
+                        reader.beginArray()
+                        try {
                             while (reader.hasNext()) {
                                 if (idRead) {
                                     reader.skipValue()
                                     continue
                                 }
-                                when (reader.nextName()) {
-                                    "id" -> {
-                                        onCompleteAction(reader.nextString())
-                                        idRead = true
+                                reader.beginObject()
+                                while (reader.hasNext()) {
+                                    if (idRead) {
+                                        reader.skipValue()
+                                        continue
                                     }
-                                    else -> reader.skipValue()
+                                    when (reader.nextName()) {
+                                        "id" -> {
+                                            onCompleteAction(reader.nextString())
+                                            idRead = true
+                                        }
+                                        else -> reader.skipValue()
+                                    }
                                 }
+                                reader.endObject()
                             }
-                            reader.endObject()
+                            reader.endArray()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
                         }
-                        reader.endArray()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+                    }
+                    else -> {
+                        Logger.error("ContentServices", "Query failed, response: $responseCode")
                     }
                 }
-                else -> {
-                    Logger.error("ContentServices", "Query failed, response: $responseCode")
-                }
             }
+        }
+        catch (e: java.lang.Exception) {
+            e.printStackTrace()
         }
     }
 }
