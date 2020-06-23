@@ -5,7 +5,12 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import androidx.core.view.GestureDetectorCompat
 
-// performs action on double tap
+/**
+ * performs action on double tap
+ * @param[parent] the context this lives in
+ * @param[action] action to be performed after a double tap
+ * @constructor creates a DoubleTapper TouchChild
+  */
 class DoubleTapper(
     parent: Context,
     var action: () -> Unit)

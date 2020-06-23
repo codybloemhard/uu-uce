@@ -49,7 +49,7 @@ var pinsUpdated = ListenableBoolean()
 
 /**
  * The view displayed in the app that holds the map.
- * @property[renderer] TODO
+ * @property[renderer] the GLSurfaceViewRenderer used to draw this map
  * @property[locationServices] service used to get location updates.
  * @property[locationDeadZone] how much does the location have to change on the screen to warrant a redraw.
  * @property[loc] the most recent known location of the device.
@@ -62,16 +62,16 @@ var pinsUpdated = ListenableBoolean()
  * @property[lfOwner] the LifecycleOwner of the ViewModels.
  * @property[pins] a map from pinId to the corresponding pin object.
  * @property[pinSize] the size of pins on the map, this is changed from settings.
- * @property[pinStatuses] the statuses of all pins in in pins.
- * @property[mergedPins] TODO
- * @property[mergedPinsLock] TODO
+ * @property[pinStatuses] the statuses of all pins
+ * @property[mergedPins] all pins merged together, used for tapping and drawing
+ * @property[mergedPinsLock] the lock used to access mergedPins
  * @property[locSizeFactor] the size of the location marker compared to the pin size.
- * @property[smap] TODO
- * @property[nrLayers] TODO
- * @property[mods] TODO
- * @property[camera] TODO
- * @property[bufferFrames] TODO
- * @property[curBufferFrame] TODO
+ * @property[smap] the map displayed in this CustomMap
+ * @property[nrLayers] the number of layers currently in this map
+ * @property[mods] the modulos of a heightline layer, if present
+ * @property[camera] the camera used to view the map
+ * @property[bufferFrames] the number of frames to keep rendering after being done to avoid black screen
+ * @property[curBufferFrame] number of bufferframes already rendered
  * @constructor creates a CustomMap view.
   */
 class CustomMap : ViewTouchParent {
@@ -157,9 +157,9 @@ class CustomMap : ViewTouchParent {
     /**
      * Add a new layer to the map, and generate a button to toggle it.
      * @param[lt] the type of layer that is being added.
-     * @param[chunkGetter] TODO
+     * @param[chunkGetter] the chunkGetter to use for this layer
      * @param[scrollLayout] the layout to which the toggle layer button should be added.
-     * @param[zoomCutoff] TODO
+     * @param[zoomCutoff] the zoom level above which this layer should not be drawn
      * @param[buttonSize] the size of the toggle layer button that will be added.
      * @param[layerName] the name of the layer taht is being added.
       */
@@ -235,12 +235,12 @@ class CustomMap : ViewTouchParent {
 
     /**
      * The draw function which draws the map, pins and location.
-     * @param[lineProgram] TODO
-     * @param[varyingColorProgram] TODO
-     * @param[pinProgram] TODO
-     * @param[locProgram] TODO
+     * @param[uniColorProgram] GL program to draw heightlines
+     * @param[varyingColorProgram] GL program to draw colored shapes
+     * @param[pinProgram] GL program to draw pins
+     * @param[locProgram] GL program to draw the location
      */
-    fun onDrawFrame(lineProgram: Int, varyingColorProgram: Int, pinProgram: Int, locProgram: Int){
+    fun onDrawFrame(uniColorProgram: Int, varyingColorProgram: Int, pinProgram: Int, locProgram: Int){
         //if both the camera and the map have no updates, don't redraw
         val res = camera.update()
         val viewport = camera.getViewport()
@@ -268,7 +268,7 @@ class CustomMap : ViewTouchParent {
 
         val timeDraw = measureTimeMillis {
             // Draw map
-            smap.draw(lineProgram, varyingColorProgram, scale, trans)
+            smap.draw(uniColorProgram, varyingColorProgram, scale, trans)
 
             if (context is GeoMap) {
                 val gm = context as GeoMap
@@ -305,7 +305,7 @@ class CustomMap : ViewTouchParent {
 
             synchronized(mergedPinsLock){
                 val disPerPixel = (viewport.second.first - viewport.first.first)/width
-                if(mergedPins?.draw(pinProgram, scale, trans, viewport, width, height, this, disPerPixel) == true){
+                if(mergedPins?.draw(pinProgram, scale, trans, viewport, this, disPerPixel) == true){
                     renderer.pinsChanged = true
                 }
             }
@@ -322,7 +322,7 @@ class CustomMap : ViewTouchParent {
     }
 
     /**
-     * TODO
+     * do GL initialization for all pins
      */
     fun initPinsGL(){
         synchronized(mergedPinsLock){
@@ -404,7 +404,7 @@ class CustomMap : ViewTouchParent {
     }
 
     /**
-     * TODO
+     * fling the map after releasing touch to make it slide
      */
     private fun flingMap(){
         camera.flingCamera()

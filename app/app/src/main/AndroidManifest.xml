@@ -60,7 +60,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".gestureDetection.TouchParent" />
         <activity
             android:name=".GeoMap"
             android:theme="@style/LightTheme.NoActionBar"

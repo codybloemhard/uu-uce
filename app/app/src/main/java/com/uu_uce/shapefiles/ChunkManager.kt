@@ -11,12 +11,15 @@ import kotlin.math.pow
 
 enum class ChunkUpdateResult{NOTHING, REDRAW, LOADING}
 
-/*
-the chunk manager makes sure chunks are loaded in and out of memory properly
-chunks: reference to the array where the chunks are stored in the layer
-chunkGetter: the means of actually retrieving chunks that tne manager needs from storage
-bmin,bmax: bounding box of whole layer
-nrCuts: there are nrCuts.size different zoomlevels, where level i has nrCuts[i] by nrCuts[i] chunks
+/**
+ * the chunk manager makes sure chunks are loaded in and out of memory properly
+ * @param[chunks] reference to the array where the chunks are stored in the layer
+ * @param[chunkGetter] the means of actually retrieving chunks that the manager needs from storage
+ * @param[bmin] bottom left of bounding box of whole layer
+ * @param[bmax] top right of bounding box of whole layer
+ * @param[nrCuts] there are nrCuts.size different zoomlevels, where level i has nrCuts\[i] by nrCuts\[i] chunks
+ * @param[zoomCutoff] the cutoff zoom level, when camzoom is above this value no chunks are shown
+ * @constructor creates a ChunkManager
  */
 class ChunkManager(
     private val chunks: MutableMap<Triple<Int, Int, Int>, Chunk>,
@@ -51,15 +54,21 @@ class ChunkManager(
 
     var zoomLevel = nrOfLODs-1
 
+    /**
+     * use the min/max zoom from the camera to calculate some things
+     * @param[minzoom] minimum zoom level of the camera
+     * @param[maxzoom] maximum zoom level of the camera
+     */
     fun setZooms(minzoom: Float, maxzoom: Float){
         factor = (minzoom/maxzoom).pow(1.0f/chunkGetter.nrCuts.size)
         this.maxzoom = maxzoom
     }
 
-    /*
-    main function, updates the currently loaded chunks
-    viewport: current viewport of the camera
-    camzoom: current zoom of the camera
+    /**
+     * main function, updates the currently loaded chunks
+     * @param[viewport] current viewport of the camera
+     * @param[cameraZoom] current zoom of the camera
+     * @return what this ChunkManager is currently doing
      */
     fun update(viewport: Pair<p2, p2>, cameraZoom: Float): ChunkUpdateResult {
         camzoom = cameraZoom
@@ -102,10 +111,9 @@ class ChunkManager(
         return ChunkUpdateResult.NOTHING
     }
 
-    /*
-    load all chunks associated with given indices asynchronously
-    chunkIndices: the chunks to load
-    zoom: the current zoom level
+    /**
+     * load all chunks associated with given indices asynchronously
+     * @param[chunkIndices] the chunks to load
      */
     private fun addChunks(chunkIndices: List<ChunkIndex>){
         loading = true
@@ -144,13 +152,18 @@ class ChunkManager(
         }
     }
 
+    /**
+     * remove all chunks that should not be loaded
+     */
     private fun clearUnusedChunks(){
         chunks.keys.removeAll { index ->
             !shouldGetLoaded(index)
         }
     }
 
-    //all chunks that should currently be active, in a spiral pattern
+    /**
+     * @return chunkindices of all chunks that should currently be active, in a spiral pattern
+     */
     private fun getActiveChunks(): List<ChunkIndex>{
         val res:MutableList<ChunkIndex> = mutableListOf()
         val nrrings = maxOf((xmax+1-xmin)/2f + 1, (ymax+1-ymin)/2f + 1).toInt()
@@ -198,13 +211,19 @@ class ChunkManager(
         return res
     }
 
-    //whether a chunk should be loaded witht he current viewport and zoom
+    /**
+     * whether a chunk should be loaded witht he current viewport
+     * @param[chunkIndex] the chunk to check
+     * @return true if it should get loaded, false otherwise
+     */
     private fun shouldGetLoaded(chunkIndex: ChunkIndex): Boolean{
         val (x,y,z) = chunkIndex
         return camzoom < zoomCutoff && z == zoomLevel && x >= xmin && y >= ymin && x <= xmax && y <= ymax
     }
 
-    //whether the chunks have changed since last upate call
+    /**
+     * @return whether the chunks have changed since last upate call
+     */
     private fun chunksChanged(): Boolean {
         val width = lastViewport.second.first - lastViewport.first.first
         val height = lastViewport.second.second - lastViewport.first.second

@@ -4,7 +4,12 @@ import android.content.Context
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 
-//perform action(f) when zoomed by a factor f
+/**
+ * performs action om zoom
+ * @param[parent] the context this lives in
+ * @param[action] action to be performed on zoom
+ * @constructor creates a Zoomer TouchChild
+ */
 class Zoomer(
     parent: Context,
     var action: (Float) -> Unit)

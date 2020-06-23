@@ -89,6 +89,12 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
 
     var pinsChanged = true
 
+    /**
+     * gets called when the GLSurface is created, creates the programs with our shaders
+     *
+     * @param[gl] old unused parameter
+     * @param[config] unused config paramater
+     */
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         GLES20.glClearColor(0.9f, 0.9f, 0.9f, 1.0f)
 
@@ -133,6 +139,11 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
         }
     }
 
+    /**
+     * gets called each time the view needs to be drawn
+     *
+     * @param[gl] old unused parameter
+     */
     override fun onDrawFrame(gl: GL10?) {
         GLES20.glUseProgram(lineProgram)
 
@@ -144,11 +155,23 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
         map.onDrawFrame(lineProgram, varyingColorProgram, pinProgram, locProgram)
     }
 
+    /**
+     * gets called each time the surface changes size
+     *
+     * @param[gl] old unused parameter
+     * @paran[width] new surface width
+     * @param[height] new surface height
+     */
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
         GLES20.glViewport(0, 0, width, height)
     }
 
-
+    /**
+     * helper function to load a shader
+     * @param[type] shader type, like GLES20.GL_VERTEX_SHADER
+     * @param[shaderCode] the code of the shader concatenated in a string
+     * @return integer reference to the new shader object
+     */
     private fun loadShader(type: Int, shaderCode: String): Int {
         return GLES20.glCreateShader(type).also { shader ->
             // add the source code to the shader and compile it

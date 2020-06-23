@@ -5,7 +5,13 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import androidx.core.view.GestureDetectorCompat
 
-//performs action(dx,dy) when scrolled
+/**
+ * performs action on scroll and fling
+ * @param[parent] the context this lives in
+ * @param[action] action to be performed after scrolling
+ * @param[flingAction] action to be performed when the touch is released
+ * @constructor creates a Scroller TouchChild
+ */
 class Scroller(
     parent: Context,
     var action: (Float, Float) -> Unit,

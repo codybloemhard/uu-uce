@@ -6,13 +6,18 @@ import android.opengl.GLSurfaceView
 import android.util.AttributeSet
 import android.view.MotionEvent
 
-
+/**
+ * a touchchild has to do something on a touchevent
+ */
 interface TouchChild{
+    /**
+     * does action on a touchevent
+     * @param[event] the current touchevent
+     */
     fun getOnTouchEvent(event: MotionEvent)
 }
-/*
-Easy way to add a gesturedetector to a view without having to override all the methods
-Make your view a ViewTouchParent and add childs with the desired behaviour
+/**
+ * Easy way to add a gesturedetector to a view without having to override all the methods
  */
 @SuppressLint("ClickableViewAccessibility")
 open class ViewTouchParent: GLSurfaceView {
@@ -25,15 +30,28 @@ open class ViewTouchParent: GLSurfaceView {
         setOnTouchListener { _, e -> updateChildren(e)}
     }
 
+    /**
+     * @return true means we handle the event
+     */
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         return true
     }
 
+    /**
+     * add a new child to this parent
+     *
+     * @param[child] the new child to be added
+     */
     fun addChild(child: TouchChild){
         children.add(child)
     }
 
+    /**
+     * update all children with the current motionevent
+     *
+     * @paran[event] current motionevent
+     */
     private fun updateChildren(event: MotionEvent): Boolean {
         children.forEach { c -> c.getOnTouchEvent(event) }
         return super.onTouchEvent(event)

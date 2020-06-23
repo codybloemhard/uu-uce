@@ -461,7 +461,7 @@ class GeoMap : AppCompatActivity() {
             val g = reader.readUByte()
             val r = reader.readUByte()
 
-            PolyStyle(outline.toInt() == 1, floatArrayOf(
+            PolyStyle(floatArrayOf(
                 r.toFloat()/255,
                 g.toFloat()/255,
                 b.toFloat()/255
