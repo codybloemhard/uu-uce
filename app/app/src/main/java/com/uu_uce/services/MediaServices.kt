@@ -2,11 +2,11 @@ package com.uu_uce.services
 
 import android.app.Activity
 import android.content.ContentValues
+import android.content.Intent
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
-import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -14,27 +14,42 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
+import com.uu_uce.FieldbookEditor.Companion.currentPath
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * Handles all functions for images and videos
+ *
+ * @property[activity] the associated activity
+ */
 class MediaServices(private val activity: Activity) {
 
-    private fun fieldbookDir() : File {
-        @Suppress("DEPRECATION")
+    /**
+     * Gives the location for storing Fieldbook content for API's before N (24)
+     *
+     * @return the path to the fieldbook directory, as a File
+     */
+    @Suppress("DEPRECATION")
+    private fun fieldbookDir(): File {
         return File(
             Environment.getExternalStorageDirectory(),
             "UU-UCE/Fieldbook"
         ).also { it.mkdirs() }
     }
 
+    /**
+     * Gives the file, filename and file location to store newly captured images
+     *
+     * @return the uri for the to-be-stored image
+     */
     fun fieldbookImageLocation(): Uri {
-
         val outputUri: Uri
         val fileName = "IMG_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}_UCE"
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 
             val values = ContentValues().apply {
                 put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
@@ -44,7 +59,10 @@ class MediaServices(private val activity: Activity) {
                 }
             }
 
-            outputUri = activity.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,values)!!
+            outputUri = activity.contentResolver.insert(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                values
+            )!!
 
         } else {
 
@@ -59,18 +77,25 @@ class MediaServices(private val activity: Activity) {
                     fileName,
                     ".jpg",
                     myDir
-                )
+                ).apply {
+                    currentPath = absolutePath
+                }
             )
         }
 
         return outputUri
     }
 
-    fun fieldbookVideoLocation() : Uri {
+    /**
+     * Gives the file, filename and file location to store newly captured videos
+     *
+     * @return the uri for the to-be-stored video
+     */
+    fun fieldbookVideoLocation(): Uri {
         val outputUri: Uri
         val fileName = "VID_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}_UCE"
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 
             val values = ContentValues().apply {
                 put(MediaStore.Video.Media.DISPLAY_NAME, fileName)
@@ -80,7 +105,10 @@ class MediaServices(private val activity: Activity) {
                 }
             }
 
-            outputUri = activity.contentResolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,values)!!
+            outputUri = activity.contentResolver.insert(
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                values
+            )!!
 
         } else {
 
@@ -95,24 +123,23 @@ class MediaServices(private val activity: Activity) {
                     fileName,
                     ".mp4",
                     myDir
-                )
+                ).apply {
+                    currentPath = absolutePath
+                }
             )
         }
 
         return outputUri
     }
 
-    fun addImageToGallery(path: String) {
-
-        //todo
-        MediaScannerConnection.scanFile(
-            activity,
-            arrayOf(path),
-            arrayOf("image/*"),
-            null
-        )
-
-        /*
+    /**
+     * Makes an image/video visible to the mediascanner, so it can be shown in the gallery
+     * Used for API's < 24
+     *
+     * @param[path] the path to the image that we want to be made visible to the gallery
+     */
+    @Suppress("DEPRECATION")
+    fun addMediaToGallery(path: String) {
         try {
             Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).also { mediaScanIntent ->
                 val f = File(path)
@@ -122,33 +149,17 @@ class MediaServices(private val activity: Activity) {
         } catch (e: Exception) {
 
         }
-         */
-    }
-    fun addVideoToGallery(path: String) {
-
-        MediaScannerConnection.scanFile(
-            activity,
-            arrayOf(path),
-            arrayOf("video/*"),
-            null
-        )
-
-        /*
-        try {
-            Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).also { mediaScanIntent ->
-                val f = File(path)
-                mediaScanIntent.data = Uri.fromFile(f)
-                activity.sendBroadcast(mediaScanIntent)
-            }
-        } catch (e: Exception) {
-
-        }
-         */
     }
 
-    fun getImageFileNameFromURI(path: Uri) : String {
+    /**
+     * Gets the filename of an image from the MediaStore MediaColumns
+     *
+     * @param[uri] the Uri that refers to the image file
+     * @return the filename of the image
+     */
+    fun getImageFileNameFromURI(uri: Uri): String {
         var fileName = ""
-        activity.contentResolver.query(path, null, null, null, null)?.use {
+        activity.contentResolver.query(uri, null, null, null, null)?.use {
             val nameIndex =
                 it.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME)
             it.moveToFirst()
@@ -157,9 +168,15 @@ class MediaServices(private val activity: Activity) {
         return fileName
     }
 
-    fun getVideoFileNameFromURI(path: Uri) : String {
+    /**
+     * Gets the filename of an video from the MediaStore MediaColumns
+     *
+     * @param[uri] the Uri that refers to the video file
+     * @return the filename of the video
+     */
+    fun getVideoFileNameFromURI(uri: Uri): String {
         var fileName = ""
-        activity.contentResolver.query(path, null, null, null, null)?.use {
+        activity.contentResolver.query(uri, null, null, null, null)?.use {
             val nameIndex =
                 it.getColumnIndex(MediaStore.Video.Media.DISPLAY_NAME)
             it.moveToFirst()
@@ -168,14 +185,19 @@ class MediaServices(private val activity: Activity) {
         return fileName
     }
 
+    /**
+     * Finds the full path to an image, using the path provided by the File Provider
+     *
+     * @param[uri] the (FileProvider) Uri that refers to the image file
+     * @return the entire path to the image, contained in a Uri
+     */
     fun getImagePathFromURI(uri: Uri?): Uri {
         var filePath = ""
-        val wholeID : String
+        val wholeID: String
 
-        try{
+        try {
             wholeID = DocumentsContract.getDocumentId(uri)
-        }
-        catch(e : java.lang.Exception){
+        } catch (e: java.lang.Exception) {
             return Uri.EMPTY
         }
 
@@ -190,7 +212,7 @@ class MediaServices(private val activity: Activity) {
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
             column, sel, arrayOf(id), null
         )
-        if(cursor != null){
+        if (cursor != null) {
             val columnIndex: Int = cursor.getColumnIndex(column[0])
             if (cursor.moveToFirst()) {
                 filePath = cursor.getString(columnIndex)
@@ -200,6 +222,12 @@ class MediaServices(private val activity: Activity) {
         return Uri.parse(filePath)
     }
 
+    /**
+     * Finds the full path to an video, using the path provided by the File Provider
+     *
+     * @param[uri] the (FileProvider) Uri that refers to the video file
+     * @return the entire path to the video, contained in a Uri
+     */
     fun getVideoPathFromURI(uri: Uri?): Uri {
         var filePath = ""
         val wholeID: String = DocumentsContract.getDocumentId(uri)
@@ -224,6 +252,15 @@ class MediaServices(private val activity: Activity) {
         return Uri.parse(filePath)
     }
 
+    /**
+     * Called whenever a thumbnail is not present in the PinContent
+     * Checks whether a thumbnail has been generated earlier
+     * If it doesn't exist yet, it generates a new thumbnail
+     *
+     * @param[videoUri] the uri of the video that's missing a thumbnail
+     * @param[thumbnailDirectory] the directory to store new thumbnails to
+     * @return the Uri for the generated thumbnail
+     */
     fun generateMissingVideoThumbnail(videoUri: Uri, thumbnailDirectory: String): Uri {
         val fileName = getFileName(videoUri.path.toString())
 
@@ -247,6 +284,14 @@ class MediaServices(private val activity: Activity) {
         }
     }
 
+    /**
+     * Loads the image as a bitmap and saves it to the dedicated directory
+     *
+     * @param[uri] the uri of the image that's missing a thumbnail
+     * @param[directory] the directory to store new thumbnails to
+     * @param[fileName] the name of the image that's missing a thumbnail. For newly taken images, a new name is generated (so null is passed)
+     * @return the Uri that refers to the newly made thumbnail
+     */
     fun makeImageThumbnail(uri: Uri?, directory: String, fileName: String? = null): Uri {
         return try {
             saveThumbnail(
@@ -261,6 +306,14 @@ class MediaServices(private val activity: Activity) {
         }
     }
 
+    /**
+     * Gets a frame in the video as a bitmap and saves it to the dedicated directory
+     *
+     * @param[uri] the uri of the video that's missing a thumbnail
+     * @param[directory] the directory to store new thumbnails to
+     * @param[fileName] the name of the video that's missing a thumbnail. For newly taken videos, a new name is generated (so null is passed)
+     * @return the Uri that refers to the newly made thumbnail
+     */
     fun makeVideoThumbnail(uri: Uri?, directory: String, fileName: String? = null): Uri {
         return try {
             saveThumbnail(
@@ -275,6 +328,15 @@ class MediaServices(private val activity: Activity) {
         }
     }
 
+    /**
+     * Finds the directory and builds the name for the newly made thumbnail
+     * Compresses the passed bitmap and saves it using afore mentioned name and directory
+     *
+     * @param[bitmap] the bitmap we will use as our thumbnail
+     * @param[directory] the directory to store new thumbnails to
+     * @param[fileName] the name for the thumbnail. For newly taken images/videos, a new name will be generated (so null is passed)
+     * @return the Uri that refers to the newly made thumbnail
+     */
     private fun saveThumbnail(bitmap: Bitmap, directory: String, fileName: String?): Uri {
         val dir = File(
             activity.getExternalFilesDir(null),
@@ -292,9 +354,7 @@ class MediaServices(private val activity: Activity) {
             File(
                 dir,
                 "thumbnail_${getCurrentDateTime(DateTimeFormat.FILE_PATH)}.jpeg"
-            ).also {
-                println(it.toString())
-            }
+            )
         }
 
         FileOutputStream(file).also {
@@ -308,19 +368,23 @@ class MediaServices(private val activity: Activity) {
     }
 }
 
-enum class DateTimeFormat{
-    FILE_PATH,
-    FIELDBOOK_ENTRY
+/**
+ * An enum that indicates the format for the DateTime we will use
+ */
+enum class DateTimeFormat(val format: String) {
+    FILE_PATH("yyyyMMdd_HHmmss"),
+    FIELDBOOK_ENTRY("dd-MM-yyyy HH:mm")
 }
 
+/**
+ * Gives the DateTime in the requested format
+ *
+ * @param[dtf] the DataTimeFormat we will use
+ * @return a string containing the Date and Time in the requested format
+ */
 fun getCurrentDateTime(dtf: DateTimeFormat): String {
-    val pattern: String = when(dtf) {
-        DateTimeFormat.FILE_PATH        -> "yyyyMMdd_HHmmss"
-        DateTimeFormat.FIELDBOOK_ENTRY  -> "dd-MM-yyyy HH:mm"
-    }
-
     return SimpleDateFormat(
-        pattern,
+        dtf.format,
         Locale("nl-NL")
     ).format(
         Date()

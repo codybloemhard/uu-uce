@@ -37,6 +37,7 @@ class FieldbookEditor: AppCompatActivity() {
         const val REQUEST_VIDEO_CAPTURE = 3
 
         var currentUri: Uri = Uri.EMPTY
+        var currentPath: String = ""
 
         private const val THUMBNAIL_DIRECTORY = "Fieldbook/Thumbnails"
     }
@@ -196,6 +197,7 @@ class FieldbookEditor: AppCompatActivity() {
     private fun resetVariables () {
         currentUri = Uri.EMPTY
         currentName = ""
+        currentPath = ""
     }
 
     private fun selectImage() {
@@ -352,7 +354,7 @@ class FieldbookEditor: AppCompatActivity() {
                     )
 
                     if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                        mediaServices.addImageToGallery(currentUri.path!!)
+                        mediaServices.addMediaToGallery(currentPath)
                     }
                 }
                 REQUEST_VIDEO_UPLOAD -> {
@@ -380,7 +382,7 @@ class FieldbookEditor: AppCompatActivity() {
                         )
                     )
                     if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                        mediaServices.addVideoToGallery(currentUri.path!!)
+                        mediaServices.addMediaToGallery(currentPath)
                     }
                 }
             }
