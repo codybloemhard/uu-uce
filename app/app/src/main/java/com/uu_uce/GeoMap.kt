@@ -28,7 +28,6 @@ import com.uu_uce.shapefiles.*
 import com.uu_uce.views.DragStatus
 import com.uu_uce.views.pinsUpdated
 import kotlinx.android.synthetic.main.activity_geo_map.*
-import kotlinx.android.synthetic.main.activity_settings.*
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 

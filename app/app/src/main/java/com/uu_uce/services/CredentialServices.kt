@@ -3,10 +3,12 @@ package com.uu_uce.services
 import android.app.Activity
 import android.widget.Toast
 import androidx.preference.PreferenceManager
-import com.uu_uce.misc.Logger
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.io.*
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder

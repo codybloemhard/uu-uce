@@ -2,7 +2,6 @@ package com.uu_uce.shapefiles
 
 import com.uu_uce.misc.Logger
 import com.uu_uce.views.CustomMap
-import org.jetbrains.annotations.TestOnly
 
 //some useful types
 typealias p2 = Pair<Float, Float>
@@ -191,6 +190,6 @@ class ShapeMap(private val customMap: CustomMap){
  * used to distinguish between the different types of layers
  */
 enum class LayerType{
-    Vegetation, Height, Water,Lines
+    Height, Water,Lines
 }
 
