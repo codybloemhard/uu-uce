@@ -370,6 +370,8 @@ class MediaServices(private val activity: Activity) {
 
 /**
  * An enum that indicates the format for the DateTime we will use
+ *
+ * @param[format] the format we want to use
  */
 enum class DateTimeFormat(val format: String) {
     FILE_PATH("yyyyMMdd_HHmmss"),

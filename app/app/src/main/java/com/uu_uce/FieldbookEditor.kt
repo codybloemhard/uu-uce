@@ -84,16 +84,6 @@ class FieldbookEditor: AppCompatActivity() {
         if (bundle != null)
             fieldbookIndex = bundle.getInt("fieldbook_index")
 
-        createTopbar(this,getString(R.string.editor_topbar_title)){
-            if(fieldbookIndex >= 0){
-                finish()
-            }
-            else{
-                deleteTemps()
-                finish()
-            }
-        }
-
         mediaServices = MediaServices(this)
 
         viewModel = this.run {
@@ -102,11 +92,21 @@ class FieldbookEditor: AppCompatActivity() {
 
         resetVariables()
 
-        rootView    = findViewById(android.R.id.content)
-        layout      = findViewById(R.id.fieldbook_content_container)
-        scrollView  = findViewById(R.id.fieldbook_scroll_view)
+        // Initiate the view and set OnClickListeners
+        createTopbar(this, getString(R.string.editor_topbar_title)) {
+            if (fieldbookIndex >= 0) {
+                finish()
+            } else {
+                deleteTemps()
+                finish()
+            }
+        }
 
-        title       = findViewById<EditText>(R.id.add_title).apply{
+        rootView = findViewById(android.R.id.content)
+        layout = findViewById(R.id.fieldbook_content_container)
+        scrollView = findViewById(R.id.fieldbook_scroll_view)
+
+        title = findViewById<EditText>(R.id.add_title).apply {
             setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
                 if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
                     //Perform Code
@@ -156,20 +156,25 @@ class FieldbookEditor: AppCompatActivity() {
             }
         }
 
+        // Fill layout
         content = mutableListOf()
 
-        // Fill layout
         if (fieldbookIndex >= 0) {
             viewModel.getContent(fieldbookIndex) {
                 title.setText(it.title)
-                content = PinContent(it.content,this, true).contentBlocks
+                content = PinContent(it.content, this, true).contentBlocks
                 for (c in content)
                     content[content.indexOf(c)] =
-                        c.makeEditable(latestBlockIndex++,layout,rootView,::changeBlock)
+                        c.makeEditable(latestBlockIndex++, layout, rootView, ::changeBlock)
             }
         }
     }
 
+    /**
+     * Gives the last know location, or none
+     *
+     * @return the last known location (or null whenever it can't find any)
+     */
     private fun location(): Location? {
         var location: Location? = null
 
@@ -182,31 +187,44 @@ class FieldbookEditor: AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if(fieldbookIndex < 0){
+        if (fieldbookIndex < 0) {
             deleteTemps()
         }
         super.onBackPressed()
     }
 
-    private fun deleteTemps(){
-        for(block in content){
+    /**
+     * Deletes already created blocks whenever the new fieldbook entry isn't saved
+     */
+    private fun deleteTemps() {
+        for (block in content) {
             block.removeContent(layout)
         }
     }
 
-    private fun resetVariables () {
+    /**
+     * Resets global variables when a new fieldbook entry is generated
+     */
+    private fun resetVariables() {
         currentUri = Uri.EMPTY
         currentName = ""
         currentPath = ""
     }
 
+    /**
+     * Gives the user the choice to take a photo, of upload an image from the gallery
+     * Checks for the required permissions and asks to give permission when necessary
+     * Starts the intents for selecting of taking pictures
+     */
     private fun selectImage() {
         resetVariables()
 
+        // Building the dialog
         val options = arrayOf(
             getString(R.string.editor_imageselection_gallery),
             getString(R.string.editor_imageselection_camera),
-            getString(R.string.cancel_button))
+            getString(R.string.cancel_button)
+        )
 
         val dialog = AlertDialog.Builder(this, R.style.AlertDialogStyle)
         dialog.setTitle(getString(R.string.editor_imageselection_popup_title))
@@ -214,27 +232,30 @@ class FieldbookEditor: AppCompatActivity() {
         dialog.setItems(options) { dialogInterface, which ->
 
             when (which) {
-                0 -> { // Choose from gallery
-                        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
-                            (
-                                    this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                                    this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-                            )
-                        ) {
-                            imageSelectionIntent()
-                        }
-                        else{
-                            getPermissions(
-                                this,
-                                listOf(
-                                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                                ),
-                                EXTERNAL_PHOTO_REQUEST
-                            )
-                        }
+                0 -> {
+                    // Check for permissions
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+                        (
+                                this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                                        this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                                )
+                    ) {
+                        // Start image selection intent
+                        imageSelectionIntent()
+                    } else {
+                        // Ask for permissions when they aren't present
+                        getPermissions(
+                            this,
+                            listOf(
+                                Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            ),
+                            EXTERNAL_PHOTO_REQUEST
+                        )
                     }
-                1 -> { // Take photo
+                }
+                1 -> {
+                    // Ask for permissions when they aren't present
                     getPermissions(
                         this,
                         listOf(
@@ -244,28 +265,39 @@ class FieldbookEditor: AppCompatActivity() {
                         ),
                         PHOTOSTORAGE_REQUEST
                     )
-                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+                    // Check for permissions
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
                         (
-                            this.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
-                            this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                            this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-                        )) {
+                                this.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
+                                        this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                                        this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                                )
+                    ) {
+                        // Start image capture intent
                         imageCaptureIntent()
                     }
                 }
-                2 -> dialogInterface.dismiss()
+                // Close the dialog
+                else -> dialogInterface.dismiss()
             }
         }
         dialog.show()
     }
 
+    /**
+     * Gives the user the choice to record a video, of upload a video from the gallery
+     * Checks for the required permissions and asks to give permission when necessary
+     * Starts the intents for selecting of taking videos
+     */
     private fun selectVideo() {
         resetVariables()
 
+        // Building the dialog
         val options = arrayOf(
             getString(R.string.editor_videoselection_gallery),
             getString(R.string.editor_videoselection_camera),
-            getString(R.string.cancel_button))
+            getString(R.string.cancel_button)
+        )
 
         val dialog = AlertDialog.Builder(this, R.style.AlertDialogStyle)
         dialog.setTitle(getString(R.string.editor_videoselection_popup_title))
@@ -273,16 +305,18 @@ class FieldbookEditor: AppCompatActivity() {
         dialog.setItems(options) { dialogInterface, which ->
 
             when (which) {
-                0 -> { // Choose from gallery
-                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+                0 -> {
+                    // Check for permissions
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
                         (
                                 this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                                this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-                        )
+                                        this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                                )
                     ) {
+                        // Start video selection intent
                         videoSelectionIntent()
-                    }
-                    else{
+                    } else {
+                        // Ask for permissions when they aren't present
                         getPermissions(
                             this,
                             listOf(
@@ -294,7 +328,8 @@ class FieldbookEditor: AppCompatActivity() {
                     }
                 }
 
-                1 -> { // Record video
+                1 -> {
+                    // Ask for permissions when they aren't present
                     getPermissions(
                         this,
                         listOf(
@@ -304,14 +339,19 @@ class FieldbookEditor: AppCompatActivity() {
                         ),
                         VIDEOSTORAGE_REQUEST
                     )
-                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
-                        (this.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
-                            this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                            this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED))
-                    {
+                    // Check for permissions
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+                        (
+                                this.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
+                                        this.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                                        this.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                                )
+                    ) {
+                        // Start video capture intent
                         videoCaptureIntent()
                     }
                 }
+                // Close the dialog
                 else -> dialogInterface.dismiss()
             }
         }
@@ -381,46 +421,67 @@ class FieldbookEditor: AppCompatActivity() {
                             THUMBNAIL_DIRECTORY
                         )
                     )
-                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
                         mediaServices.addMediaToGallery(currentPath)
                     }
                 }
             }
         } else if (resultCode == Activity.RESULT_CANCELED) {
-            Toast.makeText(this, getString(R.string.fieldbook_mediaselection_failed), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                getString(R.string.fieldbook_mediaselection_failed),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
+    /**
+     * Adds an exitable textblock to the view and adds it to the list of ContentBlocks
+     */
     private fun addText() {
         title.clearFocus()
         TextBlock(
             this
         ).also {
-            it.makeEditable(currentBlockIndex,layout,rootView,::changeBlock)
+            it.makeEditable(currentBlockIndex, layout, rootView, ::changeBlock)
             content.add(it)
         }
         scrollToView(currentBlockIndex)
     }
 
+    /**
+     * Makes a new ImageContentBlock, which adds an ImageView to the view,
+     * showing the image the provided Uri refers to
+     *
+     * @param[image] the Uri that refers to the image we want to add to this FieldbookEntry
+     * @param[thumbnail] the thumbnail of the aforementioned image
+     */
     private fun addImage(image: Uri, thumbnail: Uri) {
         title.clearFocus()
         ImageContentBlock(
             image,
             thumbnail,
             this
-        ).also{
+        ).also {
             if (editing) {
                 content[currentBlockIndex].removeContent(layout)
                 content[currentBlockIndex] = it
             } else {
                 content.add(it)
             }
-            it.makeEditable(currentBlockIndex,layout,rootView,::changeBlock)
+            it.makeEditable(currentBlockIndex, layout, rootView, ::changeBlock)
         }
         editing = false
         scrollToView(currentBlockIndex)
     }
 
+    /**
+     * Makes a new ImageContentBlock, which adds an VideoView to the view,
+     * showing the video the provided Uri refers to
+     *
+     * @param[video] the Uri that refers to the video we want to add to this FieldbookEntry
+     * @param[thumbnail] the thumbnail of the aforementioned video
+     */
     private fun addVideo(video: Uri, thumbnail: Uri) {
         title.clearFocus()
         VideoContentBlock(
@@ -434,13 +495,19 @@ class FieldbookEditor: AppCompatActivity() {
             } else {
                 content.add(it)
             }
-            it.makeEditable(currentBlockIndex,layout,rootView,::changeBlock)
+            it.makeEditable(currentBlockIndex, layout, rootView, ::changeBlock)
         }
         editing = false
         scrollToView(currentBlockIndex)
     }
 
-    private fun changeBlock(cbi: ContentBlockInterface) : Boolean {
+    /**
+     * Handles what happens when the user clicks one ContentBlock
+     * Gives the user the option to edit, delete or move a block
+     *
+     * @param[cbi] the ContentBlock that has been long clicked
+     */
+    private fun changeBlock(cbi: ContentBlockInterface): Boolean {
         currentBlockIndex = content.indexOf(cbi)
 
         // Set options for this block
@@ -455,23 +522,29 @@ class FieldbookEditor: AppCompatActivity() {
             add(getString(R.string.editor_cancel_edit))
         }
 
+        // Build the dialog
         val options = list.toTypedArray()
 
         AlertDialog.Builder(this, R.style.AlertDialogStyle)
             .setTitle(getString(R.string.editor_edit_popup_title))
             .setItems(options) { dialogInterface, which ->
-            when(options[which]) {
-                getString(R.string.editor_delete_block) -> deleteBlock(cbi)
-                getString(R.string.editor_edit_block)   -> editBlock(cbi)
-                getString(R.string.editor_moveup)       -> moveBlockUp(cbi)
-                getString(R.string.editor_movedown)     -> moveBlockDown(cbi)
-                getString(R.string.editor_cancel_edit)  -> dialogInterface.dismiss()
-            }
-        }.show()
+                when(options[which]) {
+                    getString(R.string.editor_delete_block) -> deleteBlock(cbi)
+                    getString(R.string.editor_edit_block) -> editBlock(cbi)
+                    getString(R.string.editor_moveup) -> moveBlockUp(cbi)
+                    getString(R.string.editor_movedown) -> moveBlockDown(cbi)
+                    getString(R.string.editor_cancel_edit) -> dialogInterface.dismiss()
+                }
+            }.show()
 
         return true
     }
 
+    /**
+     * Deletes the long clicked block from the view and from the list of ContentBlocks
+     *
+     * @param[cbi] the ContentBlock that has been long clicked
+     */
     private fun deleteBlock(cbi: ContentBlockInterface) {
         cbi.removeContent(layout)
         content.remove(cbi)
@@ -480,6 +553,13 @@ class FieldbookEditor: AppCompatActivity() {
             scrollToView(currentBlockIndex - 1)
     }
 
+    /**
+     * Gives the user the option to edit the long clicked ContentBlock
+     * Only works for Image- and VideoBlocks, as TextBlocks are already editable in the FieldbookEditor
+     * On long clicking, the user can replace the block with a newly captured image/video or an image/video from the gallery
+     *
+     * @param[cbi] the ContentBlock that has been long clicked
+     */
     private fun editBlock(cbi: ContentBlockInterface) {
         editing = true
         when (cbi) {
@@ -488,17 +568,33 @@ class FieldbookEditor: AppCompatActivity() {
         }
     }
 
+    /**
+     * Moves the long clicked block one position up, switching with the block above
+     *
+     * @param[cbi] the ContentBlock that has been long clicked
+     */
     private fun moveBlockUp(cbi: ContentBlockInterface) {
         val newIndex = currentBlockIndex - 1
-        moveView(newIndex, cbi)
+        moveBlock(newIndex, cbi)
     }
 
+    /**
+     * Moves the long clicked block one position down, switching with the block below
+     *
+     * @param[cbi] the ContentBlock that has been long clicked
+     */
     private fun moveBlockDown(cbi: ContentBlockInterface) {
         val newIndex = currentBlockIndex + 1
-        moveView(newIndex, cbi)
+        moveBlock(newIndex, cbi)
     }
 
-    private fun moveView (newIndex: Int, cbi: ContentBlockInterface) {
+    /**
+     * Moves the block one position
+     *
+     * @param[newIndex] the new index we want to move the block to
+     * @param[cbi] the ContentBlock we want to move
+     */
+    private fun moveBlock(newIndex: Int, cbi: ContentBlockInterface) {
         layout.apply {
             removeViewAt(currentBlockIndex)
             addView(cbi.content, newIndex)
@@ -510,16 +606,23 @@ class FieldbookEditor: AppCompatActivity() {
         scrollToView(newIndex)
     }
 
+    /**
+     * Makes the collected data into a FieldbookEntry and inserts in the database
+     *
+     * @param[title] the title the user selected
+     * @param[content] all ContentBlocks the user added
+     * @param[currentDate] the current Date and Time
+     * @param[location] the last know location
+     */
     private fun insertIntoFieldbook(
         title: String,
         content: List<ContentBlockInterface>,
         currentDate: String,
         location: Location?
     ) {
-        val utm = if(location == null){
+        val utm = if (location == null) {
             UTMCoordinate(0, 'N', 0.0f, 0.0f).toString()
-        }
-        else{
+        } else {
             degreeToUTM(Pair(location.latitude.toFloat(),location.longitude.toFloat())).toString()
         }
 
@@ -557,13 +660,17 @@ class FieldbookEditor: AppCompatActivity() {
             }
 
             EXTERNAL_VIDEO_REQUEST -> {
-                if(grantResults.all { x -> x == 0 }){
+                if (grantResults.all { x -> x == 0 }) {
                     videoSelectionIntent()
                 }
             }
         }
     }
 
+    /**
+     * Starts the image capture intent
+     * Indicates the location to store the image to
+     */
     private fun imageCaptureIntent() {
         currentUri = mediaServices.fieldbookImageLocation()
 
@@ -581,6 +688,10 @@ class FieldbookEditor: AppCompatActivity() {
         )
     }
 
+    /**
+     * Starts the image selection intent
+     * Opens a content picker, that shows only images
+     */
     private fun imageSelectionIntent() {
         val intent = Intent(
             Intent.ACTION_GET_CONTENT,
@@ -593,6 +704,10 @@ class FieldbookEditor: AppCompatActivity() {
         )
     }
 
+    /**
+     * Starts the video capture intent
+     * Indicates the location to store the video to
+     */
     private fun videoCaptureIntent() {
         currentUri = mediaServices.fieldbookVideoLocation()
 
@@ -614,7 +729,10 @@ class FieldbookEditor: AppCompatActivity() {
         )
     }
 
-
+    /**
+     * Starts the video selection intent
+     * Opens a content picker, that shows only videos
+     */
     private fun videoSelectionIntent() {
         val intent = Intent(
             Intent.ACTION_GET_CONTENT,
@@ -627,12 +745,22 @@ class FieldbookEditor: AppCompatActivity() {
         )
     }
 
+    /**
+     * Scrolls the scrollview to the requested index
+     *
+     * @param[index] the index of the ContentBlock that has to be centered
+     */
     private fun scrollToView(index: Int) {
         scrollView.post {
-            scrollView.smoothScrollTo(0,layout.getChildAt(index).top)
+            scrollView.smoothScrollTo(0, layout.getChildAt(index).top)
         }
     }
 
+    /**
+     * Hides the keyboard from the screen
+     *
+     * @param[activity] the associated activity
+     */
     private fun hideKeyboard(activity: Activity) {
         val imm: InputMethodManager =
             activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
