@@ -10,9 +10,22 @@ import javax.microedition.khronos.opengles.GL10
 const val coordsPerVertex= 2
 const val colorsPerVertex = 3
 
+/**
+ * Renderer for CustomMap view
+ *
+ * @param[map] the map this renderer is attached to
+ * @constructor creates a GLSurfaceView.Renderer for CustomMap
+ *
+ * @property[uniColorProgram] program for drawing unicolor lines
+ * @property[varyingColorProgram] program for drawing shapes of varying colors
+ * @property[pinProgram] program for drawing pins
+ * @property[locProgram] program for drawing location
+ * @property[pinsChanged] whether the pins have changed
+ */
 class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
+    //shadercode
     private val lineVertexShaderCode =
-                "uniform vec2 trans;\n" +
+        "uniform vec2 trans;\n" +
                 "uniform vec2 scale;\n" +
                 "attribute vec4 vPosition;\n" +
                 "void main() {\n" +
@@ -20,14 +33,14 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
                 "}\n"
 
     private val uniformColorFragmentShaderCode =
-                "precision mediump float;\n" +
+        "precision mediump float;\n" +
                 "uniform vec4 vColor;\n" +
                 "void main() {\n" +
                 "  gl_FragColor = vColor;\n" +
                 "}\n"
 
     private val varyingColorVertexShaderCode =
-                "uniform vec2 trans;\n" +
+        "uniform vec2 trans;\n" +
                 "uniform vec2 scale;\n" +
                 "attribute vec4 vPosition;\n" +
                 "attribute vec3 inColor;\n" +
@@ -38,14 +51,14 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
                 "}\n"
 
     private val varyingColorFragmentShaderCode =
-                "precision mediump float;\n" +
+        "precision mediump float;\n" +
                 "varying vec3 vColor;\n" +
                 "void main() {\n" +
                 "  gl_FragColor = vec4(vColor,1.0);\n" +
                 "}\n"
 
     private val pinVertexShaderCode =
-                "attribute vec2 a_TexCoordinate;\n" +
+        "attribute vec2 a_TexCoordinate;\n" +
                 "varying vec2 v_TexCoordinate;\n" +
                 "uniform vec2 trans;\n" +
                 "uniform vec2 scale;\n" +
@@ -57,7 +70,7 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
                 "}\n"
 
     private val pinFragmentShaderCode =
-                "precision mediump float;\n" +
+        "precision mediump float;\n" +
                 "uniform vec4 vColor;\n" +
                 "uniform sampler2D u_Texture;\n" +
                 "varying vec2 v_TexCoordinate;\n" +
@@ -66,7 +79,7 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
                 "}\n"
 
     private val locVertexShaderCode =
-                "uniform vec2 trans;\n" +
+        "uniform vec2 trans;\n" +
                 "uniform vec2 scale;\n" +
                 "uniform vec2 locScale;\n" +
                 "attribute vec4 vPosition;\n" +
@@ -74,7 +87,7 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
                 "    gl_Position = vec4(trans.x * scale.x + vPosition.x*locScale.x, trans.y * scale.y + vPosition.y*locScale.y, 0.0, 1.0);\n" +
                 "}\n"
 
-    private var lineProgram: Int = 0
+    private var uniColorProgram: Int = 0
     private var varyingColorProgram: Int = 0
     private var pinProgram: Int = 0
     private var locProgram: Int = 0
@@ -82,6 +95,12 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
 
     var pinsChanged = true
 
+    /**
+     * gets called when the GLSurface is created, creates the programs with our shaders
+     *
+     * @param[gl] old unused parameter
+     * @param[config] unused config paramater
+     */
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         GLES20.glClearColor(0.9f, 0.9f, 0.9f, 1.0f)
 
@@ -93,7 +112,7 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
 
         var vertexShader: Int = loadShader(GLES20.GL_VERTEX_SHADER, lineVertexShaderCode)
         var fragmentShader: Int = loadShader(GLES20.GL_FRAGMENT_SHADER, uniformColorFragmentShaderCode)
-        lineProgram = GLES20.glCreateProgram().also {
+        uniColorProgram = GLES20.glCreateProgram().also {
             GLES20.glAttachShader(it, vertexShader)
             GLES20.glAttachShader(it, fragmentShader)
             GLES20.glLinkProgram(it)
@@ -126,22 +145,39 @@ class CustomMapGLRenderer(private val map: CustomMap): GLSurfaceView.Renderer{
         }
     }
 
+    /**
+     * gets called each time the view needs to be drawn
+     *
+     * @param[gl] old unused parameter
+     */
     override fun onDrawFrame(gl: GL10?) {
-        GLES20.glUseProgram(lineProgram)
+        GLES20.glUseProgram(uniColorProgram)
 
-        if(pinsChanged) {
+        if (pinsChanged) {
             map.initPinsGL()
             pinsChanged = false
         }
 
-        map.onDrawFrame(lineProgram, varyingColorProgram, pinProgram, locProgram)
+        map.onDrawFrame(uniColorProgram, varyingColorProgram, pinProgram, locProgram)
     }
 
+    /**
+     * gets called each time the surface changes size
+     *
+     * @param[gl] old unused parameter
+     * @paran[width] new surface width
+     * @param[height] new surface height
+     */
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
         GLES20.glViewport(0, 0, width, height)
     }
 
-
+    /**
+     * helper function to load a shader
+     * @param[type] shader type, like GLES20.GL_VERTEX_SHADER
+     * @param[shaderCode] the code of the shader concatenated in a string
+     * @return integer reference to the new shader object
+     */
     private fun loadShader(type: Int, shaderCode: String): Int {
         return GLES20.glCreateShader(type).also { shader ->
             // add the source code to the shader and compile it

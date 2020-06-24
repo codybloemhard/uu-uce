@@ -46,7 +46,7 @@ class FieldbookEditor: AppCompatActivity() {
 
     private lateinit var mediaServices  : MediaServices
 
-    private lateinit var content        : MutableList<ContentBlockInterface>
+    private lateinit var content: MutableList<ContentBlock>
 
     private lateinit var rootView       : View
     private lateinit var scrollView     : ScrollView
@@ -440,7 +440,7 @@ class FieldbookEditor: AppCompatActivity() {
      */
     private fun addText() {
         title.clearFocus()
-        TextBlock(
+        EditTextContentBlock(
             this
         ).also {
             it.makeEditable(currentBlockIndex, layout, rootView, ::changeBlock)
@@ -507,12 +507,12 @@ class FieldbookEditor: AppCompatActivity() {
      *
      * @param[cbi] the ContentBlock that has been long clicked
      */
-    private fun changeBlock(cbi: ContentBlockInterface): Boolean {
+    private fun changeBlock(cbi: ContentBlock): Boolean {
         currentBlockIndex = content.indexOf(cbi)
 
         // Set options for this block
         val list = mutableListOf<String>().apply {
-            if (cbi !is TextBlock)
+            if (cbi !is EditTextContentBlock)
                 add(getString(R.string.editor_edit_block))
             add(getString(R.string.editor_delete_block))
             if (currentBlockIndex > 0)
@@ -545,7 +545,7 @@ class FieldbookEditor: AppCompatActivity() {
      *
      * @param[cbi] the ContentBlock that has been long clicked
      */
-    private fun deleteBlock(cbi: ContentBlockInterface) {
+    private fun deleteBlock(cbi: ContentBlock) {
         cbi.removeContent(layout)
         content.remove(cbi)
         latestBlockIndex--
@@ -560,7 +560,7 @@ class FieldbookEditor: AppCompatActivity() {
      *
      * @param[cbi] the ContentBlock that has been long clicked
      */
-    private fun editBlock(cbi: ContentBlockInterface) {
+    private fun editBlock(cbi: ContentBlock) {
         editing = true
         when (cbi) {
             is ImageContentBlock -> selectImage()
@@ -573,7 +573,7 @@ class FieldbookEditor: AppCompatActivity() {
      *
      * @param[cbi] the ContentBlock that has been long clicked
      */
-    private fun moveBlockUp(cbi: ContentBlockInterface) {
+    private fun moveBlockUp(cbi: ContentBlock) {
         val newIndex = currentBlockIndex - 1
         moveBlock(newIndex, cbi)
     }
@@ -583,7 +583,7 @@ class FieldbookEditor: AppCompatActivity() {
      *
      * @param[cbi] the ContentBlock that has been long clicked
      */
-    private fun moveBlockDown(cbi: ContentBlockInterface) {
+    private fun moveBlockDown(cbi: ContentBlock) {
         val newIndex = currentBlockIndex + 1
         moveBlock(newIndex, cbi)
     }
@@ -594,7 +594,7 @@ class FieldbookEditor: AppCompatActivity() {
      * @param[newIndex] the new index we want to move the block to
      * @param[cbi] the ContentBlock we want to move
      */
-    private fun moveBlock(newIndex: Int, cbi: ContentBlockInterface) {
+    private fun moveBlock(newIndex: Int, cbi: ContentBlock) {
         layout.apply {
             removeViewAt(currentBlockIndex)
             addView(cbi.content, newIndex)
@@ -616,7 +616,7 @@ class FieldbookEditor: AppCompatActivity() {
      */
     private fun insertIntoFieldbook(
         title: String,
-        content: List<ContentBlockInterface>,
+        content: List<ContentBlock>,
         currentDate: String,
         location: Location?
     ) {

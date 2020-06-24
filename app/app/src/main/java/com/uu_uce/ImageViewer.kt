@@ -16,7 +16,11 @@ import androidx.preference.PreferenceManager
 import com.github.chrisbanes.photoview.PhotoView
 import com.github.chrisbanes.photoview.PhotoViewAttacher
 
-
+/**
+ * An activity in which a single image with title can be viewed and zoomed in on.
+ * @property[sharedPref] the shared preferences where the settings are stored.
+ * @constructor an ImageViewer activity.
+ */
 class ImageViewer : AppCompatActivity() {
 
     private lateinit var sharedPref : SharedPreferences

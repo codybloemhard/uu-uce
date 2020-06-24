@@ -7,7 +7,9 @@ import android.view.MotionEvent
 import android.widget.FrameLayout
 import kotlin.math.abs
 
-//a simple draggable button that's used for dragging the menu up and down
+/**
+ * a simple draggable button that's used for dragging the menu up and down
+ */
 class DragButton: FrameLayout {
     constructor(context: Context): super(context)
     constructor(context: Context, attrs: AttributeSet): super(context, attrs)
@@ -15,8 +17,8 @@ class DragButton: FrameLayout {
 
     //actions to be performed at the respective events
     var clickAction: () -> Unit = {}
-    var dragAction: (dx: Float, dy: Float) -> Unit = {_,_->  }
-    var dragEndAction: (dx: Float, dy: Float) -> Unit = {_,_ ->}
+    var dragAction: (dx: Float, dy: Float) -> Unit = { _, _ -> }
+    var dragEndAction: (dx: Float, dy: Float) -> Unit = { _, _ -> }
 
     private var lastx = 0f
     private var secondlastx = 0f
@@ -25,10 +27,14 @@ class DragButton: FrameLayout {
     private var clickStart = 0f
     private var maximumClickDistance = 10
 
+    /**
+     * handle the touchevent by performing the correct actions
+     * @return true if the event was handled, false otherwise
+     */
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        when(event.action){
-            MotionEvent.ACTION_DOWN ->{
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
                 //store where the drag action started
                 clickStart = event.rawY
                 secondlastx = lastx

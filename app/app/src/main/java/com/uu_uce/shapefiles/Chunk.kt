@@ -1,7 +1,8 @@
 package com.uu_uce.shapefiles
 
-//chunkindex (x,y,z) is the x'th chunk from the left, the y'th
-//from the bottom, in zoomlevel z
+/**
+ * chunkindex (x,y,z) is the x'th chunk from the left, the y'th from the bottom, in zoomlevel z
+ */
 typealias ChunkIndex = Triple<Int,Int,Int>
 fun chunkName(c: ChunkIndex): String{
     return "${c.third}-${c.first}-${c.second}.hlinechunk"
@@ -13,11 +14,13 @@ fun geolineChunkName(c: ChunkIndex): String{
     return "${c.first}-${c.second}.geolinechunk"
 }
 
-/*
-a chunk holds all shapes of a layer that are in a specific AABB
-shapes: all shapes present in the chunk
-bmin/bmax: the bounding box of all shapes
-type: what type of content is in this chunk
+/**
+ * a chunk holds all shapes of a layer that are in a specific AABB
+ * @param[shapes] all shapes present in the chunk
+ * @param[type] what type of content is in this chunk
+ * @constructor merge all shapes into the drawinfo
+ *
+ * @property[drawInfo] the drawInfo containing all information of shapes in this chunk
  */
 class Chunk(
     private var shapes: List<Shape>,
@@ -36,8 +39,8 @@ class Chunk(
         else -> throw Exception("chunk type not implemented")
     }
 
-    init{
-        for(shape in shapes) {
+    init {
+        for (shape in shapes) {
             shape.initDrawInfo(drawInfo)
         }
         drawInfo.finalize()
@@ -45,8 +48,14 @@ class Chunk(
         shapes = listOf()
     }
 
-    //display all chunks to the canvas
-    fun draw(lineProgram: Int, varyingColorProgram: Int, scale: FloatArray, trans: FloatArray, color: FloatArray){
-        drawInfo.draw(lineProgram, varyingColorProgram, scale, trans, color)
+    /**
+     * draws all the shapes in this chunk
+     * @param[uniColorProgram] the GL program to draw unicolor shapes with
+     * @param[varyingColorProgram] the GL program to draw different colored shapes with
+     * @param[scale] scale vector used to draw everything at the right size
+     * @param[trans] translation vector to draw everything in the right place
+     */
+    fun draw(uniColorProgram: Int, varyingColorProgram: Int, scale: FloatArray, trans: FloatArray) {
+        drawInfo.draw(uniColorProgram, varyingColorProgram, scale, trans)
     }
 }

@@ -38,7 +38,13 @@ import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 import kotlin.math.roundToInt
 
-//abstract pin class includes functionality for drawing the pin, and some abstract methods
+/**
+ * Abstract pin class includes functionality for drawing the pin, and some abstract methods
+ * @property[coordinate] the utm-coordinate at which the pin is located
+ * @property[background] a bitmap of the pin that is to be drawn on the map
+ * @property[icon] a drawable of the icon that is to be drawn on top of the background
+ * @property[pinWidth] the width of the pin on the map, this is set automatically from settings
+ */
 abstract class Pin(
     val coordinate              : UTMCoordinate,
     protected var background    : Bitmap,
@@ -46,7 +52,8 @@ abstract class Pin(
     var pinWidth                : Float = defaultPinSize.toFloat()
 ){
     protected var completeRange = 100
-    //opengl stuff
+
+    //opengl variables
     private var backgroundHandle: Int = -1
     private lateinit var vertexBuffer: FloatBuffer
     private lateinit var indexBuffer: ShortBuffer
@@ -61,14 +68,14 @@ abstract class Pin(
     private val drawOrder = shortArrayOf(0, 1, 2, 0, 2, 3)
     private val vertexStride: Int = coordsPerVertex * 4
 
+    //some lengths are still needed after dismissing the icon/background, so we save them
     private val bitmapIconWidth = icon.intrinsicWidth.toFloat()
     private val bitmapIconHeight = icon.intrinsicHeight.toFloat()
     private val bitmapBackgroundWidth = background.width.toFloat()
     private val bitmapBackgroundHeight = background.height.toFloat()
 
     // Calculate pin height to maintain aspect ratio
-    var pinHeight =
-        pinWidth * (bitmapBackgroundHeight / bitmapBackgroundWidth)
+    var pinHeight = pinWidth * (bitmapBackgroundHeight / bitmapBackgroundWidth)
 
     // Declare variables for icon size
     private var iconWidth  : Double = 0.0
@@ -80,19 +87,20 @@ abstract class Pin(
 
     init {
         // Calculate icon measurements
-        if(icon.intrinsicHeight > icon.intrinsicWidth){
+        if (icon.intrinsicHeight > icon.intrinsicWidth) {
             iconHeight = pinHeight * 0.5
             iconWidth = iconHeight * (bitmapIconWidth / bitmapIconHeight)
-        }
-        else{
+        } else {
             iconWidth = pinWidth * 0.55
             iconHeight = iconWidth * (bitmapIconHeight / bitmapIconWidth)
         }
     }
 
-    //to be called once by the GL thread, to initialize all buffers related to this pin
-    open fun initGL(){
-        if(this::vertexBuffer.isInitialized) return
+    /**
+     * To be called once by the GL thread, initializes all buffers related to this pin
+     */
+    open fun initGL() {
+        if (this::vertexBuffer.isInitialized) return
         //initialize opengl drawing
         vertexBuffer =
             ByteBuffer.allocateDirect(spriteCoords.size * 4).run {
@@ -146,35 +154,74 @@ abstract class Pin(
         if(icon.intrinsicHeight > icon.intrinsicWidth){
             iconHeight = pinHeight * 0.5
             iconWidth = iconHeight * (bitmapIconWidth / bitmapIconHeight)
-        }
-        else{
+        } else {
             iconWidth = pinWidth * 0.55
             iconHeight = iconWidth * (bitmapIconHeight / bitmapIconWidth)
         }
-        icon.setBounds((iconX - localIconWidth / 2).toInt(), (iconY - localIconHeight / 2).toInt(), (iconX + localIconWidth / 2).toInt(), (iconY + localIconHeight / 2).toInt())
+        icon.setBounds(
+            (iconX - localIconWidth / 2).toInt(),
+            (iconY - localIconHeight / 2).toInt(),
+            (iconX + localIconWidth / 2).toInt(),
+            (iconY + localIconHeight / 2).toInt()
+        )
         icon.draw(canvas)
 
         backgroundHandle = loadTexture(background)
     }
 
-    //whether tapLocation hits this pin or not
-    protected fun isInside(tapLocation: p2): Boolean{
+    /**
+     * Determines whether tapLocation hits this pin or not
+     *
+     * @param[tapLocation] the location where a tap occurs
+     * @return true if the tap hit the pin, false if it did not
+     */
+    protected fun isInside(tapLocation: p2): Boolean {
         return pointInAABoundingBox(boundingBox.first, boundingBox.second, tapLocation, 0)
     }
 
-    //what to do when tapped
-    abstract fun tap(tapLocation : p2, activity : Activity, view: View, disPerPixel: Float)
+    /**
+     * Function that is executed when this pin is tapped.
+     */
+    abstract fun tap(tapLocation: p2, activity: Activity, view: View, disPerPixel: Float)
 
-    //should create a list of links to all content in this pin
-    //used to create the list when a mergedPin is clicked
+    /**
+     * Should create a list of links to all content in this pin
+     * Used to create the list when a mergedPin is clicked
+     */
     abstract fun addContent(): MutableList<String>
 
-    //main drawing function, draws the pin and recalculates the bounding box
-    open fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2,p2>, width : Int, height : Int, view: View, disPerPixel: Float): Boolean {
+    /**
+     * Create popup showing this pins content
+     *
+     * @param[parentView] the view that hosts the popup
+     * @param[activity] the current activity
+     */
+    abstract fun openContent(parentView: View, activity: Activity)
 
-        val screenLocation: Pair<Float, Float> = coordToScreen(coordinate, viewport, view.width, view.height)
+    /**
+     * Main drawing function, draws the pin and recalculates the bounding box
+     *
+     * @param[program] reference to the GL program to use
+     * @param[scale] scale vector used to draw everything at the right size
+     * @param[trans] translation vector to draw everything in the right place
+     * @param[viewport] current viewport of the camera
+     * @param[view] the view this is drawn in
+     * @param[disPerPixel] the number of UTM units (meters?) that one pixel is wide
+     * @return true if this pin still needs to be initialized, false if not
+     */
+    open fun draw(
+        program: Int,
+        scale: FloatArray,
+        trans: FloatArray,
+        viewport: Pair<p2, p2>,
+        view: View,
+        disPerPixel: Float
+    ): Boolean {
 
-        if(screenLocation.first.isNaN() || screenLocation.second.isNaN()){
+        val screenLocation: Pair<Float, Float> =
+            coordToScreen(coordinate, viewport, view.width, view.height)
+
+        if (screenLocation.first.isNaN() || screenLocation.second.isNaN()) {
             Logger.error("Pin", "Pin draw called with NaN location")
             return false
         }
@@ -186,7 +233,7 @@ abstract class Pin(
         val maxY = (screenLocation.second).roundToInt()
 
         // Check whether pin is out of screen
-        if (minX > width || maxX < 0 || minY > height || maxY < 0) {
+        if (minX > view.width || maxX < 0 || minY > view.height || maxY < 0) {
             Logger.log(LogType.Event, "Pin", "Pin outside of viewport")
             inScreen = false
             return false
@@ -211,7 +258,7 @@ abstract class Pin(
         val scaleHandle = GLES20.glGetUniformLocation(program, "scale")
         GLES20.glUniform2fv(scaleHandle, 1, scale, 0)
 
-        val pinScale = floatArrayOf(pinWidth / width * 2, pinHeight / height * 2)
+        val pinScale = floatArrayOf(pinWidth / view.width * 2, pinHeight / view.height * 2)
         val pinScaleHandle = GLES20.glGetUniformLocation(program, "pinScale")
         GLES20.glUniform2fv(pinScaleHandle, 1, pinScale, 0)
 
@@ -229,7 +276,12 @@ abstract class Pin(
         GLES20.glUniform1i(textureUniformHandle, 0)
 
 
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, drawOrder.size, GLES20.GL_UNSIGNED_SHORT, indexBuffer)
+        GLES20.glDrawElements(
+            GLES20.GL_TRIANGLES,
+            drawOrder.size,
+            GLES20.GL_UNSIGNED_SHORT,
+            indexBuffer
+        )
 
         GLES20.glDisableVertexAttribArray(positionHandle)
         GLES20.glDisableVertexAttribArray(textureCoordinateHandle)
@@ -237,9 +289,13 @@ abstract class Pin(
         return false
     }
 
-    //changes the width of the pin to pinSize, and the height accordingly
-    //also changes the icon's size
-    open fun resize(pinSize : Int){
+    /**
+     * Changes the width of the pin to pinSize, the height changes accordingly
+     * This also changes the icon's size
+     *
+     * @param[pinSize] the desired width of the pin in pixels
+     */
+    open fun resize(pinSize: Int) {
         pinWidth = pinSize.toFloat()
 
         // Calculate pin height to maintain aspect ratio
@@ -247,17 +303,20 @@ abstract class Pin(
             pinWidth * bitmapBackgroundHeight / bitmapBackgroundWidth
 
         // Calculate icon measurements
-        if(bitmapIconHeight > bitmapIconWidth){
+        if (bitmapIconHeight > bitmapIconWidth) {
             iconHeight = pinHeight * 0.5
             iconWidth = iconHeight * (bitmapIconWidth / bitmapIconHeight)
-        }
-        else{
+        } else {
             iconWidth = pinWidth * 0.55
             iconHeight = iconWidth * (bitmapIconHeight / bitmapIconWidth)
         }
     }
 
-    //helper function to load a bitmap into a buffer
+    /**
+     * Helper function to load a bitmap into a buffer
+     * @param[bitmap] the bitmap to be made into a texture
+     * @return integer reference to the new texture
+     */
     private fun loadTexture(bitmap: Bitmap): Int {
         val textureHandle = IntArray(1)
         GLES20.glGenTextures(1, textureHandle, 0)
@@ -290,7 +349,18 @@ abstract class Pin(
     }
 }
 
-//normal singular pin, which shows its information when tapped
+/**
+ * Singular pin, which shows its content when tapped.
+ * @property[id] the id of the pin, should be UUID4 format.
+ * @property[title] the title of the pin.
+ * @property[content] a json format string containing the content of the pin.
+ * @property[status] the current status of the pin.
+ * @property[predecessorIds] the ids of pins that need to be completed before this pin is unlocked,
+ *  in a string sepparated by commas(,).
+ * @property[followIds] the ids of pins that follow this pin, formatted the same way as predecessors.
+ * @property[viewModel] the viewModel the pin uses to acccess the database.
+ * @constructor creates a single pin.
+ */
 class SinglePin(
     var id                      : String = "",
     coordinate                  : UTMCoordinate,
@@ -320,11 +390,18 @@ class SinglePin(
         }
     }
 
-    override fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2, p2>, width: Int, height: Int, view: View, disPerPixel: Float): Boolean {
+    override fun draw(
+        program: Int,
+        scale: FloatArray,
+        trans: FloatArray,
+        viewport: Pair<p2, p2>,
+        view: View,
+        disPerPixel: Float
+    ): Boolean {
         // Check whether pin is unlocked
         if (status == 0) return false
 
-        return super.draw(program, scale, trans, viewport, width, height, view, disPerPixel)
+        return super.draw(program, scale, trans, viewport, view, disPerPixel)
     }
 
     //show this pins content when tapped
@@ -342,26 +419,29 @@ class SinglePin(
         return mutableListOf(id)
     }
 
-    // Check if pin should be unlocked
-    fun tryUnlock(action : (() -> Unit)){
-        if(predecessorIds[0] != "" && status < 1){
+    /**
+     * Check if pin should be unlocked and execute funcion when it is unlocked.
+     * @param[action] the action to be executed when the pin is unlocked.
+     */
+    fun tryUnlock(action: (() -> Unit)) {
+        if (predecessorIds[0] != "" && status < 1) {
             (viewModel as PinViewModel).tryUnlock(id, predecessorIds, action)
-        }
-        else{
+        } else {
             action()
         }
     }
 
-    //create popup showing this pins content
-    fun openContent(parentView: View, activity : Activity) {
+
+    override fun openContent(parentView: View, activity: Activity) {
         val layoutInflater = activity.layoutInflater
 
         var popupWindow: PopupWindow? = null
         // Build an custom view (to be inflated on top of our current view & build it's popup window)
         val viewGroup: ViewGroup
-        var newViewGroup: ViewParent = if(parentView is ViewParent) parentView else parentView.parent
-        while(true){
-            if(newViewGroup is ViewGroup){
+        var newViewGroup: ViewParent =
+            if (parentView is ViewParent) parentView else parentView.parent
+        while (true) {
+            if (newViewGroup is ViewGroup) {
                 viewGroup = newViewGroup
                 break
             }
@@ -453,7 +533,7 @@ class SinglePin(
                         buttonLayout.setMargins(parentView.width / 7, parentView.height / 50, parentView.width / 7, parentView.height / 50)
                         finishButton.layoutParams = buttonLayout
                         finishButton.setOnClickListener{
-                            finishQuiz(activity, parentView)
+                            finishQuizzes(activity, parentView)
                             popupWindow.dismiss()
                         }
                         layout.addView(finishButton)
@@ -475,8 +555,7 @@ class SinglePin(
                                 .setPositiveButton(activity.getString(R.string.positive_button_text)) { _, _ -> popupWindow.dismiss() }
                                 .setNegativeButton(activity.getString(R.string.negative_button_text), null)
                                 .show()
-                        }
-                        else{
+                        } else {
                             popupWindow.dismiss()
                         }
                     }
@@ -486,40 +565,61 @@ class SinglePin(
         )
     }
 
+    /**
+     * Completes the current pin and informs following pins that it has been completed.
+     */
     private fun complete() {
         status = 2
         (viewModel as PinViewModel).completePin(id, followIds)
     }
 
-    fun addQuestion(questionId : Int, reward: Int){
+    /**
+     * Adds a pin to the current pin.
+     * @param[questionId] the id of the question to be added.
+     * @param[reward] the available reward for completing the new quiz.
+     */
+    fun addQuestion(questionId: Int, reward: Int) {
         answered[questionId] = false
         totalReward += reward
     }
 
-    fun answerQuestion(questionId : Int, reward : Int){
+    /**
+     * Marks a quiz as answered.
+     * @param[questionId] the quiz to be marked as answered.
+     * @param[reward] the reward that has been earned by answering.
+     */
+    fun answerQuestion(questionId: Int, reward: Int) {
         questionRewards[questionId] = reward
         answered[questionId] = true
         madeProgress = true
     }
 
-    private fun resetQuestions(){
-        questionRewards.map{0}
+    /**
+     * Resets all quizzes in the pin.
+     */
+    private fun resetQuestions() {
+        questionRewards.map { 0 }
         totalReward = 0
         madeProgress = false
-        answered.map{true}
+        answered.map { true }
     }
 
-    private fun finishQuiz(activity : Activity, parentView: View){
-        if(answered.all{b -> b}){
+    /**
+     * Finishes all quizzes in the pin.
+     * @param[activity] the current activity.
+     * @param[parentView] the view in which the result popup should be opened.
+     */
+    private fun finishQuizzes(activity: Activity, parentView: View) {
+        if (answered.all { b -> b }) {
             // All questions answered
             val reward = questionRewards.sum()
 
             var sufficient = false
-            if(reward >= 0.55 * totalReward){
+            if (reward >= 0.55 * totalReward) {
                 sufficient = true
                 complete()
 
-                val sharedPref =  PreferenceManager.getDefaultSharedPreferences(activity)
+                val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity)
                 val prevPoints = sharedPref.getInt("com.uu_uce.USER_POINTS", 0)
                 with(sharedPref.edit()) {
                     putInt("com.uu_uce.USER_POINTS", prevPoints + reward)
@@ -591,13 +691,19 @@ class SinglePin(
     }
 }
 
-//merged pin, contains two pins a,b which can be merged pins too, creating a tree-structure
-//a and b are drawn/tapped seperately when their hitboxes don't collide
-//a merged pin is drawn/tapped when they do collide
-//nrPixels: minimum number of pixels needed between a and b until they collide
-//actualDis: distance between a and b, but only in the direction in which they will collide, which is the same direction as for nrPixels
-//      this will be difference in x coordinate if they  approach each other horizontally
-//      and difference in y coordinate if they approach each other vertically
+/**
+ * a merged pin contains two pins a,b which can be merged pins too, creating a tree-structure
+ * a and b are drawn/tapped seperately when their hitboxes don't collide
+ * a merged pin is drawn/tapped when they do collide
+ *
+ * @property[a] one of the two children
+ * @property[b] the other child
+ * @property[actualDis] distance between a and b, but only in the direction in which they will collide, which is the same direction as for nrPixels this will be difference in x coordinate if they approach each other horizontally and difference in y coordinate if they approach each other vertically
+ * @property[nrPixels] minimum number of pixels needed between a and b until they collide
+ * @property[pinViewModel] the viewModel used to access the database in GeoMap
+ * @property[fieldbookViewModel] the viewModel used to access the database in Fieldbook
+ * @constructor creates a MergedPin
+ */
 class MergedPin(
     private val a: Pin?,
     private val b: Pin?,
@@ -610,50 +716,70 @@ class MergedPin(
     icon: Drawable,
     pinSize: Float = defaultPinSize.toFloat()
 ): Pin(coordinate, background, icon, pinSize) {
-    //draw a and b if they don't collide, draw merge pin if they do
-    override fun draw(program: Int, scale: FloatArray, trans: FloatArray, viewport: Pair<p2, p2>, width: Int, height: Int, view: View, disPerPixel: Float): Boolean {
-        return if(nrPixels * disPerPixel < actualDis) {
-            var res = a?.draw(program,scale,trans,viewport,width,height,view,disPerPixel) ?: false
-            res = res || b?.draw(program,scale,trans,viewport,width,height,view,disPerPixel) ?: false
+
+    /**
+     * draw both subpins if they don't collide, draw merge pin if they do
+     */
+    override fun draw(
+        program: Int,
+        scale: FloatArray,
+        trans: FloatArray,
+        viewport: Pair<p2, p2>,
+        view: View,
+        disPerPixel: Float
+    ): Boolean {
+        return if (nrPixels * disPerPixel < actualDis) {
+            var res = a?.draw(program, scale, trans, viewport, view, disPerPixel) ?: false
+            res = res || b?.draw(program, scale, trans, viewport, view, disPerPixel) ?: false
             res
-        }else{
-            super.draw(program,scale,trans,viewport,width,height,view,disPerPixel)
+        } else {
+            super.draw(program, scale, trans, viewport, view, disPerPixel)
         }
     }
 
+    /**
+     * initialize both subpins
+     */
     override fun initGL() {
         a?.initGL()
         b?.initGL()
         super.initGL()
     }
 
-    //tap a and b if they don't collide, tap merge pin if they do
-    override fun tap(tapLocation: p2, activity: Activity, view: View, disPerPixel: Float){
-        if(nrPixels * disPerPixel < actualDis) {
+    /**
+     * tap both subpins if they don't collide, tap merge pin if they do
+     */
+    override fun tap(tapLocation: p2, activity: Activity, view: View, disPerPixel: Float) {
+        if (nrPixels * disPerPixel < actualDis) {
             a?.tap(tapLocation, activity, view, disPerPixel)
             b?.tap(tapLocation, activity, view, disPerPixel)
-        }else{
-            if(!isInside(tapLocation)) return
+        } else {
+            if (!isInside(tapLocation)) return
             openContent(view, activity)
         }
     }
 
-    //add content of both sub pins
+    /**
+     * add content of both subpins
+     */
     override fun addContent(): MutableList<String> {
-        val alist = a?.addContent()?:mutableListOf()
-        val blist = b?.addContent()?:mutableListOf()
+        val alist = a?.addContent() ?: mutableListOf()
+        val blist = b?.addContent() ?: mutableListOf()
         alist.addAll(blist)
         return alist
     }
 
-    //create a popup containing all of the pins inside this pin, in the same style as AllPins
-    private fun openContent(view: View, activity: Activity){
+    /**
+     * create a popup containing all of the pins inside this pin, in the same style as AllPins
+     */
+    override fun openContent(parentView: View, activity: Activity) {
         val layoutInflater = activity.layoutInflater
 
         var popupWindow: PopupWindow? = null
 
         // Build an custom view (to be inflated on top of our current view & build it's popup window)
-        val customView = layoutInflater.inflate(R.layout.merged_pin_popup, view.parent as ViewGroup, false)
+        val customView =
+            layoutInflater.inflate(R.layout.merged_pin_popup, parentView.parent as ViewGroup, false)
         customView.setOnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_BACK && event.repeatCount == 0 && popupWindow?.isShowing == true) {
                 popupWindow?.dismiss()
@@ -685,7 +811,7 @@ class MergedPin(
         val viewManager = LinearLayoutManager(activity)
         if(pinViewModel != null) {
             val pinViewAdapter = PinListAdapter(activity)
-            pinViewAdapter.view = view
+            pinViewAdapter.view = parentView
 
             customView.findViewById<RecyclerView>(R.id.allpins_recyclerview).apply {
                 layoutManager = viewManager
@@ -697,8 +823,8 @@ class MergedPin(
             }
         }
         if(fieldbookViewModel != null) {
-            val fieldbookViewAdapter = FieldbookAdapter(activity, fieldbookViewModel, view)
-            fieldbookViewAdapter.view = view
+            val fieldbookViewAdapter = FieldbookAdapter(activity, fieldbookViewModel, parentView)
+            fieldbookViewAdapter.view = parentView
 
             customView.findViewById<RecyclerView>(R.id.allpins_recyclerview).apply {
                 layoutManager = viewManager
@@ -710,10 +836,12 @@ class MergedPin(
             }
         }
 
-        popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0)
+        popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0)
     }
 
-    //resize a b and this
+    /**
+     * resize both subpins
+     */
     override fun resize(pinSize: Int) {
         a?.resize(pinSize)
         b?.resize(pinSize)

@@ -16,8 +16,14 @@ import com.uu_uce.profile.ProfileStatistics
 import com.uu_uce.ui.createTopbar
 import kotlinx.android.synthetic.main.activity_profile.*
 
+/**
+ * An activity in which the user can see their personal information as well as unlockables.
+ * @property[selectedOptionText] the text view corresponding to the currently selected fragment.
+ * @property[selectedOptionBar] the bar under the text corresponding to the currently selected fragment.
+ * @property[sharedPref] the shared preferences where the settings are stored.
+ * @constructor a Profile Activity.
+ */
 class Profile : AppCompatActivity() {
-
     private lateinit var selectedOptionText : TextView
     private lateinit var selectedOptionBar : View
     private lateinit var sharedPref : SharedPreferences
@@ -31,8 +37,7 @@ class Profile : AppCompatActivity() {
         // Set statusbar text color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !darkMode) {
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR//  set status text dark
-        }
-        else if(!darkMode){
+        } else if(!darkMode){
             window.statusBarColor = Color.BLACK// set status background white
         }
 
@@ -86,16 +91,25 @@ class Profile : AppCompatActivity() {
                 selectedOptionBar.setBackgroundColor(ContextCompat.getColor(this, R.color.TextGrey))
 
                 statistics_button_text.setTextColor(ContextCompat.getColor(this, R.color.HighBlue))
-                statistics_button_bar.setBackgroundColor(ContextCompat.getColor(this, R.color.HighBlue))
+                statistics_button_bar.setBackgroundColor(
+                    ContextCompat.getColor(
+                        this,
+                        R.color.HighBlue
+                    )
+                )
 
                 selectedOptionText = statistics_button_text
-                selectedOptionBar  = statistics_button_bar
+                selectedOptionBar = statistics_button_bar
 
                 openFragment(ProfileStatistics())
             }
         }
     }
 
+    /**
+     * Opens a fragment in the fragment holder.
+     * @param[fragment] the fragment to be opened.
+     */
     private fun openFragment(fragment: Fragment) {
         val transaction = supportFragmentManager.beginTransaction()
         transaction.replace(R.id.profile_container, fragment)

@@ -216,11 +216,13 @@ class FieldbookPinmapFragment : Fragment() {
             val g = reader.readUByte()
             val r = reader.readUByte()
 
-            PolyStyle(outline.toInt() == 1, floatArrayOf(
-                r.toFloat()/255,
-                g.toFloat()/255,
-                b.toFloat()/255
-            ))
+            PolyStyle(
+                floatArrayOf(
+                    r.toFloat() / 255,
+                    g.toFloat() / 255,
+                    b.toFloat() / 255
+                )
+            )
         }
     }
 }

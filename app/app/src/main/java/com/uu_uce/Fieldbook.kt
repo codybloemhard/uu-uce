@@ -18,7 +18,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.uu_uce.fieldbook.FieldbookEntry
 import com.uu_uce.fieldbook.FieldbookHomeFragment
 import com.uu_uce.fieldbook.FieldbookPinmapFragment
-import com.uu_uce.pins.ContentBlockInterface
+import com.uu_uce.pins.ContentBlock
 import com.uu_uce.ui.createTopbar
 
 
@@ -106,16 +106,21 @@ class Fieldbook : AppCompatActivity() {
  * @param[entry] the selected FieldbookEntry
  * @param[content] the content of the mentioned entry
  */
-fun openFieldbookPopup (activity: Activity, rootView: View, entry: FieldbookEntry, content: List<ContentBlockInterface>) {
+fun openFieldbookPopup(
+    activity: Activity,
+    rootView: View,
+    entry: FieldbookEntry,
+    content: List<ContentBlock>
+) {
     val layoutInflater = activity.layoutInflater
 
     var popupWindow: PopupWindow? = null
 
     val viewGroup: ViewGroup
-    var newViewGroup: ViewParent = if(rootView is ViewParent) rootView else rootView.parent
+    var newViewGroup: ViewParent = if (rootView is ViewParent) rootView else rootView.parent
 
-    while(true){
-        if(newViewGroup is ViewGroup){
+    while (true) {
+        if (newViewGroup is ViewGroup) {
             viewGroup = newViewGroup
             break
         }

@@ -9,7 +9,9 @@ import androidx.core.view.updateLayoutParams
 import com.uu_uce.R
 import kotlinx.android.synthetic.main.activity_geo_map.view.*
 
-//view that holds most buttons, and can be dragged up and down
+/**
+ * view that holds the menu buttons, and can be dragged up and down
+ */
 class Menu : RelativeLayout {
     constructor(context: Context): super(context)
     constructor(context: Context, attrs: AttributeSet): super(context, attrs)
@@ -26,43 +28,52 @@ class Menu : RelativeLayout {
     private var screenHeight = 0
     private var minScroll = 0f
 
-    private lateinit var dragButton : ImageView
+    private lateinit var dragButton: ImageView
 
-    //when screen height is known, it should be passed on to Menu to update its variables
-    fun setScreenHeight(scrnHeight: Int, openBtnHeight: Int, scrollHeight: Int, lowerMenuHeight: Int){
+    /**
+     * when screen height is known, it should be passed on to Menu to update its variables
+     * @param[scrnHeight] height of the screen
+     * @param[dragButton] height of the dragButton
+     * @param[scrollHeight] height of scrollLayout containing toggle buttons
+     * @param[lowerMenuHeight] height of the part of the menu below the toggles
+     */
+    fun setScreenHeight(scrnHeight: Int, dragButton: Int, scrollHeight: Int, lowerMenuHeight: Int) {
         disableBar = scrollHeight == 0 // Disable bar when no layers are available
-        if(disableBar){
+        if (disableBar) {
             toggle_layer_scroll.visibility = View.GONE
-        }
-        else{
+        } else {
             toggle_layer_scroll.visibility = View.VISIBLE
         }
 
         dragStatus = DragStatus.Down
         screenHeight = scrnHeight
-        downY = screenHeight - openBtnHeight.toFloat()
+        downY = screenHeight - dragButton.toFloat()
         barY = downY - scrollHeight.toFloat()
         upY = barY - lowerMenuHeight.toFloat() * 1.2f
-        updateLayoutParams{height = screenHeight}
+        updateLayoutParams { height = screenHeight }
         y = downY
         minScroll = screenHeight * 0.1f
 
-        dragButton = findViewById(R.id.dragButton)
-        dragButton.setImageResource(R.drawable.ic_sprite_arrowup)
+        this.dragButton = findViewById(R.id.dragButton)
+        this.dragButton.setImageResource(R.drawable.ic_sprite_arrowup)
     }
 
-    //when the button is released, snap to the closest position in the drag-direction
-    fun snap(dx: Float, dy: Float){
+    /**
+     * when the button is released, snap to the closest position in the drag-direction
+     * @param[dx] velocity in x direction
+     * @param[dy] velocity in y direction
+     */
+    fun snap(dx: Float, dy: Float) {
         when {
-            y < upY ->{
+            y < upY -> {
                 up()
             }
             y < barY -> {
-                if(dy < 0) up()
+                if (dy < 0) up()
                 else bar()
             }
             y < downY -> {
-                if(dy < 0) bar()
+                if (dy < 0) bar()
                 else down()
             }
             else -> {
@@ -71,41 +82,53 @@ class Menu : RelativeLayout {
         }
     }
 
-    //drag up/down by delta-y
-    fun drag(dx: Float, dy: Float){
+    /**
+     * drag the menu up/down
+     * @param[dx] velocity in x direction
+     * @param[dy] velocity in y direction
+     */
+    fun drag(dx: Float, dy: Float) {
         y = maxOf(y + dy, minScroll)
     }
 
-    //move to up position (everything visible)
-    private fun up(){
+    /**
+     * move to up position (everything visible)
+     */
+    private fun up() {
         dragStatus = DragStatus.Up
         animate().y(upY)
         dragButton.setImageResource(R.drawable.ic_sprite_arrowdown)
     }
 
-    //move to bar position (only upper row visible)
-    private fun bar(){
+    /**
+     * move to bar position (only upper row visible)
+     */
+    private fun bar() {
         dragStatus = DragStatus.Bar
         animate().y(barY)
         dragButton.setImageResource(R.drawable.ic_sprite_arrowup)
     }
 
-    //move to down position (only drag button visible)
-    fun down(){
+    /**
+     * move to down position (only drag button visible)
+     */
+    fun down() {
         dragStatus = DragStatus.Down
         animate().y(downY)
         dragButton.setImageResource(R.drawable.ic_sprite_arrowup)
     }
 
-    //when button is tapped, cycle through positions
-    fun dragButtonTap(){
-        animate().y(y-100)
-        when(dragStatus){
-            DragStatus.Down ->{
-                if(disableBar) up()
+    /**
+     * when button is tapped, cycle through positions
+     */
+    fun dragButtonTap() {
+        animate().y(y - 100)
+        when (dragStatus) {
+            DragStatus.Down -> {
+                if (disableBar) up()
                 else bar()
             }
-            DragStatus.Bar ->{
+            DragStatus.Bar -> {
                 up()
             }
             DragStatus.Up ->{
@@ -115,6 +138,9 @@ class Menu : RelativeLayout {
     }
 }
 
+/**
+ * different statuses of the menu
+ */
 enum class DragStatus{
     Down, Bar, Up
 }

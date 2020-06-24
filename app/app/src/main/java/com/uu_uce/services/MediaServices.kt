@@ -32,7 +32,7 @@ class MediaServices(private val activity: Activity) {
      *
      * @return the path to the fieldbook directory, as a File
      */
-    @Suppress("DEPRECATION")
+    @Suppress("DEPRECATION") // Used for older API levels
     private fun fieldbookDir(): File {
         return File(
             Environment.getExternalStorageDirectory(),

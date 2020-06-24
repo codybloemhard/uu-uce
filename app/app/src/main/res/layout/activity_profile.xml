@@ -68,29 +68,17 @@
         app:layout_constraintTop_toBottomOf="@+id/user_orginization_logo" />
 
     <TextView
-        android:id="@+id/user_number_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto"
-        android:text="@string/profile_user_number"
-        android:textColor="@color/TextGrey"
-        android:textSize="15sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_name_text" />
-
-    <TextView
         android:id="@+id/organization_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
         android:fontFamily="@font/roboto_bold"
         android:text="@string/profile_organization_name"
         android:textColor="@color/TextGrey"
         android:textSize="15sp"
+        android:layout_marginTop="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_number_text" />
+        app:layout_constraintTop_toBottomOf="@id/user_name_text" />
 
     <LinearLayout
         android:id="@+id/button_bar"

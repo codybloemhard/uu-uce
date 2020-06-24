@@ -23,7 +23,16 @@ import com.uu_uce.allpins.PinViewModel
 import com.uu_uce.ui.createTopbar
 import kotlinx.android.synthetic.main.activity_all_pins.*
 
-
+/**
+ * An activity where a list of all unlocked pins is displayed.
+ * @property[recyclerView] the RecyclerView containing an item for each unlocked pin.
+ * @property[viewManager]
+ * @property[pinViewModel] the ViewModel from which the pin database can be accessed.
+ * @property[sharedPref] the shared preferences in which app settings are stored.
+ * @property[viewAdapter] the adapter which handles logic for RecyclerviewItems
+ * @property[sortmode] the selected sorting option.
+ * @constructor the AllPins activity.
+ */
 class AllPins : AppCompatActivity() {
     private lateinit var recyclerView   : RecyclerView
     private lateinit var viewManager    : RecyclerView.LayoutManager
@@ -91,7 +100,7 @@ class AllPins : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if(pins_searchbar.text.toString().count() > 0){
+        if (pins_searchbar.text.toString().count() > 0) {
             pins_searchbar.text.clear()
             searchPins("")
             return
@@ -99,14 +108,18 @@ class AllPins : AppCompatActivity() {
         super.onBackPressed()
     }
 
+    /**
+     * Opens a dialog where the user can select a sorting mode.
+     */
     private fun openDialog() {
-        val filterOptions : Array<String> = arrayOf(
+        val filterOptions: Array<String> = arrayOf(
             getString(R.string.allpins_sorting_title_az),
             getString(R.string.allpins_sorting_title_za),
             getString(R.string.allpins_sorting_difficulty_easyhard),
             getString(R.string.allpins_sorting_difficulty_hardeasy),
             getString(R.string.allpins_sorting_type_az),
-            getString(R.string.allpins_sorting_type_za))
+            getString(R.string.allpins_sorting_type_za)
+        )
 
         AlertDialog.Builder(this, R.style.AlertDialogStyle)
             .setTitle(getString(R.string.allpins_sort_popup_title))
@@ -121,17 +134,33 @@ class AllPins : AppCompatActivity() {
             }.show()
     }
 
-    private fun sortPins(){
+    /**
+     * Sets an observer to the pins so changing the sortmode will automatically call sortList.
+     */
+    private fun sortPins() {
         viewAdapter = PinListAdapter(this)
         recyclerView.adapter = viewAdapter
         pinViewModel = ViewModelProvider(this).get(PinViewModel::class.java)
         pinViewModel.allPinData.observe(this, Observer { pins ->
-            pins?.let { viewAdapter.setPins(sortList(it, sharedPref.getInt("com.uu_uce.SORTMODE", 0)), pinViewModel) }
+            pins?.let {
+                viewAdapter.setPins(
+                    sortList(
+                        it,
+                        sharedPref.getInt("com.uu_uce.SORTMODE", 0)
+                    ), pinViewModel
+                )
+            }
         })
     }
 
-    private fun sortList(pins : List<PinData>, sortmode: Int) : List<PinData> {
-        return when(sortmode) {
+    /**
+     * Sorts the items in the RecyclerView according to the current sortmode.
+     * @param[pins] the PinData that is to be sorted.
+     * @param[sortmode] the mode according to which the pins need to be sorted.
+     * @return a sorted list of PinData.
+     */
+    private fun sortList(pins: List<PinData>, sortmode: Int): List<PinData> {
+        return when (sortmode) {
             0 -> pins.sortedWith(compareBy { it.title })
             1 -> pins.sortedWith(compareByDescending { it.title })
             2 -> pins.sortedWith(compareBy { it.difficulty })
@@ -144,15 +173,26 @@ class AllPins : AppCompatActivity() {
         }
     }
 
-    private fun searchPins(search : String){
-        pinViewModel.searchPins(search){ pins ->
+    /**
+     * Searches for pins whose titles match with the searchterm.
+     * @param[search] the searchterm.
+     */
+    private fun searchPins(search: String) {
+        pinViewModel.searchPins(search) { pins ->
             pins?.let {
-                viewAdapter.setPins(sortList(pins, sharedPref.getInt("com.uu_uce.SORTMODE", 0)), pinViewModel)
+                viewAdapter.setPins(
+                    sortList(pins, sharedPref.getInt("com.uu_uce.SORTMODE", 0)),
+                    pinViewModel
+                )
             }
             hideKeyboard(this)
         }
     }
 
+    /**
+     * Hides the keyboard.
+     * @param[activity] the current activity.
+     */
     private fun hideKeyboard(activity: Activity) {
         val imm: InputMethodManager =
             activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager

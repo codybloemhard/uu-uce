@@ -13,6 +13,13 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
+/**
+ * location of the user, and potentially other users
+ *
+ * @param[utm] the current UTM location
+ * @param[context] the context this location is in
+ * @constructor initializes all buffers
+ */
 class Location(var utm: UTMCoordinate, context: Context){
     private var innerVertexBuffer: FloatBuffer
     private var outerVertexBuffer: FloatBuffer
@@ -22,33 +29,29 @@ class Location(var utm: UTMCoordinate, context: Context){
     private val outerColor: FloatArray
 
     init{
-        val col = ResourcesCompat.getColor(context.resources, R.color.HighBlue, null).toUInt()
-        color = floatArrayOf(
-            ((col and (255u shl 16)) shr 16).toFloat()/255,
-            ((col and (255u shl 8 )) shr 8 ).toFloat()/255,
-            ((col and (255u shl 0 )) shr 0 ).toFloat()/255,
-            ((col and (255u shl 24)) shr 24).toFloat()/255)
+        color = colorIntToFloatArray(
+            ResourcesCompat.getColor(context.resources, R.color.HighBlue, null).toUInt()
+        )
 
-        val outcol = ResourcesCompat.getColor(context.resources, R.color.BestWhite, null).toUInt()
-        outerColor = floatArrayOf(
-            ((outcol and (255u shl 16)) shr 16).toFloat()/255,
-            ((outcol and (255u shl 8 )) shr 8 ).toFloat()/255,
-            ((outcol and (255u shl 0 )) shr 0 ).toFloat()/255,
-            ((outcol and (255u shl 24)) shr 24).toFloat()/255)
-
+        outerColor = colorIntToFloatArray(
+            ResourcesCompat.getColor(
+                context.resources,
+                R.color.BestWhite,
+                null
+            ).toUInt()
+        )
 
         val nrSegments = 20
         val verticesMutable: MutableList<Float> = mutableListOf()
         verticesMutable.add(0f)
         verticesMutable.add(0f)
-        for (i in 0..nrSegments)
-        {
+        for (i in 0..nrSegments) {
             val angle = i.toFloat()/nrSegments*2* PI
             verticesMutable.add((sin(angle)).toFloat())
             verticesMutable.add((cos(angle)).toFloat())
         }
         val innerVertices = verticesMutable.toFloatArray()
-        val outerVertices = verticesMutable.map{f -> f*outerEdgePercent}.toFloatArray()
+        val outerVertices = verticesMutable.map{ f -> f*outerEdgePercent}.toFloatArray()
         innerVertexBuffer =
             ByteBuffer.allocateDirect(innerVertices.size * 4).run {
                 order(ByteOrder.nativeOrder())
@@ -65,10 +68,27 @@ class Location(var utm: UTMCoordinate, context: Context){
                     position(0)
                 }
             }
-        vertexCount = innerVertices.size/ coordsPerVertex
+        vertexCount = innerVertices.size / coordsPerVertex
     }
 
-    fun draw(program: Int, scale: FloatArray, trans: FloatArray, radius: Float, width: Int, height: Int){
+    /**
+     * draws this location
+     *
+     * @param[program] the GL program to use while drawing
+     * @param[scale] scale vector used to draw everything at the right size
+     * @param[trans] translation vector to draw everything in the right place
+     * @param[radius] the radius of the circle to draw
+     * @param[width] width of view this location is in
+     * @param[height] height of view this location is in
+     */
+    fun draw(
+        program: Int,
+        scale: FloatArray,
+        trans: FloatArray,
+        radius: Float,
+        width: Int,
+        height: Int
+    ) {
         GLES20.glUseProgram(program)
 
         //set different shader arguments
@@ -107,12 +127,26 @@ class Location(var utm: UTMCoordinate, context: Context){
             coordsPerVertex,
             GLES20.GL_FLOAT,
             false,
-            coordsPerVertex *4,
+            coordsPerVertex * 4,
             innerVertexBuffer
         )
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, vertexCount)
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(positionHandle)
+    }
+
+    /**
+     * helper function to turn standard Android Studio color into a GL floatarray
+     * @param[col] color in argb int format
+     * @return color in rgba float format
+     */
+    private fun colorIntToFloatArray(col: UInt): FloatArray {
+        return floatArrayOf(
+            ((col and (255u shl 16)) shr 16).toFloat() / 255,
+            ((col and (255u shl 8)) shr 8).toFloat() / 255,
+            ((col and (255u shl 0)) shr 0).toFloat() / 255,
+            ((col and (255u shl 24)) shr 24).toFloat() / 255
+        )
     }
 }

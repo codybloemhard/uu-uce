@@ -18,7 +18,11 @@ import java.net.HttpURLConnection
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
-
+/**
+ * An activity in which the user can log into an acoount or choose to enter the app in offline mode.
+ * @property[sharedPref] the shared preferences where the settings are stored.
+ * @constructor a Login activity.
+ */
 class Login : AppCompatActivity() {
 
     private lateinit var sharedPref : SharedPreferences
@@ -100,8 +104,12 @@ class Login : AppCompatActivity() {
                                 }
                             }
                             HttpURLConnection.HTTP_INTERNAL_ERROR -> {
-                                this.runOnUiThread{
-                                    Toast.makeText(this, getString(R.string.login_serverdown), Toast.LENGTH_LONG).show()
+                                this.runOnUiThread {
+                                    Toast.makeText(
+                                        this,
+                                        getString(R.string.login_serverdown),
+                                        Toast.LENGTH_LONG
+                                    ).show()
                                 }
                             }
                         }
@@ -109,24 +117,49 @@ class Login : AppCompatActivity() {
                 }
             }
         }
+
+        offline_button.setOnClickListener {
+            Toast.makeText(this, getString(R.string.login_offline), Toast.LENGTH_LONG).show()
+            with(sharedPref.edit()) {
+                putString("com.uu_uce.USERNAME", "")
+                putString("com.uu_uce.PASSWORD", "")
+                putString("com.uu_uce.SERVER_IP", "")
+                putString("com.uu_uce.ORGNAME", "")
+                apply()
+            }
+
+            //TODO: if login becomes necessary remove this.
+            val intent = Intent(this, GeoMap::class.java)
+            startActivity(intent)
+            finish()
+        }
     }
 
     override fun onBackPressed() {
         moveTaskToBack(true)
     }
 
-    private fun getHash(password: String): ByteArray {
+    /**
+     * Calculates the SHA256 hash of a string.
+     * @param[clearText] the string to be hashed.
+     * @return the hash of the string.
+     */
+    private fun getHash(clearText: String): ByteArray {
         var digest: MessageDigest? = null
         try {
             digest = MessageDigest.getInstance("SHA-256")
-        }
-        catch (e1: NoSuchAlgorithmException) {
+        } catch (e1: NoSuchAlgorithmException) {
             e1.printStackTrace()
         }
         digest!!.reset()
-        return digest.digest(password.toByteArray())
+        return digest.digest(clearText.toByteArray())
     }
 
+    /**
+     * Converts a ByteArray to a hexadecimal value in string format.
+     * @param[data] a ByteArray to be converted to hexadecimal.
+     * @return a hexadecimal value in string format.
+     */
     private fun bin2hex(data: ByteArray): String {
         return java.lang.String.format("%0" + data.size * 2 + "X", BigInteger(1, data))
     }

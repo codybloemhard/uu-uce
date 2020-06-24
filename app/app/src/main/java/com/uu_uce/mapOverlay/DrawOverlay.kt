@@ -5,14 +5,20 @@ import com.uu_uce.shapefiles.p2
 import kotlin.math.abs
 import kotlin.math.pow
 
-/*
-Calculates where on the screen a coordinate is.
-coordinate: the coordinate to be mapped onto the screen.
-viewport: the current viewport.
-view: the current map that the function is called in.
-It will provide you with the screen location of a certain coordinate.
+/**
+ * Calculates where on the screen a coordinate is.
+ * @param[coordinate] the coordinate to be mapped onto the screen.
+ * @param[viewport] the current viewport.
+ * @param[viewWidth] the width of the current map.
+ * @param[viewHeight] the height of the current map.
+ * @return the screen location of a certain coordinate.
  */
-fun coordToScreen(coordinate  : UTMCoordinate, viewport : Pair<p2, p2>, viewWidth : Int, viewHeight : Int) : Pair<Float, Float>{
+fun coordToScreen(
+    coordinate: UTMCoordinate,
+    viewport: Pair<p2, p2>,
+    viewWidth: Int,
+    viewHeight: Int
+): Pair<Float, Float> {
     val mapX = (coordinate.east - viewport.first.first)
     val mapY = (coordinate.north - viewport.first.second)
 
@@ -25,12 +31,13 @@ fun coordToScreen(coordinate  : UTMCoordinate, viewport : Pair<p2, p2>, viewWidt
     return Pair(screenX, screenY)
 }
 
-/*
-Calculates where on the map a screen coordinate is.
-screenLoc: the location on the screen you would like the map coordinate of.
-viewport: the current viewport.
-view: the current map that the function is called in.
-It will provide you with the screen location of a certain coordinate.
+/**
+ * Calculates where on the map a screen coordinate is.
+ * @param[screenLoc] the location on the screen you would like the map coordinate of.
+ * @param[viewport] the current viewport.
+ * @param[viewWidth] the width of the current map.
+ * @param[viewHeight] the height of the current map.
+ * @return the map coordinate of a certain screen position.
  */
 fun screenToCoord(screenLoc : Pair<Float, Float>, viewport : Pair<p2, p2>, viewWidth : Int, viewHeight : Int) : UTMCoordinate{
     val screenX = screenLoc.first / viewWidth
@@ -45,13 +52,13 @@ fun screenToCoord(screenLoc : Pair<Float, Float>, viewport : Pair<p2, p2>, viewW
     return UTMCoordinate(31, 'N', easting, northing)
 }
 
-/*
-Calculates if two boundingboxes intersect.
-bb1Min: The top-left coordinate of the first bounding box.
-bb1Max: The bottom-right coordinate of the first bounding box.
-bb2Min: The top-left coordinate of the second bounding box.
-bb2Max: The bottom-right coordinate of the second bounding box.
-It will provide you with a boolean value that says if the bounding boxes intersect or not.
+/**
+ * Calculates if two boundingboxes intersect.
+ * @param[bb1Min] the top-left coordinate of the first bounding box.
+ * @param[bb1Max] the bottom-right coordinate of the first bounding box.
+ * @param[bb2Min] the top-left coordinate of the second bounding box.
+ * @param[bb2Max] the bottom-right coordinate of the second bounding box.
+ * @return a boolean value that says if the bounding boxes intersect or not.
  */
 fun aaBoundingBoxContains(bb1Min: p2, bb1Max: p2, bb2Min: p2, bb2Max: p2) : Boolean{
     return !(
@@ -62,28 +69,28 @@ fun aaBoundingBoxContains(bb1Min: p2, bb1Max: p2, bb2Min: p2, bb2Max: p2) : Bool
             )
 }
 
-/*
-Calculates if a point is inside of a boundingbox.
-bb1Min: The top-left coordinate of the first bounding box.
-bb1Max: The bottom-right coordinate of the first bounding box.
-point : A point that you wish to know of if it is in the screen.
-bufferSize: How far outside the boundingbox can the point be to still be considered inside.
-It will provide you with a boolean value that says if the bounding boxes intersect or not.
+/**
+ * Calculates if a point is inside of a boundingbox.
+ * @param[bbMin] the top-left coordinate of the first bounding box.
+ * @param[bbMax] the bottom-right coordinate of the first bounding box.
+ * @param[point] a point that you wish to know of if it is in the screen.
+ * @param[bufferSize] how far outside the boundingbox can the point be to still be considered inside.
+ * @return a boolean value that says if the bounding boxes intersect or not.
  */
 fun pointInAABoundingBox(bbMin: p2, bbMax: p2, point : p2, bufferSize : Int) : Boolean{
-    return(
-                point.first     < bbMax.first   + bufferSize    &&
-                point.first     > bbMin.first   - bufferSize    &&
-                point.second    < bbMax.second  + bufferSize    &&
-                point.second    > bbMin.second  - bufferSize
+    return (
+            point.first < bbMax.first + bufferSize &&
+                    point.first > bbMin.first - bufferSize &&
+                    point.second < bbMax.second + bufferSize &&
+                    point.second > bbMin.second - bufferSize
             )
 }
 
-/*
-Calculates the distance between two points.
-p1: The first point
-p2: The second point
-It will provide you with the distance between the points as a double.
+/**
+ * Calculates the euclidean distance between two points.
+ * @param[p1] the first point
+ * @param[p2] the second point
+ * @return the distance between the points as a double.
  */
 fun pointDistance(p1 : Pair<Float, Float>, p2 : Pair<Float, Float>) : Double{
     return abs((p1.first - p2.first).toDouble()).pow(2) + abs((p1.second - p2.second).toDouble()).pow(2)
