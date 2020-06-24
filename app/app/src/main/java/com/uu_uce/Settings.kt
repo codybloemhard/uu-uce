@@ -3,7 +3,6 @@ package com.uu_uce
 import android.app.AlertDialog
 import android.content.SharedPreferences
 import android.graphics.Color
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
@@ -32,7 +31,6 @@ var needsRestart = false
 const val mapsFolderName = "Maps"
 const val contentFolderName = "PinContent"
 const val legendName = "legend.png"
-//const val pinDatabaseFile = "75aa95dd-b74b-467e-a7db-5d0677d7da7b.json"
 const val mergedPinBackground = 5
 const val mergedPinIcon = "MERGEDPIN"
 
@@ -186,10 +184,7 @@ class Settings : AppCompatActivity() {
 
             if (!File(getExternalFilesDir(null)?.path + File.separator + mapsFolderName).exists()) {
                 downloadingMaps = true
-                queryServer("map", this){ mapid ->
-                    val maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapid)
-                    downloadMaps(maps)
-                }
+                queryServer("map", this){ mapid -> downloadMaps(mapid) }
             }
             else{
                 AlertDialog.Builder(this, R.style.AlertDialogStyle)
@@ -198,10 +193,7 @@ class Settings : AppCompatActivity() {
                     .setMessage(getString(R.string.settings_redownload_map_body))
                     .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
                         downloadingMaps = true
-                        queryServer("map", this){ mapid ->
-                            val maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapid)
-                            downloadMaps(maps)
-                        }
+                        queryServer("map", this){ mapid -> downloadMaps(mapid) }
                     }
                     .setNegativeButton(getString(R.string.negative_button_text), null)
                     .show()
@@ -338,9 +330,23 @@ class Settings : AppCompatActivity() {
 
     /**
      * Downloads the maps zip and unpacks it.
-     * @param[maps] a list of strings containing all map file paths.
+     * @param[mapid] string containing the map id.
      */
-    private fun downloadMaps(maps : List<String>) {
+    private fun downloadMaps(mapid : String) {
+        if(mapid == "") {
+            runOnUiThread{
+                maps_downloading_progress.visibility = View.INVISIBLE
+                downloadingMaps = false
+                Toast.makeText(
+                    this,
+                    getString(R.string.settings_queryfail),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            return
+        }
+
+        val maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapid)
         runOnUiThread{
             maps_downloading_progress.visibility = View.VISIBLE
         }
@@ -439,7 +445,6 @@ class Settings : AppCompatActivity() {
         if(pinDatabaseFile == ""){
             runOnUiThread {
                 pins_downloading_progress.visibility = View.INVISIBLE
-                updating = false
                 Toast.makeText(
                     this,
                     getString(R.string.settings_queryfail),

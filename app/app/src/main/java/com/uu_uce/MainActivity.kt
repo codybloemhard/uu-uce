@@ -63,6 +63,7 @@ class MainActivity : AppCompatActivity() {
                     HttpURLConnection.HTTP_INTERNAL_ERROR -> {
                         this.runOnUiThread{
                             Toast.makeText(this, getString(R.string.login_serverdown), Toast.LENGTH_LONG).show()
+                            openLogin()
                         }
                     }
                     else -> {

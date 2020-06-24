@@ -105,10 +105,7 @@ class GeoMap : AppCompatActivity() {
                 .setTitle(getString(R.string.geomap_download_warning_head))
                 .setMessage(getString(R.string.geomap_download_warning_body))
                 .setPositiveButton(getString(R.string.positive_button_text)) { _, _ ->
-                    queryServer("map", this){ mapid ->
-                        val maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapid)
-                        downloadMaps(maps)
-                    }
+                    queryServer("map", this){ mapid -> downloadMaps(mapid) }
                 }
                 .setNegativeButton(getString(R.string.negative_button_text)) { _, _ ->
                     start()
@@ -405,10 +402,23 @@ class GeoMap : AppCompatActivity() {
 
     /**
      * Starts a download for the maps.
-     * @param[maps] a list of strings containing all map file paths.
+     * @param[mapid] string containing the map id.
      */
-    private fun downloadMaps(maps : List<String>) {
+    private fun downloadMaps(mapid : String) {
+        if(mapid == "") {
+            runOnUiThread{
+                popupWindow?.dismiss()
+                Toast.makeText(
+                    this,
+                    getString(R.string.settings_queryfail),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            return
+        }
+
         openProgressPopup(window.decorView.rootView)
+        val maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapid)
         updateFiles(
             maps,
             this,
