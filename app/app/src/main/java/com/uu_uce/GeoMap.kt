@@ -425,7 +425,10 @@ class GeoMap : AppCompatActivity() {
             return
         }
 
-        openProgressPopup(window.decorView.rootView)
+        runOnUiThread{
+            openProgressPopup(window.decorView.rootView)
+        }
+
         val maps = listOf(getExternalFilesDir(null)?.path + File.separator + mapid)
         updateFiles(
             maps,
