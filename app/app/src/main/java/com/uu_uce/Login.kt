@@ -164,3 +164,8 @@ class Login : AppCompatActivity() {
         return java.lang.String.format("%0" + data.size * 2 + "X", BigInteger(1, data))
     }
 }
+
+/* This program has been developed by students from the bachelor Computer
+# Science at Utrecht University within the Software Project course. ©️ Copyright
+# Utrecht University (Department of Information and Computing Sciences)*/
+
