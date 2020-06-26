@@ -428,7 +428,4 @@ class ColoredLine(var points: List<p2>, val lineStyle: LineStyle) : Shape()
 class Polygon(var vertices: List<p2>, var indices: MutableList<Short>, val polyStyle: PolyStyle) :
     Shape()
 
-/* This program has been developed by students from the bachelor Computer
-# Science at Utrecht University within the Software Project course. ©️ Copyright
-# Utrecht University (Department of Information and Computing Sciences)*/
 
