@@ -412,7 +412,9 @@ class Settings : AppCompatActivity() {
                 }
             }
 
-            content_downloading_progress.visibility = View.VISIBLE
+            runOnUiThread {
+                content_downloading_progress.visibility = View.VISIBLE
+            }
 
             updateFiles(
                 pathList,
@@ -467,7 +469,9 @@ class Settings : AppCompatActivity() {
             return
         }
 
-        pins_downloading_progress.visibility = View.VISIBLE
+        runOnUiThread{
+            pins_downloading_progress.visibility = View.VISIBLE
+        }
         updateFiles(
             listOf(getExternalFilesDir(null)?.path + File.separator + pinDatabaseFile),
             this,
