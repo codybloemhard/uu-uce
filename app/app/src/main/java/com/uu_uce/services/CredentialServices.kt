@@ -67,17 +67,19 @@ fun login(username : String, password : String, ip : String, activity: Activity,
                         onCompleteAction(responseCode)
                     }
                     else -> {
-                        throw IOException("Server returned non-OK status: $responseCode")
+                        onCompleteAction(responseCode)
                     }
                 }
             }
-        } catch (e: Exception) {
+        }
+        catch (e: Exception) {
             activity.runOnUiThread {
                 Toast.makeText(
                     activity,
                     "No connection to the server could be established",
                     Toast.LENGTH_LONG
                 ).show()
+                onCompleteAction(HttpURLConnection.HTTP_NOT_FOUND)
             }
             e.printStackTrace()
         }

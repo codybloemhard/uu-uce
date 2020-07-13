@@ -57,9 +57,6 @@ class MainActivity : AppCompatActivity() {
                         val intent = Intent(this, GeoMap::class.java)
                         startActivity(intent)
                     }
-                    HttpURLConnection.HTTP_NOT_FOUND -> {
-                        openLogin()
-                    }
                     HttpURLConnection.HTTP_INTERNAL_ERROR -> {
                         this.runOnUiThread{
                             Toast.makeText(this, getString(R.string.login_serverdown), Toast.LENGTH_LONG).show()
@@ -71,7 +68,8 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-        } else {
+        }
+        else {
             openLogin()
         }
     }
